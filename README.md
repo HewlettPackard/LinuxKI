@@ -39,7 +39,9 @@ After data collection, a default set of reports can be generated as follows:
 ### Download
 Pre-packaged RPM and DEB files are available at the following locations:
 
-https://github.com/HewlettPackard/LinuxKI/tree/master/rpms
+* [LinuxKI RPM package](https://github.com/HewlettPackard/LinuxKI/raw/master/rpms/linuxki-5.1-1.noarch.rpm)
+* [LinuxKI DEB package](https://github.com/HewlettPackard/LinuxKI/raw/master/rpms/linuxki_5.1-1_all.deb)
+
 
 ### Prerquisites
 
@@ -115,8 +117,8 @@ You can verify the version of the LinuxKI toolset using rpm or dpkg as follows:
 
 For additional information, please refer to the following documents:
 
-[LinuxKI Quick Reference Guide](https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/LinuxKI_QuickRefGuide.pdf)
+[LinuxKI Quick Reference Guide](https://github.com/HewlettPackard/LinuxKI/raw/master/documentation/LinuxKI_QuickRefGuide.pdf)
 \
-[LinuxKI Frequently Asked Questions](https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/LinuxKI_FAQ.pdf)
+[LinuxKI Frequently Asked Questions](https://github.com/HewlettPackard/LinuxKI/raw/master/documentation/LinuxKI_FAQ.pdf)
 \
-[LinuxKI MasterClass](https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/LinuxKI_MasterClass.pdf)
+[LinuxKI MasterClass](https://github.com/HewlettPackard/LinuxKI/raw/master/documentation/LinuxKI_MasterClass.pdf)

@@ -119,4 +119,4 @@ For additional information, please refer to the following documents:
 \
 [LinuxKI Frequently Asked Questions](https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/LinuxKI_FAQ.pdf)
 \
-[LinuxKI MasterClass)(https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/LinuxKI_MasterClass.pdf)
+[LinuxKI MasterClass](https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/LinuxKI_MasterClass.pdf)

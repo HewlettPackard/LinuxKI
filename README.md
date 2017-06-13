@@ -15,7 +15,7 @@ Kiinfo can collect its trace data from either of two sources: the Linux ftrace f
 
 Using the LiKI tracing module is the preferred method, but ftrace may be used in cases where where the LiKI DLKM cannot be installed, either due to missing dependencies, or inherent risks of installing a DLKM.
 
-###Disclaimer of Warranty and Limitation of Liability Notices
+### Disclaimer of Warranty and Limitation of Liability Notices
 
 Refer to the COPYING.liki, COPYING.kiinfo, LICENSE.txt files for additional
 information.
@@ -36,16 +36,16 @@ After data collection, a default set of reports can be generated as follows:
     $ kiall -r         # -r option creates a nodename/timestamp directory structure
 
 
-###Download
+### Download
 Pre-packaged RPM and DEB files are available at the following locations:
 
-(https://github.com/HewlettPackard/LinuxKI/tree/master/](https://github.com/HewlettPackard/LinuxKI/tree/master/rpms)
+https://github.com/HewlettPackard/LinuxKI/tree/master/rpms
 
-###Prerquisites
+### Prerquisites
 
 Install Linux kernel header/devel package(s) if you want to collect data using the LiKI DKLM tracing module.  You will also need basic developer tools like gcc and make.
 
-###Installation
+### Installation
 
 The LinuxKI Toolset is provided in an RPM Package and can be installed as
 follows:
@@ -63,7 +63,7 @@ You can also use your favorite package manager, such as yum.
 
     # yum localinstall linuxki.<version>.noarch.rpm
 
-###Removing the LinuxKI toolset
+### Removing the LinuxKI toolset
 
 You can remove the LinuxKI toolset using rpm or dpkg as follows:
 
@@ -73,7 +73,7 @@ You can remove the LinuxKI toolset using rpm or dpkg as follows:
      # dpkg --purge linuxki
 
 
-###Compiling the LiKI module
+### Compiling the LiKI module
 
 The LinuxKI Toolset has a few pre-compiled likit.ko modules avaiable.  However, due to the large numbers of Linux distributes and versions available, it is not possible to pre-compile and test every version.
 
@@ -87,7 +87,7 @@ If the supplied LiKI kernel module (likit.ko) will not load on your distribuitio
 If LiKI fails to compile, you can resolve the dependency issue and execute the module_prep script to manually build the LiKI DLKM tracing module.  You can also continue to use the LinuxKI Toolset using the ftrace tracing
 mechanism.
 
-###Data Collection
+### Data Collection
 
 When the system is experiencing performance problems, the runki script can be run to collect data. By default 20 seconds of sample data will be collected, and then runki will spend some time longer gathering other performance and configuration data and bundling this into a single gzip archive. It might take several minutes in all to complete. Only superuser can collect data.  Data is stored in the current working directory, and may require several hundred megabytes or gigabytes of space per collection run, depending on the size of the system and amount of trace data generated.  The filesystem on which data is stored should be enabled to use the filesystem cache; directIO is not recommended.  If sufficient memory is available, the current working directory can be changed to /dev/shm and the runki script can collect the data in-memory and then copied to persistent storage later.
 
@@ -116,5 +116,7 @@ You can verify the version of the LinuxKI toolset using rpm or dpkg as follows:
 For additional information, please refer to the following documents:
 
 [LinuxKI Quick Reference Guide](https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/LinuxKI_QuickRefGuide.pdf)
+\
 [LinuxKI Frequently Asked Questions](https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/LinuxKI_FAQ.pdf)
+\
 [LinuxKI MasterClass)(https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/LinuxKI_MasterClass.pdf)

@@ -1,0 +1,150 @@
+#**************************************************************************
+# Copyright 2017 Hewlett Packard Enterprise Development LP.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version. This program is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details. You
+# should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#***************************************************************************
+#!/bin/bash
+nfs_datadir=0
+nfs_linuxki=0
+
+CMU_HOST=`echo $SSH_CLIENT|awk '{print $1}'`
+CMU_CLIENT=`echo $SSH_CONNECTION|awk '{print $3}'`
+
+# if its a PDSH to the same CMU Host, then simply return
+# as there as there is nothing to install
+if [ $CMU_HOST == $CMU_CLIENT ]; then
+	exit 0;
+fi
+
+
+date > /tmp/linuxki.last.run
+echo $0 >> /tmp/linuxki.last.run
+mount >> /tmp/linuxki.last.run
+
+if [ ! -f /tmp/linuxki_config ]; then
+	echo Linux KI Toolset config file not copied to node\?
+	rm -f /tmp/linuxki_config /tmp/linuxki_node_install 2> /dev/null
+	exit 10
+fi
+
+. /tmp/linuxki_config
+
+[ -z "$CMU_DATADIR" ] && echo "CMU_DATADIR not set in config???" && exit 11
+
+echo --- Linux KI Toolset node installation starting...
+
+if [ -z $CMU_HOST ]; then
+	echo !!!Could not determine CMU server address!!!
+	rm -f /tmp/linuxki_config /tmp/linuxki_node_install 2> /dev/null
+	exit 12
+fi
+
+# Take care of the CMU_DATADIR
+
+mkdir -p $CMU_DATADIR 2> /dev/null
+if [ ! -d "$CMU_DATADIR" ]; then
+	echo !!!Cannot create $CMU_DATADIR!!!
+	rm -f /tmp/linuxki_config /tmp/linuxki_node_install 2> /dev/null
+	exit 13
+fi
+
+#
+# NFS mount the datadir.   If unsuccessful, then use a local directory
+# 
+umount -f $CMU_DATADIR 2> /dev/null
+mount $CMU_HOST:$CMU_DATADIR $CMU_DATADIR -o retry=0,timeo=50 2> /dev/null
+# if the nfs mount fails, we will use the local directory and do a rpdcp later
+if [ $? -eq 0 ]; then
+	nfs_datadir=1
+fi
+
+#
+# local installation of LinuxKI?
+#
+#if [ ! -d /opt/linuxki ] || [ ! -f /opt/linuxki/kiinfo ] || [ ! -f /opt/linuxki/runki ]; then
+#	umount -f /opt/linuxki 2> /dev/null
+#	mkdir -p /opt/linuxki 2> /dev/null
+#	mount $CMU_HOST:/opt/linuxki /opt/linuxki -o retry=0,timeo=50 2> /dev/null
+#	if [ $? -eq 0 ]; then
+#		nfs_linuxki=1
+#	else
+#		echo "!!!Could not NFS mount /opt/linuxki from ${CMU_HOST}!!!"
+#		rm -f /tmp/linuxki_config /tmp/linuxki_node_install 2> /dev/null
+#		exit 15
+#	fi
+#fi
+
+#
+# Unconditionaly attempt to NFS mount /opt/linuxki from head node
+#
+umount -f /opt/linuxki 2> /dev/null
+mkdir -p /opt/linuxki 2> /dev/null
+mount $CMU_HOST:/opt/linuxki /opt/linuxki -o retry=0,timeo=50 2> /dev/null
+if [ $? -eq 0 ]; then
+	# Note: We may have mounted over the top of an existing install
+	#       but this will ensure we're using the same version as the head node
+	nfs_linuxki=1
+fi
+
+#
+# make sure we don't have any stale NFS mounts
+#
+if [ $nfs_datadir -eq 1 ]; then
+	TMPFILE=`mktemp`
+	ls $CMU_DATADIR > /dev/null 2> $TMPFILE
+	grep -q Stale $TMPFILE && umount -f $CMU_DATADIR && mount $CMU_HOST:$CMU_DATADIR $CMU_DATADIR -o retry=0,timeo=50
+	ls $CMU_DATADIR > /dev/null 2> $TMPFILE
+	grep -q Stale $TMPFILE && echo "!!!Could not access $CMU_DATADIR NFS mount!!!" && exit 16
+	rm -f $TMPFILE 2> /dev/null
+fi
+
+if [ $nfs_linuxki -eq 1 ]; then
+        TMPFILE=`mktemp`
+        ls /opt/linuxki/config > /dev/null 2> $TMPFILE
+        grep -q Stale $TMPFILE && umount -f /opt/linuxki && mount $CMU_HOST:/opt/linuxki /opt/linuxki -o retry=0,timeo=50
+        ls /opt/linuxki/config > /dev/null 2> $TMPFILE
+        grep -q Stale $TMPFILE && echo "!!!Could not access /opt/linuxki NFS mount!!!" && exit 17
+        rm -f $TMPFILE 2> /dev/null
+fi
+
+date >> /tmp/linuxki.last.run
+mount >> /tmp/linuxki.last.run
+
+#
+# Update /etc/fstab with NFS mounts if required
+#
+grep -q -e "Linux KI Toolset Integration" -e $CMU_DATADIR /etc/fstab
+if [ $? -ne 0 ]; then
+	if [ $nfs_datadir -eq 1 ] || [ $nfs_linuxki -eq 1 ]; then
+		echo "# Linux KI Toolset Integration on `date`" >> /etc/fstab
+		[ $nfs_datadir -eq 1 ] && echo "$CMU_HOST:$CMU_DATADIR $CMU_DATADIR nfs retry=0,timeo=50 0 0" >> /etc/fstab
+		[ $nfs_linuxki -eq 1 ] && echo "$CMU_HOST:/opt/linuxki /opt/linuxki nfs retry=0,timeo=50 0 0" >> /etc/fstab
+	fi
+	
+fi
+
+#
+# Find right module version for this node
+#
+/opt/linuxki/module_prep > /dev/null 2>&1
+
+#
+# Update config file if the rpm is installed locally
+#
+[ $nfs_linuxki -eq 0 ] && [ /tmp/linuxki_config -nt /opt/linuxki/config ] && cp -p /tmp/linuxki_config /opt/linuxki/config
+
+#
+# Clean up
+#
+rm -f /tmp/linuxki_config /tmp/linuxki_node_install 2> /dev/null
+
+echo --- Linux KI Toolset node installation complete!
+exit 0

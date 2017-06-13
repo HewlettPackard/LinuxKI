@@ -1,0 +1,47 @@
+#**************************************************************************
+# Copyright 2017 Hewlett Packard Enterprise Development LP.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version. This program is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details. You
+# should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#***************************************************************************
+#!/bin/bash
+
+if [ ! -f /opt/linuxki/config ]; then
+        echo Linux KI Toolset config file /opt/linuxki/config not found. >&2
+        echo Linux KI Toolset not properly installed... >&2
+        exit 10
+fi
+
+. /opt/linuxki/config
+
+[ -z "$CMU_DATADIR" ] && echo "CMU_DATADIR not set in /opt/linuxki/config???" >&2 && exit 11
+[ -z "$NODE_STAGEDIR" ] && echo "NODE_STAGEDIR not set in /opt/linuxki/config???" >&2 && exit 12
+
+#
+# setup
+#
+[ -z "$WCOLL" ] && echo "WCOLL (file containing list of target hosts) not set???" >&2 && exit 14
+export WCOLL
+
+#
+# Display diskspace
+#
+echo ------------------------------------------------------
+echo CMU Head Node Data Repository $CMU_DATADIR:
+echo ------------------------------------------------------
+
+df -Ha $CMU_DATADIR
+
+echo " "
+echo ------------------------------------------------------
+echo Target Nodes Staging Area $NODE_STAGEDIR:
+echo ------------------------------------------------------
+
+$PDSH -S df -Ha $NODE_STAGEDIR | grep -v Filesystem | sort | uniq

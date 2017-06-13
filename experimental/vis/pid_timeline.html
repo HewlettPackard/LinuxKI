@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html xmlns:xlink="http://www.w3.org/1999/xlink">
+        <head>
+                <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+                <title>Timeline of task activity</title>
+                <script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>
+                <style type="text/css">
+                        #body {
+                                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                                font-size: 14px;
+                                width:1200px;
+                                height: 800px;
+                                position: absolute;
+                                // border: solid 1px black;
+                        }
+
+                        #Timeline_chart {
+                                position: absolute;
+                                top: 0px;
+                                left: 0px;
+                                width: 1200px;
+  	                        height: 500px;
+                                // border: solid 1px black;
+				white-space:pre;
+                        }
+
+			
+                        .svg1 {
+				shape-rendering: crispEdges;
+				position: absolute;
+                                top: 200px;
+                                left: 100px;
+                        }
+
+                        .svg2 {
+                                shape-rendering: crispEdges;
+                                position: absolute;
+                                top: 250px;
+                                left: 0px;
+                        }
+
+
+			#rect_popup {
+				position: relative;
+			}
+
+                        .pagesummary {
+                                pointer-events: none;
+                                font: 18px sans-serif;
+                                white-space:pre;
+                        }
+
+                        .chartsummary {
+                                pointer-events: none;
+                                font: 14px sans-serif;
+                                white-space:pre;
+                        }
+
+        		.canvas {
+        			position: absolute;
+        		}
+
+        		.popup {
+            			position: absolute;
+            			left: 0;
+            			top: 0;
+	    			background-color: cornsilk;
+            			border: 1px #ccc solid;
+            			border-radius: 6px;
+            			box-shadow: #333 2px 2px 4px;
+            			padding: 8px;
+            			white-space:pre;
+            			font-family: courier new;
+            			font-size: 11px;
+            			font-weight: bold;
+            			opacity: 0.95
+        		}
+
+        		.popup h2 {
+            			margin: 0 0 1rem 0;
+        		}
+
+                        text {
+                                pointer-events: none;
+                        }
+
+	                .chart {
+  	         //               shape-rendering: crispEdges;
+	                }
+
+	                .mini text {
+	                        font: 12px sans-serif;
+	                }
+
+	                .main text {
+				white-space:pre;
+				white-space:wrap;
+	                }
+
+			.axis path,
+			.axis line {
+    				fill: none;
+    				stroke: black;
+    				shape-rendering: crispEdges;
+			}
+
+			.axis text {
+    				font-family: sans-serif;
+    				font-size: 11px;
+			}
+			
+			.baxis path,
+                        .baxis line {
+                                fill: none;
+                                stroke: black;
+                                shape-rendering: crispEdges;
+                        }
+
+                        .baxis text {
+                                font-family: sans-serif;
+                                font-size: 11px;
+                        }
+
+	                .brush .extent {
+	                        stroke: gray;
+	                        fill: dodgerblue;
+	                        fill-opacity: .365;
+	                }
+                </style>
+        </head>
+
+        <body>
+                <div id="body">
+                        <div id="Timeline_chart" class="canvas" margin="2px">
+				<p><b><font size=4>  PID Activity Timeline </font><br><br><label>  Color Scale: <select id="color" name="color">
+                        		<option value="tcpu">%Total CPU util during interval</option>
+                                        <option value="usr">%usr CPU util during interval</option>
+					<option value="sys">%sys CPU util during interval</option>
+					<option value="runq">%runq wait during interval</option>
+					<option value="syscalls">syscall count</option>
+                                        <option value="reads">disk reads</option>
+                                        <option value="writes">disk writes</option>
+                        	    </select> </label>	<label> Height encodes: <select id="height" name="height">
+					<option value="tcpu">%Total CPU util during interval</option>
+                                        <option value="usr">%usr CPU util during interval</option>
+                                        <option value="sys">%sys CPU util during interval</option>
+					<option value="runq">%runq wait during interval</option>
+                                        <option value="syscalls">syscall count</option>
+                                        <option value="reads">disk reads</option>
+                                        <option value="writes">disk writes</option>
+
+				    </select> 
+				</label></b></p>
+                        </div>
+                <div>
+
+        <script type="text/javascript">
+	d3.csv("pid_timeline.csv", function(csvdata) {
+
+		var pids = [];
+
+		var prev_syscalls = 0;
+		var prev_syscalls = 0;
+        	var prev_runtime = 0;
+        	var prev_systime = 0;
+        	var prev_usertime = 0;
+        	var prev_runqtime = 0;
+	        var prev_irqtime = 0;
+      		var prev_totaltime = 0;
+	        var prev_sleeptime = 0;
+	        var prev_stealtime = 0;
+	        var prev_switch_cnt = 0;
+	        var prev_sleep_cnt = 0;
+	        var prev_preempt_cnt = 0;
+        	var prev_wakeup_cnt = 0;
+	        var prev_run_per_csw = 0;
+	        var prev_migr = 0;
+	        var prev_nodemigr = 0;
+	        var prev_totalio = 0;
+	        var prev_readio = 0;
+	        var prev_writeio = 0;
+
+        	var curr_syscalls = 0;
+	        var curr_syscalls = 0;
+	        var curr_runtime = 0;
+	        var curr_systime = 0;
+	        var curr_usertime = 0;
+	        var curr_runqtime = 0;
+	        var curr_irqtime = 0;
+	        var curr_totaltime = 0;
+	        var curr_sleeptime = 0;
+	        var curr_stealtime = 0;
+	        var curr_switch_cnt = 0;
+	        var curr_sleep_cnt = 0;
+	        var curr_preempt_cnt = 0;
+	        var curr_wakeup_cnt = 0;
+	        var curr_run_per_csw = 0;
+	        var curr_migr = 0;
+	        var curr_nodemigr = 0;
+	        var curr_totalio = 0;
+	        var curr_readio = 0;
+        	var curr_writeio = 0;
+
+		var d_end_prev = 0;
+
+// hostname,timestamp,subdir,server_id,interval,start,end,pid,syscalls,runtime,systime,usertime,runqtime,sleeptime,irqtime,totaltime,stealtime,switch_cnt,sleep_cnt,preempt_cnt,wakeup_cnt,run_per_csw,migr,nodemigr,totalio,readio,writeio
+
+		// convert CSV strings to numbers
+		csvdata.forEach(function (d,i) {
+			d.server_id = +d.server_id;
+			d.interval = +d.interval;
+			d.interval = d.interval/1000.0;
+			d.start = +d.start;
+			d.end = +d.end;
+			if (d.start > d_end_prev) {
+                                d.start = d_end_prev;
+                                d.end = d.start + d.interval;
+                        }
+			d_end_prev = d.end;
+
+			d.syscalls = +d.syscalls;
+			d.runtime = +d.runtime;
+			d.systime = +d.systime;
+			d.usertime = +d.usertime;
+			d.runqtime = +d.runqtime;
+			d.irqtime = +d.irqtime;
+			d.totaltime = +d.totaltime;
+			d.sleeptime = +d.sleeptime;
+			d.stealtime = +d.stealtime;
+			d.switch_cnt = +d.switch_cnt;
+			d.sleep_cnt = +d.sleep_cnt;
+			d.preempt_cnt = +d.preempt_cnt;
+			d.wakeup_cnt = +d.wakeup_cnt;
+			d.run_per_csw = +d.run_per_csw;
+			d.migr = +d.migr;
+			d.nodemigr = +d.nodemigr;
+			d.totalio = +d.totalio;
+			d.readio = +d.readio;
+			d.writeio = +d.writeio;
+
+			// Save a copy of current running total values
+                        curr_syscalls = d.syscalls;
+                        curr_runtime = d.runtime;
+                        curr_systime = d.systime;
+                        curr_usertime = d.usertime;
+                        curr_runqtime = d.runqtime;
+                        curr_irqtime = d.irqtime;
+                        curr_totaltime = d.totaltime;
+                        curr_sleeptime = d.sleeptime;
+                        curr_stealtime = d.stealtime;
+                        curr_switch_cnt = d.switch_cnt;
+                        curr_sleep_cnt = d.sleep_cnt;
+                        curr_preempt_cnt = d.preempt_cnt;
+                        curr_wakeup_cnt = d.wakeup_cnt;
+                        curr_run_per_csw = d.run_per_csw;
+                        curr_migr = d.migr;
+                        curr_nodemigr = d.nodemigr;
+                        curr_totalio = d.totalio;
+                        curr_readio = d.readio;
+                        curr_writeio = d.writeio;
+			
+			if (i > 0) {
+				d.syscalls = d.syscalls - prev_syscalls;
+				d.runtime  = d.runtime  - prev_runtime;
+				d.systime  = d.systime  - prev_systime;
+				d.usertime = d.usertime - prev_usertime;
+				d.runqtime = d.runqtime - prev_runqtime;
+				d.irqtime  = d.irqtime  - prev_irqtime;
+				d.totaltime = d.totaltime - prev_totaltime;
+				d.sleeptime = d.sleeptime - prev_sleeptime;
+				d.stealtime = d.stealtime - prev_stealtime;
+				d.switch_cnt = d.switch_cnt - prev_switch_cnt;
+				d.sleep_cnt  = d.sleep_cnt  - prev_sleep_cnt;
+				d.preempt_cnt = d.preempt_cnt - prev_preempt_cnt;
+				d.wakeup_cnt = d.wakeup_cnt - prev_wakeup_cnt;
+				if (d.switch_cnt)  d.run_per_csw = d.runtime/d.switch_cnt;
+				d.migr = d.migr - prev_migr;
+				d.nodemigr = d.nodemigr -  prev_nodemigr;
+				d.totalio = d.totalio - prev_totalio;
+				d.readio = d.readio - prev_readio;
+				d.writeio = d.writeio - prev_writeio;
+			}
+
+        		prev_syscalls = curr_syscalls;
+        		prev_runtime = curr_runtime;
+        		prev_systime = curr_systime;
+        		prev_usertime = curr_usertime;
+        		prev_runqtime = curr_runqtime;
+        		prev_irqtime = curr_irqtime;
+        		prev_totaltime = curr_totaltime;
+        		prev_sleeptime = curr_sleeptime;
+        		prev_stealtime = curr_stealtime;
+        		prev_switch_cnt = curr_switch_cnt;
+        		prev_sleep_cnt = curr_sleep_cnt;
+        		prev_preempt_cnt = curr_preempt_cnt;
+        		prev_wakeup_cnt = curr_wakeup_cnt;
+        		prev_run_per_csw = curr_run_per_csw;
+        		prev_migr = curr_migr;
+        		prev_nodemigr = curr_nodemigr;
+        		prev_totalio = curr_totalio;
+        		prev_readio = curr_readio;
+        		prev_writeio = curr_writeio;
+
+			previdx = i;
+			pids.push({"pid": d.pid});
+                });
+
+                var colorScale = d3.scale.linear()
+                        .domain([0,101])
+                        .interpolate(d3.interpolateHcl)
+                        .range(["#00ff00", "#ff0000"]);
+
+		var num = d3.format("5.6f");
+    		var numpct = d3.format("5.1f");
+		
+                // extract a list of just the unique pids included in CSV file
+                pids = d3.keys(d3.nest()
+                        .key(function(d) {return d.pid;})
+                        .map(pids));
+
+                var pid_cnt = pids.length;
+                var timeBegin = d3.min(csvdata, function(d) { return d.start});
+                var timeEnd = d3.max(csvdata, function(d) { return d.end});
+
+		// Initial metrics are %total CPU util, hence min(c h) values are 0
+
+		var mincval = "Scale: 0%";
+		var maxcval = "100%";
+
+		var minhval = "0%";
+		var maxhval = "100%";
+		var minvalue = d3.min(csvdata, function(d) { return d.runtime*100/d.interval});
+                var maxvalue = Math.min(100,d3.max(csvdata, function(d) { return (d.runtime*100.0/(d.interval))}) );
+
+		
+		// Defining margins and lane sizes
+		var m = [5, 15, 35, 100], //top right bottom left
+                        w = 1024 - m[1] - m[3],
+                        h = (pid_cnt + 2)*80 - m[0] - m[2],
+                        miniHeight = pid_cnt * 40,
+                        mainHeight = h - miniHeight - 30,
+			minilaneHeight = miniHeight/pid_cnt;
+			mainlaneHeight = mainHeight/pid_cnt;
+
+                //scales
+		var xScale = d3.scale.linear()
+                     .domain([ d3.min(csvdata, function(d) { return d.end; }), d3.max(csvdata, function(d) { return d.end; })])
+                     .range([0, w]);
+
+                var x = d3.scale.linear()
+                                .domain([timeBegin, timeEnd])
+                                .range([0, w]);
+                var x1 = d3.scale.linear()
+                                .range([0, w]);
+                var y2 = d3.scale.linear()
+                                .domain([0, pid_cnt])
+                                .range([0, mainHeight]);
+                var y1 = d3.scale.linear()
+                                .domain([0, pid_cnt])
+                                .range([0, miniHeight]);
+		var h1 = d3.scale.linear()
+                                .domain([0,d3.max(csvdata, function(d) { return d.interval; }) ])
+                                .range([2,36]);
+                var h2 = d3.scale.linear()
+                                .domain([0,d3.max(csvdata, function(d) { return d.interval; }) ])
+                                .range([2,mainlaneHeight - 2]);
+		// var h1 = d3.scale.linear()
+		//		.domain([0,function(d) { return 100*d.runtime/d.interval;} ])
+		//		.range([2,36]); 
+		// var h2 = d3.scale.linear()
+                //                .domain([0,function(d) { return d.interval;} ])
+                //                .range([2,mainlaneHeight - 2]);
+
+                // Define an X-axis function
+
+                var xAxis = d3.svg.axis()
+                                .scale(xScale)
+				.tickFormat(d3.format(".1f"))
+                                .orient("bottom");
+
+
+		// Add the SVG canvas
+
+		// Adding colorscale legend
+		var legend = d3.select("#Timeline_chart")
+                                        .append("svg")
+                                        .attr("width", w + m[1] + m[3] + 176)
+                                        .attr("height", 40)
+					.attr("class", "svg1");
+
+		var legend_data = d3.range(40);
+	
+		var legendScale = legend.selectAll("rect")
+			.data(legend_data);
+
+		var legend_colorScale = d3.scale.linear()
+                        .domain([d3.min(legend_data), d3.max(legend_data)])
+                        .interpolate(d3.interpolateHcl)
+                        .range(["#00ff00", "#ff0000"]);
+
+		legendScale.enter()
+      			.append("rect")
+			.attr("width", 5)
+                        .attr("height", 10)
+                        .attr("x", function(d,i) { return (i*5);})
+                        .attr("y", 14)
+                        .attr("fill", function(d,i) { return legend_colorScale(d);})
+                        .attr("opacity", 0.75);
+
+		legend.append("text")
+			.attr("width", 40)
+                        .attr("height", 10)
+                        .attr("x", 0)
+                        .attr("y", 10)
+			.attr("font-size",11)
+			.attr("font-weight", "bold")
+			.text(mincval)
+			.attr("class", "mincvalText");
+
+                legend.append("text")
+                        .attr("width", 60)
+                        .attr("height", 10)
+                        .attr("x", 170)
+                        .attr("y", 10)
+			.attr("font-size",11)
+			.attr("font-weight", "bold")
+                        .text(maxcval)
+			.attr("class", "maxcvalText");
+
+                legend.append("text")
+                        .attr("width", 40)
+                        .attr("height", 10)
+                        .attr("x", 230)
+                        .attr("y", 10)
+			.attr("font-size",11)
+			.attr("font-weight", "bold")
+                        .text("Min value");
+
+		legend.append("text")
+                        .attr("width", 40)
+                        .attr("height", 10)
+                        .attr("x", 230)
+                        .attr("y", 24)
+                        .text(numpct(minvalue))
+			.attr("font-size",11)
+                        .attr("font-weight", "bold")
+			.attr("class", "minvarText");
+
+                legend.append("text")
+                        .attr("width", 60)
+                        .attr("height", 10)
+                        .attr("x", 300)
+                        .attr("y", 10)
+			.attr("font-size",11)
+			.attr("font-weight", "bold")
+                        .text("Max value");
+
+		legend.append("text")
+                        .attr("width", 40)
+                        .attr("height", 10)
+                        .attr("x", 300)
+                        .attr("y", 24)
+			.attr("font-size",11)
+                        .attr("font-weight", "bold")
+                        .text(numpct(maxvalue))
+			.attr("class", "maxvarText");
+
+
+                var chart = d3.select("#Timeline_chart")
+                                        .append("svg")
+                                        .attr("width", w + m[1] + m[3] + 176)
+                                        .attr("height", h + m[0] + m[2])
+                                        .attr("class", "svg2");
+
+		// Add the clipping path to the top larger window
+                chart.append("defs").append("clipPath")
+                        .attr("id", "clip")
+                        .append("rect")
+                        .attr("width", w)
+                        .attr("height", mainHeight);
+
+		// Create two 'g' group elemenst...one for main window, one for mini window
+                var mini = chart.append("g")
+                                        .attr("transform", "translate(" + m[3] + "," +  m[0] + ")")
+                                        .attr("width", w)
+                                        .attr("height", miniHeight)
+                                        .attr("class", "mini");
+
+                var main = chart.append("g")
+                                        .attr("transform", "translate(" + m[3] + "," + (miniHeight + m[0] + 40) + ")")
+                                        .attr("width", w)
+                                        .attr("height", mainHeight)
+                                        .attr("class", "main");
+
+                // Add main lanes and texts
+
+                main.append("g").selectAll(".laneLines")
+                        .data(pids)
+                        .enter().append("line")
+                        .attr("x1", m[1])
+                        .attr("y1", function(d,i) {return y2(pids.indexOf(pids[i]));})
+                        .attr("x2", w)
+                        .attr("y2", function(d,i) {return y2(pids.indexOf(pids[i]));})
+                        .attr("stroke", "lightgray")
+
+		// Add left and right labels to main data display
+		// Left scale will display colcor and relavant metric chosen
+		// Right scale will describe the height encoded metrics
+
+                main.append("g").selectAll(".laneTextUpper")
+                        .data(pids)
+                        .enter().append("text")
+                        .text(maxhval)
+                        .attr("x", -15)
+                        .attr("y", function(d, i) {return y2(i);})
+                        .attr("dy", ".5ex")
+                        .attr("text-anchor", "end")
+			.attr("font-size",11)
+                        .attr("font-weight", "bold")
+                        .attr("class", "laneTextUpper");
+
+                main.append("g").selectAll(".laneTextLower")
+                        .data(pids)
+                        .enter().append("text")
+                        .text(minhval)
+                        .attr("x", -15)
+                        .attr("y", function(d, i) {return y2(i + 1);})
+                        .attr("dy", ".5ex")
+                        .attr("text-anchor", "end")
+			.attr("font-size",11)
+                        .attr("font-weight", "bold")
+                        .attr("class", "laneTextLower");
+
+                // Add mini lanes and texts
+
+                mini.append("g").selectAll(".laneLines")
+                        .data(pids)
+                        .enter().append("line")
+                        .attr("x1", m[1])
+                        .attr("y1", function(d,i) {return y1(pids.indexOf(pids[i]));})
+                        .attr("x2", w)
+                        .attr("y2", function(d,i) {return y1(pids.indexOf(pids[i]));})
+                        .attr("stroke", "lightgray");
+
+                mini.append("g").selectAll(".laneTextMini")
+                        .data(pids)
+                        .enter().append("text")
+                        .text(function(d) {return ("PID " + d);})
+                        .attr("x", -m[1])
+                        .attr("y", function(d, i) {return y1(i + .5);})
+                        .attr("dy", ".5ex")
+                        .attr("text-anchor", "end")
+                        .attr("class", "ItemslaneText");
+
+                var itemRects = main.append("g")
+                        .attr("clip-path", "url(#clip)");
+
+                //Add mini item rects... main rects don't appear till you start brushing...see display()
+
+                mini.append("g").selectAll(".miniItems")
+                        .data(csvdata)
+                        .enter().append("rect")
+                        .attr("x", function(d) {return x(d.start);})
+                        .attr("y", function(d) {return y1(d.server_id + 1) - h1(Math.min(d.interval,d.runtime)) - 1;})
+                        .attr("width", function(d) {return x(d.end) - x(d.start) - 1 ;})
+                        .attr("height", function(d) {return h1(Math.min(d.interval,d.runtime)) })
+                        .attr("stroke-width", 2)
+                        .attr("fill", function(d) {return colorScale(Math.min(100,(d.runtime*100)/d.interval))})
+			.attr("class", "miniItems");
+
+                //brush
+                var brush = d3.svg.brush()
+                          .x(x)
+                          .on("brush", display);
+
+                minExtent = brush.extent()[0];
+                maxExtent = brush.extent()[1];
+
+                mini.append("g")
+                        .attr("class", "x brush")
+                        .call(brush)
+                        .selectAll("rect")
+                        .attr("y", 1)
+                        .attr("height", miniHeight - 1);
+
+		mini.append("g")
+			.attr("class", "axis") 
+			.attr("transform", "translate(0," + (miniHeight) + ")")
+			.call(xAxis);
+
+		var xBrushScale = d3.scale.linear()
+                        .domain([ minExtent,maxExtent ])
+                        .range([0, w]);
+
+                var xBrushAxis = d3.svg.axis()
+                        .scale(xBrushScale)
+                        .tickFormat(d3.format(".4f"))
+                        .orient("bottom");
+
+                var baxis = main.append("g")
+                        .attr("class", "baxis")
+                        .attr("transform", "translate(0," + (mainHeight + 2) + ")")
+                        .call(xBrushAxis);
+
+                display();
+
+		// Set default color scheme and height encoding to tatol CPU util%
+		var visitems,rects;
+		var fill_c = tcpu_fill;
+		var cur_h = tcpu_h;	
+		var rect_h1 = tcpu_height1;
+		var rect_h2 = tcpu_height2;
+		var y2_h =  tcpu_y2;
+
+                function display() {
+                        minExtent = brush.extent()[0],
+                        maxExtent = brush.extent()[1];
+
+			if (minExtent != maxExtent )
+                                visItems = csvdata.filter(function(d) {return (d.end) > minExtent || (d.start) < maxExtent;});
+                        else
+                                visItems = csvdata.filter(function(d) {return (d.end) < maxExtent && (d.start) > minExtent;});
+
+                        mini.select(".brush")
+                                .call(brush.extent([minExtent, maxExtent]));
+			xBrushScale.domain([ minExtent,maxExtent ]);
+                        main.select(".baxis")
+                                .call(xBrushAxis);
+
+                        x1.domain([minExtent, maxExtent]);
+
+                        //update main item rects
+                        rects = itemRects.selectAll("a")
+                                .data(visItems, function (d) { return d.server_id; })
+
+                        rects.enter().append("svg:a")
+				.append("rect")
+				.attr("class", "mainrect")
+                                .attr("x", function(d) {return x1(d.start);})
+                                .attr("y", function(d) {return y2_h(d) ;})
+                                .attr("width", function(d) {return x1(d.end) -  x1(d.start) -2 ;})
+                                .attr("height", function(d) {return rect_h2(d) ;})
+                        	.attr("stroke-width", 6)
+                        	.attr("fill", function(d) {return fill_c(d);})
+			
+                        rects.exit().remove();
+                }
+
+
+		// button selections for color scale and height encoding. 
+
+		d3.select("#color").on("change", function() {
+			switch(this.value)
+			{
+				case "tcpu":
+					tcpu_c();  break;
+				case "reads":
+					reads_c(); break;
+				case "writes":
+					writes_c(); break;
+                                case "syscalls":
+                                        syscalls_c(); break;
+                                case "usr":
+                                        usr_c(); break;
+                                case "sys":
+                                        sys_c(); break;
+				case "runq":
+					runq_c(); break;
+				default:
+					tcpu_c(); 
+			}	
+                });
+
+		d3.select("#height").on("change", function() {
+                        switch(this.value)
+                        {
+                                case "tcpu":
+                                        tcpu_h();  break;
+                                case "reads":
+                                        reads_h(); break;
+                                case "writes":
+                                        writes_h(); break;
+                                case "syscalls":
+                                        syscalls_h(); break;
+                                case "usr":
+                                        usr_h(); break;
+                                case "sys":
+                                        sys_h(); break;
+				case "runq":
+                                        runq_h(); break;
+                                default:
+                                        tcpu_h();
+                        }
+                });
+
+
+
+		// Building the colorscale mappings
+
+	        var tcpu_colorScale = d3.scale.linear().domain([0,101])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+
+                var reads_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.readio; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+
+                var writes_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.writeio; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+
+                var syscalls_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.syscalls; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+
+		var usr_colorScale = d3.scale.linear().domain([0,101])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+		
+		var sys_colorScale = d3.scale.linear().domain([0,101])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+
+		var runq_colorScale = d3.scale.linear().domain([0,101])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+
+		// Colorscale mapping methods run when brushing and selecting new encoding schemes
+
+		function tcpu_fill(d) {return tcpu_colorScale(Math.min(100,(d.runtime*100)/d.interval));}
+		function tcpu_c(d) {
+			fill_c = tcpu_fill;
+			main.selectAll("rect").attr("fill",function(d) { return tcpu_colorScale(Math.min(100,(d.runtime*100)/d.interval)); });
+			mini.selectAll("rect").attr("fill",function(d) { return tcpu_colorScale(Math.min(100,(d.runtime*100)/d.interval)); });
+			mincval = "Scale: 0%";
+                	maxcval = "100%";
+                	minvalue = d3.min(csvdata, function(d) { return (d.runtime*100)/d.interval });
+                	maxvalue = Math.min(100,d3.max(csvdata, function(d) { return (Math.min(100,(d.runtime*100)/d.interval)) }) );
+			legend.selectAll(".minvarText").text(numpct(minvalue));
+                        legend.selectAll(".maxvarText").text(numpct(maxvalue));
+			legend.selectAll(".mincvalText").text(mincval);
+                        legend.selectAll(".maxcvalText").text(maxcval);
+		}
+
+
+                function reads_fill(d) {return reads_colorScale(d.readio); }
+                function reads_c(d) {
+                        fill_c = reads_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return reads_colorScale(d.readio); });
+                        mini.selectAll("rect").attr("fill",function(d) { return reads_colorScale(d.readio); });
+			mincval = "Scale: 0";
+                        maxcval = "Max value";
+			minvalue = d3.min(csvdata, function(d) { return d.readio});
+                        maxvalue = d3.max(csvdata, function(d) { return d.readio});
+                        legend.selectAll(".minvarText").text(numpct(minvalue));
+                        legend.selectAll(".maxvarText").text(numpct(maxvalue));
+			legend.selectAll(".mincvalText").text(mincval);
+                        legend.selectAll(".maxcvalText").text(maxcval);
+                }
+
+                function writes_fill(d) {return writes_colorScale(d.writeio); }
+                function writes_c(d) {
+                        fill_c = writes_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return writes_colorScale(d.writeio); });
+                        mini.selectAll("rect").attr("fill",function(d) { return writes_colorScale(d.writeio); });
+			mincval = "Scale: 0";
+                        maxcval = "Max value";
+                        minvalue = d3.min(csvdata, function(d) { return d.writeio});
+                        maxvalue = d3.max(csvdata, function(d) { return d.writeio});
+                        legend.selectAll(".minvarText").text(numpct(minvalue));
+                        legend.selectAll(".maxvarText").text(numpct(maxvalue));
+                        legend.selectAll(".mincvalText").text(mincval);
+                        legend.selectAll(".maxcvalText").text(maxcval);
+                }
+
+                function syscalls_fill(d) {return syscalls_colorScale(d.syscalls); }
+                function syscalls_c(d) {
+                        fill_c = syscalls_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return syscalls_colorScale(d.syscalls); });
+                        mini.selectAll("rect").attr("fill",function(d) { return syscalls_colorScale(d.syscalls); });
+			mincval = "Scale: 0";
+                        maxcval = "Max value";
+                        minvalue = d3.min(csvdata, function(d) { return d.syscalls});
+                        maxvalue = d3.max(csvdata, function(d) { return d.syscalls});
+                        legend.selectAll(".minvarText").text(numpct(minvalue));
+                        legend.selectAll(".maxvarText").text(numpct(maxvalue));
+                        legend.selectAll(".mincvalText").text(mincval);
+                        legend.selectAll(".maxcvalText").text(maxcval);
+                }
+
+                function usr_fill(d) {return tcpu_colorScale(Math.min(100,(d.usertime*100)/d.interval));}
+                function usr_c(d) {
+                        fill_c = usr_fill;
+			main.selectAll("rect").attr("fill",function(d) { return tcpu_colorScale(Math.min(100,(d.usertime*100)/d.interval)); });
+                        mini.selectAll("rect").attr("fill",function(d) { return tcpu_colorScale(Math.min(100,(d.usertime*100)/d.interval)); });
+                        mincval = "Scale: 0%";
+                        maxcval = "100%";
+                        minvalue = d3.min(csvdata, function(d) { return (d.usertime*100)/d.interval});
+                        maxvalue = Math.min(100,d3.max(csvdata, function(d) { return (Math.min(100,(d.usertime*100)/d.interval)) }) );
+			legend.selectAll(".minvarText").text(numpct(minvalue));
+                        legend.selectAll(".maxvarText").text(numpct(maxvalue));
+			legend.selectAll(".mincvalText").text(mincval);
+                        legend.selectAll(".maxcvalText").text(maxcval);
+		}
+
+                function sys_fill(d) {return tcpu_colorScale(Math.min(100,(d.systime*100)/d.interval));}
+                function sys_c(d) {
+                        fill_c = sys_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return tcpu_colorScale(Math.min(100,(d.systime*100)/d.interval)); });
+                        mini.selectAll("rect").attr("fill",function(d) { return tcpu_colorScale(Math.min(100,(d.systime*100)/d.interval)); });
+                        mincval = "Scale: 0%";
+                        maxcval = "100%";
+                        minvalue = d3.min(csvdata, function(d) { return (d.systime*100)/d.interval});
+                        maxvalue = Math.min(100,d3.max(csvdata, function(d) { return (Math.min(100,(d.systime*100)/d.interval)) }) );
+			legend.selectAll(".minvarText").text(numpct(minvalue));
+                        legend.selectAll(".maxvarText").text(numpct(maxvalue));
+			legend.selectAll(".mincvalText").text(mincval);
+                        legend.selectAll(".maxcvalText").text(maxcval);
+                }
+
+		function runq_fill(d) {return runq_colorScale(d.runqtime*100/d.totaltime); }
+                function runq_c(d) {
+                        fill_c = runq_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return runq_colorScale(Math.min(100,(d.runqtime*100)/d.interval)); });
+                        mini.selectAll("rect").attr("fill",function(d) { return runq_colorScale(Math.min(100,(d.runqtime*100)/d.interval)); });
+                        mincval = "Scale: 0%";
+                        maxcval = "100%";
+                        minvalue = numpct(d3.min(csvdata, function(d) { return d.runqtime*100/d.interval}));
+                        maxvalue = numpct(d3.max(csvdata, function(d) {return (Math.min(100,(d.runqtime*100)/d.interval)) }));
+                        legend.selectAll(".minvarText").text(numpct(minvalue));
+                        legend.selectAll(".maxvarText").text(numpct(maxvalue));
+                        legend.selectAll(".mincvalText").text(mincval);
+                        legend.selectAll(".maxcvalText").text(maxcval);
+                }
+
+
+
+		// Height altering methods
+
+		var tcpu_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.interval; }) ])
+                                        .range([2,mainlaneHeight - 2]);
+		var tcpu_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.interval; }) ])
+                                        .range([2,36]);
+
+		var reads_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.readio; })])
+					.range([2,mainlaneHeight - 2]);
+		var reads_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.readio; })])
+                                        .range([2,36]);
+       
+                var writes_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.writeio; })])
+                                        .range([2,mainlaneHeight - 2]);
+                var writes_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.writeio; })])
+                                        .range([2,36]);
+
+                var syscalls_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.syscalls; })])
+                                        .range([2,mainlaneHeight - 2]);
+                var syscalls_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.syscalls; })])
+                                        .range([2,36]);
+
+                var usr_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.interval; }) ])
+                                        .range([2,mainlaneHeight - 2]);
+                var usr_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.interval; }) ])
+                                        .range([2,36]);
+
+                var sys_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.interval; }) ])
+                                        .range([2,mainlaneHeight - 2]);
+                var sys_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.interval; }) ])
+                                        .range([2,36]);
+
+                var runq_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.interval; }) ])
+                                        .range([2,mainlaneHeight - 2]);
+                var runq_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.interval; }) ])
+                                        .range([2,36]);
+
+		
+                // Height mapping methods run when brushing and selecting new encoding schemes
+
+
+
+		function tcpu_height2(d) {return tcpu_h2(Math.min(d.interval,d.runtime)); }
+		function tcpu_y2(d) {return y2(d.server_id + 1) - tcpu_h2(Math.min(d.interval,d.runtime)); }
+		function tcpu_height1(d) {return tcpu_h1(Math.min(d.interval,d.runtime)); }
+		function tcpu_h(d) {
+			y2_h =  tcpu_y2;
+			rect_h2 = tcpu_height2; rect_h1 = tcpu_height1; 
+			main.selectAll("rect").attr("height",function(d) {return tcpu_h2(Math.min(d.interval,d.runtime)); })
+				.attr("y", function(d) {return y2(d.server_id + 1) -  tcpu_h2(Math.min(d.interval,d.runtime)); });
+			mini.selectAll(".miniItems").attr("height",function(d) {return tcpu_h1(Math.min(d.interval,d.runtime)); })
+				.attr("y", function(d) {return y1(d.server_id + 1) -  tcpu_h1(Math.min(d.interval,d.runtime)); });
+			minhval = "0%";
+                	maxhval = "100%";
+			main.selectAll(".laneTextUpper").text(maxhval);
+                        main.selectAll(".laneTextLower").text(minhval);
+                }
+
+                function reads_height2(d) {return reads_h2(d.readio); }
+                function reads_y2(d) {return y2(d.server_id + 1) - reads_h2(d.readio); }
+                function reads_height1(d) {return reads_h1(d.readio); }
+                function reads_h(d) {
+                        y2_h = reads_y2;
+                        rect_h2 = reads_height2; rect_h1 = reads_height1;
+                        main.selectAll("rect").attr("height",function(d) {return reads_h2(d.readio); })
+                                .attr("y", function(d) {return y2(d.server_id + 1) -  reads_h2(d.readio); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return reads_h1(d.readio); })
+                                .attr("y", function(d) {return y1(d.server_id + 1) -  reads_h1(d.readio); });
+			minhval = "0 reads";
+                        maxhval = d3.max(csvdata, function(d) { return d.readio}) + " reads";
+                        main.selectAll(".laneTextUpper").text(maxhval);
+                        main.selectAll(".laneTextLower").text(minhval);
+                }
+
+                function writes_height2(d) {return writes_h2(d.writeio); }
+                function writes_y2(d) {return y2(d.server_id + 1) - writes_h2(d.writeio); }
+                function writes_height1(d) {return writes_h1(d.writeio); }
+                function writes_h(d) {
+                        y2_h = writes_y2;
+                        rect_h2 = writes_height2; rect_h1 = writes_height1;
+                        main.selectAll("rect").attr("height",function(d) {return writes_h2(d.writeio); })
+                                .attr("y", function(d) {return y2(d.server_id + 1) -  writes_h2(d.writeio); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return writes_h1(d.writeio); })
+                                .attr("y", function(d) {return y1(d.server_id + 1) -  writes_h1(d.writeio); });
+			minhval = "0 writes";
+                        maxhval = d3.max(csvdata, function(d) { return d.writeio}) + " writes";
+                        main.selectAll(".laneTextUpper").text(maxhval);
+                        main.selectAll(".laneTextLower").text(minhval);
+                }
+
+                function syscalls_height2(d) {return syscalls_h2(d.syscalls); }
+                function syscalls_y2(d) {return y2(d.server_id + 1) - syscalls_h2(d.syscalls); }
+                function syscalls_height1(d) {return syscalls_h1(d.syscalls); }
+                function syscalls_h(d) {
+                        y2_h = syscalls_y2;
+                        rect_h2 = syscalls_height2; rect_h1 = syscalls_height1;
+                        main.selectAll("rect").attr("height",function(d) {return syscalls_h2(d.syscalls); })
+                                .attr("y", function(d) {return y2(d.server_id + 1) -  syscalls_h2(d.syscalls); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return syscalls_h1(d.syscalls); })
+                                .attr("y", function(d) {return y1(d.server_id + 1) -  syscalls_h1(d.syscalls); });
+			minhval = "0 scalls";
+                        maxhval = d3.max(csvdata, function(d) { return d.syscalls}) + " scalls";
+                        main.selectAll(".laneTextUpper").text(maxhval);
+                        main.selectAll(".laneTextLower").text(minhval);
+                }
+
+                function usr_height2(d) {return usr_h2(Math.min(d.interval,d.usertime)); }
+                function usr_y2(d) {return y2(d.server_id + 1) - usr_h2(Math.min(d.interval,d.usertime)); }
+                function usr_height1(d) {return usr_h1(Math.min(d.interval,d.usertime)); }
+                function usr_h(d) {
+                        y2_h = usr_y2;
+                        rect_h2 = usr_height2; rect_h1 = usr_height1;
+                        main.selectAll("rect").attr("height",function(d) {return usr_h2(Math.min(d.interval,d.usertime)); })
+                                .attr("y", function(d) {return y2(d.server_id + 1) -  usr_h2(Math.min(d.interval,d.usertime)); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return usr_h1(Math.min(d.interval,d.usertime)); })
+                                .attr("y", function(d) {return y1(d.server_id + 1) -  usr_h1(Math.min(d.interval,d.usertime)); });
+			minhval = "0%";
+                        maxhval = "100%";
+                        main.selectAll(".laneTextUpper").text(maxhval);
+                        main.selectAll(".laneTextLower").text(minhval);
+                }
+
+                function sys_height2(d) {return sys_h2(Math.min(d.interval,d.systime)); }
+                function sys_y2(d) {return y2(d.server_id + 1) - sys_h2(Math.min(d.interval,d.systime)); }
+                function sys_height1(d) {return sys_h1(Math.min(d.interval,d.systime)); }
+                function sys_h(d) {
+                        y2_h = sys_y2;
+                        rect_h2 = sys_height2; rect_h1 = sys_height1;
+			main.selectAll("rect").attr("height",function(d) {return usr_h2(Math.min(d.interval,d.systime)); })
+                                .attr("y", function(d) {return y2(d.server_id + 1) -  usr_h2(Math.min(d.interval,d.systime)); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return usr_h1(Math.min(d.interval,d.systime)); })
+                                .attr("y", function(d) {return y1(d.server_id + 1) -  usr_h1(Math.min(d.interval,d.systime)); });
+			minhval = "0%";
+                        maxhval = "100%";
+                        main.selectAll(".laneTextUpper").text(maxhval);
+                        main.selectAll(".laneTextLower").text(minhval);
+		}
+
+		function runq_height2(d) {return runq_h2(Math.min(d.interval,d.runqtime)); }
+                function runq_y2(d) {return y2(d.server_id + 1) - runq_h2(Math.min(d.interval,d.runqtime)); }
+                function runq_height1(d) {return runq_h1(Math.min(d.interval,d.runqtime/d.interval)); }
+                function runq_h(d) {
+                        y2_h = runq_y2;
+                        rect_h2 = runq_height2; rect_h1 = runq_height1;
+                        main.selectAll("rect").attr("height",function(d) {return usr_h2(Math.min(d.interval,d.runqtime)); })
+                                .attr("y", function(d) {return y2(d.server_id + 1) -  usr_h2(Math.min(d.interval,d.runqtime)); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return usr_h1(Math.min(d.interval,d.runqtime)); })
+                                .attr("y", function(d) {return y1(d.server_id + 1) -  usr_h1(Math.min(d.interval,d.runqtime)); });
+                        minhval = "0%";
+                        maxhval = "100%";
+                        main.selectAll(".laneTextUpper").text(maxhval);
+                        main.selectAll(".laneTextLower").text(minhval);
+                }
+	});
+
+/*
+ * Attach a context menu to a D3 element
+ */
+
+
+	contextMenuShowing = false;
+
+	var minExtent = 0;
+	var maxExtent = 0;
+
+	d3.select("body").on('contextmenu',function (d,i) {
+		if(contextMenuShowing) {
+        		d3.event.preventDefault();
+        		d3.select(".popup").remove();
+        		contextMenuShowing = false;
+		} else {
+        		d3_target = d3.select(d3.event.target);
+        		if (d3_target.classed("mainrect")) {
+            			d3.event.preventDefault();
+            			contextMenuShowing = true;
+            			d = d3_target.datum();
+            
+				// Build the popup
+            			canvas = d3.select(".canvas");
+            			mousePosition = d3.mouse(canvas.node());
+
+            			var num = d3.format("5.6f");
+	    			var numint = d3.format("5.0f");
+            			var numpct = d3.format("5.1f");
+
+            			popup = canvas.append("div")
+                			.attr("class", "popup")
+                			.style("left", mousePosition[0] + "px")
+                			.style("top", mousePosition[1] + "px");
+            			popup.append("h2").text(d.display_division);
+            			popup.append("p")
+					.text("Interval:   " +  num(d.start)
+                			+ " - " + num(d.end)
+                        		+ "\n\n%Busy : " + numpct(Math.min(100,(100 * d.runtime/d.interval)))
+                        		+ "      Runtime : " + num(d.runtime)
+                        		+ "\n%User : " + numpct(Math.min(100,(100 * d.usertime/d.interval)))
+                        		+ "      Usertime: " + num(d.usertime)
+                        		+ "\n%Sys  : " + numpct(Math.min(100,(100 * d.systime/d.interval)))
+                        		+ "      Systime : " + num(d.systime)
+                        		+ "\n%RunQ : " + numpct(Math.min(100,(100 * d.runqtime/d.interval)))
+                        		+ "      Runqtime: " + num(d.runqtime)
+                        		+ "\nAvgRq : " + numpct(d.runqtime*1000000/(1 + d.switch_cnt)) + "(us)"
+                        		+ "  Slptime : " + num(d.sleeptime)
+                        		+ "\n                   "
+                        		+ "Irqtime : " + num(d.irqtime)
+                        		+ "\n                   "
+                        		+ "Stealtm : " + num(d.stealtime)
+                        		+ "\nCSW cnt :  " + numint(d.switch_cnt)
+                        		+ "\nSlp cnt :  " + numint(d.sleep_cnt)
+                        		+ "\nPreempts:  " + numint(d.preempt_cnt) + "     CPU Migr : " + d.migr
+                        		+ "\nWakeups :  " + numint(d.wakeup_cnt) + "     Node Migr: " + d.nodemigr
+                        		+ "\nSyscalls:  " + numint(d.syscalls)
+                        		+ "\nRead  IO:  " + numint(d.readio)
+                        		+ "\nWrite IO:  " + numint(d.writeio) )
+            			popup.append("p")
+	    				.append("a")
+					.attr("href", "../../kivis.php?type=kipid&start=" + d.start + "&end=" + d.end + "&pid=" + d.pid + "&ts=" +d.timestamp )
+	    				.text("kipid report (this interval)\n")
+            				.append("a")
+            				.attr("href", "../../kivis.php?type=kipid&start=" + num(minExtent) + "&end=" + num(maxExtent) + "&pid=" + d.pid + "&ts=" +d.timestamp )
+            				.text("kipid report (zoom timespan)\n")
+            				.append("a")
+            				.attr("href", "../../kivis.php?type=kitrace&start=" + d.start + "&end=" + d.end + "&pid=" + d.pid + "&ts=" +d.timestamp )
+            				.text("kitrace records (this interval)\n")
+            				.append("a")
+            				.attr("href", "../../kivis.php?type=kitrace&start=" + num(minExtent) + "&end=" + num(maxExtent) + "&pid=" + d.pid + "&ts=" +d.timestamp)
+            				.text("kitrace records (zoom timespan)\n")
+            				.append("a")
+           				.attr("href", "../../kivis.php?type=pid_switch&start=" + d.start + "&end=" + d.end + "&pid=" + d.pid + "&ts=" +d.timestamp)
+            				.text("scheduling detail (this interval)\n");
+
+				canvasSize = [
+                			canvas.node().offsetWidth,
+                			canvas.node().offsetHeight
+            			];
+
+            			popupSize = [
+                			popup.node().offsetWidth,
+                			popup.node().offsetHeight
+            			];
+
+            			if (popupSize[0] + mousePosition[0] > canvasSize[0]) {
+                			popup.style("left","auto");
+                			popup.style("right",0);
+            			}
+
+            			if (popupSize[1] + mousePosition[1] > canvasSize[1]) {
+                			popup.style("top","auto");
+                			popup.style("bottom",0);
+            			}
+        		}
+    		}
+	});
+
+
+                </script>
+        </body>
+</html>
+

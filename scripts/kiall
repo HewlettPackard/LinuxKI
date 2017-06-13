@@ -1,0 +1,514 @@
+#**************************************************************************
+# Copyright 2017 Hewlett Packard Enterprise Development LP.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version. This program is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details. You
+# should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#***************************************************************************
+#!/bin/bash
+# kiall script  -- generate default LinuxKI reports 
+#
+# version 2.2   05/19/2011
+# version 2.3   06/12/2012   modified to handle *.tgz files
+# version 2.4   07/12/2012   converted to bash
+# version 2.5   08/22/2012   added likim to merge liki ki.bin files
+# version 2.6   10/10/2012   added checks for kiinfo password
+# version 2.7   07/18/2013   added csv report options
+# version 2.8   07/18/2013   added scdetail option to kifile report
+# version 2.9   11/04/2013   New support for Linux KI 2.0.  Added Control-C processing. 
+#                            Added code to collect cstates if available.
+# version 2.10  11/21/2013   Added kifutex
+# version 2.11  03/06/2014   Added kiall
+# version 2.12  03/17/2014   Added kiinfo -clparse and kiall -c option
+# version 2.13  04/10/2014   Rewrite to simplify code.  Improved -c option and added -f option.
+
+# version 3.0   09/16/2014   Added -x option to generate Kparse data in txt format instead of html
+# version 3.1   10/24/2014   Added -V option for Visualization
+# version 3.2   12/13/2014   Added EDIR and EVDIR vars 
+# version 3.3   12/30/2014   Made -V option viewable
+# version 3.4   03/03/2015   Added Visualization to clparse
+# version 3.5   04/09/2015   combined kiall oracle & vis flag runs
+# version 3.6   05/28/2015   uncommented out the verify_passwd function
+
+# version 4.0   11/25/2015   Changed copyright string
+# version 4.1   02/29/2016   added new symlinks for pid_timeline.html and kivis.php
+#                            added open file ulimit check
+# version 5.0   04/21/2017   removed checkaccess check since passwd is not needed.
+# 
+# DESCRIPTION:
+#  
+#   kiall will uncompress/untar a ki_all.*.tar.gz KI tarball and automatically
+#   run various "canned" KI reports, such as kipid, kparse, kiprof, etc.  Some 
+#   of the less CPU and memory intensive reports will be run in parallel.
+#   Note, for kiall to work successfully, the KI tarball must be named 
+#   ki_all.<timestamp>.tar.gz.   
+# 
+# USAGE: 
+#
+#   kiall [-r] [-c] [-m] [-l] [-x] [-V] [-t timestamp] 
+#   
+# OPTIONS:
+#  
+#   -r        Create a working directory called <hostname>/<timestamp> to store
+#             the kitrace data and reports.   Works well for environments where
+#             multiple kitrace data files have been created for the same system
+#             or in muli-system environments.  A
+#
+#   -c        For KI data from a cluster.  Creates multiple working directories
+#             of the form <timestamp>/<hostname>.  Generates KI reports for each
+#             host, and then generates Cluster Kparse (clparse) report
+#
+#   -f	      Find KI files starting in current working directory and searching
+#             all subsequent directories.
+#
+#   -m        Skip MW processing.   
+# 
+#             Note that this option can run on multiple KItrace collections at 
+#             one invocation of kiall.
+#
+#   -l        lite collection 
+#   -x        Generate the kparse report as a .txt file instead of an .html file
+#
+#   -V	      Add visualization options (vis,vpct,vdepth) to kiall, kparse, kipid
+#   
+#  -t <timestamp>  Only runs KI reports on a single KItrace collection.
+#
+# NOTE:  
+#  
+#   Update the DIR environment variable below to reflect the directory where the KI tools
+#   are placed.
+#  
+#   set OS to LINUX or HPUX
+#
+
+DIR=/opt/linuxki
+EDIR=$DIR/experimental
+EVDIR=$EDIR/vis
+OS=`uname`
+SAVED_PWD=$PWD
+Password=""
+rflag=0
+cflag=0
+fflag=0
+domwa=1
+lite=0
+dotxt=0
+dovis=0
+
+help()
+{
+    printf "Usage: %s: [-l] [-m] [-r] [-f] [-c] [-x] [-t timestamp]\n" "$0"
+	printf "            -h               Help\n"
+	printf "            -l               Lite version - bypasses some options\n" 
+	printf "            -m               Do not process collectl or MWA data\n"
+	printf "            -r               restore into created subdir - <host>/<MMDD_HHMM> \n"
+	printf "            -f               Find KI files in pwd and any directories below\n"
+	printf "            -c               Cluster-wide processing\n"
+	printf "            -x               Generate Kparse text format instead of html format\n"
+	printf "            -V               Use visualization options where possible in reports\n"
+	printf "            -t <timestamp>   Only process KI budle with matching timestamp\n"
+}
+
+getnodename()
+{
+# tag must be set
+    for NODENAME in `ls ki_all.*$tag* 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
+    do
+	if [ ! -z $NODENAME ]; then
+	    if [ $NODENAME = "$tag" ]; then
+		NODENAME=""
+	    fi
+	fi
+    done
+}
+
+extract_ki_files()
+{
+# tag and NODENAME must be set 
+# First, unzip regular files; not tar archives 
+    for file in `ls *$tag*gz 2>/dev/null | egrep -v "\.tar|\.tgz"`
+    do
+        echo gunzip $file
+        gunzip $file
+    done
+
+# Check to see if ki.bin files exist.   If so, then we can return 
+    if [ -f ki.bin.$tag ] ; then 
+	return
+    fi
+    if [ -f ki.bin.000.$tag ] ; then
+	return
+    fi
+
+# if there are no ki.bin files, then try to extract from ki_all tar files 
+    if [ -f ki_all.$NODENAME.$tag.tar ] ; then
+	gzip ki_all.$NODENAME.$tag.tar
+    fi 
+    if [ -f ki_all.$NODENAME.$tag.tar.gz ] ; then
+	mv ki_all.$NODENAME.$tag.tar.gz ki_all.$NODENAME.$tag.tgz
+    fi 
+    if [ -f ki_all.$tag.tar ] ; then
+	gzip ki_all.$tag.tar
+    fi 
+    if [ -f ki_all.$tag.tar.gz ] ; then
+	mv ki_all.$tag.tar.gz ki_all.$NODENAME.$tag.tgz
+    fi 
+
+    if [ -f ki_all.$NODENAME.$tag.tgz ] ; then
+	tar xf ki_all.$NODENAME.$tag.tgz
+    elif [ -f ki_all.$tag.tgz ] ; then
+	tar xf ki_all.$tag.tgz
+    fi
+}
+
+likimerge()
+{
+#   attempt to merge liki ki.bin files
+
+# Check open file limit
+    ulimit -n hard
+    ncpus=`grep "^processor" cpuinfo.$tag | tail -1 | awk '{print $3}'`
+    let nfiles=$ncpus*2
+    let nfiles=$nfiles+10
+    if (( "`ulimit -n`" < $nfiles )) ;
+    then
+        echo "!!! Open file hard limit `ulimit -n -H` too small for number of CPUs"
+        exit 1
+    fi
+    unset ncpus nfile
+
+    echo "Merging KI binary files.  Please wait..."
+    $DIR/kiinfo -likimerge -ts $tag >/dev/null 2>&1
+    RETVAL=$?
+    if [ $RETVAL -eq 0 ] ; then
+	echo "ki.bin files merged by kiinfo -likimerge"
+	rm ki.bin.*.$tag  >/dev/null 2>&1
+	chmod 644 ki.bin.$tag
+    else
+	echo "kiinfo -likimerge cannot merge ki.bin files.  Suspect default tracing (ftrace) used."
+	rm ki.bin.$tag >/dev/null 2>&1
+	if [ $dovis -eq 1 ] ; then
+	    echo "-V visualization option works best with liki DLKM tracing. Only limit visualization charts are available with Ftrace."
+	fi
+	
+    fi
+}
+
+process_mw()
+{
+    if [ $domwa -eq 0 ] ; then
+	return
+    fi
+   
+    if [ -f MWA.tar.$tag.gz ] ; then
+	mv MWA.tar.$tag.gz MWA.$tag.tgz
+    fi
+
+    if [ -f MWA.tar.$tag ] ; then
+	gzip MWA.tar.$tag
+	mv MWA.tar.$tag.gz MWA.$tag.tgz
+    fi
+
+    if [ -f MWA.$tag.tgz ] ; then
+	rm -rf MW 
+	mkdir MW
+	mv MWA.$tag.tgz MW
+    fi
+
+# 	no processing of MWA data yet 
+#	cd MW
+# 	process MW data here - not implemented yet
+#	cd ..
+}
+
+
+process_ki()
+{
+    echo $DIR/kiinfo -kitrace -ts $tag 
+    ( $DIR/kiinfo -kitrace -ts $tag >ki.$tag & )
+    rm -rf PIDS >/dev/null
+    mkdir PIDS
+    if [ `grep "ora_" ps-eLf.$tag | wc -l` -gt 0 ]
+    then
+    	if [ $dotxt -eq 0 ] ; then
+	    if [ $dovis -eq 0 ] ; then
+                echo $DIR/kiinfo -kiall csv,oracle -html -ts $tag
+                ( $DIR/kiinfo -kiall csv,oracle -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
+	    else
+		process_V
+	    fi
+	else
+            echo $DIR/kiinfo -kiall csv,oracle -ts $tag
+            ( $DIR/kiinfo -kiall csv,oracle -ts $tag ; touch -r ki.bin.*$tag kp.$tag.txt)
+	fi
+    else
+    	if [ $dotxt -eq 0 ] ; then
+            if [ $dovis -eq 0 ] ; then
+                echo $DIR/kiinfo -kiall csv -html -ts $tag
+                ( $DIR/kiinfo -kiall csv -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
+            else
+                process_V
+            fi
+	else
+                echo $DIR/kiinfo -kiall csv -ts $tag
+                ( $DIR/kiinfo -kiall csv -ts $tag ; touch -r ki.bin.*$tag kp.$tag.txt)
+	fi
+    fi
+}
+
+process_V()
+{
+    if [ `grep "ora_" ps-eLf.$tag | wc -l` -gt 0 ] ; then
+        echo $DIR/kiinfo -kiall oracle,csv,vis,vpct=1,vdepth=3 -html -ts $tag
+        ( $DIR/kiinfo -kiall oracle,csv,vis,vpct=1,vdepth=3 -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
+    else 
+        echo $DIR/kiinfo -kiall csv,vis,vpct=1,vdepth=3 -html -ts $tag
+        ( $DIR/kiinfo -kiall csv,vis,vpct=1,vdepth=3 -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
+    fi
+
+    echo Generating symlinks to $EVDIR for visualization charts
+
+    if [ -f ki.$tag ] ; then
+        $EVDIR/kidsk_2_csv.sh $tag
+        ln -s $EVDIR/kidsk_scatter.html ./kidsk_scatter.html  > /dev/null 2>&1
+        ln -s $EVDIR/kidsk_2_csv.sh ./kidsk_2_csv.sh  > /dev/null 2>&1
+        $EVDIR/futex_2_csv.sh $tag
+        ln -s $EVDIR/futex_scatter.html ./futex_scatter.html  > /dev/null 2>&1
+        ln -s $EVDIR/futex_2_csv.sh ./futex_2_csv.sh  > /dev/null 2>&1
+    fi
+
+    if [ -d VIS ] ; then
+        ln -s $EVDIR/pid_detail.html ./pid_detail.html  > /dev/null 2>&1
+        ln -s $EVDIR/pid_wtree.html  ./pid_wtree.html  > /dev/null 2>&1
+    fi
+
+    SAVEDIR=$( pwd )
+
+    echo Symlinking timeline files
+    ln -s $EVDIR/timeline.html $SAVEDIR/timeline.html > /dev/null 2>&1
+    ln -s $EVDIR/pid_timeline.html $SAVEDIR/pid_timeline.html > /dev/null 2>&1
+    ln -s $EVDIR/timeline.php $SAVEDIR/timeline.php > /dev/null 2>&1
+    ln -s $EVDIR/kivis.php $SAVEDIR/kivis.php > /dev/null 2>&1
+    ln -s $EDIR/D3 D3  > /dev/null 2>&1
+    mkdir tl_temp > /dev/null 2>&1
+    chmod 777 tl_temp
+    chmod 777 PIDS
+    chmod 644 PIDS/*
+    chmod -R 777 VIS
+    chmod 777 .
+
+    echo Running visualization CSV file generation script
+    $EVDIR/d3_csv.sh
+    cd $SAVEDIR
+}
+
+
+process_pwd()
+{
+    ls ki*.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]* >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+	return;
+    fi
+    for tag in `ls ki*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]* | grep -v "ki.err" | grep -v "\.csv" | awk '{print substr($1,match($1,"[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]"),9)}' | sort | uniq ` 
+    do
+	if [ ! -z "$intag" ] ; then
+	    if [ $tag = $intag ] ; then
+		:
+	    else
+		continue	
+	    fi
+	fi
+
+        echo "Processing files in: "$PWD
+	for NODENAME in `ls ki_all.*$tag* 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
+	do
+	    if [ ! -z $NODENAME ]; then
+		if [ $NODENAME = "$tag" ]; then
+		    NODENAME=""
+	        fi
+	    fi
+        done
+
+        extract_ki_files
+	if [ -f ki.bin.000.$tag ] ; then
+	    likimerge
+	fi
+
+	if [ -f ki.bin.$tag ] ; then
+	    process_ki
+	elif [ -f ki.bin.000.$tag ] ; then
+	    process_ki
+	else
+	    echo "No ki.bin files found for $tag"
+	fi
+    done
+}
+
+process_r()
+{
+#   Files need to be of the form ki_all.<hostname>.<timestamp>.tgz
+
+    ls ki_all.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]*.tgz >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+	echo "No files of the form ki_all.<hostname>.<timestamp>.tgz found in $SAVED_PWD"
+	return;
+    fi
+    for tag in `ls ki_all*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9].tgz | awk '{print substr($1,match($1,"[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]"),9)}' | sort | uniq ` 
+    do
+	if [ ! -z "$intag" ] ; then
+	    if [ $tag = $intag ] ; then
+		:
+	    else
+		continue	
+	    fi
+	fi
+
+	for NODENAME in `ls ki_all.*.$tag.tgz 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
+	do
+	    if [ ! -z $NODENAME ] ; then
+	        if [ ! -d $NODENAME ] ; then
+		    mkdir $NODENAME
+		fi
+		if [ ! -d $NODENAME/$tag ] ; then
+	 	    mkdir $NODENAME/$tag
+		fi
+
+		mv ki_all.$NODENAME.$tag.tgz $NODENAME/$tag/ki_all.$NODENAME.$tag.tgz
+		cd $NODENAME/$tag
+		process_pwd
+	    	cd $SAVED_PWD
+	    fi
+        done
+    done
+}
+
+process_c()
+{
+#   Files need to be of the form ki_all.<hostname>.<timestamp>.tgz
+
+    ls ki_all.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]*.tgz >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+#	if there are no ki_all files, then simply run kiinfo in cwd if the -t option is passed
+	if [ ! -z "$intag" ] ; then
+	    if [ $dovis -eq 0 ] ; then
+                echo $DIR/kiinfo -clparse csv,cltree,top=20 -html -ts $intag
+                $DIR/kiinfo -clparse csv,cltree,top=20 -html -ts $intag  >cp.$intag.html
+            else
+                echo $DIR/kiinfo -clparse csv,vis,cltree,top=20 -html -ts $intag
+                $DIR/kiinfo -clparse csv,vis,cltree,top=20 -html -ts $intag  >cp.$intag.html
+            fi    
+	else
+	    echo "No files of the form ki_all.<hostname>.<timestamp>.tgz found in $SAVED_PWD"
+	fi
+	return
+    fi
+
+    for tag in `ls ki_all*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9].tgz 2>/dev/null | awk '{print substr($1,match($1,"[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]"),9)}' | sort | uniq ` 
+    do
+	if [ ! -z "$intag" ] ; then
+	    if [ $tag = $intag ] ; then
+		:
+	    else
+		continue	
+	    fi
+	fi
+
+	for NODENAME in `ls ki_all.*.$tag.tgz 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
+	do
+	    if [ ! -d $tag ] ; then
+		mkdir $tag
+	    fi
+
+	    if [ ! -z $NODENAME ] ; then
+		rm -rf $tag/$NODENAME
+		mkdir $tag/$NODENAME
+		mv ki_all.$NODENAME.$tag.tgz $tag/$NODENAME
+		cd $tag/$NODENAME
+		process_pwd
+	    	cd $SAVED_PWD
+	    fi
+        done
+	cd $tag
+	if [ $dovis -eq 0 ] ; then
+                echo $DIR/kiinfo -clparse csv,cltree,top=20 -html -ts $tag
+                $DIR/kiinfo -clparse csv,cltree,top=20 -html -ts $tag  >cp.$tag.html
+        else
+                echo $DIR/kiinfo -clparse csv,vis,cltree,top=20 -html -ts $tag
+                $DIR/kiinfo -clparse csv,vis,cltree,top=20 -html -ts $tag  >cp.$tag.html
+
+	echo Symlinking cluster timeline files
+    	ln -s $EVDIR/cluster_timeline.html cluster_timeline.html > /dev/null 2>&1
+    	ln -s $EVDIR/timeline.php timeline.php > /dev/null 2>&1
+	ln -s $EDIR/D3 D3 > /dev/null 2>&1
+
+        fi
+	cd $SAVED_PWD
+    done
+}
+
+process_f()
+{
+    for SUBDIR in `find * -type d `
+    do
+	cd $SUBDIR
+	process_pwd
+	cd $SAVED_PWD
+	wait
+    done
+}
+
+
+
+while getopts p:t:rcfmxVlh optname
+do
+	case $optname in
+		h)	help
+			exit 1;;
+		t) 	intag="$OPTARG";;
+		r)	rflag=1;;
+		c)	cflag=1;;
+		f)	fflag=1;;
+                m)      domwa=0;;
+		x)	dotxt=1;;
+		V)	dovis=1;;
+                l)      lite=1;;
+		p)      Password="$OPTARG";;
+		?)	help
+			exit 2;;
+	esac
+done
+
+if [ $rflag -eq 1 -a $cflag -eq 1 ] ; then
+    echo "ERROR: Cannot use both -r and -c options"
+    exit 9
+fi
+
+if [ $rflag -eq 1 -a $fflag -eq 1 ] ; then
+    echo "ERROR: Cannot use both -r and -f options"
+    exit 10 
+fi
+
+if [ $cflag -eq 1 -a $fflag -eq 1 ] ; then
+    echo "ERROR: Cannot use both -r and -f options"
+    exit 10 
+fi
+
+if [ $rflag -eq 1 ] ; then
+  process_r
+elif [ $cflag -eq 1 ] ; then
+  process_c
+elif [ $fflag -eq 1 ] ; then
+  process_f
+else
+  process_pwd
+fi
+
+cd $SAVED_PWD
+wait
+echo "kiall complete"

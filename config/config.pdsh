@@ -1,0 +1,103 @@
+#
+# Configuration file for LinuxKI Toolset
+#
+
+#
+# RUNKI_OPTS is passed to runki. This can be changed at any time between runs. Options include:
+#
+#		-L              Gather minimal data for local analysis...no gzip/tar
+#		-m              Skip Collectl/MeasureWare data collection
+#		-u              Skip userspace profile (perf) data collection
+#		-j              Collect Java stacks
+#	      	-J <path>	Location of Java jstack command
+#		-n <interface>  Gather tcpdump trace data
+#		-v              Skip vxfs, misc disc data collection
+#		-d <secs>       Duration of KI data collection. Defaults to 20 secs if not specified.
+#		-t <secs>       Maximum time for data collection tools to run. Defaults to 120 secs if not specified.
+#               -p              Use liKI DLKM instead of kiinfo/ftrace to dump trace data.
+#               -e <event>      Identify events to dump. Possible values are: default | all | <event>
+#               -s <subsys>     Identify subsys to dump. For example: irq, scsi, block, etc.
+#               -c "comment"    echo comment into comment.$tag file
+#
+#export RUNKI_OPTS="-p"
+
+#
+# RUNKI_AUX_CMDS specifies any additional tools/commands to be executed via /bin/bash -c
+#
+#export RUNKI_AUX_CMDS="command1;command2;command3"
+
+#
+# PERF_PROFILE_OPTS specifies any additional options passed to perf
+# when collecting profile data
+#
+#export PERF_PROFILE_OPTS="-g"
+
+#
+# SAR_OPTS specifies options passed to sar, a null string disables sar collection
+# 
+export SAR_OPTS="-dpqrwWB -u ALL -P ALL -n DEV -n EDEV -I SUM" 
+
+
+#
+# Everything below only applies to cluster installations. In a cluster environment
+# collection is initiated through pdsh, either from the command line or through the
+# Cluster Management Utility GUI. 
+#
+
+#
+# CMU_DATADIR	The repository for consolidated data on the CMU head node.
+# This MAY ONLY be changed during installation.
+#
+export CMU_DATADIR="/var/linuxki"
+
+#
+# NODE STAGEDIR	The directory in which nodes will stage their trace data during collection
+# prior to copying it to the CMU head node. This can be changed between an "Uninstall from
+# nodes" and "Install on nodes".
+#
+export NODE_STAGEDIR="/tmp"
+
+#
+# PDSH specifies the location of the PDSH binary; typically either /usr/bin/pdsh
+# or /opt/cmu/bin/pdsh
+#
+#export PDSH=/opt/cmu/bin/pdsh
+export PDSH=/usr/bin/pdsh
+
+#
+# PDCP specifies the location of the PDCP binary; typically either /usr/bin/pdcp
+# or /opt/cmu/bin/pdcp
+
+#export PDCP=/opt/cmu/bin/pdcp
+export PDCP=/usr/bin/pdcp
+
+#
+# RPDCP specifies the location of the RPDCP binary; typically either /usr/bin/rpdcp
+# or /opt/cmu/bin/rpdcp
+
+#export RPDCP=/opt/cmu/bin/rpdcp
+export RPDCP=/usr/bin/rpdcp
+
+#
+# WCOLL should point to a file containing a list of nodes subject to pdsh
+# commands. If using CMU then CMU will set this automatically, but if not
+# either the user must specify a value for WCOLL (see pdsh(1)), or it
+# will default to /etc/pdsh/machines
+#
+# export WCOLL=/my/node/list
+#
+#if [ -z "${WCOLL+xxx}" ]; then 
+#	export WCOLL=/etc/pdsh/machines
+#fi
+
+#
+# EXPORTS specifies the location of the NFS exports file.
+#
+export EXPORTS=/etc/exports
+
+#
+# PDSH_RCMD_TYPE specifies remote command type for pdsh/pdcp
+# Non-CMU installations may require setting this if the defaults
+# are not correct.
+#
+#export PDSH_RCMD_TYPE=ssh

@@ -1,0 +1,142 @@
+#**************************************************************************
+# Copyright 2017 Hewlett Packard Enterprise Development LP.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version. This program is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details. You
+# should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#***************************************************************************
+#!/bin/bash
+
+echo -e \\tFinishing installation of the Linux KI Toolset ...
+
+#
+# Configure/install kiinfo binary
+#
+ARCH=`uname -m`
+if ([ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]); then
+	rm /opt/linuxki/kiinfo >/dev/null 2>&1
+	ln /opt/linuxki/kiinfo.x86_64 /opt/linuxki/kiinfo
+elif [ "$ARCH" = "aarch64" ]; then
+	rm /opt/linuxki/kiinfo >/dev/null 2>&1
+	ln /opt/linuxki/kiinfo.aarch64 /opt/linuxki/kiinfo
+else
+	echo "Unknown Architecture.  Only x86_64 and aarch64 supported"
+	exit 0
+fi
+
+
+#
+# Configure/install LiKI module
+#
+/opt/linuxki/module_prep
+
+#
+# If this install is on a cluster head node with pdsh installed then set
+# up for cluster installation
+#
+if [ -f /opt/cmu/etc/cmuserver.conf ]; then
+	CMODE=CMU_HeadNode
+elif [ -x /opt/cmu/bin/pdcp ]; then
+	CMODE=CMU_ClusterNode
+elif [ -d /etc/pdsh -o -d /opt/pdsh -o -x /usr/bin/pdsh -o -x /usr/local/bin/pdsh ]; then 
+	CMODE=CMD
+else
+	echo "STANDALONE" > /opt/linuxki/.configured
+	rm -f /opt/linuxki/config.cmu /opt/linuxki/config.pdsh
+	exit 0
+fi
+
+if [ ! -f /opt/linuxki/.configured ]; then
+	# 
+	# Copy the appropriate cluster linuxki config file
+	#
+	echo $CMODE > /opt/linuxki/.cmode
+
+	if ([ "$CMODE" = "CMU_HeadNode" ] || [ "$CMODE" = "CMU_ClusterNode" ]); then
+		mv -f /opt/linuxki/config.cmu /opt/linuxki/config
+		rm -f /opt/linuxki/config.pdsh
+	else
+		mv -f /opt/linuxki/config.pdsh /opt/linuxki/config
+		rm -f /opt/linuxki/config.cmu
+	fi
+fi
+
+#
+# Pick up the config
+#
+. /opt/linuxki/config
+
+[ -z "$CMU_DATADIR" ] && echo "CMU_DATADIR not set in /opt/linuxki/config???" && exit 12
+[ -z "$EXPORTS" ] && echo "EXPORTS not set in /opt/linuxki/config???" && exit 12
+
+#
+# Check for CMU cluster node rpm installation
+#
+if [ "$CMODE" = "CMU_ClusterNode" ]; then
+	echo CLUSTER > /opt/linuxki/.configured
+	echo -e \\tPlease remember to perform a \"Linux KI Toolset -\> Install on nodes\" for this cluster node from CMU...
+	exit 0
+fi
+
+#
+# Check for non-CMU cluster node
+#
+if [ "$CMODE" = "CMD" ]; then
+	echo CLUSTER > /opt/linuxki/.configured
+	echo -e \\tPlease remember to set up NFS exports on the node to receive collected data if desired...
+	exit 0
+fi
+
+#
+# Create linuxki data directory to receive incoming data from nodes
+#
+if [ ! -d $CMU_DATADIR ]; then
+        echo -e \\tCreating $CMU_DATADIR data directory ...
+        mkdir -p $CMU_DATADIR
+fi
+
+#
+# Export the binaries directories
+#
+grep -q "Linux KI Toolset Integration" $EXPORTS
+if [ $? -eq 1 ]; then
+       	echo -e \\tAdding Linux KI Toolset NFS exports to $EXPORTS ...
+       	echo "# Linux KI Toolset Integration on `date`" >> $EXPORTS
+	echo "/opt/linuxki *(sync,rw,no_all_squash,no_subtree_check,no_root_squash)" >> $EXPORTS
+	#echo "$CMU_DATADIR *(sync,rw,no_all_squash,no_subtree_check,no_root_squash)" >> $EXPORTS
+fi
+
+exportfs | grep -q linuxki
+if [ $? -eq 1 ]; then
+	echo -e \\tExporting Linux KI Toolset directories ...
+	exportfs -o sync,rw,no_all_squash,no_subtree_check,no_root_squash "*:/opt/linuxki"
+	#exportfs -o sync,rw,no_all_squash,no_subtree_check,no_root_squash "*:$CMU_DATADIR"
+fi
+
+#
+# Add Linux KI menu options to the CMU context menu
+#
+if [ "$CMODE" = "CMU_HeadNode" ]; then
+	#
+	# Add CMU context menu
+	#
+	grep -q "Linux KI Toolset Integration" /opt/cmu/etc/cmu_custom_menu
+	if [ $? -eq 1 ]; then
+		echo -e \\tAdding Linux KI Toolset context menu items to /opt/cmu/etc/cmu_custom_menu ...
+		echo "# Linux KI Toolset Integration on `date`" >> /opt/cmu/etc/cmu_custom_menu
+		echo "SERVER;Linux KI Toolset|Check disk space;env WCOLL=CMU_TEMP_NODE_FILE /opt/linuxki/cluster/cluster_diskspace" >> /opt/cmu/etc/cmu_custom_menu
+		echo "TERMINAL;Linux KI Toolset|Install on nodes;env WCOLL=CMU_TEMP_NODE_FILE /opt/linuxki/cluster/cluster_install" >> /opt/cmu/etc/cmu_custom_menu
+		echo "TERMINAL;Linux KI Toolset|Collect data;env WCOLL=CMU_TEMP_NODE_FILE /opt/linuxki/cluster/cluster_collect" >> /opt/cmu/etc/cmu_custom_menu
+		echo "TERMINAL;Linux KI Toolset|Uninstall from nodes;env WCOLL=CMU_TEMP_NODE_FILE /opt/linuxki/cluster/cluster_remove" >> /opt/cmu/etc/cmu_custom_menu
+	fi
+	echo -e \\tPlease remember to perform a \"Linux KI Toolset -\> Install on nodes\" from CMU...
+fi
+
+echo CLUSTER > /opt/linuxki/.configured
+exit 0

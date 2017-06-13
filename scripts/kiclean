@@ -1,0 +1,204 @@
+#**************************************************************************
+# Copyright 2017 Hewlett Packard Enterprise Development LP.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version. This program is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details. You
+# should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#***************************************************************************
+#!/bin/bash
+# kiclean script  --  cleanup KI files after analysis
+# 
+# version 2.0  11/01/2009
+# version 2.1  06/12/2012  Updated to use tgz files.
+# version 2.2  07/12/2012  Converted to bash
+# version 2.3  03/22/2013  Don't remove comment file
+# version 2.4  04/10/2013  Added -r to traverse directories looking for KI data to clean
+# version 4.0  11/25/2015  Updated copyright
+# version 4.1  01/26/2016  Added -v option for Visualization files/dirs cleanup.
+# version 5.1  06/07/2017  Added Copyright notice       
+#
+# DESCRIPTION:
+# 
+#   Clean the current working directory where KI files are extracted from a ki_all.*.tar.gz 
+#   file. The script will keep the *.txt file and the kp.*.html file, and the ki_all.*.tar.gz
+#   KI tar ball for achive purposes.
+# 
+# USAGE:
+# 
+#   kiclean [-r] [-f] [-p] [-v]
+#
+# OPTIONS:  
+# 
+#   -f       Remove miscellaneous/tmp files from directory 
+#            If the -f option is not used, the misc file names
+#            will be printed and kiclean -f can be run 
+#            to remove the misc files as well.
+#
+#   -r       Traverse subdirs recursivelly looking for KI subdirs to clean
+#
+#   -p	     Remove the PIDS subdirectory
+#
+#   -v       Remove the Visualization subdirs & related .sh .php .csv files
+#  
+# NOTE:
+#
+#   Update the DIR environment variable below to reflect the directory where the KI tools
+#   are placed.  Also, place exportmwa.sh and the export subdir under DIR as well to format
+#   Measureware data.
+#
+
+SAVED_PWD=$PWD
+force=0
+rflag=0
+pflag=0
+vflag=0
+
+help()
+{
+    printf "Usage: %s: [-r] [-f] [-p] [-v]\n" "$0"
+        printf "            -h               Help\n"
+        printf "            -r               Recursively traverse sudirs looking for KI data to archive\n"
+	printf "	    -p		     Remove PIDS subdirectory\n"
+	printf "	    -v		     Remove VIS  subdirectory & rel. sh/php/html files\n"
+        printf "            -f               Force remove misc/tmp files\n"
+}
+
+clean_pwd()
+{
+    ls ki*.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]* >/dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+        return;
+    fi
+    echo Cleaning $PWD
+
+    for tag in `ls ki*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]* | grep -v "ki.err" | grep -v "\.csv" | awk '{print substr($1,match($1,"[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]"),9)}' | sort | uniq `
+    do
+        for NODENAME in `ls ki_all.*$tag* 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
+        do
+            if [ ! -z $NODENAME ]; then
+                if [ $NODENAME = "$tag" ]; then
+                    NODENAME=""
+                fi
+            fi
+        done
+
+	if [ -z $NODENAME ]; then
+# 	    if there is no NODENAME, then pull it from the hostname file
+	    gunzip hostname.$tag >/dev/null 2>&1
+            if [ -f hostname.$tag ] ; then
+                NODENAME=`cat hostname.$tag | sed "s/\./ /g" | awk '{print $1}'`
+            fi
+	fi
+
+	if [ -z $NODENAME ]; then
+	    continue;
+	fi
+	
+#	Before archiving, we must have a compress tar file saved
+
+	if [ -f ki_all.$NODENAME.$tag.tar ] ; then
+            gzip ki_all.$NODENAME.$tag.tar
+	fi
+	if [ -f ki_all.$NODENAME.$tag.tar.gz ] ; then
+		mv ki_all.$NODENAME.$tag.tar.gz ki_all.$NODENAME.$tag.tgz
+	fi
+	if [ -f ki_all.$tag.tar ] ; then 
+		gzip ki_all.$tag.tar
+	fi
+	if [ -f ki_all.$NODENAME.$tag.tar ] ; then
+            gzip ki_all.$NODENAME.$tag.tar
+        fi
+        if [ -f ki_all.$NODENAME.$tag.tar.gz ] ; then
+            mv ki_all.$NODENAME.$tag.tar.gz ki_all.$NODENAME.$tag.tgz
+        fi	
+
+	if [ ! -f ki_all.$NODENAME.$tag.tgz ] ; then
+#	    if there is no ki_all.*.tgz file, then lets archive what we have
+#    	    First, unzip regular files
+            gunzip *.gz
+	    tar -czvf ki_all.$NODENAME.$tag.tgz *.$tag	
+	fi
+
+	if [ ! -f ki_all.$NODENAME.$tag.tgz ] ; then
+		continue;
+	fi
+
+        for file in `ls *.$tag 2>/dev/null`
+        do
+            if [ $file == "comment.$tag" ]
+            then
+                continue
+            fi
+            rm -f $file
+        done
+        rm -rf !p4.d
+        rm -rf !p4.$tag.d
+        rm -rf MW
+	rm -rf objdump.$tag >/dev/null 2>&1
+	rm -f *.$tag.csv
+	if [ $pflag -eq 1 ] ; then
+	    rm -rf PIDS
+	fi
+	if [ $vflag -eq 1 ] ; then
+	    rm -Rf VIS D3 tl_temp
+	    rm -f *.csv *.sh *.php  >/dev/null 2>&1
+	    rm -f $(ls *.html | grep -v kp)
+	fi
+
+    	for file in `ls 2>/dev/null | egrep -v '\.txt|\.gz|\.tgz|\.html|^doc|^4000|^PIDS|^VIS|^statsp|^MW|^misc|^comment'`
+    	do
+            if [ $file == !p4.* ] ; then
+                continue
+            fi
+
+            if [ $force -eq 1 ] ; then
+                rm -f $file
+            else
+                echo "$file not removed"
+            fi
+    	done
+
+    done
+}
+
+recursive_clean()
+{
+	for SUBDIR in `find . -type d | grep -v PIDS | grep -v MW | grep -v VIS | grep -v "objdump"`
+	do
+		cd $SUBDIR
+    		ls ki.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9] >/dev/null 2>&1
+    		if [ $? -eq 0 ] ; then
+			clean_pwd
+    		fi
+		cd $SAVED_PWD
+		wait
+	done
+}
+
+while getopts hfpvr optname 
+do
+	case $optname in
+		h)	help
+			exit 1;;
+		f)	force=1;;
+		r)	rflag=1;;
+		p)	pflag=1;;
+		v)	vflag=1;;
+		?)	help
+			exit 2;;
+	esac
+done
+
+if [ $rflag -eq 1 ] ; then
+	recursive_clean
+else
+	clean_pwd
+fi
+wait
+echo "kiclean complete"

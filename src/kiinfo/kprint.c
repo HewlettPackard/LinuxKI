@@ -1,0 +1,3023 @@
+/***************************************************************************
+Copyright 2017 Hewlett Packard Enterprise Development LP.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or (at
+your option) any later version. This program is distributed in the
+hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE. See the GNU General Public License for more details. You
+should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation,
+Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+***************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/time.h>
+#include <sys/errno.h>
+#include <sys/types.h>
+#include <linux/kdev_t.h>
+#include "ki_tool.h"
+#include "liki.h"
+#include "developers.h"
+#include "kd_types.h"
+#include "globals.h"
+#include "info.h"
+#include "sort.h"
+#include "html.h"
+#include "kpmsgcat.h"
+#include "msgcat.h"
+#include "hash.h"
+#include "oracle.h"
+
+typedef struct kp_trc_type_args {
+        uint64          warnflag;
+        int             total_recs;
+} kp_trc_type_args_t;
+
+void
+print_cmdline()
+{
+        FILE *f = NULL;
+	char fname[30];
+        char *rtnptr;
+	int warn_indx;
+
+	sprintf (fname, "cmdline.%s", timestamp);
+        if ( (f = fopen(fname, "r")) == NULL) {
+                return;
+        }
+
+	ANM(_LNK_0_1_0);
+        rtnptr = fgets((char *)&input_str, 511, f);
+        while (rtnptr != NULL) {
+		printf ("%s", input_str); 
+
+		if (strstr(input_str, "numa=off")) {
+                	warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_NUMA_OFF, _LNK_0_1_0);
+                	kp_warning(globals->warnings, warn_indx, _LNK_0_1_0); T("\n");
+		}
+
+                rtnptr = fgets((char *)&input_str, 511, f);
+        }
+
+	fclose(f);
+}
+
+void
+print_mem_info()
+{
+        FILE *f = NULL;
+	char fname[30];
+        char *rtnptr;
+	int i;
+	char  varname[30];
+	int	hp_anon_kb, hp_total, hp_free, hp_used, hp_pagesize;
+
+	if (is_alive) {
+		sprintf (fname, "/proc/meminfo");
+	} else {
+		sprintf(fname, "mem_info.%s", timestamp);
+	}
+	
+        if ( (f = fopen(fname,"r")) == NULL) {
+                printf ("Unable to open file %s, errno %d\n", fname,  errno);
+                printf ("Continuing without memory info.\n");
+                return;
+        }
+
+	i = 0;
+        rtnptr = fgets((char *)&input_str, 127, f);
+        while (rtnptr != NULL) {
+		if (i < 4) printf ("%s", input_str); 
+	
+		if (strncmp(input_str, "AnonHugePages", 13) == 0) {
+			sscanf (input_str, "%s %d", varname, &hp_anon_kb);
+		} else if (strncmp(input_str, "HugePages_Total", 15) == 0) { 
+			sscanf (input_str, "%s %d", varname, &hp_total);
+		} else if (strncmp(input_str, "HugePages_Free", 14) == 0) { 
+			sscanf (input_str, "%s %d", varname, &hp_free);
+		} else if (strncmp(input_str, "Hugepagesize", 12) == 0) { 
+			sscanf (input_str, "%s %d", varname, &hp_pagesize);
+		}
+		
+		i++;
+                rtnptr = fgets((char *)&input_str, 127, f);
+        }
+
+	printf ("HugePages: %7d  %9d  %9d\n",
+		hp_total, hp_total - hp_free, hp_free);
+	printf ("Hugepagesize : %7d kb\n", hp_pagesize);
+	printf ("AnonHugePages: %7d kb\n", hp_anon_kb);
+
+	fclose (f);
+}
+
+
+void 
+kp_sys_summary ()
+{
+	if (debug) printf ("kp_sys_summary\n");
+	
+	HR;
+	ITALIC_U("basic system info"); printf("\n");
+	if (globals->VM_guest) {
+		BOLD("Virtual Machine Guest\n");
+	}
+	BOLD("Number of CPU's   : %d\n", globals->ncpu);
+	if (globals->HT_enabled) BOLD("Number of LCPU's  : %d\n", globals->nlcpu);
+	if (globals->nldom > 0) BOLD("Number of NODE's  : %d\n", globals->nldom);
+
+	T("\n");
+	print_cmdline();
+	T("\n");
+	print_mem_info(); 		
+}
+
+void kp_toc()
+{	
+	hc_info_t *hcinfop = globals->hcinfop;
+	HR;
+	BLUE_TABLE;
+	TEXT("\n");
+	ANM(_LNK_TOC);
+	HEAD3(_MSG_TOC);
+	_TABLE;
+
+ 	UL; LI; RED_FONT; T(_MSG_LINK); T(" "); ARFx(SPF(line,"%s%d", _LNK_WARN, 0), _MSG_NEXT_NOTE); BLACK_FONT; _UL; NLt;
+	T(_MSG_LINK_INFO); NLt;
+
+	UL;
+	  LI; ARF(_LNK_1_0, _MSG_1_0); NLt;
+	  UL;
+	    LI; ARF(_LNK_1_1, _MSG_1_1); NLt;
+ 	    UL;
+	      LI; ARF(_LNK_1_1_1, _MSG_1_1_1); NLt;
+	      if (globals->nldom) { LI; ARF(_LNK_1_1_2, _MSG_1_1_2); NLt }
+	      if (globals->powerp) {LI; ARF(_LNK_1_1_3, _MSG_1_1_3); NLt }
+	      if (globals->HT_enabled) { LI; ARF(_LNK_1_1_4, _MSG_1_1_4); NLt }
+ 	    _UL;
+	    LI; ARF(_LNK_1_2, _MSG_1_2); NLt;
+	    UL;
+              LI; ARF(_LNK_1_2_1, _MSG_1_2_1); NLt;
+              LI; ARF(_LNK_1_2_2, _MSG_1_2_2); NLt;
+	      if (STEAL_ON) { LI; ARF(_LNK_1_2_3, _MSG_1_2_3); NLt; }
+            _UL;
+	    LI; ARF(_LNK_1_3, _MSG_1_3); NLt;
+	    UL;
+              LI; ARF(_LNK_1_3_1, _MSG_1_3_1); NLt;
+              LI; ARF(_LNK_1_3_2, _MSG_1_3_2); NLt;
+              if (kparse_full) LI; ARF(_LNK_1_3_3, _MSG_1_3_3); NLt;
+	    _UL;
+	    LI; ARF(_LNK_1_4, _MSG_1_4); NLt;
+            if (hcinfop && hcinfop->total) {
+	    UL;
+              LI; ARF(_LNK_1_4_1, _MSG_1_4_1); NLt;
+              LI; ARF(_LNK_1_4_2, _MSG_1_4_2); NLt;
+              LI; ARF(_LNK_1_4_3, _MSG_1_4_3); NLt;
+              if (kparse_full) { LI; ARF(_LNK_1_4_4, _MSG_1_4_4); NLt; } 
+              if (kparse_full) { LI; ARF(_LNK_1_4_5, _MSG_1_4_5); NLt; } 
+	    _UL;
+	    }
+	    LI; ARF(_LNK_1_5, _MSG_1_5); NLt;
+	    if (globals->irqp || globals->softirqp) {
+	      LI; ARF(_LNK_1_6, _MSG_1_6); NLt;
+	      UL;
+                LI; ARF(_LNK_1_6_1, _MSG_1_6_1); NLt;
+                LI; ARF(_LNK_1_6_2, _MSG_1_6_2); NLt;
+                LI; ARF(_LNK_1_6_3, _MSG_1_6_3); NLt;
+	      _UL;
+	    }
+	  _UL;
+
+	  LI; ARF(_LNK_2_0, _MSG_2_0); NLt;
+	  UL;
+            LI; ARF(_LNK_2_1, _MSG_2_1); NLt;
+	    UL;
+              LI; ARF(_LNK_2_1_1, _MSG_2_1_1); NLt;
+              LI; ARF(_LNK_2_1_2, _MSG_2_1_2); NLt;
+              LI; ARF(_LNK_2_1_3, _MSG_2_1_3); NLt;
+	      if (kparse_full)  { LI; ARF(_LNK_2_1_4, _MSG_2_1_4); NLt; }
+            _UL;
+            LI; ARF(_LNK_2_2, _MSG_2_2); NLt;
+	    UL;
+              LI; ARF(_LNK_2_2_1, _MSG_2_2_1); NLt;
+              LI; ARF(_LNK_2_2_2, _MSG_2_2_2); NLt;
+            _UL;
+	    LI; ARF(_LNK_2_3, _MSG_2_3); NLt;
+            UL;
+              LI; ARF(_LNK_2_3_1, _MSG_2_3_1); NLt;
+              LI; ARF(_LNK_2_3_2, _MSG_2_3_2); NLt;
+            _UL;
+	  _UL;
+
+	  LI; ARF(_LNK_3_0, _MSG_3_0); NLt;
+	  UL;
+            LI; ARF(_LNK_3_1, _MSG_3_1); NLt;
+            LI; ARF(_LNK_3_2, _MSG_3_2); NLt;
+            LI; ARF(_LNK_3_3, _MSG_3_3); NLt;
+            if (kparse_full) LI; ARF(_LNK_3_4, _MSG_3_4); NLt;
+	  _UL;
+	  
+	  LI; ARF(_LNK_4_0, _MSG_4_0); NLt;
+	  UL;
+	    LI; ARF(_LNK_4_1, _MSG_4_1); NLt;
+	    LI; ARF(_LNK_4_2, _MSG_4_2); NLt;
+	    UL;
+              LI; ARF(_LNK_4_2_1, _MSG_4_2_1); NLt;
+              LI; ARF(_LNK_4_2_2, _MSG_4_2_2); NLt;
+              LI; ARF(_LNK_4_2_3, _MSG_4_2_3); NLt;
+              LI; ARF(_LNK_4_2_4, _MSG_4_2_4); NLt;
+              LI; ARF(_LNK_4_2_5, _MSG_4_2_5); NLt;
+              LI; ARF(_LNK_4_2_6, _MSG_4_2_6); NLt;
+            _UL;
+	    LI; ARF(_LNK_4_3, _MSG_4_3); NLt;
+	    UL;
+              LI; ARF(_LNK_4_3_1, _MSG_4_3_1); NLt;
+              LI; ARF(_LNK_4_3_2, _MSG_4_3_2); NLt;
+	    _UL;
+	    LI; ARF(_LNK_4_4, _MSG_4_4); NLt;
+	    LI; ARF(_LNK_4_5, _MSG_4_5); NLt;
+	    LI; ARF(_LNK_4_6, _MSG_4_6); NLt;
+	    LI; ARF(_LNK_4_7, _MSG_4_7); NLt;
+	  _UL;
+
+	  LI; ARF(_LNK_5_0, _MSG_5_0); NLt;
+	  UL;
+	    LI; ARF(_LNK_5_1, _MSG_5_1); NLt;
+	    LI; ARF(_LNK_5_2, _MSG_5_2); NLt;
+	    LI; ARF(_LNK_5_3, _MSG_5_3); NLt;
+	    LI; ARF(_LNK_5_4, _MSG_5_4); NLt;
+	    LI; ARF(_LNK_5_5, _MSG_5_5); NLt;
+	    LI; ARF(_LNK_5_6, _MSG_5_6); NLt;
+	  _UL;
+
+	  if (IS_LIKI_V2_PLUS) {
+	    LI; ARF(_LNK_6_0, _MSG_6_0); NLt;
+	    UL;
+	      LI; ARF(_LNK_6_1, _MSG_6_1); NLt;
+	      LI; ARF(_LNK_6_2, _MSG_6_2); NLt;
+	    _UL;
+	  }
+
+	  if (next_sid > 1) {
+            LI; ARF(_LNK_7_0, _MSG_7_0); NLt;
+	    UL;	
+              LI; ARF(_LNK_7_1, _MSG_7_1); NLt;
+              LI; ARF(_LNK_7_2, _MSG_7_2); NLt;
+              LI; ARF(_LNK_7_3, _MSG_7_3); NLt;
+              LI; ARF(_LNK_7_4, _MSG_7_4); NLt;
+              LI; ARF(_LNK_7_5, _MSG_7_5); NLt;
+              LI; ARF(_LNK_7_6, _MSG_7_6); NLt;
+              LI; ARF(_LNK_7_7, _MSG_7_7); NLt;
+	    _UL;
+	  }
+
+	  if (globals->docker_hash) {
+  	    LI; ARF(_LNK_8_0, _MSG_8_0); NLt;
+	    UL;	
+              LI; ARF(_LNK_8_1, _MSG_8_1); NLt;
+              LI; ARF(_LNK_8_2, _MSG_8_2); NLt;
+	    _UL;
+	  }
+
+  	  LI; ARF(_LNK_9_0, _MSG_9_0); NLt;
+	  if (HTML) {
+	    UL;	
+              LI; ARF(_LNK_9_1, _MSG_9_1); NLt;
+              LI; ARF(_LNK_9_2, _MSG_9_2); NLt;
+              LI; ARF(_LNK_9_3, _MSG_9_3); NLt;
+              if (vis) { LI; ARF(_LNK_9_4, _MSG_9_4); NLt; }
+	    _UL;
+	  }
+
+          LI; ARF(_LNK_10_0, _MSG_10_0); NLt;
+	_UL;
+}
+
+int
+kp_warning (warn_t *warning, int indx, char *top)
+{
+        int msg_idx = warning[indx].idx;
+
+        ANM(SPF(line, "%s%d", _LNK_WARN, indx));
+        if (warning[indx].type == WARN) {
+                RED_FONT;
+                T(warnmsg[msg_idx].msg);
+                T(" ");
+                if (warnmsg[msg_idx].url) {
+                        AERx(warnmsg[msg_idx].url, T("[INFO]"));
+                }
+                ARFx(SPF(line,"%s%d", _LNK_WARN, indx+1), _MSG_NEXT_NOTE);
+                BLACK_FONT;
+        } else {
+                BOLD(warnmsg[msg_idx].msg);
+                T(" ");
+                if (top) {
+                        ARFx(top, "[Sect]");
+                }
+                if (warnmsg[msg_idx].url) {
+                        AERx(warnmsg[msg_idx].url, T("[INFO]"));
+                }
+                ARFx(SPF(line,"%s%d", _LNK_WARN, indx+1), _MSG_NEXT_NOTE);
+        }
+
+        return 0;
+}
+
+void
+kp_whats_it_doing()			/* Section 1.0 */
+{
+	HR; T("\n");
+	BLUE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_0);
+        HEAD2(_MSG_1_0); T("\n");
+        FONT_SIZE(-1);
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        /* printf ("%s\n", _MSG_1_0_KEY); */
+
+	return;
+}
+	
+void
+kp_global_cpu()				/* Section 1.1 */
+{
+        uint64  warnflag = 0;
+        int warn_indx;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_1);
+        HEAD3(_MSG_1_1); T("\n");
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_1_1,"[Next Subsection]");
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	if (cluster_flag) BOLD("Server           ");
+	BOLD("    nCPU          sys%%        user%%        idle%%");
+	if (gbl_irq_time) BOLD("  hardirq_sys hardirq_user hardirq idle  softirq_sys softirq_user softirq_idle");
+	if (STEAL_ON) BOLD("   stealbusy%%   stealidle%%");
+	if (msr_flag) BOLD ("  LLC_hit%%    CPI   Avg_MHz  SMI_cnt");
+	printf ("\n");
+
+	print_global_cpu_stats(globals, &warnflag);
+        if (warnflag & WARNF_CPU_BOTTLENECK) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_CPU_BOTTLENECK, _LNK_1_1);
+                kp_warning(globals->warnings, warn_indx, _LNK_1_1); T("\n");
+        }
+
+	return;
+}
+
+void
+kp_per_cpu_usage()			/* Section 1.1.1 */
+{
+        uint64  warnflag = 0;
+        int warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_1_1);
+        HEAD3(_MSG_1_1_1);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_1,"[Prev Subsection]");
+
+        if (globals->nldom) {
+                ARFx(_LNK_1_1_2,"[Next Subsection]");
+	} else if (globals->powerp) {
+                ARFx(_LNK_1_1_3,"[Next Subsection]");
+	} else if (globals->HT_enabled) {
+                ARFx(_LNK_1_1_4,"[Next Subsection]");
+        } else {
+                ARFx(_LNK_1_2,"[Next Subsection]");
+        }
+
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        print_percpu_stats(&warnflag);
+	CSV_FIELD("kirunq", "[CSV]");
+
+	if (warnflag & WARNF_STEALTIME) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_STEALTIME, _LNK_1_1_1);
+                kp_warning(globals->warnings, warn_indx, _LNK_1_1_1); T("\n");
+        }
+		
+	return;
+}
+
+void
+kp_per_ldom_usage()			/* Section 1.1.2 */
+{
+        uint64  warnflag = 0;
+        int warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_1_2);
+        HEAD3(_MSG_1_1_2);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_1_1,"[Prev Subsection]");
+	if (globals->powerp) {
+                ARFx(_LNK_1_1_3,"[Next Subsection]");
+        } else if (globals->HT_enabled) {
+                ARFx(_LNK_1_1_4,"[Next Subsection]");
+        } else {
+                ARFx(_LNK_1_2,"[Next Subsection]");
+        }
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	print_perldom_stats(NULL);
+	CSV_FIELD("kirunq", "[CSV]");
+}
+
+void kp_power_report()			/* Section 1.1.3 */
+{
+        uint64 warnflag = 0ull;
+        int warn_indx=0;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_1_3);
+        HEAD3(_MSG_1_1_3);
+        FONT_SIZE(-1);
+        if (globals->nldom) {
+                ARFx(_LNK_1_1_2,"[Prev Subsection]");
+        } else {
+                ARFx(_LNK_1_1_1,"[Prev Subsection]");
+	}
+        if (globals->HT_enabled) {
+                ARFx(_LNK_1_1_4,"[Next Subsection]");
+        } else {
+                ARFx(_LNK_1_2,"[Next Subsection]");
+        }
+        ARFx(_LNK_1_0,"---[Prev Section]"); 
+        ARFx(_LNK_2_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+        TEXT("\n");
+
+	if (globals->powerp) {
+		print_cstate_stats(&warnflag);
+		CSV_FIELD("kirunq", "[CSV]");
+
+		if (warnflag & WARNF_POWER) {
+                	warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_POWER, _LNK_1_1_3);
+                	kp_warning(globals->warnings, warn_indx, _LNK_1_1_3); T("\n");
+		}
+	} else { 
+		BOLD("No Power Events Captured\n");
+	}
+}
+
+void
+kp_HT_usage()				/* Section 1.1.4 */
+{
+        uint64  warnflag = 0;
+        int warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_1_4);
+        HEAD3(_MSG_1_1_4);
+        FONT_SIZE(-1);
+	if (globals->powerp) {
+                ARFx(_LNK_1_1_3,"[Prev Subsection]");
+        } else if (globals->nldom) {
+                ARFx(_LNK_1_1_2,"[Prev Subsection]");
+        } else {
+                ARFx(_LNK_1_1_1,"[Prev Subsection]");
+        }
+
+        ARFx(_LNK_1_2,"[Next Subsection]");
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        print_HT_report(NULL); 
+}
+
+void
+kp_busy_pids()				/* Section 1.2 */
+{
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_2);
+        HEAD3(_MSG_1_2); T("\n");
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_1,"[Prev Subsection]");
+        ARFx(_LNK_1_2_1,"[Next Subsection]");
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+}
+
+void
+kp_top_pids_runtime()			/* Section 1.2.1 */
+{
+        uint64  warnflag = 0;
+        int warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_2_1);
+        HEAD3(_MSG_1_2_1);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_2,"[Prev Subsection]");
+        ARFx(_LNK_1_2_2,"[Next Subsection]");
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+        TEXT("\n");
+
+	npid=10;
+        print_runtime_pids(&warnflag);
+	CSV_FIELD("kipid", "[CSV]");
+
+	return;
+}
+
+void
+kp_top_pids_systime()			/* Section 1.2.2 */
+{
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_2_2);
+        HEAD3(_MSG_1_2_2);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_2_1,"[Prev Subsection]");
+	if (STEAL_ON) { ARFx(_LNK_1_2_3,"[Next Subsection]"); }
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+        TEXT("\n");
+
+	npid=10;
+        print_systime_pids(NULL);
+	CSV_FIELD("kipid", "[CSV]");
+
+	return;
+}
+
+void
+kp_top_pids_stealtime()			/* Section 1.2.3 */
+{
+        uint64  warnflag = 0;
+        int warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_2_3);
+        HEAD3(_MSG_1_2_3);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_2_2,"[Prev Subsection]");
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+        TEXT("\n");
+
+	npid=10;
+        print_stealtime_pids(NULL);
+	CSV_FIELD("kipid", "[CSV]");
+
+	return;
+}
+
+void
+kp_trace_types()			/* Section 1.3 */
+{
+        kp_trc_type_args_t trctyp_arg;
+        int warn_indx;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_3);
+        HEAD3(_MSG_1_3); T("\n");
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_2,"[Prev Subsection]");
+        ARFx(_LNK_1_3_1,"[Next Subsection]");
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+}
+
+int
+kp_trc_type (void *arg1, void *arg2)
+{
+        trc_info_t *trcp = (trc_info_t *)arg1;
+        kp_trc_type_args_t *trctyp_argp = (kp_trc_type_args_t *)arg2;
+        syscall_stats_t *syscall_statsp = trcp->syscall_statsp;
+        uint64  key, syscallno, mode, id, ftype;
+        int i, total_traces;
+	char ftypestr[80];
+	short *syscall_index;
+
+        total_traces = trctyp_argp->total_recs;
+
+        if (trcp == NULL) {
+                BOLD("No Trace Types Logged"); BR;
+                return 0;
+        }
+        key = trcp->lle.key;
+        id = TRC_ID(key);
+	ftype = TRC_FSTYPE(key);
+        syscallno = TRC_SYSCALLNO(key);
+        mode = TRC_MODE(key);
+
+        SPAN_GREY;
+
+	syscall_index = (mode == ELF32) ? globals->syscall_index_32 : globals->syscall_index_64;
+
+        if (syscall_statsp) {
+		if ((trctyp_argp->warnflag == 0) && strstr("semget", syscall_arg_list[syscall_index[syscallno]].name) && (syscall_statsp->errors > 100)) {
+			RED_FONT;
+			trctyp_argp->warnflag |= WARNF_SEMGET;
+		}
+
+                if (ftype) 
+                        sprintf (ftypestr, "%s (%s)", syscall_arg_list[syscall_index[syscallno]].name, ftype_name_index[ftype]);
+                else 
+                        sprintf (ftypestr, "%s", syscall_arg_list[syscall_index[syscallno]].name);
+
+                printf("%-8d %6.2f%%  %-30s %4d %11.3f %9.4f %9.6f %9d",
+                trcp->count,
+                (trcp->count*100.0) / (total_traces*1.0), 
+                ftypestr,
+		mode,
+                SECS(syscall_statsp->total_time),
+                SECS(syscall_statsp->max_time),
+                SECS(syscall_statsp->total_time) / (trcp->count*1.0),
+		syscall_statsp->errors);
+		BLACK_FONT;
+        } else {
+                printf("%-8d %6.2f%%  %-77s",
+                        trcp->count,
+                        (trcp->count*100.0) / (total_traces*1.0),
+		        ki_actions[id].event);
+
+        }
+        if ((lineno & 0x1) == 0) _SPAN;
+        T("\n");
+
+        lineno++;
+
+        return 0;
+
+}
+
+void
+kp_global_trace_types()			/* Section 1.3.1 */
+{
+        kp_trc_type_args_t trctyp_arg;
+	int		warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_3_1);
+        HEAD3(_MSG_1_3_1);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_3,"[Prev Subsection]");
+        ARFx(_LNK_1_3_2,"[Next Subsection]");
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        BOLD("Freq     Percent  Trace_type                    64bit    ElapsedT       Max       Ave    Errors\n");
+
+        trctyp_arg.total_recs = globals->total_traces;
+        trctyp_arg.warnflag = 0ull;
+        foreach_hash_entry((void **)globals->trc_hash, TRC_HASHSZ, kp_trc_type, trc_sort_by_count, 30, &trctyp_arg);
+        printf ("Total Traces %d\n", globals->total_traces);
+
+	/* Warn if processes do excessive SEMGET calls */
+	if (trctyp_arg.warnflag & WARNF_SEMGET) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SEMGET, _LNK_1_3_1);
+		kp_warning(globals->warnings, warn_indx, _LNK_1_3_1); T("\n");
+	}
+
+}
+
+int
+kp_pid_freq(void *arg1, void *arg2)
+{
+        pid_info_t *pidp = (pid_info_t *)arg1;
+        uint64 *warnflagp = (uint64 *)arg2;
+
+        SPAN_GREY;
+
+        PID_URL_FIELD8(pidp->PID);
+        printf ("    %9d     %-48s",
+                pidp->num_tr_recs,
+                pidp->cmd);
+	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
+	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
+	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	printf ("\n");
+
+        if ((lineno & 0x1) == 0) _SPAN;
+        lineno++;
+
+	return 0;
+}
+
+void
+kp_top_pid_trace_counts()		/* Section 1.3.2 */
+{
+        uint64  warnflag = 0;
+        int warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_3_2);
+        HEAD3(_MSG_1_3_2);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_3_1,"[Prev Subsection]");
+        if (kparse_full) {
+                ARFx(_LNK_1_3_3,"[Next Subsection]");
+        } else {
+                ARFx(_LNK_1_4,"[Next Subsection]");
+        }
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        BOLD("PID         Frequency     Command\n");
+        foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, kp_pid_freq, pid_sort_by_trace_recs, 20, &warnflag);
+
+}
+
+int
+kp_pid_traces(void *arg1, void *arg2)
+{
+        pid_info_t *pidp = (pid_info_t *)arg1;
+        kp_trc_type_args_t *trctyp_arg = arg2;
+        kp_trc_type_args_t local_trctyp_arg;
+        uint64  warnflag = 0;
+        int warn_indx;
+
+        TEXT("\n");
+        CAPTION_GREY;
+        BOLD("Analyzing Pid: ");
+        PID_URL_FIELD8(pidp->PID);
+	BOLD ("Trace Records: ");
+	printf ("%-8d ", pidp->num_tr_recs); 
+        BOLD("cmd: ");
+        printf("%s ", pidp->cmd);
+	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
+	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
+	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+        _CAPTION;
+
+        TEXT("\n");
+        BOLD("Freq     Percent  Trace_type                    64bit    ElapsedT       Max       Ave    Errors\n");
+
+        lineno=0;
+
+        local_trctyp_arg.total_recs = pidp->num_tr_recs;
+        local_trctyp_arg.warnflag = 0ull;
+        foreach_hash_entry((void **)pidp->trc_hash, TRC_HASHSZ, kp_trc_type, trc_sort_by_count, 15, &local_trctyp_arg);
+        if ((local_trctyp_arg.warnflag & WARNF_SEMGET) && (strstr(pidp->cmd, "dw.") || strstr(pidp->cmd, "work"))) {
+		trctyp_arg->warnflag |= WARNF_SEMGET;
+	}
+
+        return 0;
+}
+
+void
+kp_top_pid_trace_types()		/* Section 1.3.3 */
+{
+        kp_trc_type_args_t trctyp_arg;
+        int warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_3_3);
+        HEAD3(_MSG_1_3_3);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_3_2,"[Prev Subsection]");
+        ARFx(_LNK_1_4,"[Next Subsection]");
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	trctyp_arg.warnflag = 0;
+        foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, kp_pid_traces, pid_sort_by_trace_recs, 10, &trctyp_arg);
+	/* Warn if SAP disp+work processes do excessive SEMGET calls */
+	if (trctyp_arg.warnflag & WARNF_SEMGET) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SEMGET, _LNK_1_3_3);
+		kp_warning(globals->warnings, warn_indx, _LNK_1_3_3); T("\n");
+	}
+
+
+}
+
+void
+kp_hardclocks()				/* Section 1.4 */
+{
+	hc_info_t *hcinfop = globals->hcinfop;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_4);
+        HEAD3(_MSG_1_4);
+        FONT_SIZE(-1);
+        if (hcinfop && hcinfop->total) {
+        	ARFx(_LNK_1_3,"[Prev Subsection]");
+        	ARFx(_LNK_1_4_1,"[Next Subsection]");
+        	ARFx(_LNK_1_0,"---[Prev Section]");
+        	ARFx(_LNK_2_0,"[Next Section]");
+        	ARFx(_LNK_TOC,"[Table of Contents]");
+	} else {
+        	ARFx(_LNK_1_3,"[Prev Subsection]");
+        	ARFx(_LNK_1_5,"[Next Subsection]");
+        	ARFx(_LNK_1_0,"---[Prev Section]");
+        	ARFx(_LNK_2_0,"[Next Section]");
+        	ARFx(_LNK_TOC,"[Table of Contents]");
+	}
+        _TABLE;
+        TEXTx("\n");
+
+        if (hcinfop && hcinfop->total) {
+        	printf("%s\n", _MSG_1_4_INFO);
+	} else {
+		BOLD ("No Hardclock Entries Found\n");
+	}
+}
+
+void
+kp_cpustates()				/* Section 1.4.1 */
+{
+        hc_info_t *hcinfop;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_4_1);
+        HEAD3(_MSG_1_4_1);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_3_3,"[Prev Subsection]");
+        ARFx(_LNK_1_4_2,"[Next Subsection]");
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+        TEXT("\n");
+
+        hcinfop = globals->hcinfop;
+
+	if (hcinfop && hcinfop->total && hcinfop->pc_hash) {
+		BOLD ("  Count   USER%%    SYS%%   INTR%%   IDLE%%\n");
+		prof_print_summary(hcinfop);
+		printf ("\n");
+	} else {
+                BOLD("No Hardclock Entries Found\n");
+        }
+}
+
+void
+kp_hc_bycpu()		   		/* Section 1.4.2 */
+{
+
+        int i;
+        cpu_info_t *cpuinfop;
+        hc_info_t *hcinfop;
+        uint64 total;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_4_2);
+        HEAD3(_MSG_1_4_2);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_4_1,"[Prev Subsection]");
+        ARFx(_LNK_1_4_3,"[Next Subsection]");
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+        TEXT("\n");
+
+        hcinfop = globals->hcinfop;
+	if (hcinfop && hcinfop->total && hcinfop->pc_hash) {
+		lineno=0;
+		BOLD ("    CPU   Count   USER%%    SYS%%   INTR%%   IDLE%%\n");
+        	prof_print_percpu_summary(hcinfop);
+	} else {
+                BOLD("No Hardclock Entries Found\n");
+        }
+}
+
+void
+kp_hc_kernfuncs()			/* Section 1.4.3 */
+{
+        hc_info_t *hcinfop;
+	print_pc_args_t print_pc_args;
+	int warn_indx;
+	uint64 warnflag = 0;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_4_3);
+        HEAD3(_MSG_1_4_3);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_4_2,"[Prev Subsection]");
+        if (kparse_full) {
+                ARFx(_LNK_1_4_4,"[Next Subsection]");
+        } else {
+                ARFx(_LNK_1_5,"[Next Subsection]");
+        }
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+        TEXT("\n");
+
+        hcinfop = globals->hcinfop;
+        print_pc_args.hcinfop = hcinfop;
+        print_pc_args.warnflagp = &warnflag;
+
+	if (hcinfop && hcinfop->total && hcinfop->pc_hash) {
+        	BOLD("   Count     Pct  Function \n");
+		lineno=0;
+        	foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc2, pc_sort_by_count, 40, (void *)&print_pc_args);
+	} else {
+                BOLD("No Hardclock Entries Found\n");
+        }
+
+	if ((*print_pc_args.warnflagp) & WARNF_SEMLOCK) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SEMLOCK, _LNK_1_4_3);
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_3); T("\n");
+	}
+}
+
+void
+kp_hc_stktraces()			/* Section 1.4.4 */
+{
+        hc_info_t *hcinfop;
+        int warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_4_4);
+        HEAD3(_MSG_1_4_4);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_4_3,"[Prev Subsection]");
+        ARFx(_LNK_1_4_5,"[Next Subsection]");
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+        TEXT("\n");
+
+        hcinfop = globals->hcinfop;
+	if (hcinfop && hcinfop->total && hcinfop->pc_hash) {
+        	BOLD("   Count     Pct  Stack trace\n");
+        	foreach_hash_entry((void **)hcinfop->hc_stktrc_hash, STKTRC_HSIZE, hc_print_stktrc, stktrc_sort_by_cnt, 40, (void *)hcinfop);
+	} else {
+                BOLD("No Hardclock Entries Found\n");
+        }
+}
+
+void
+kp_hc_funcbypid()			/* Section 1.4.5 */
+{
+        hc_info_t *hcinfop;
+        uint64  total;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_4_5);
+        HEAD3(_MSG_1_4_5);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_4_4,"[Prev Subsection]");
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+        TEXT("\n");
+
+        hcinfop = globals->hcinfop;
+	if (hcinfop && hcinfop->total && hcinfop->pc_hash) {
+	        total = hcinfop->total;
+	        foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
+                           (int (*)(void *, void *))print_pid_symbols,
+                                   pid_sort_by_hc,
+                                   5, (void *)&total);
+	} else {
+                BOLD("No Hardclock Entries Found\n");
+        }
+}
+
+void 
+kp_th_detection()			/* Section 1.5 */
+{
+        uint64 warnflag = 0ull;
+        int warn_indx=0;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_5);
+        HEAD3(_MSG_1_5);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_4,"[Prev Subsection]"); 
+	if (globals->irqp || globals->softirqp) {
+        	ARFx(_LNK_1_6,"[Next Subsection]"); 
+	}
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+        TEXT("\n");
+
+        BOLD("PID       Wakeups MaxWakeups    Count     TimeStamp  cmd\n");
+        foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_wakeup_pids, pid_sort_by_wakeups, 10, NULL);
+}
+
+void 
+kp_irq()				/* Section 1.6 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_6);
+        HEAD3(_MSG_1_6);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_5,"[Prev Subsection]"); 
+        ARFx(_LNK_1_6_1,"[Next Subsection]"); 
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+        TEXT("\n");
+}
+
+void 
+kp_hardirqs()				/* Section 1.6.1 */
+{
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_6_1);
+        HEAD3(_MSG_1_6_1);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_6,"[Prev Subsection]"); 
+        ARFx(_LNK_1_6_2,"[Next Subsection]"); 
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+        TEXT("\n");
+
+	print_global_hardirq_stats();
+}
+
+void 
+kp_hardirqs_by_cpu()			/* Section 1.6.2 */
+{
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_6_2);
+        HEAD3(_MSG_1_6_2);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_6_1,"[Prev Subsection]"); 
+        ARFx(_LNK_1_6_3,"[Next Subsection]"); 
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+        TEXT("\n");
+
+	print_percpu_irq_stats(HARDIRQ);
+}
+
+void 
+kp_softirqs()				/* Section 1.6.3 */
+{
+        uint64  warnflag = 0;
+        int warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_1_6_3);
+        HEAD3(_MSG_1_6_3);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_6_2,"[Prev Subsection]"); 
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+        TEXT("\n");
+
+	print_global_softirq_stats(&warnflag);
+        if (warnflag & WARNF_TASKLET) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_TASKLET, _LNK_1_6_3);
+                kp_warning(globals->warnings, warn_indx, _LNK_1_6_3); T("\n");
+	}
+}
+
+void
+kp_whats_it_waiting_for()      		/* Section 2.0 */
+{
+
+        HR;
+        BLUE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_2_0);
+        HEAD2(_MSG_2_0);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_0,"[Prev Section]");
+        ARFx(_LNK_3_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+}
+
+void
+kp_swtch_reports()          		/* Section 2.1 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_2_1);
+        HEAD3(_MSG_2_1);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_2_1_1,"[Next Subsection]");
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_3_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+}
+
+void
+kp_freq_swtch_funcs()          		/* Section 2.1.1 */
+{
+        uint64  warnflag = 0;
+        int warn_indx;
+        sched_info_t *schedp = globals->schedp;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_2_1_1);
+        HEAD3(_MSG_2_1_1);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_2_1,"[Prev Subsection]");
+        ARFx(_LNK_2_1_2,"[Next Subsection]");
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_3_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	if (schedp == NULL) return ;
+        if (globals->slp_hash == NULL) return;
+
+        lineno=1;
+        BOLD("   Count     Pct    SlpTime  SlpPct   Msec/Slp   MaxMsecs  Func\n");
+	foreach_hash_entry_l((void **)globals->slp_hash, SLP_HSIZE, print_slp_info, slp_sort_by_count, 30, &schedp->sched_stats);
+        TEXT("\n");
+}
+
+void
+kp_freq_swtch_stktrc()          	/* Section 2.1.2 */
+{
+        int warn_indx;
+	print_stktrc_args_t print_stktrc_args;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_2_1_2);
+        HEAD3(_MSG_2_1_2);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_2_1_1,"[Prev Subsection]");
+        ARFx(_LNK_2_1_3,"[Next Subsection]");
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_3_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	if (globals->schedp == NULL) return ;
+        if (globals->stktrc_hash == NULL) return;
+
+        print_stktrc_args.schedp = globals->schedp;
+	print_stktrc_args.warnflag = 0;
+
+        lineno=1;
+
+        BOLD("   count   wpct       avg   Stack trace\n");
+        BOLD("              %%     msecs              \n");
+        BOLD("============================================================\n");
+        foreach_hash_entry((void **)globals->stktrc_hash, STKTRC_HSIZE, print_stktrc_info, stktrc_sort_by_cnt, 30, (void *)&print_stktrc_args);
+
+	if (print_stktrc_args.warnflag & WARNF_MIGRATE_PAGES) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_MIGRATE_PAGES, _LNK_2_1_2);
+		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); T("\n");
+	}
+
+	if (print_stktrc_args.warnflag & WARNF_IXGBE_READ) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_IXGBE_READ, _LNK_2_1_2);
+		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); T("\n");
+	}
+
+	if (print_stktrc_args.warnflag & WARNF_XFS_DIOREAD) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_XFS_DIOREAD, _LNK_2_1_2);
+		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); T("\n");
+	}
+	if (print_stktrc_args.warnflag & WARNF_XFS_DIO_ALIGN) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_XFS_DIO_ALIGN, _LNK_2_1_2);
+		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); T("\n");
+	}
+	T("\n");
+}
+
+void
+kp_top_swtch_pids()           		/* Section 2.1.2 */
+{
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_2_1_3);
+        HEAD3(_MSG_2_1_3);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_2_1_2,"[Prev Subsection]");
+        if (kparse_full) {
+                ARFx(_LNK_2_1_4,"[Next Subsection]");
+        } else {
+                ARFx(_LNK_2_2,"[Next Subsection]");
+        }
+
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_3_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        BOLD("PID        VolSlp ForceSlp  MigrCnt    SlpTime     AvMsec  Command\n");
+        foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_swtch_summary, pid_sort_by_sleep_cnt, 20, NULL); 
+	CSV_FIELD("kipid", "[CSV]");
+}
+
+int
+kp_print_sleep_pids(void *arg1, void *arg2)
+{
+        pid_info_t *pidp = (pid_info_t *)arg1;
+
+        if (pidp->schedp == NULL) return 0;
+        if (pidp->slp_hash == NULL) return 0;
+
+        CAPTION_GREY;
+        BOLD("Pid: ");
+        PID_URL_FIELD8(pidp->PID);
+        BOLD("Cmd: ");
+        printf("%s", pidp->cmd);
+	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
+	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
+	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (cluster_flag) {DSPACE; SERVER_URL_FIELD_SECTION_BRACKETS(globals, _LNK_2_1_3); }
+        _CAPTION;
+
+        nsym=5;
+
+        sleep_report((void *)pidp->slp_hash, pidp->schedp, slp_sort_by_time, arg2);
+
+        return 0;
+}
+
+void
+kp_top_swtch_pid_funcs()           	/* Section 2.1.4 */
+{
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_2_1_4);
+        HEAD3(_MSG_2_1_4);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_2_1_3,"[Prev Subsection]");
+        ARFx(_LNK_2_2,"[Next Subsection]");
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_3_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, kp_print_sleep_pids, pid_sort_by_sleep_cnt, 10, NULL); 
+	CSV_FIELD("kiwait", "[CSV]");
+}
+
+void
+kp_wait_for_cpu()              		/* Section 2.2 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_2_2);
+        HEAD3(_MSG_2_2);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_2_1,"[Prev Subsection]");
+        ARFx(_LNK_2_2_1,"[Next Subsection]");
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_3_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+}
+
+
+void
+kp_runq_histogram()			/* Section 2.2.1 */
+{
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_2_2_1);
+        HEAD3(_MSG_2_2_1);
+        FONT_SIZE(-1);
+        ARFx(_LNK_2_2,"[Prev Subsection]");
+        ARFx(_LNK_2_2_2,"[Next Subsection]");
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_3_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        print_percpu_runq_histogram();
+}
+
+void
+kp_runq_statistics()			/* Section 2.2.1 */
+{
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_2_2_1);
+        HEAD3(_MSG_2_2_1);
+        FONT_SIZE(-1);
+        ARFx(_LNK_2_2,"[Prev Subsection]");
+        ARFx(_LNK_2_2_2,"[Next Subsection]");
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_3_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        print_percpu_runq_stats();
+}
+
+void
+kp_top_runq_pids()				/* Section 2.2.2 */
+{
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_2_2_2);
+        HEAD3(_MSG_2_2_2);
+        FONT_SIZE(-1);
+        ARFx(_LNK_2_2_1,"[Prev Subsection]");
+        ARFx(_LNK_2_3,"[Next Subsection]");
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_3_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        npid=10;
+        print_runq_pids(NULL);
+	CSV_FIELD("kipid", "[CSV]");
+}
+
+void
+kp_futex()				/* Section 2.3 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_2_3);
+        HEAD3(_MSG_2_3);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_2_2_2,"[Prev Subsection]");
+        ARFx(_LNK_2_3_1,"[Next Subsection]");
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_3_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+}
+
+void
+kp_futex_summary_by_cnt()                              /* Section 2.3.1 */
+{
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_2_3_1);
+        HEAD3(_MSG_2_3_1);
+        FONT_SIZE(-1);
+        ARFx(_LNK_2_3,"[Prev Subsection]");
+        ARFx(_LNK_2_3_2,"[Next Subsection]");
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_3_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        foreach_hash_entry((void **)globals->futex_hash,FUTEX_HSIZE,
+                        (int (*)(void *, void *))hash_count_entries,
+                        NULL, 0, &globals->futex_cnt);
+	BOLD("%sTotal Futex count = %d (Top %d listed)\n", tab, globals->futex_cnt, MIN(globals->futex_cnt, nfutex));
+	futex_print_report_by_cnt(globals->futex_cnt);
+}
+
+void
+kp_futex_summary_by_time()                              /* Section 2.3.2 */
+{
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_2_3_2);
+        HEAD3(_MSG_2_3_2);
+        FONT_SIZE(-1);
+        ARFx(_LNK_2_3_1,"[Prev Subsection]");
+        ARFx(_LNK_3_0,"[Next Subsection]");
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_3_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	BOLD("%sTotal Futex count = %d (Top %d listed)\n", tab, globals->futex_cnt, MIN(globals->futex_cnt, nfutex));
+	futex_print_report_by_time(globals->futex_cnt);
+}
+
+void
+kp_file_activity()			/* Section 3.0 */
+{
+        HR;
+        BLUE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_3_0);
+        HEAD2(_MSG_3_0);
+        FONT_SIZE(-1);
+        ARFx(_LNK_2_0,"[Prev Section]");
+        ARFx(_LNK_4_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+}
+
+void
+kp_file_ops()				/* Section 3.1 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_3_1);
+        HEAD3(_MSG_3_1);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_3_2,"[Next Subsection]");
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_4_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+
+        lineno = 1;
+        tab=tab0;
+
+        BOLD("%sSyscalls   ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
+        foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata,
+                           (int (*)())fdata_sort_by_syscalls,
+                           20, NULL);
+
+	CSV_FIELD("kifile", "[CSV]");
+}
+
+
+void
+kp_file_time()				/* Section 3.2 */
+{
+        uint64 warnflag = 0ull;
+        int warn_indx;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_3_2);
+        HEAD3(_MSG_3_2);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_3_1,"[Prev Subsection]");
+        ARFx(_LNK_3_3,"[Next Subsection]");
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_4_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        lineno = 0;
+        tab=tab0;
+
+        BOLD("%sSyscalls   ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
+        foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata,
+                            (int (*)())fdata_sort_by_elptime,
+                            20, NULL);
+	CSV_FIELD("kifile", "[CSV]");
+}
+
+void
+kp_file_errs()				/* Section 3.3 */
+{
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_3_3);
+        HEAD3(_MSG_3_3);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_3_2,"[Prev Subsection]");
+        if (kparse_full) {
+                ARFx(_LNK_3_4,"[Next Subsection]");
+        } 
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_4_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        lineno = 1;
+        tab=tab0;
+
+        BOLD("%sSyscalls   ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
+        foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata_errs,
+                           (int (*)())fdata_sort_by_errs,
+                           20, NULL);
+	CSV_FIELD("kifile", "[CSV]");
+
+}
+
+kp_fdata_syscalls(void *arg1, void *arg2)
+{
+        fdata_info_t *fdatap = (fdata_info_t *)arg1;
+
+        if (fdatap->stats.syscall_cnt == 0)
+                return 0;
+
+        CAPTION_GREY;
+        BOLD("Device: ");
+        printf("0x%llx ", fdatap->dev);
+        BOLD("Node: ");
+        printf("%d ", fdatap->node);
+	BOLD("Syscalls: ");
+	printf("%d ", fdatap->stats.syscall_cnt);
+        BOLD("Fname: ");
+        printf("%-60s ", fdatap->fnameptr);
+        TEXT("\n");
+
+        _CAPTION;
+
+        BOLD("System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n");
+
+        foreach_hash_entry((void **)fdatap->syscallp, SYSCALL_HASHSZ,
+                                (int (*)(void *, void *))print_syscall_info,
+                                (int (*)())syscall_sort_by_cnt, 10, arg2);
+
+        return 0;
+}
+
+void
+kp_top_files()				/* Section 3.4 */
+{
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_3_4);
+        HEAD3(_MSG_3_4);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_3_3,"[Prev Subsection]");
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_4_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+        foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, kp_fdata_syscalls, fdata_sort_by_syscalls, 10, NULL);
+	CSV_FIELD("kifile", "[CSV]");
+
+}
+
+void
+kp_device_report()			/* Section 4.0 */
+{
+        HR;
+        BLUE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_0);
+        HEAD2(_MSG_4_0);
+        FONT_SIZE(-1);
+        ARFx(_LNK_3_0,"[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+}
+
+int
+kp_dev_entries(void *arg1, void *arg2)
+{
+	dev_info_t *devinfop = (dev_info_t *)arg1;
+	uint64 *warnflagp = (uint64 *)arg2;
+	struct iostats *statsp = &devinfop->iostats[0];
+	uint32 dev;
+
+	if (devinfop->iostats[IOTOT].compl_cnt == 0) return 0;
+
+        dev = devinfop->lle.key;
+	PRINT_DEVNAME(devinfop);
+	DSPACE;
+	print_iostats_totals(globals, &devinfop->iostats[0], arg2);
+
+	if (statsp[IOTOT].barrier_cnt) {
+               	pid_printf (" barriers: ");
+               	RED_FONT;
+               	pid_printf ("%d", statsp[IOTOT].barrier_cnt);
+               	BLACK_FONT;
+	}
+
+	if (statsp[IOTOT].requeue_cnt) {
+                pid_printf (" requeue: ");
+                RED_FONT;
+                pid_printf ("%d", statsp[IOTOT].requeue_cnt);
+                BLACK_FONT;
+        }
+
+	printf ("\n");
+
+        if ((statsp[IOTOT].barrier_cnt > 20) && (warnflagp != NULL)) {
+                (*warnflagp) |= WARNF_BARRIER;
+        }
+}
+
+void
+kp_device_globals()			/* Section 4.1 */
+{
+	struct iostats *tiostatsp, *riostatsp, *wiostatsp;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_1);
+        HEAD3(_MSG_4_1);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_2,"[Next Subsection]");
+        ARFx(_LNK_3_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	BOLD("         --------------------  Total  -------------------- --------------------  Write  -------------------- ---------------------  Read  --------------------\n");
+	BOLD("Devices     IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+        printf ("%7d  ", globals->ndevs);
+	print_iostats_totals(globals, &globals->iostats[0], NULL);
+	return;
+}
+
+void
+kp_perdev_reports()			/* Section 4.2.0 */
+{ 
+	GREEN_TABLE;
+	TEXT("\n");
+	ANM(_LNK_4_2);
+	HEAD3(_MSG_4_2);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_1,"[Prev Subsection]");
+        ARFx(_LNK_4_2_1,"[Next Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+}
+
+int
+kp_dev_entries_over5(void *arg1, void *arg2)
+{
+	dev_info_t *devinfop = (dev_info_t *)arg1;
+
+	if ((devinfop->iostats[IOTOT].compl_cnt / secs) < 5) return 0;
+
+	kp_dev_entries(arg1, arg2);
+	return 0;
+}
+
+int
+kp_dev_entries_less5(void *arg1, void *arg2)
+{
+        dev_info_t *devinfop = (dev_info_t *)arg1;
+        uint64 *warnflagp = (uint64 *)arg2;
+        if (devinfop->iostats[IOTOT].compl_cnt == 0) return 0;
+        if ((devinfop->iostats[IOTOT].compl_cnt / secs) > 5) return 0;
+
+	kp_dev_entries(arg1, arg2);
+	return 0;
+}
+
+int
+kp_dev_requeue_entries(void *arg1, void *arg2)
+{
+        dev_info_t *devinfop = (dev_info_t *)arg1;
+
+        if (devinfop->iostats[IOTOT].requeue_cnt == 0) return 0;
+
+        kp_dev_entries(arg1, arg2);
+        return 0;
+}
+
+void
+kp_active_disks()			/* Section 4.2.1 */
+{
+        uint64 warnflag = 0ull;
+        int warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_2_1);
+        HEAD3(_MSG_4_2_1);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_2,"[Prev Subsection]");
+        ARFx(_LNK_4_2_2,"[Next Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        tab=tab0;
+        lineno=1;
+
+	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+        foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, kp_dev_entries, dev_sort_by_count, 10, &warnflag);
+	CSV_FIELD("kidsk", "[CSV]");
+
+        if (warnflag & WARNF_BARRIER) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_BARRIER, _LNK_4_2_1);
+                kp_warning(globals->warnings, warn_indx, _LNK_4_2_1); T("\n");
+	}
+}
+
+void
+kp_highserv1_disks()			/* Section 4.2.2 */
+{
+        uint64 warnflag = 0;
+        int warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_2_2);
+        HEAD3(_MSG_4_2_2);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_2_1,"[Prev Subsection]");
+        ARFx(_LNK_4_2_3,"[Next Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        tab=tab0;
+        lineno=1;
+	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+        foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, kp_dev_entries_over5, dev_sort_by_avserv_over5, 10, &warnflag);
+	CSV_FIELD("kidsk", "[CSV]");
+
+        if (warnflag & WARNF_AVSERV) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_HIGH_AVSERV, _LNK_4_2_2);
+                kp_warning(globals->warnings, warn_indx, _LNK_4_2_2); T("\n");
+	}
+}
+
+void 
+kp_highserv2_disks()			/* Section 4.2.3 */
+{
+        uint64 warnflag = 0;
+        int warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_2_3);
+        HEAD3(_MSG_4_2_3);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_2_2,"[Prev Subsection]");
+        ARFx(_LNK_4_2_4,"[Next Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        tab=tab0;
+        lineno=1;
+	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+        foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, kp_dev_entries_less5, dev_sort_by_avserv_less5, 10, &warnflag);
+	CSV_FIELD("kidsk", "[CSV]");
+}
+
+void
+kp_highwait_disks()			/* Section 4.2.4 */
+{
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_2_4);
+        HEAD3(_MSG_4_2_4);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_2_3,"[Prev Subsection]");
+        ARFx(_LNK_4_2_5,"[Next Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        tab=tab0;
+        lineno=1;
+	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+        foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, kp_dev_entries, dev_sort_by_avwait, 10, NULL);
+	CSV_FIELD("kidsk", "[CSV]");
+}
+
+void
+kp_requeue_disks()			/* Section 4.2.5 */
+{
+        uint64 warnflag=0;
+        int64 warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_2_5);
+        HEAD3(_MSG_4_2_5);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_2_4,"[Prev Subsection]");
+        ARFx(_LNK_4_2_6,"[Next Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        tab=tab0;
+        lineno=1;
+        BOLD("    device  avque avinflt    r/s    w/s     KB/s  avsz  avwait  avserv \n");
+        foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, kp_dev_requeue_entries, dev_sort_by_requeue, 0, &warnflag);
+        if (warnflag & WARNF_REQUEUES) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_REQUEUES, _LNK_4_2_5);
+                kp_warning(globals->warnings, warn_indx, _LNK_4_2_5); T("\n");
+	}
+}
+
+void
+kp_dsk_histogram()			/* Section 4.2.6 */
+{
+        uint64 warnflag=0;
+        int64 warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_2_6);
+        HEAD3(_MSG_4_2_6);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_2_5,"[Prev Subsection]");
+        ARFx(_LNK_4_3,"[Next Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        tab=tab0;
+        lineno=1;
+        print_io_histogram(globals->iotimes, &warnflag);
+        if (warnflag & WARNF_IO_DELAYS) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_IO_DELAYS, _LNK_4_2_6);
+                kp_warning(globals->warnings, warn_indx, _LNK_4_2_6); T("\n");
+        }
+}
+
+void
+kp_mapper_report()			/* Section 4.3.0 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_3);
+        HEAD3(_MSG_4_3);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_2,"[Prev Subsection]");
+        ARFx(_LNK_4_3_1,"[Next Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+}
+
+void
+kp_active_mapper_devs()			/* Section 4.3.1 */
+{
+        uint64 warnflag=0;
+        int64 warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_3_1);
+        HEAD3(_MSG_4_3_1);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_3,"[Prev Subsection]");
+        ARFx(_LNK_4_3_2,"[Next Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+        foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, kp_dev_entries, dev_sort_by_count, 10, NULL);
+	CSV_FIELD("kidsk", "[CSV]");
+}
+
+void
+kp_hiserv_mapper_devs()			/* Section 4.3.2 */
+{
+        uint64 warnflag=0;
+        int64 warn_indx;
+
+        ORANGE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_3_2);
+        HEAD3(_MSG_4_3_2);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_3_1,"[Prev Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        tab=tab0;
+        lineno=1;
+	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+        foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, kp_dev_entries_over5, dev_sort_by_avserv_over5, 10, &warnflag);
+	CSV_FIELD("kidsk", "[CSV]");
+}
+
+
+int
+kp_fc_entries(void *arg1, void *arg2)
+{
+	fc_info_t *fcinfop = (fc_info_t *)arg1;
+	struct iostats *statsp = &fcinfop->iostats[0];
+	uint64 fcpath = fcinfop->lle.key;
+	char path_str[16];
+
+	if (fcpath == NO_HBA) {
+		sprintf (path_str, "ukn");
+	} else {
+		sprintf (path_str, "%d:%d:%d", FCPATH1(fcpath), FCPATH2(fcpath), FCPATH3(fcpath));
+	}
+	printf ("%-10s", path_str);
+	DSPACE;
+	print_iostats_totals(globals, &fcinfop->iostats[0], arg2);
+
+	if (statsp[IOTOT].barrier_cnt) {
+               	printf (" barriers: ");
+               	RED_FONT;
+               	printf ("%d", statsp[IOTOT].barrier_cnt);
+               	BLACK_FONT;
+	}
+
+	if (statsp[IOTOT].requeue_cnt) {
+                pid_printf (" requeue: ");
+                RED_FONT;
+                printf ("%d", statsp[IOTOT].requeue_cnt);
+                BLACK_FONT;
+        }
+
+	printf ("\n");
+
+}
+
+void
+kp_fc_totals()				/* Section 4.4 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_4);
+        HEAD3(_MSG_4_4);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_3_2,"[Prev Subsection]");
+        ARFx(_LNK_4_5,"[Next Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        tab=tab0;
+        lineno=1;
+	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+        foreach_hash_entry((void **)globals->fchash, FC_HSIZE, kp_fc_entries, NULL, 0, NULL);
+}
+
+
+void
+kp_perpid_dev_totals()			/* Section 4.5 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_5);
+        HEAD3(_MSG_4_5);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_4,"[Prev Subsection]");
+        ARFx(_LNK_4_6,"[Next Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        BOLD ("     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process\n");
+        BOLD ("==============================================================================\n");
+
+        foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, calc_pid_iototals, NULL, 0, NULL);
+        foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_iosum,  pid_sort_by_iocnt, 10, NULL);
+	CSV_FIELD("kipid", "[CSV]");
+}
+
+int
+kp_blk_read_entry(void *arg1, void *arg2)
+{
+        dskblk_info_t *dskblkp = (dskblk_info_t *)arg1;
+        uint64 *warnflagp = (uint64 *)arg2;
+	dev_info_t *devinfop;
+        uint64 dev;
+
+        if (dskblkp->rd_cnt < 3) return 0;
+
+        dev = DSKBLK_DEV(dskblkp->lle.key);
+        if (dskblkp->rd_cnt > 50)  {
+                RED_FONT;
+                if (warnflagp) (*warnflagp) |= WARNF_REREADS;
+        }
+	devinfop = GET_DEVP(DEVHASHP(globals,dev), dev);
+
+        printf("%-7d 0x%08llx      0x%-8llx     ",
+                dskblkp->rd_cnt,
+                dev,
+                dskblkp->sector);
+
+	if (devinfop->devname) printf ("/dev/%s", devinfop->devname);
+        if (devinfop->mapname) printf ("    (/dev/mapper/%s)", devinfop->mapname);
+	
+	printf ("\n");
+        BLACK_FONT;
+
+        return 0;
+}
+
+void
+kp_dskblk_read()			/* Section 4.6 */
+{
+
+        uint64  warnflag = 0;
+        int     warn_indx;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_6);
+        HEAD3(_MSG_4_6);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_5,"[Prev Subsection]");
+        ARFx(_LNK_4_7,"[Next Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+        T(_MSG_4_6_INFO);
+        TEXTx("\n");
+
+        BOLD("Freq    Dev             Block\n");
+        foreach_hash_entry((void **)globals->dskblk_hash, DSKBLK_HSIZE, kp_blk_read_entry, dskblk_sort_by_rdcnt, 10, &warnflag);
+
+        if (warnflag & WARNF_REREADS) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_REREADS, _LNK_4_5);
+                kp_warning(globals->warnings, warn_indx, _LNK_4_5); T("\n");
+        }
+
+}
+
+int
+kp_blk_write_entry(void *arg1, void *arg2)
+{
+        dskblk_info_t *dskblkp = (dskblk_info_t *)arg1;
+        char device[12];
+        uint64 dev;
+	dev_info_t *devinfop;
+
+        if (dskblkp->wr_cnt < 2) return 0;
+
+        dev = DSKBLK_DEV(dskblkp->lle.key);
+        devinfop = GET_DEVP(DEVHASHP(globals,dev), dev);
+
+        printf("%-7d 0x%08llx      0x%-8llx     ",
+                dskblkp->wr_cnt,
+                dev,
+                dskblkp->sector);
+
+	if (devinfop->devname)  
+                printf ("/dev/%s", devinfop->devname);
+       	if (devinfop->mapname) 
+               	printf ("    (/dev/mapper/%s)", devinfop->mapname);
+	
+	printf ("\n");
+
+        return 0;
+}
+
+void
+kp_dskblk_write()			/* Section 4.7 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_7);
+        HEAD3(_MSG_4_7);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_6,"[Prev Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        BOLD("Freq    Dev             Block\n");
+        foreach_hash_entry((void **)globals->dskblk_hash, DSKBLK_HSIZE, kp_blk_write_entry, dskblk_sort_by_wrcnt, 10, NULL);
+
+}
+
+void 
+kp_network()
+{
+        HR;
+        BLUE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_5_0);
+        HEAD2(_MSG_5_0);
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_0,"[Prev Section]"); _A;
+	if (IS_LIKI_V2_PLUS)  {
+                ARFx(_LNK_6_0,"[Next Section]");
+        } else if (next_sid > 1)  {
+                ARFx(_LNK_7_0,"[Next Section]");
+	} else {
+                ARFx(_LNK_8_0,"[Next Section]"); 
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+}
+
+void
+kp_ipip()
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_5_1);
+        HEAD2(_MSG_5_1);
+        FONT_SIZE(-1);
+        ARFx(_LNK_5_2,"[Next Subsection]"); 
+        ARFx(_LNK_4_0,"---[Prev Section]"); _A;
+	if (IS_LIKI_V2_PLUS)  {
+                ARFx(_LNK_6_0,"[Next Section]");
+        } else if (next_sid > 1)  {
+                ARFx(_LNK_7_0,"[Next Section]");
+	} else {
+                ARFx(_LNK_8_0,"[Next Section]"); 
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	BOLD ("Syscalls      Rd/s      RdKB/s      Wr/s      WrKB/s  Connection\n");
+	foreach_hash_entry2((void **)globals->ipip_hash, IPIP_HASHSZ, socket_print_ipip,
+			    (int (*)())ipip_sort_by_syscalls, 10, NULL);
+	CSV_FIELD("kisock", "[CSV]");
+}
+
+kp_remoteip()
+{
+	int scallflag=1;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_5_2);
+        HEAD2(_MSG_5_2);
+        FONT_SIZE(-1);
+        ARFx(_LNK_5_1,"[Prev Subsection]"); 
+        ARFx(_LNK_5_3,"[Next Subsection]"); 
+        ARFx(_LNK_4_0,"---[Prev Section]"); _A;
+	if (IS_LIKI_V2_PLUS)  {
+                ARFx(_LNK_6_0,"[Next Section]");
+        } else if (next_sid > 1)  {
+                ARFx(_LNK_7_0,"[Next Section]");
+	} else {
+                ARFx(_LNK_8_0,"[Next Section]"); 
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        foreach_hash_entry((void **)globals->rip_hash, IP_HASHSZ, socket_print_rip,
+			   (int (*)())ip_sort_by_syscalls, 10, &scallflag);
+	CSV_FIELD("kisock", "[CSV]");
+}
+
+kp_remoteport()
+{
+	int scallflag=1;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_5_3);
+        HEAD2(_MSG_5_3);
+        FONT_SIZE(-1);
+        ARFx(_LNK_5_2,"[Prev Subsection]"); 
+        ARFx(_LNK_5_4,"[Next Subsection]"); 
+        ARFx(_LNK_4_0,"---[Prev Section]"); _A;
+	if (IS_LIKI_V2_PLUS)  {
+                ARFx(_LNK_6_0,"[Next Section]");
+        } else if (next_sid > 1)  {
+                ARFx(_LNK_7_0,"[Next Section]");
+	} else {
+                ARFx(_LNK_8_0,"[Next Section]"); 
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        foreach_hash_entry((void **)globals->rsock_hash, SOCK_HASHSZ, socket_print_rsock,
+			   (int (*)())sock_sort_by_syscalls, 5, &scallflag);
+	CSV_FIELD("kisock", "[CSV]");
+}
+
+kp_localip()
+{
+	int scallflag=1;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_5_4);
+        HEAD2(_MSG_5_4);
+        FONT_SIZE(-1);
+        ARFx(_LNK_5_3,"[Prev Subsection]"); 
+        ARFx(_LNK_5_5,"[Next Subsection]"); 
+        ARFx(_LNK_4_0,"---[Prev Section]"); _A;
+	if (IS_LIKI_V2_PLUS)  {
+                ARFx(_LNK_6_0,"[Next Section]");
+        } else if (next_sid > 1)  {
+                ARFx(_LNK_7_0,"[Next Section]");
+	} else {
+                ARFx(_LNK_8_0,"[Next Section]"); 
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	foreach_hash_entry((void **)globals->lip_hash, IP_HASHSZ, socket_print_lip,
+			   (int (*)())ip_sort_by_syscalls, 10, &scallflag);
+	CSV_FIELD("kisock", "[CSV]");
+}
+
+kp_localport()
+{
+	int scallflag=1;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_5_5);
+        HEAD2(_MSG_5_5);
+        FONT_SIZE(-1);
+        ARFx(_LNK_5_4,"[Prev Subsection]"); 
+        ARFx(_LNK_5_6,"[Next Subsection]"); 
+        ARFx(_LNK_4_0,"---[Prev Section]"); _A;
+	if (IS_LIKI_V2_PLUS)  {
+                ARFx(_LNK_6_0,"[Next Section]");
+        } else if (next_sid > 1)  {
+                ARFx(_LNK_7_0,"[Next Section]");
+	} else {
+                ARFx(_LNK_8_0,"[Next Section]"); 
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	foreach_hash_entry((void **)globals->lsock_hash, SOCK_HASHSZ, socket_print_lsock,
+			   (int (*)())sock_sort_by_syscalls, 5, &scallflag);
+
+	CSV_FIELD("kisock", "[CSV]");
+}
+
+kp_socket()
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_5_6);
+        HEAD2(_MSG_5_6);
+        FONT_SIZE(-1);
+        ARFx(_LNK_5_5,"[Prev Subsection]"); 
+        ARFx(_LNK_4_0,"---[Prev Section]"); _A;
+	if (IS_LIKI_V2_PLUS)  {
+                ARFx(_LNK_6_0,"[Next Section]");
+        } else if (next_sid > 1)  {
+                ARFx(_LNK_7_0,"[Next Section]");
+	} else {
+                ARFx(_LNK_8_0,"[Next Section]"); 
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	BOLD("Syscalls      Rd/s      RdKB/s      Wr/s      WrKB/s  Connection\n");
+        foreach_hash_entry2((void **)globals->sdata_hash, SDATA_HASHSZ, socket_print_sdata,
+                           (int (*)())sdata_sort_by_syscalls, 10, NULL);
+	CSV_FIELD("kisock", "[CSV]");
+}
+
+void
+kp_memory()				/* Section 6.0 */
+{
+        HR;
+        BLUE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_6_0);
+        HEAD2(_MSG_6_0);
+        FONT_SIZE(-1);
+        ARFx(_LNK_5_0,"[Prev Section]"); _A;
+        if (next_sid > 1)  {
+                ARFx(_LNK_7_0,"[Next Section]");
+        } else if (globals->docker_hash) { 
+                ARFx(_LNK_8_0,"[Next Section]"); 
+	} else  {
+                ARFx(_LNK_9_0,"[Next Section]"); 
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+}
+
+int
+kp_pid_memory(void *arg1, void *arg2)
+{
+        pid_info_t *pidp = (pid_info_t *)arg1;
+	sched_info_t *schedp;
+        uint64 *warnflagp = (uint64 *)arg2;
+
+        printf ("%8d %8d ",
+                pidp->vss,
+                pidp->rss);
+        PID_URL_FIELD8_R(pidp->PID);
+        printf (" %s", pidp->cmd);
+	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
+	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
+	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	printf ("\n");
+
+        return 0;
+}
+
+void
+kp_rss()				/* Section 6.1 */
+{
+        uint64 warnflag = 0ull;
+        int warn_indx=0;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_6_1);
+        HEAD3(_MSG_6_1);
+        FONT_SIZE(-1);
+        ARFx(_LNK_6_2,"[Next Subsection]"); 
+        ARFx(_LNK_6_0,"---[Prev Section]"); 
+        if (next_sid > 1)  {
+                ARFx(_LNK_7_0,"[Next Section]");
+        } else if (globals->docker_hash) { 
+                ARFx(_LNK_8_0,"[Next Section]"); 
+	} else {
+		ARFx(_LNK_9_0,"[Next Section]");
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        BOLD("     vss      rss      PID Command\n");
+        foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, kp_pid_memory, pid_sort_by_rss, 10, &warnflag);
+	CSV_FIELD("kipid", "[CSV]");
+}
+
+void
+kp_vss()				/* Section 6.2 */
+{
+        uint64 warnflag = 0ull;
+        int warn_indx=0;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_6_2);
+        HEAD3(_MSG_6_2);
+        FONT_SIZE(-1);
+        ARFx(_LNK_6_1,"[Prev Subsection]"); 
+        ARFx(_LNK_6_0,"---[Prev Section]");
+        if (next_sid > 1)  {
+                ARFx(_LNK_7_0,"[Next Section]");
+        } else if (globals->docker_hash) { 
+                ARFx(_LNK_8_0,"[Next Section]"); 
+        } else  { 
+                ARFx(_LNK_9_0,"[Next Section]");
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        BOLD("     vss      rss      PID Command\n");
+        foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, kp_pid_memory, pid_sort_by_vss, 10, &warnflag);
+	CSV_FIELD("kipid", "[CSV]");
+}
+
+
+void
+kp_oracle()				/* Section 7.0 */
+{
+        HR;
+        BLUE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_7_0);
+        HEAD2(_MSG_7_0);
+        FONT_SIZE(-1);
+	if (IS_LIKI_V2_PLUS)  {
+        	ARFx(_LNK_6_0,"[Prev Section]");
+	} else { 
+        	ARFx(_LNK_5_0,"[Prev Section]");
+	}
+	if (globals->docker_hash) {
+        	ARFx(_LNK_8_0,"[Next Section]");
+	} else {
+        	ARFx(_LNK_9_0,"[Next Section]");
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+}
+
+void
+kp_print_orastats (int type)
+{
+	int i;
+        ora_stats_t orastats;
+	int count, indx;
+
+	if (type == NORACLE)  {
+		/* usually, we only won't one hash chain for the specific Oracle process type 
+		 * so count=1 is normal.   But we have a special cause to look at all the
+		 * hash chains to analyze every Oracle process.  So so if NORACLE is passed, we
+		 * alter the count to NO_ORACLE and start at bucket 0 so we can look at every
+		 * hash chain 
+		 */
+		count=NORACLE;
+		indx=0;
+	} else {
+		count=1;
+		indx = type;
+	}
+
+	if (IS_LIKI && ((type == LGWR) || (type == DBWRITER))) {
+        	BOLD("                                --- CPU STATS ---   ---------- PHYSICAL READS --------   --------- PHYSICAL WRITES --------\n");
+        	BOLD("Instance    Procs  SchedPolicy  RunTime  RunQTime   IO/sec   AvSize   KB/sec    AvServ   IO/sec   AvSize   KB/sec    AvServ\n");
+	} else {
+        	BOLD("                   --- CPU STATS ---   ---------- PHYSICAL READS --------   --------- PHYSICAL WRITES --------\n");
+        	BOLD("Instance    Procs  RunTime  RunQTime   IO/sec   AvSize   KB/sec    AvServ   IO/sec   AvSize   KB/sec    AvServ\n");
+	}
+
+        for (i = 1; i < next_sid; i++) {
+                bzero(&orastats, sizeof(ora_stats_t));
+                foreach_hash_entry((void **)&sid_table[i].sid_pid[indx], count, oracle_pid_stats, NULL, 0, &orastats);
+
+                printf("%-9s %6d",
+                        sid_table[i].sid_name, 
+			 orastats.pid_cnt);
+
+		if (IS_LIKI && ((type == LGWR) || (type == DBWRITER))) {
+        		printf (" %12s", sched_policy_name[orastats.sched_policy]);
+		}
+
+                printf(" %9.3f %9.3f %8.0f %8lld %8.0f %9.6f %8.0f %8lld %8.0f %9.6f",
+                        SECS(orastats.run_time),
+                        SECS(orastats.runq_time),
+                        orastats.iostats[IORD].compl_cnt / secs,
+                        (orastats.iostats[IORD].sect_xfrd/2) / MAX(orastats.iostats[IORD].compl_cnt,1 ),
+                        (orastats.iostats[IORD].sect_xfrd/2) / secs,
+			SECS(orastats.iostats[IORD].cum_ioserv / MAX(orastats.iostats[IORD].compl_cnt,1)),
+                        orastats.iostats[IOWR].compl_cnt / secs,
+                        (orastats.iostats[IOWR].sect_xfrd/2) / MAX(orastats.iostats[IOWR].compl_cnt, 1),
+                        (orastats.iostats[IOWR].sect_xfrd/2) / secs,
+			SECS(orastats.iostats[IOWR].cum_ioserv / MAX(orastats.iostats[IOWR].compl_cnt, 1)));
+
+		if (orastats.iostats[IOTOT].barrier_cnt) {
+                	printf (" barriers: ");
+                	RED_FONT;
+                	printf ("%d", orastats.iostats[IOTOT].barrier_cnt);
+                	BLACK_FONT;
+		}
+
+		printf ("\n");
+        }
+}
+
+void
+kp_oracle_sids()			/* Section 7.1 */
+{
+        int warn_indx=0;
+        uint64 warnflag = 0ull;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_7_1);
+        HEAD3(_MSG_7_1);
+        FONT_SIZE(-1);
+        ARFx(_LNK_7_2,"[Next Subsection]"); 
+        ARFx(_LNK_7_0,"---[Prev Section]"); 
+	if (globals->docker_hash) {
+        	ARFx(_LNK_8_0,"[Next Section]");
+	} else {
+        	ARFx(_LNK_9_0,"[Next Section]");
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+        T("\n");
+
+	kp_print_orastats(NORACLE);
+}
+
+void
+kp_lgwr_analysis()			/* Section 7.2 */
+{
+        int warn_indx=0;
+        uint64 warnflag = 0ull;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_7_2);
+        HEAD3(_MSG_7_2);
+        FONT_SIZE(-1);
+        ARFx(_LNK_7_1,"[Prev Subsection]"); 
+        ARFx(_LNK_7_3,"[Next Subsection]"); 
+        ARFx(_LNK_7_0,"---[Prev Section]"); 
+	if (globals->docker_hash) {
+        	ARFx(_LNK_8_0,"[Next Section]");
+	} else {
+        	ARFx(_LNK_9_0,"[Next Section]");
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+        T("\n");
+
+	kp_print_orastats(LGWR);
+}
+
+void
+kp_arch_analysis()			/* Section 7.3 */
+{
+        int warn_indx=0;
+        uint64 warnflag = 0ull;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_7_3);
+        HEAD3(_MSG_7_3);
+        FONT_SIZE(-1);
+        ARFx(_LNK_7_2,"[Prev Subsection]"); 
+        ARFx(_LNK_7_4,"[Next Subsection]"); 
+        ARFx(_LNK_7_0,"---[Prev Section]"); 
+	if (globals->docker_hash) {
+        	ARFx(_LNK_8_0,"[Next Section]");
+	} else {
+        	ARFx(_LNK_9_0,"[Next Section]");
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+        T("\n");
+
+	kp_print_orastats(ARCHIVE);
+}
+
+void
+kp_dbw_analysis()			/* Section 7.4 */
+{
+        int warn_indx=0;
+        uint64 warnflag = 0ull;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_7_4);
+        HEAD3(_MSG_7_4);
+        FONT_SIZE(-1);
+        ARFx(_LNK_7_3,"[Prev Subsection]"); 
+        ARFx(_LNK_7_5,"[Next Subsection]"); 
+        ARFx(_LNK_7_0,"---[Prev Section]"); 
+	if (globals->docker_hash) {
+        	ARFx(_LNK_8_0,"[Next Section]");
+	} else {
+        	ARFx(_LNK_9_0,"[Next Section]");
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+        T("\n");
+
+	kp_print_orastats(DBWRITER);
+}
+
+void
+kp_pquery_analysis()			/* Section 7.5 */
+{
+        int warn_indx=0;
+        uint64 warnflag = 0ull;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_7_5);
+        HEAD3(_MSG_7_5);
+        FONT_SIZE(-1);
+        ARFx(_LNK_7_4,"[Prev Subsection]"); 
+        ARFx(_LNK_7_6,"[Next Subsection]"); 
+        ARFx(_LNK_7_0,"---[Prev Section]"); 
+	if (globals->docker_hash) {
+        	ARFx(_LNK_8_0,"[Next Section]");
+	} else {
+        	ARFx(_LNK_9_0,"[Next Section]");
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+        T("\n");
+
+	kp_print_orastats(PQUERY);
+}
+
+void
+kp_shared_server_analysis()		/* Section 7.6 */
+{
+        int warn_indx=0;
+        uint64 warnflag = 0ull;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_7_6);
+        HEAD3(_MSG_7_6);
+        FONT_SIZE(-1);
+        ARFx(_LNK_7_5,"[Prev Subsection]"); 
+        ARFx(_LNK_7_7,"[Next Subsection]"); 
+        ARFx(_LNK_7_0,"---[Prev Section]"); 
+	if (globals->docker_hash) {
+        	ARFx(_LNK_8_0,"[Next Section]");
+	} else {
+        	ARFx(_LNK_9_0,"[Next Section]");
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+        T("\n");
+
+
+	kp_print_orastats(ORACLE);
+}
+
+void
+kp_ioslave_analysis()			/* Section 7.7 */
+{
+        int warn_indx=0;
+        uint64 warnflag = 0ull;
+
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_7_7);
+        HEAD3(_MSG_7_7);
+        FONT_SIZE(-1);
+        ARFx(_LNK_7_6,"[Prev Subsection]"); 
+        ARFx(_LNK_7_0,"---[Prev Section]"); 
+	if (globals->docker_hash) {
+        	ARFx(_LNK_8_0,"[Next Section]");
+	} else {
+        	ARFx(_LNK_9_0,"[Next Section]");
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+        T("\n");
+
+	kp_print_orastats(SLAVE);
+}
+
+void
+kp_dockers()			/* Section 8.0 */
+{
+	HR;
+        BLUE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_8_0);
+        HEAD2(_MSG_8_0);
+        FONT_SIZE(-1);
+	
+	if (next_sid > 1)  {
+        	ARFx(_LNK_7_0,"[Prev Section]"); 
+	} else if (IS_LIKI_V2_PLUS)  { 
+        	ARFx(_LNK_6_0,"[Prev Section]");
+	} else { 
+        	ARFx(_LNK_5_0,"[Prev Section]");
+	}
+
+        ARFx(_LNK_9_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+}
+
+void
+kp_docker_cpu()				/* Section 8.1 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_8_1);
+        HEAD3(_MSG_8_1);
+        FONT_SIZE(-1);
+        ARFx(_LNK_8_2,"[Next Subsection]"); 
+	if (next_sid > 1)  {
+        	ARFx(_LNK_7_0,"---[Prev Section]"); 
+	} else if (IS_LIKI_V2_PLUS)  { 
+        	ARFx(_LNK_6_0,"---[Prev Section]");
+	} else { 
+        	ARFx(_LNK_5_0,"---[Prev Section]");
+	}
+        ARFx(_LNK_9_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+
+	docker_print_cpu_report();
+
+}
+
+void
+kp_docker_io()				/* Section 8.2 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_8_2);
+        HEAD3(_MSG_8_2);
+        FONT_SIZE(-1);
+        ARFx(_LNK_8_1,"[Prev Subsection]"); 
+	if (globals->docker_hash) {
+        	ARFx(_LNK_8_0,"---[Prev Section]"); 
+	} else if (next_sid > 1)  {
+        	ARFx(_LNK_7_0,"---[Prev Section]"); 
+	} else if (IS_LIKI_V2_PLUS)  { 
+        	ARFx(_LNK_6_0,"---[Prev Section]");
+	} else { 
+        	ARFx(_LNK_5_0,"---[Prev Section]");
+	}
+        ARFx(_LNK_9_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+
+	docker_print_io_report();
+}
+
+void
+kp_file_links()			/* Section 9.0 */
+{
+        int i, msg_idx;
+        warn_t *warnp;
+
+	HR;
+        BLUE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_9_0);
+        HEAD2(_MSG_9_0);
+        FONT_SIZE(-1);
+	
+	if (globals->docker_hash) {
+        	ARFx(_LNK_8_0,"[Prev Section]"); 
+	} else if (next_sid > 1)  {
+        	ARFx(_LNK_7_0,"[Prev Section]"); 
+	} else if (IS_LIKI_V2_PLUS)  { 
+        	ARFx(_LNK_6_0,"[Prev Section]");
+	} else { 
+        	ARFx(_LNK_5_0,"[Prev Section]");
+	}
+
+        ARFx(_LNK_10_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+}
+
+void
+kp_txt_links()				/* Section 9.1 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_9_1);
+        HEAD3(_MSG_9_1);
+        FONT_SIZE(-1);
+        ARFx(_LNK_9_2,"[Next Subsection]"); 
+	if (globals->docker_hash) {
+        	ARFx(_LNK_8_0,"---[Prev Section]"); 
+	} else if (next_sid > 1)  {
+        	ARFx(_LNK_7_0,"---[Prev Section]"); 
+	} else if (IS_LIKI_V2_PLUS)  { 
+        	ARFx(_LNK_6_0,"---[Prev Section]");
+	} else { 
+        	ARFx(_LNK_5_0,"---[Prev Section]");
+	}
+        ARFx(_LNK_10_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+	TXT_FIELD("kipid", "PID Analysis Report");
+	TXT_FIELD("kidsk", "Disk Analysis Report");
+	TXT_FIELD("kirunq", "CPU/RunQ Analysis Report");
+	if (globals->hcinfop) TXT_FIELD("kiprof", "CPU Profiling Report");
+	TXT_FIELD("kiwait", "Wait/Sleep Analysis Report");
+	TXT_FIELD("kifile", "File Activity Report");
+	TXT_FIELD("kifutex", "Futex Report");
+	if (globals->docker_hash) TXT_FIELD("kisock", "Docker Container Report");
+}
+
+void
+kp_csv_links()				/* Section 9.2 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_9_2);
+        HEAD3(_MSG_9_2);
+        FONT_SIZE(-1);
+        ARFx(_LNK_9_1,"[Prev Subsection]"); 
+        ARFx(_LNK_9_3,"[Next Subsection]"); 
+	if (globals->docker_hash) {
+        	ARFx(_LNK_8_0,"---[Prev Section]"); 
+	} else if (next_sid > 1)  {
+        	ARFx(_LNK_7_0,"---[Prev Section]"); 
+	} else if (IS_LIKI_V2_PLUS)  { 
+        	ARFx(_LNK_6_0,"---[Prev Section]");
+	} else { 
+        	ARFx(_LNK_5_0,"---[Prev Section]");
+	}
+        ARFx(_LNK_10_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+	CSV_FIELD("kipid", "kipid CSV file");
+	CSV_FIELD("kidsk", "kidsk CSV file");
+	CSV_FIELD("kirunq", "kirunq CSV file");
+	CSV_FIELD("kiwait", "kiwait CSV file");
+	CSV_FIELD("kifile", "kifile CSV file");
+	CSV_FIELD("kisock", "kisock CSV file");
+}
+
+void
+kp_misc_links()				/* Section 9.3 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_9_3);
+        HEAD3(_MSG_9_3);
+        FONT_SIZE(-1);
+        ARFx(_LNK_9_2,"[Prev Subsection]");  
+        if (vis) { ARFx(_LNK_9_4,"[Next Subsection]");  }
+	if (globals->docker_hash) {
+        	ARFx(_LNK_8_0,"---[Prev Section]"); 
+	} else if (next_sid > 1)  {
+        	ARFx(_LNK_7_0,"---[Prev Section]"); 
+	} else if (IS_LIKI_V2_PLUS)  { 
+        	ARFx(_LNK_6_0,"---[Prev Section]");
+	} else { 
+        	ARFx(_LNK_5_0,"---[Prev Section]");
+	}
+        ARFx(_LNK_10_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+	BOLD("General\n");
+	FILE_FIELD("uname-a", "uname -a");
+	FILE_FIELD("release", "/etc/*release");
+	FILE_FIELD("uptime", "uptime");
+	FILE_FIELD("cmdline", "/proc/cmdline");
+	FILE_FIELD("grub.conf", "/boot/grub/grub.conf");
+	BOLD("Configuration\n");
+	FILE_FIELD("cpuinfo", "/proc/cpuinfo");
+	FILE_FIELD("mem_info", "free; /proc/meminfo");
+	FILE_FIELD("lspci", "lspci");
+	FILE_FIELD("dmidecode", "dmidecode");
+	FILE_FIELD("getconf-a", "getconf -a");
+	FILE_FIELD("sysctl-a", "sysctl -a");
+	FILE_FIELD("sysctl.conf", "/etc/sysctl.conf");
+	FILE_FIELD("sched_features", "<debugfs>/sched_features");
+	FILE_FIELD("ipcs-m", "ipcs -m");
+	BOLD("NUMA Information\n");
+	FILE_FIELD("numa_info", "numactl --hardware / numastat");
+	FILE_FIELD("mpsched", "mpsched");
+	BOLD("Processes\n");
+	FILE_FIELD("ps-eLf", "ps -eLf");
+	FILE_FIELD("ps-aux", "ps aus");
+	FILE_FIELD("pstree", "pstree");
+	FILE_FIELD("stacks", "/proc/*/stacks/*");
+	BOLD("File Systems and I/O\n");
+	FILE_FIELD("mount-v", "mount -v");
+	FILE_FIELD("fstab", "/etc/fstab");
+	FILE_FIELD("extfs", "extfs inforamation");
+	FILE_FIELD("lvm", "LVM info");
+	FILE_FIELD("dmsetup_ls", "dmsetup ls --tree");
+	FILE_FIELD("multipath-l", "multipath -ll");
+	FILE_FIELD("multipath.conf", "/etc/multipath.conf");
+	FILE_FIELD("block_params", "Block Device parameters");
+	FILE_FIELD("interrupts", "/proc/interrupts");
+	BOLD("Network\n");
+	FILE_FIELD("ifconfig", "ifconfig");
+	FILE_FIELD("ethtool", "ethtool");
+	FILE_FIELD("route-n", "route -n");
+	FILE_FIELD("bonds", "/proc/net/bonding/bond*");
+	FILE_FIELD("netstat-s", "netstat -s");
+	FILE_FIELD("netstat-neopa", "netstat -neopa");
+}
+
+void
+kp_vis_links()				/* Section 9.4 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_9_4);
+        HEAD3(_MSG_9_4);
+        FONT_SIZE(-1);
+        ARFx(_LNK_9_3,"[Prev Subsection]"); 
+	if (globals->docker_hash) {
+        	ARFx(_LNK_8_0,"---[Prev Section]"); 
+	} else if (next_sid > 1)  {
+        	ARFx(_LNK_7_0,"---[Prev Section]"); 
+	} else if (IS_LIKI_V2_PLUS)  { 
+        	ARFx(_LNK_6_0,"---[Prev Section]");
+	} else { 
+        	ARFx(_LNK_5_0,"---[Prev Section]");
+	}
+        ARFx(_LNK_10_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+	VISFILE_FIELD("timeline", "Server Activity Timeline");
+	VISFILE_FIELD("kidsk_scatter", "Disk Device I/Os");
+	VISFILE_FIELD("futex_scatter", "Global Futex Usage");
+	VISFILE_FIELD("network", "Top 50 Network Traffice Flows");
+	VISFILE_FIELD("socket", "Server Network Traffice Flow by IP+Port (UDP or TCP)");
+	VISFILE_FIELD("kidsk", "Disk Statistics");
+	VISFILE_FIELD("kirunq", "CPU/RunQ Statistics");
+	VISFILE_FIELD("kifile", "File Statistics");
+	VISFILE_FIELD("kipid_io", "Per-Task I/O Statistics");
+	VISFILE_FIELD("kipid_sched", "Per-Task Scheduler Statistics");
+}
+
+void
+kp_warnings_report()			/* Section 9.0 */
+{
+        int i, msg_idx;
+        warn_t *warnp;
+
+	HR;
+        BLUE_TABLE;
+        TEXT("\n");
+        ANM(_LNK_10_0);
+        ANM(SPF(line,"%s%d", _LNK_WARN, globals->next_warning));
+        HEAD2(_MSG_10_0);
+        FONT_SIZE(-1);
+	
+        ARFx(_LNK_9_0,"[Prev Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	if (globals->next_warning == 0) {
+		TEXT("\n");
+		BOLD("No Warnings Found\n");
+		return;
+	}
+
+        RED_FONT;
+        UL;
+        for (i = 0; i < globals->next_warning; i++) {
+                warnp = globals->warnings;
+                if (warnp[i].type == NOTE) continue;
+
+                msg_idx = warnp[i].idx;
+
+                if (HTML) {
+                    if (warnp[i].lnk)  {
+                            LI; ARFx(SPF(line, "%s", warnp[i].lnk), warnmsg[msg_idx].msg); 
+                    } else {
+                            LI; ARFx(SPF(line,"%s%d", _LNK_WARN, i), warnmsg[msg_idx].msg); 
+                    }
+                } else {
+                        printf ("%s\n", warnmsg[msg_idx].msg);
+                }
+
+        }
+        _UL;
+        BLACK_FONT;
+}
+

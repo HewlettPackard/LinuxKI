@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+<html xmlns:xlink="http://www.w3.org/1999/xlink">
+        <head>
+		<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+                <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+                <title>Timeline of task activity</title>
+                <script type="text/javascript" src="D3/d3.v2.js"></script>
+                <style type="text/css">
+                        #body {
+                                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                                font-size: 14px;
+                                width:1200px;
+//                              height: 800px;
+                                position: absolute;
+                                // border: solid 1px black;
+                        }
+
+                        #Description_text {
+                                position: absolute;
+                                top: 0px;
+                                left: 0px;
+                                width:1198px;
+                                height:48px;
+                                // border: solid 1px black;
+                        }
+
+                        #Timeline_chart {
+                                position: absolute;
+                                top: 48px;
+                                left: 0px;
+                                width:1198px;
+//  	                        height:758px;
+// 				border: solid 1px black;
+				white-space:pre;
+                        }
+
+                        #tooltip {
+                                position: absolute;
+                                width: auto;
+                                height: auto;
+                                padding: 10px;
+                                background-color: cornsilk;
+                                opacity:0.95;
+                                -webkit-border-radius: 10px;
+                                -moz-border-radius: 10px;
+                                border-radius: 10px;
+                                -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                                -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                                box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                                pointer-events: none;
+                                white-space: pre;
+                        }
+
+                        #tooltip.hidden {
+                                display: none;
+                        }
+
+                        #tooltip p {
+                                margin: 0;
+                                font-family: courier new;
+                                font-size: 11px;
+                                line-height: 13px;
+                        }
+
+			#rect_popup {
+				position: relative;
+			}
+
+                        .pagesummary {
+                                pointer-events: none;
+                                font: 18px sans-serif;
+                                white-space:pre;
+                        }
+
+                        .chartsummary {
+                                pointer-events: none;
+                                font: 14px sans-serif;
+                                white-space:pre;
+                        }
+
+			.popup {
+				position: relative;
+				left: 0;
+				top: 0;
+				background-color: #fff;
+				width: 200px;
+				border: 1px #ccc solid;
+				border-radius: 6px;
+				box-shadow: #333 2px 2px 4px;
+				padding: 8px;
+				font-family: arial, helvetica, sans-serif;
+			}
+			
+			.popup h2 {
+				margin: 0 0 1rem 0;
+			}
+
+
+                        text {
+                                pointer-events: none;
+                                white-space:pre;
+                        }
+
+	                .chart {
+//               		shape-rendering: crispEdges;
+	                }
+
+	                .mini text {
+	                        font: 8px sans-serif;
+	                }
+
+	                .main text {
+	                        font: 8px sans-serif;
+	                }
+
+			.axis path,
+			.axis line {
+    				fill: none;
+    				stroke: black;
+    				shape-rendering: crispEdges;
+			}
+
+			.axis text {
+    				font-family: sans-serif;
+    				font-size: 11px;
+			}
+
+	                .brush .extent {
+	                        stroke: gray;
+	                        fill: dodgerblue;
+	                        fill-opacity: .365;
+	                }
+                </style>
+        </head>
+        <body>
+                <div id="body">
+                        <div id="Description_text">
+                                <div class="pagesummary"><p><b> Cluster Activity Timeline  </b></p></div>
+			</div>
+                        <div id="Timeline_chart">
+                                	<p><b><label>  Color Scale: <select id="color" name="color">
+                        		<option value="bcpu">% busy CPU</option>
+					<option value="acpu">Context switches</option>
+					<option value="scpu">% system CPU</option>
+					<option value="ucpu">% user CPU</option>
+					<option value="shirq">% sys hardirq</option>
+                                        <option value="uhirq">% user hardirq</option>
+                                        <option value="ihirq">% idle hardirq</option>
+					<option value="ssirq">% sys softirq</option>
+                                        <option value="usirq">% user softirq</option>
+                                        <option value="isirq">% idle softirq</option>
+                                        <option value="dbli">% HT dbl idle</option>
+                                        <option value="dblb">% HT dbl busy</option>
+					<option value="vcsw">% vol switch</option>
+					<option value="fcsw">% forced switch</option>
+					<option value="avrq">Avg runq wait</option>
+					<option value="maxrq">Max runq wait</option>
+					<option value="ldmigin"> Node Migrations In</option>
+					<option value="ldmigout"> Node Migrations Out</option>
+					<option value="iops">Disk IOPs</option>
+					<option value="mbps">MB per sec</option>
+					<option value="avgsize">Avg disk IO size</option>
+					<option value="avginflt">Avg inflight</option>
+					<option value="avgwait">Avg queue time</option>
+					<option value="avgsvc">Avg service time</option>
+					<option value="w_iops">Write Disk IOPs</option>
+                                        <option value="w_mbps">Write MB per sec</option>
+                                        <option value="w_avgsize">Write Avg disk IO size</option>
+                                        <option value="w_avginflt">Write Avg inflight</option>
+                                        <option value="w_avgwait">Write Avg queue time</option>
+                                        <option value="w_avgsvc">Write Avg service time</option>
+					<option value="r_iops">Read Disk IOPs</option>
+                                        <option value="r_mbps">Read MB per sec</option>
+                                        <option value="r_avgsize">Read Avg disk IO size</option>
+                                        <option value="r_avginflt">Read Avg inflight</option>
+                                        <option value="r_avgwait">Read Avg queue time</option>
+                                        <option value="r_avgsvc">Read Avg service time</option>
+                                        <option value="reque">disk requeues</option>
+                                        <option value="barr">Barrier writes</option>
+                                        <option value="events">Total events</option>
+                                        <option value="mevents">Missed events</option>
+                                        <option value="mbuffers">Missed Buffers</option>
+					
+
+				</select> </label>	<label> Height encodes: <select id="height" name="height">
+                                        <option value="acpu">Context switches</option>
+					<option value="bcpu">% busy CPU</option>
+					<option value="scpu">% system CPU</option>
+                                        <option value="ucpu">% user CPU</option>
+                                        <option value="shirq">% sys hardirq</option>
+                                        <option value="uhirq">% user hardirq</option>
+                                        <option value="ihirq">% idle hardirq</option>
+                                        <option value="ssirq">% sys softirq</option>
+                                        <option value="usirq">% user softirq</option>
+                                        <option value="isirq">% idle softirq</option>
+                                        <option value="dbli">% HT dbl idle</option>
+                                        <option value="dblb">% HT dbl busy</option>
+                                        <option value="vcsw">% vol switch</option>
+                                        <option value="fcsw">% forced switch</option>
+                                        <option value="avrq">Avg runq wait</option>
+                                        <option value="maxrq">Max runq wait</option>
+                                        <option value="ldmigin"> Node Migrations In</option>
+                                        <option value="ldmigout"> Node Migrations Out</option>
+                                        <option value="iops">Disk IOPs</option>
+                                        <option value="mbps">MB per sec</option>
+                                        <option value="avgsize">Avg disk IO size</option>
+                                        <option value="avginflt">Avg inflight</option>
+                                        <option value="avgwait">Avg queue time</option>
+                                        <option value="avgsvc">Avg service time</option>
+                                        <option value="w_iops">Write Disk IOPs</option>
+                                        <option value="w_mbps">Write MB per sec</option>
+                                        <option value="w_avgsize">Write Avg disk IO size</option>
+                                        <option value="w_avginflt">Write Avg inflight</option>
+                                        <option value="w_avgwait">Write Avg queue time</option>
+                                        <option value="w_avgsvc">Write Avg service time</option>
+                                        <option value="r_iops">Read Disk IOPs</option>
+                                        <option value="r_mbps">Read MB per sec</option>
+                                        <option value="r_avgsize">Read Avg disk IO size</option>
+                                        <option value="r_avginflt">Read Avg inflight</option>
+                                        <option value="r_avgwait">Read Avg queue time</option>
+                                        <option value="r_avgsvc">Read Avg service time</option>
+                                        <option value="reque">disk requeues</option>
+                                        <option value="barr">Barrier writes</option>
+                                        <option value="events">Total events</option>
+                                        <option value="mevents">Missed events</option>
+                                        <option value="mbuffers">Missed Buffers</option>
+                                </select> </label>           
+
+				</select> </label></b></p><p><b>  Reports:		<input type="checkbox" id="kparse" name="kparse" value="yes" checked>kparse  <input type="checkbox" id="kipid" name="kipid" value="yes">kipid  <input type="checkbox" id="kidsk" name="kidsk" value="yes">kidsk  <input type="checkbox" id="kirunq" name="kirunq" value="yes">kirunq <input type="checkbox" id="kifutex" name="kifutex" value="yes">kifutex  <input type="checkbox" id="kitrace" name="kitrace" value="yes">kitrace		<input type="checkbox" id="cleanup" name="cleanup" value="yes" checked>Delete prior reports</b></p> 
+                        </div>
+                        <div id="tooltip" class="hidden">
+                                  <p><span id="rect_popup">100 </span></p>
+                        </div>
+                <div>
+                <script type="text/javascript">
+
+	d3.csv("cluster_timeline.csv", function(csvdata) {
+
+		var nodes = [];
+		// convert CSV strings to numbers
+		csvdata.forEach(function (d,i) {
+			d.hostid = +d.hostid;
+			d.interval = +d.interval;
+			d.start = +d.start;
+			d.end = +d.end;
+			d.lcpu_cnt = +d.lcpu_cnt;
+			d.busy_pct = +d.busy_pct;
+			d.sys_pct = +d.sys_pct;
+			d.user_pct = +d.user_pct;
+			d.idle_pct = +d.idle_pct;
+			d.hardirq_sys_pct = +d.hardirq_sys_pct;
+			d.hardirq_user_pct = +d.hardirq_user_pct;
+			d.hardirq_idle_pct = +d.hardirq_idle_pct;
+			d.softirq_sys_pct = +d.softirq_sys_pct;
+			d.softirq_user_pct = +d.softirq_user_pct;
+			d.softirq_idle_pct = + d.softirq_idle_pct;
+			d.dblidle = +d.dblidle;
+			d.lcpu1busy = +d.lcpu1busy;
+			d.lcpu2busy = +d.lcpu2busy;
+			d.dblbusy = +d.dblbusy;
+			d.switch_cnt = +d.switch_cnt;
+			d.vol_pct = +d.vol_pct;
+			d.forced_pct = +d.forced_pct;
+			d.AvRunqTm = +d.AvRunqTm;
+			d.MaxRunqTm = +d.MaxRunqTm;
+			d.TotRunqTm = +d.TotRunqTm;
+			d.RunqCnt = +d.RunqCnt;
+			d.Migrs = +d.Migrs;
+			d.LdomMigIn = +d.LdomMigIn;
+			d.LdomMigOut = +d.LdomMigOut;
+			d.CstateEvts = +d.CstateEvts;
+			d.cstate0 = +d.cstate0;
+			d.cstate1 = +d.cstate1;
+			d.cstate2 = +d.cstate2;
+			d.cstate3 = +d.cstate3;
+			d.FreqEvts = +d.FreqEvts;
+			d.IO_ps = +d.IO_ps;
+			d.MB_ps = +d.MB_ps;
+			d.AvIOsz = +d.AvIOsz;
+			d.AvInFlt = +d.AvInFlt;
+			d.QuTm = +d.QuTm;
+			d.SvcTm = +d.SvcTm;
+			d.wIO_ps = +d.wIO_ps;
+			d.wMB_ps = +d.wMB_ps;
+			d.wAvIOsz = +d.wAvIOsz;
+			d.wAvInFlt = +d.wAvInFlt;
+			d.wQuTm = +d.wQuTm;
+			d.wSvcTm = +d.wSvcTm;
+			d.rIO_ps = +d.rIO_ps;
+                        d.rMB_ps = +d.rMB_ps;
+                        d.rAvIOsz = +d.rAvIOsz;
+                        d.rAvInFlt = +d.rAvInFlt;
+                        d.rQuTm = +d.rQuTm;
+                        d.rSvcTm = +d.rSvcTm;
+			d.requeues_ps = +d.requeues_ps;
+			d.barriers_ps = +d.barriers_ps;
+			d.Events = +d.Events;
+			d.Buffers = +d.Buffers;
+			d.MissedEvents = +d.MissedEvents;
+			d.MissedBufs = +d.MissedBufs
+			nodes.push({ "hostname": d.hostname, "id": d.hostid})
+                });
+
+		// We have to decide what to use for the default color scale upon first
+		// presentation of the chart.  We'll use zero to the highest 'busy_pct'.
+                var colorScale = d3.scale.linear()
+                        .domain([0,100])
+                        .interpolate(d3.interpolateHcl)
+                        .range(["#00ff00", "#ff0000"]);
+
+                // Extract a list of just the unique hostnames.  This is used to
+		// draw a lane for each host, determine how many hosts etc..
+                nodes = d3.keys(d3.nest()
+                        .key(function(d) {return d.hostname;})
+                        .map(nodes));
+                var node_cnt = nodes.length;
+
+		csvdata.forEach(function (d,i) {
+                        d.hostid = nodes.indexOf(d.hostname);
+		});
+
+
+		// Determin the start/end times for the X axis.
+                var timeBegin = d3.min(csvdata, function(d) { return d.start});
+                var timeEnd = d3.max(csvdata, function(d) { return d.end});
+
+		// Defining margins and lane sizes
+		var m = [5, 10, 15, 120], //top right bottom left
+                        w = 1160 - m[1] - m[3],
+                        h = (node_cnt + 1)*50 - m[0] - m[2],
+                        miniHeight = node_cnt * 20,
+                        mainHeight = h - miniHeight - 30,
+			minilaneHeight = miniHeight/node_cnt;
+			mainlaneHeight = mainHeight/node_cnt;
+
+                // Set the scales for the X axis, the heighth of the lanes, etc.
+		var xScale = d3.scale.linear()
+                     .domain([ d3.min(csvdata, function(d) { return d.end; }), d3.max(csvdata, function(d) { return d.end; })])
+                     .range([0, w]);
+
+                var x = d3.scale.linear()
+                                .domain([timeBegin, timeEnd])
+                                .range([0, w]);
+                var x1 = d3.scale.linear()
+                                .range([0, w]);
+                var y2 = d3.scale.linear()
+                                .domain([0, node_cnt])
+                                .range([0, mainHeight]);
+                var y1 = d3.scale.linear()
+                                .domain([0, node_cnt])
+                                .range([0, miniHeight]);
+		
+		// Heighth of elements is scaled to the context switch rate, zero to max.
+		var h1 = d3.scale.linear()
+				.domain([0,d3.max(csvdata, function(d) { return d.switch_cnt; }) ])
+				.range([2,16]); 
+		var h2 = d3.scale.linear()
+                                .domain([0,d3.max(csvdata, function(d) { return d.switch_cnt; }) ])
+                                .range([2,mainlaneHeight - 2]);
+
+                // Define an X-axis function
+                var xAxis = d3.svg.axis()
+                                .scale(xScale)
+				.tickFormat(d3.format(".1f"))
+                                .orient("bottom");
+
+
+		// Add the SVG canvas
+                var chart = d3.select("#Timeline_chart")
+                                        .append("svg")
+                                        .attr("width", w + m[1] + m[3])
+                                        .attr("height", h + m[0] + m[2])
+                                        .attr("class", "chart");
+
+		// Add the clipping path to the top larger window
+                chart.append("defs").append("clipPath")
+                        .attr("id", "clip")
+                        .append("rect")
+                        .attr("width", 1160)
+                        .attr("height", mainHeight);
+
+		// Create two 'g' group elemenst...one for main window, one for mini window
+                var mini = chart.append("g")
+                                        .attr("transform", "translate(" + m[3] + "," +  m[0] + ")")
+                                        .attr("width", w)
+                                        .attr("height", miniHeight)
+                                        .attr("class", "mini");
+
+                var main = chart.append("g")
+                                        .attr("transform", "translate(" + m[3] + "," + (miniHeight + m[0] + 40) + ")")
+                                        .attr("width", w)
+                                        .attr("height", mainHeight)
+                                        .attr("class", "main");
+
+                //main lanes and texts
+                main.append("g").selectAll(".laneLines")
+                        .data(nodes)
+                        .enter().append("line")
+                        .attr("x1", -m[0])
+                        .attr("y1", function(d,i) {return y2(nodes.indexOf(nodes[i]));})
+                        .attr("x2", w)
+                        .attr("y2", function(d,i) {return y2(nodes.indexOf(nodes[i]));})
+                        .attr("stroke", "lightgray")
+
+                main.append("g").selectAll(".laneText")
+                        .data(nodes)
+                        .enter().append("text")
+                        .text(function(d) {return d;})
+                        .attr("x", -m[1])
+                        .attr("y", function(d, i) {return y2(i + .5);})
+                        .attr("dy", ".5ex")
+                        .attr("text-anchor", "end")
+                        .attr("class", "laneText");
+
+                //mini lanes and texts
+                mini.append("g").selectAll(".laneLines")
+                        .data(nodes)
+                        .enter().append("line")
+                        .attr("x1", -m[0])
+                        .attr("y1", function(d,i) {return y1(nodes.indexOf(nodes[i]));})
+                        .attr("x2", w)
+                        .attr("y2", function(d,i) {return y1(nodes.indexOf(nodes[i]));})
+                        .attr("stroke", "lightgray");
+
+                mini.append("g").selectAll(".laneText")
+                        .data(nodes)
+                        .enter().append("text")
+                        .text(function(d) {return d;})
+                        .attr("x", -m[1])
+                        .attr("y", function(d, i) {return y1(i + .5);})
+                        .attr("dy", ".5ex")
+                        .attr("text-anchor", "end")
+                        .attr("class", "ItemslaneText");
+
+                var itemRects = main.append("g")
+                        .attr("clip-path", "url(#clip)");
+
+                //Add mini item rects... main rects don't appear till you start brushing...see display()
+
+                mini.append("g").selectAll(".miniItems")
+                        .data(csvdata)
+                        .enter().append("rect")
+                        .attr("x", function(d) {return x(d.start);})
+                        .attr("y", function(d) {return y1(d.hostid+ 1) - h1(d.switch_cnt) - 1;})
+			.attr("width", function(d) {return Math.max(1,(x(d.end) -  x(d.start) - 1));})
+                        .attr("height", function(d) {return h1(d.switch_cnt) })
+                        .attr("stroke-width", 2)
+//                        .attr("fill-opacity", .7)
+                        .attr("fill", function(d) {return colorScale(d.busy_pct)})
+			.attr("class", "miniItems");
+
+                //mini labels
+//                mini.append("g").selectAll(".miniLabels")
+//                        .data(csvdata)
+//                        .enter().append("text")
+//                        .text(function(d) {return d.start;})
+//                        .attr("x", function(d) {return x(d.start);})
+//                        .attr("y", function(d) {return y2(d.hostid + .5);})
+//                        .attr("dy", ".5ex");
+
+                //brush
+                var brush = d3.svg.brush()
+                          .x(x)
+                          .on("brush", display);
+
+                mini.append("g")
+                        .attr("class", "x brush")
+                        .call(brush)
+                        .selectAll("rect")
+                        .attr("y", 1)
+                        .attr("height", miniHeight - 1);
+
+		mini.append("g")
+			.attr("class", "axis") 
+			.attr("transform", "translate(0," + (miniHeight) + ")")
+			.call(xAxis);
+
+                display();
+
+		// Required vars for the initial color and height presentation.  Menu selectable
+		// after that.... and a very large menu it is...
+		var visitems,rects;
+		var fill_c = bcpu_fill;
+		var cur_h = acpu_h;	
+		var rect_h1 = acpu_height1;
+		var rect_h2 = acpu_height2;
+		var y2_h =  acpu_y2;
+
+                function display() {
+                        var  labels,
+                                minExtent = brush.extent()[0],
+                                maxExtent = brush.extent()[1];
+	
+       			visItems = csvdata.filter(function(d) {return (d.start) < maxExtent && (d.end) > minExtent;});
+                        mini.select(".brush")
+                                .call(brush.extent([minExtent, maxExtent]));
+
+                        x1.domain([minExtent, maxExtent]);
+
+			contextMenuShowing = false;
+
+                        //update main item rects
+                        rects = itemRects.selectAll("a")
+                                .data(visItems, function (d) { return d.hostid; })
+				.attr("xlink:show", "new")
+                                .attr("xlink:href", function(d){return "timeline.php?start=" + minExtent 
+					+ "&end=" + maxExtent + "&node=" + d.hostname + "&kparse=" + kparse
+					+ "&kipid=" + kipid + "&kidsk=" + kidsk + "&kirunq=" + kirunq + "&kifutex=" + kifutex 
+					+ "&coop=" + coop + "&vis=" + vis + "&kiall=" + kiall 
+					+ "&kitrace=" + kitrace + "&timestamp=" + d.timestamp + "&path=" + d.path + "/"
+					+ d.hostname + "&cleanup=" + cleanup
+					;});
+
+                        rects.enter().append("svg:a")
+				.attr("xlink:show", "new")
+                                .attr("xlink:href", function(d){return "timeline.php?start=" + minExtent
+                                        + "&end=" + maxExtent + "&node=" + d.hostname + "&kparse=" + kparse
+                                        + "&kipid=" + kipid + "&kidsk=" + kidsk + "&kirunq=" + kirunq + "&kifutex=" + kifutex
+                                        + "&coop=" + coop + "&vis=" + vis + "&kiall=" + kiall
+                                        + "&kitrace=" + kitrace + "&timestamp=" + d.timestamp + "&path=" + d.path + "/"
+					+ d.hostname + "&cleanup=" + cleanup
+                                        ;})
+				.append("rect")
+                                .attr("x", function(d) {return x1(d.start);})
+                                .attr("y", function(d) {return y2_h(d) ;})
+                                .attr("width", function(d) {return Math.max(1,(x1(d.end) -  x1(d.start) - 2));})
+                                .attr("height", function(d) {return rect_h2(d) ;})
+                        	.attr("stroke-width", 6)
+                        	.attr("fill", function(d) {return fill_c(d);})
+			    .on("mouseout", function() {
+               			// Hide the tooltip
+               			d3.select("#tooltip").classed("hidden", true) })
+          		    .on("mouseover", function(d) {
+              			if (!d.hostname) return;
+              			d3.select('#tooltip')
+                 			.style('position', 'absolute')
+                 			.style('left', d3.event.x + 20 + "px")
+                 			.style('top', d3.event.y - 80 + "px")
+                 			.style('display', 'block')
+                 			.select("#rect_popup")
+	.text("Click to create report(s)\n\n" + d.hostname +  ":  start: " +  d.start + " end: " + d.end
+		+ "\n" + "\% Total/Sys/User/Idle CPU: " + d.busy_pct + "\%/ " + d.sys_pct + "\%/ " + d.user_pct + "\%/ " + d.idle_pct + "\%"
+		+ "\n" + "\% HardIrq Sys/Usr/Idle: " + d.hardirq_sys_pct + "\%/ " + d.hardirq_user_pct + "\%/ " + d.hardirq_idle_pct + "\%" 
+		+ "\n" + "\% SoftIrq Sys/Usr/Idle: " + d.softirq_sys_pct + "\%/ " + d.softirq_user_pct + "\%/ " + d.softirq_idle_pct + "\%" 
+		+ "\n" + "\% HT Double Idle/busy: " + d.dblidle + "\%/ " + d.dblbusy + "\%/  CSW cnt/vol/forced : " + d.switch_cnt + 
+			"/ " + d.vol_pct + "\%/ " + d.forced_pct + "\%"
+		+ "\n" + "Avg/Max runq usecs: " + d.AvRunqTm + "/ " + d.MaxRunqTm + "  Total migr/Node_in/Node_out: " + d.Migrs +
+			"/ " + d.LdomMigIn + "/ " + d.LdomMigOut 
+		+ "\n" + "Disk Total IOPs/MBps/AvIOsz/AvInFLight/AvWait/AvSvc: " + d.IO_ps + "/ " + d.MB_ps + "/ " + d.AvIOsz + "/ "
+			+ d.AvInFlt + "/ " + d.QuTm + "/ " + d.SvcTm
+		+ "\n" + "Disk Write IOPs/MBps/AvIOsz/AvInFLight/AvWait/AvSvc: " + d.wIO_ps + "/ " + d.wMB_ps + "/ " + d.wAvIOsz + "/ "
+                        + d.wAvInFlt + "/ " + d.wQuTm + "/ " + d.wSvcTm
+		+ "\n" + "Disk Read  IOPs/MBps/AvIOsz/AvInFLight/AvWait/AvSvc: " + d.rIO_ps + "/ " + d.rMB_ps + "/ " + d.rAvIOsz + "/ "
+                        + d.rAvInFlt + "/ " + d.rQuTm + "/ " + d.rSvcTm
+		+ "\n" + "Events/MissedEvents/buffers/MissedBufs: " + d.Events + "/ " + d.MissedEvents + "/ " + d.Buffers + "/ " + d.MissedBufs);
+
+
+
+              			d3.select("#tooltip").classed("hidden", false) })
+          		    .on("mouseout", function() {
+               			// Hide the tooltip
+               			d3.select("#tooltip").classed("hidden", true).style('display', 'none') });
+			
+                        rects.exit().remove();
+                }
+
+
+		// button selections for color scale and height encoding. 
+
+		d3.select("#color").on("change", function() {
+			switch(this.value)
+			{
+				case "bcpu":
+					bcpu_c();  break;
+				case "acpu":
+					acpu_c(); break;
+				case "scpu":
+					scpu_c(); break;
+				case "ucpu":
+                                        ucpu_c(); break;
+                                case "shirq":
+                                        shirq_c(); break;
+                                case "uhirq":
+                                        uhirq_c(); break;
+                                case "ihirq":
+                                        ihirq_c(); break;
+                                case "ssirq":
+                                        ssirq_c(); break;
+                                case "usirq":
+                                        usirq_c(); break;
+                                case "isirq":
+                                        isirq_c(); break;
+				case "dbli":
+					dbli_c(); break;
+				case "dblb":
+					dblb_c(); break;
+				case "vcsw":
+                                        vcsw_c(); break;
+                                case "fcsw":
+                                        fcsw_c(); break;
+                                case "avrq":
+                                        avrq_c(); break;
+                                case "maxrq":
+                                        maxrq_c(); break;
+				case "ldmigin":
+                                        ldmigin_c(); break;
+                                case "ldmigout":
+                                        ldmigout_c(); break;
+                                case "cstates":
+                                        cstates_c(); break;
+                                case "c0":
+                                        c0_c(); break;
+                                case "c1":
+                                        c1_c(); break;
+                                case "c2":
+                                        c2_c(); break;
+                                case "c3":
+                                        c3_c(); break;
+                                case "iops":
+                                        iops_c(); break;
+                                case "mbps":
+                                        mbps_c(); break;
+                                case "avgsize":
+                                        avgsize_c(); break;
+                                case "avginflt":
+                                        avginflt_c(); break;
+                                case "avgwait":
+                                        avgwait_c(); break;
+                                case "avgsvc":
+                                        avgsvc_c(); break;
+                                case "w_iops":
+                                        w_iops_c(); break;
+                                case "w_mbps":
+                                        w_mbps_c(); break;
+                                case "w_avgsize":
+                                        w_avgsize_c(); break;
+                                case "w_avginflt":
+                                        w_avginflt_c(); break;
+                                case "w_avgwait":
+                                        w_avgwait_c(); break;
+                                case "w_avgsvc":
+                                        w_avgsvc_c(); break;
+                                case "r_iops":
+                                        r_iops_c(); break;
+                                case "r_mbps":
+                                        r_mbps_c(); break;
+                                case "r_avgsize":
+                                        r_avgsize_c(); break;
+                                case "r_avginflt":
+                                        r_avginflt_c(); break;
+                                case "r_avgwait":
+                                        r_avgwait_c(); break;
+                                case "r_avgsvc":
+                                        r_avgsvc_c(); break;
+                                case "reque":
+                                        reque_c(); break;
+                                case "barr":
+                                        barr_c(); break;
+                                case "events":
+                                        events_c(); break;
+                                case "mevents":
+                                        mevents_c(); break;
+                                case "mbuffers":
+                                        mbuffers_c(); break;
+
+				default:
+					bcpu_c(); 
+			}	
+                });
+
+		d3.select("#height").on("change", function() {
+                        switch(this.value)
+                        {
+                                case "bcpu":
+                                        bcpu_h();  break;
+                                case "acpu":
+                                        acpu_h(); break;
+                                case "scpu":
+                                        scpu_h(); break;
+                                case "ucpu":
+                                        ucpu_h(); break;
+                                case "shirq":
+                                        shirq_h(); break;
+                                case "uhirq":
+                                        uhirq_h(); break;
+                                case "ihirq":
+                                        ihirq_h(); break;
+                                case "ssirq":
+                                        ssirq_h(); break;
+                                case "usirq":
+                                        usirq_h(); break;
+                                case "isirq":
+                                        isirq_h(); break;
+                                case "dbli":
+                                        dbli_h(); break;
+                                case "dblb":
+                                        dblb_h(); break;
+                                case "vcsw":
+                                        vcsw_h(); break;
+                                case "fcsw":
+                                        fcsw_h(); break;
+                                case "avrq":
+                                        avrq_h(); break;
+                                case "maxrq":
+                                        maxrq_h(); break;
+                                case "ldmigin":
+                                        ldmigin_h(); break;
+                                case "ldmigout":
+                                        ldmigout_h(); break;
+                                case "cstates":
+                                        cstates_h(); break;
+                                case "c0":
+                                        c0_h(); break;
+                                case "c1":
+                                        c1_h(); break;
+                                case "c2":
+                                        c2_h(); break;
+                                case "c3":
+                                        c3_h(); break;
+                                case "iops":
+                                        iops_h(); break;
+                                case "mbps":
+                                        mbps_h(); break;
+                                case "avgsize":
+                                        avgsize_h(); break;
+                                case "avginflt":
+                                        avginflt_h(); break;
+                                case "avgwait":
+                                        avgwait_h(); break;
+                                case "avgsvc":
+                                        avgsvc_h(); break;
+                                case "w_iops":
+                                        w_iops_h(); break;
+                                case "w_mbps":
+                                        w_mbps_h(); break;
+                                case "w_avgsize":
+                                        w_avgsize_h(); break;
+                                case "w_avginflt":
+                                        w_avginflt_h(); break;
+                                case "w_avgwait":
+                                        w_avgwait_h(); break;
+                                case "w_avgsvc":
+                                        w_avgsvc_h(); break;
+                                case "r_iops":
+                                        r_iops_h(); break;
+                                case "r_mbps":
+                                        r_mbps_h(); break;
+                                case "r_avgsize":
+                                        r_avgsize_h(); break;
+                                case "r_avginflt":
+                                        r_avginflt_h(); break;
+                                case "r_avgwait":
+                                        r_avgwait_h(); break;
+                                case "r_avgsvc":
+                                        r_avgsvc_h(); break;
+                                case "reque":
+                                        reque_h(); break;
+                                case "barr":
+                                        barr_h(); break;
+                                case "events":
+                                        events_h(); break;
+                                case "mevents":
+                                        mevents_h(); break;
+                                case "mbuffers":
+                                        mbuffers_h(); break;
+
+                                default:
+                                        bcpu_h();
+                        }
+                });
+
+
+		// Checkboxes for desired reports to generates
+
+
+		var kparse = 1;
+                var kipid = 0;
+                var kidsk = 0;
+                var kirunq= 0;
+                var kifutex = 0;
+                var coop = 0;
+                var vis = 0;
+                var kiall = 0;
+                var kitrace = 0;
+		var cleanup = 1;
+
+		d3.select("#kparse").on("change", function() {
+                        if (this.checked)
+                                kparse = 1;
+                        else
+				kparse = 0;
+			display();
+                });
+
+		d3.select("#kipid").on("change", function() {
+                        if (this.checked)
+                                kipid = 1;
+                        else
+                                kipid = 0;
+                        display();
+                });
+
+		d3.select("#kidsk").on("change", function() {
+                        if (this.checked)
+                                kidsk = 1;
+                        else
+                                kidsk = 0;
+                        display();
+                });
+
+                d3.select("#kirunq").on("change", function() {
+                        if (this.checked)
+                                kirunq = 1;
+                        else
+                                kirunq = 0;
+                        display();
+                });
+
+                d3.select("#kifutex").on("change", function() {
+                        if (this.checked)
+                                kifutex = 1;
+                        else
+                                kifutex = 0;
+                        display();
+                });
+
+                d3.select("#coop").on("change", function() {
+                        if (this.checked)
+                                coop = 1;
+                        else
+                                coop = 0;
+                        display();
+                });
+
+		d3.select("#vis").on("change", function() {
+                        if (this.checked)
+                                vis = 1;
+                        else
+                                vis = 0;
+                        display();
+                });
+
+                d3.select("#kiall").on("change", function() {
+			if (this.checked)
+                                kiall = 1;  // Change to '1' when kiall can follow symlinks.
+                        else
+                                kiall = 0;
+                        display();
+                });
+
+		d3.select("#kitrace").on("change", function() {
+                        if (this.checked)
+                                kitrace = 1;
+                        else
+                                kitrace = 0;
+                        display();
+                });
+
+                d3.select("#cleanup").on("change", function() {
+                        if (this.checked)
+                                cleanup = 1;
+                        else
+                                cleanup = 0;
+                        display();
+                });
+
+
+
+		// Building the colorscale mappings
+
+		var pct_colorScale = d3.scale.linear().domain([0,100])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+		var acpu_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.switch_cnt; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+		var avrq_colorScale = d3.scale.linear().domain([d3.min(csvdata, function(d) { return d.AvRunqTm; }),
+					d3.max(csvdata, function(d) { return d.AvRunqTm; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+		var maxrq_colorScale = d3.scale.linear().domain([d3.min(csvdata, function(d) { return d.MaxRunqTm; }),
+                                        d3.max(csvdata, function(d) { return d.MaxRunqTm; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+		var ldmigin_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.LdomMigIn; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+		var ldmigout_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.LdomMigOut; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+		var cst_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.CstateEvts; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var c0_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.cstate0; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var c1_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.cstate1; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var c2_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.cstate2; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var c3_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.cstate3; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+		var iops_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.IO_ps; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+		var mbps_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.MB_ps; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var avgsize_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.AvIOsz; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var avginflt_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.AvInFlt; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var avgwait_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.QuTm; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var avgsvc_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.SvcTm; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var w_iops_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wIO_ps; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var w_mbps_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wMB_ps; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var w_avgsize_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wAvIOsz; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var w_avginflt_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wAvInFlt; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var w_avgwait_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wQuTm; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var w_avgsvc_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wSvcTm; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var r_iops_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rIO_ps; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var r_mbps_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rMB_ps; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var r_avgsize_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rAvIOsz; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var r_avginflt_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rAvInFlt; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var r_avgwait_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rQuTm; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var r_avgsvc_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rSvcTm; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var reque_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.requeues_ps; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var barr_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.barriers_ps; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var events_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.Events; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var mevents_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.MissedEvents; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+                var mbuffers_colorScale = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.MissedBufs; })])
+                                .interpolate(d3.interpolateHcl).range(["#00ff00", "#ff0000"]);
+
+
+		// Colorscale mapping methods run when brushing and selecting new encoding schemes
+
+		function  bcpu_fill(d) {return pct_colorScale(d.busy_pct);}
+		function bcpu_c(d) {
+			fill_c = bcpu_fill;
+			main.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.busy_pct); });
+			mini.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.busy_pct); });
+		}
+
+		function  acpu_fill(d) {return acpu_colorScale(d.switch_cnt); }
+		function acpu_c(d) {
+			fill_c = acpu_fill;
+			main.selectAll("rect").attr("fill",function(d) { return acpu_colorScale(d.switch_cnt); });
+			mini.selectAll("rect").attr("fill",function(d) { return acpu_colorScale(d.switch_cnt); });
+		}
+
+		function scpu_fill(d) {return pct_colorScale(d.sys_pct);}
+		function scpu_c(d) {
+			fill_c = scpu_fill;
+			main.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.sys_pct); });
+                        mini.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.sys_pct); });
+                }
+
+		function ucpu_fill(d) {return pct_colorScale(d.user_pct);}
+                function ucpu_c(d) {
+                        fill_c = ucpu_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.user_pct); });
+                        mini.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.user_pct); });
+                }
+
+                function shirq_fill(d) {return pct_colorScale(d.hardirq_sys_pct);}
+                function shirq_c(d) {
+                        fill_c = shirq_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.hardirq_sys_pct); });
+                        mini.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.hardirq_sys_pct); });
+                }
+
+                function uhirq_fill(d) {return pct_colorScale(d.hardirq_user_pct);}
+                function uhirq_c(d) {
+                        fill_c = uhirq_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.hardirq_user_pct); });
+                        mini.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.hardirq_user_pct); });
+                }
+
+                function ihirq_fill(d) {return pct_colorScale(d.hardirq_idle_pct);}
+                function ihirq_c(d) {
+                        fill_c = ihirq_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.hardirq_idle_pct); });
+                        mini.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.hardirq_idle_pct); });
+                }
+
+                function ssirq_fill(d) {return pct_colorScale(d.softirq_sys_pct);}
+                function shirq_c(d) {
+                        fill_c = ssirq_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.softirq_sys_pct); });
+                        mini.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.softirq_sys_pct); });
+                }
+
+                function usirq_fill(d) {return pct_colorScale(d.softirq_user_pct);}
+                function usirq_c(d) {
+                        fill_c = usirq_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.softirq_user_pct); });
+                        mini.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.softirq_user_pct); });
+                }
+
+                function isirq_fill(d) {return pct_colorScale(d.softirq_idle_pct);}
+                function isirq_c(d) {
+                        fill_c = isirq_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.softirq_idle_pct); });
+                        mini.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.softirq_idle_pct); });
+                }
+
+		function dbli_fill(d) {return pct_colorScale(d.dblidle);}
+		function dbli_c(d) {
+			fill_c = dbli_fill;
+			main.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.dblidle); });
+			mini.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.dblidle); });
+		}
+
+		function dblb_fill(d) {return pct_colorScale(d.dblbusy);}
+                function dblb_c(d) {
+                        fill_c = dblb_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.dblbusy); });
+                        mini.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.dblbusy); });
+                }
+
+		function vcsw_fill(d) {return pct_colorScale(d.vol_pct);}
+                function vcsw_c(d) {
+                        fill_c = vcsw_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.vol_pct); });
+                        mini.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.vol_pct); });
+                }
+
+                function fcsw_fill(d) {return pct_colorScale(d.forced_pct);}
+                function fcsw_c(d) {
+                        fill_c = fcsw_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.forced_pct); });
+                        mini.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.forced_pct); });
+                }
+
+		function avrq_fill(d) {return avrq_colorScale(d.AvRunqTm);}
+                function avrq_c(d) {
+                        fill_c = avrq_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return avrq_colorScale(d.AvRunqTm); });
+                        mini.selectAll("rect").attr("fill",function(d) { return avrq_colorScale(d.AvRunqTm); });
+                }
+
+		function maxrq_fill(d) {return maxrq_colorScale(d.MaxRunqTm);}
+                function maxrq_c(d) {
+                        fill_c = maxrq_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return maxrq_colorScale(d.MaxRunqTm); });
+                        mini.selectAll("rect").attr("fill",function(d) { return maxrq_colorScale(d.MaxRunqTm); });
+                }
+
+		function ldmigin_fill(d) {return ldmigin_colorScale(d.LdomMigIn);}
+		function ldmigin_c(d) {	
+			fill_c = ldmigin_fill;
+			main.selectAll("rect").attr("fill",function(d) { return ldmigin_colorScale(d.LdomMigIn); });
+			mini.selectAll("rect").attr("fill",function(d) { return ldmigin_colorScale(d.LdomMigIn); });
+		}
+
+		function ldmigout_fill(d) {return ldmigout_colorScale(d.LdomMigOut);}
+                function ldmigout_c(d) {
+                        fill_c = ldmigout_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return ldmigout_colorScale(d.LdomMigOut); });
+                        mini.selectAll("rect").attr("fill",function(d) { return ldmigout_colorScale(d.LdomMigOut); });
+                }
+
+		function cst_fill(d) {return cst_colorScale(d.CstateEvts);}
+                function cst_c(d) {
+                        fill_c = cst_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return cst_colorScale(d.CstateEvts); });
+                        mini.selectAll("rect").attr("fill",function(d) { return cst_colorScale(d.CstateEvts); });
+                }
+
+		function c0_fill(d) {return cst_colorScale(d.cstate0);}
+                function c0_c(d) {
+                        fill_c = c0_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return c0_colorScale(d.cstate0); });
+                        mini.selectAll("rect").attr("fill",function(d) { return c0_colorScale(d.cstate0); });
+                }
+
+                function c1_fill(d) {return cst_colorScale(d.cstate1);}
+                function c1_c(d) {
+                        fill_c = c1_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return c1_colorScale(d.cstate1); });
+                        mini.selectAll("rect").attr("fill",function(d) { return c1_colorScale(d.cstate1); });
+                }
+
+                function c2_fill(d) {return cst_colorScale(d.cstate2);}
+                function c2_c(d) {
+                        fill_c = c2_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return c2_colorScale(d.cstate2); });
+                        mini.selectAll("rect").attr("fill",function(d) { return c2_colorScale(d.cstate2); });
+                }
+
+                function c3_fill(d) {return cst_colorScale(d.cstate3);}
+                function c3_c(d) {
+                        fill_c = c3_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return c3_colorScale(d.cstate3); });
+                        mini.selectAll("rect").attr("fill",function(d) { return c3_colorScale(d.cstate3); });
+                }
+
+                function iops_fill(d) {return iops_colorScale(d.IO_ps);}
+                function iops_c(d) {
+                        fill_c = iops_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return iops_colorScale(d.IO_ps); });
+                        mini.selectAll("rect").attr("fill",function(d) { return iops_colorScale(d.IO_ps); });
+                }
+
+                function mbps_fill(d) {return mbps_colorScale(d.MB_ps);}
+                function mbps_c(d) {
+                        fill_c = mbps_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return mbps_colorScale(d.MB_ps); });
+                        mini.selectAll("rect").attr("fill",function(d) { return mbps_colorScale(d.MB_ps); });
+                }
+
+		function avgsize_fill(d) {return avgsize_colorScale(d.AvIOsz);}
+                function avgsize_c(d) {
+                        fill_c = avgsize_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return avgsize_colorScale(d.AvIOsz); });
+                        mini.selectAll("rect").attr("fill",function(d) { return avgsize_colorScale(d.AvIOsz); });
+                }
+
+                function avginflt_fill(d) {return avginflt_colorScale(d.AvInFlt);}
+                function avginflt_c(d) {
+                        fill_c = avginflt_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return avginflt_colorScale(d.AvInFlt); });
+                        mini.selectAll("rect").attr("fill",function(d) { return avginflt_colorScale(d.AvInFlt); });
+                }
+
+                function avgwait_fill(d) {return avgwait_colorScale(d.QuTm);}
+                function avgwait_c(d) {
+                        fill_c = avgwait_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return avgwait_colorScale(d.QuTm); });
+                        mini.selectAll("rect").attr("fill",function(d) { return avgwait_colorScale(d.QuTm); });
+                }
+
+                function avgsvc_fill(d) {return avgsvc_colorScale(d.SvcTm);}
+                function avgsvc_c(d) {
+                        fill_c = avgsvc_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return avgsvc_colorScale(d.SvcTm); });
+                        mini.selectAll("rect").attr("fill",function(d) { return avgsvc_colorScale(d.SvcTm); });
+                }
+
+                function w_iops_fill(d) {return w_iops_colorScale(d.wIO_ps);}
+                function w_iops_c(d) {
+                        fill_c = w_iops_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return w_iops_colorScale(d.wIO_ps); });
+                        mini.selectAll("rect").attr("fill",function(d) { return w_iops_colorScale(d.wIO_ps); });
+                }
+
+                function w_mbps_fill(d) {return w_mbps_colorScale(d.wMB_ps);}
+                function w_mbps_c(d) {
+                        fill_c = w_mbps_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return w_mbps_colorScale(d.wMB_ps); });
+                        mini.selectAll("rect").attr("fill",function(d) { return w_mbps_colorScale(d.wMB_ps); });
+                }
+
+                function w_avgsize_fill(d) {return w_avgsize_colorScale(d.wAvIOsz);}
+                function w_avgsize_c(d) {
+                        fill_c = w_avgsize_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return w_avgsize_colorScale(d.wAvIOsz); });
+                        mini.selectAll("rect").attr("fill",function(d) { return w_avgsize_colorScale(d.wAvIOsz); });
+                }
+
+                function w_avginflt_fill(d) {return w_avginflt_colorScale(d.wAvInFlt);}
+                function w_avginflt_c(d) {
+                        fill_c = w_avginflt_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return w_avginflt_colorScale(d.wAvInFlt); });
+                        mini.selectAll("rect").attr("fill",function(d) { return w_avginflt_colorScale(d.wAvInFlt); });
+                }
+
+                function w_avgwait_fill(d) {return w_avgwait_colorScale(d.wQuTm);}
+                function w_avgwait_c(d) {
+                        fill_c = w_avgwait_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return w_avgwait_colorScale(d.wQuTm); });
+                        mini.selectAll("rect").attr("fill",function(d) { return w_avgwait_colorScale(d.wQuTm); });
+                }
+
+                function w_avgsvc_fill(d) {return w_avgsvc_colorScale(d.wSvcTm);}
+                function w_avgsvc_c(d) {
+                        fill_c = w_avgsvc_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return w_avgsvc_colorScale(d.wSvcTm); });
+                        mini.selectAll("rect").attr("fill",function(d) { return w_avgsvc_colorScale(d.wSvcTm); });
+                }
+
+                function r_iops_fill(d) {return r_iops_colorScale(d.rIO_ps);}
+                function r_iops_c(d) {
+                        fill_c = r_iops_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return r_iops_colorScale(d.rIO_ps); });
+                        mini.selectAll("rect").attr("fill",function(d) { return r_iops_colorScale(d.rIO_ps); });
+                }
+
+                function r_mbps_fill(d) {return r_mbps_colorScale(d.rMB_ps);}
+                function r_mbps_c(d) {
+                        fill_c = r_mbps_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return r_mbps_colorScale(d.rMB_ps); });
+                        mini.selectAll("rect").attr("fill",function(d) { return r_mbps_colorScale(d.rMB_ps); });
+                }
+
+                function r_avgsize_fill(d) {return r_avgsize_colorScale(d.rAvIOsz);}
+                function r_avgsize_c(d) {
+                        fill_c = r_avgsize_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return r_avgsize_colorScale(d.rAvIOsz); });
+                        mini.selectAll("rect").attr("fill",function(d) { return r_avgsize_colorScale(d.rAvIOsz); });
+                }
+
+                function r_avginflt_fill(d) {return r_avginflt_colorScale(d.rAvInFlt);}
+                function r_avginflt_c(d) {
+                        fill_c = r_avginflt_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return r_avginflt_colorScale(d.rAvInFlt); });
+                        mini.selectAll("rect").attr("fill",function(d) { return r_avginflt_colorScale(d.rAvInFlt); });
+                }
+
+                function r_avgwait_fill(d) {return r_avgwait_colorScale(d.rQuTm);}
+                function r_avgwait_c(d) {
+                        fill_c = r_avgwait_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return r_avgwait_colorScale(d.rQuTm); });
+                        mini.selectAll("rect").attr("fill",function(d) { return r_avgwait_colorScale(d.rQuTm); });
+                }
+
+                function r_avgsvc_fill(d) {return r_avgsvc_colorScale(d.rSvcTm);}
+                function r_avgsvc_c(d) {
+                        fill_c = r_avgsvc_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return r_avgsvc_colorScale(d.rSvcTm); });
+                        mini.selectAll("rect").attr("fill",function(d) { return r_avgsvc_colorScale(d.rSvcTm); });
+                }
+
+                function reque_fill(d) {return reque_colorScale(d.requeues_ps);}
+                function reque_c(d) {
+                        fill_c = reque_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return reque_colorScale(d.requeues_ps); });
+                        mini.selectAll("rect").attr("fill",function(d) { return reque_colorScale(d.requeues_ps); });
+                }
+
+		function barr_fill(d) {return barr_colorScale(d.barriers_ps);}
+		function barr_c(d) {
+                        fill_c = barr_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return barr_colorScale(d.barriers_ps); });
+                        mini.selectAll("rect").attr("fill",function(d) { return barr_colorScale(d.barriers_ps); });
+                }
+
+		function events_fill(d) {return events_colorScale(d.Events);}
+                function events_c(d) {
+                        fill_c = events_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return events_colorScale(d.Events); });
+                        mini.selectAll("rect").attr("fill",function(d) { return events_colorScale(d.Events); });
+                }
+
+		function mevents_fill(d) {return mevents_colorScale(d.MissedEvents);}
+                function mevents_c(d) {
+                        fill_c = mevents_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return mevents_colorScale(d.MissedEvents); });
+                        mini.selectAll("rect").attr("fill",function(d) { return mevents_colorScale(d.MissedEvents); });
+                }
+
+		function mbuffers_fill(d) {return mbuffers_colorScale(d.MissedBufs);}
+                function mbuffers_c(d) {
+                        fill_c = mbuffers_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return mbuffers_colorScale(d.MissedBufs); });
+                        mini.selectAll("rect").attr("fill",function(d) { return mbuffers_colorScale(d.MissedBufs); });
+                }
+
+
+
+
+		// Height altering methods
+
+		var pct_h2 = d3.scale.linear().domain([0,100])
+                                        .range([2,mainlaneHeight - 2]);
+		var acpu_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.switch_cnt; })])
+                                        .range([2,mainlaneHeight - 2]);
+		var avrq_h2 = d3.scale.linear().domain([d3.min(csvdata, function(d) { return d.AvRunqTm; }),
+                                        d3.max(csvdata, function(d) { return d.AvRunqTm; })])
+                                .range([2,mainlaneHeight - 2]);
+                var maxrq_h2 = d3.scale.linear().domain([d3.min(csvdata, function(d) { return d.MaxRunqTm; }),
+                                        d3.max(csvdata, function(d) { return d.MaxRunqTm; })])
+                                .range([2,mainlaneHeight - 2]);
+                var ldmigin_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.LdomMigIn; })])
+                                .range([2,mainlaneHeight - 2]);
+                var ldmigout_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.LdomMigOut; })])
+                                .range([2,mainlaneHeight - 2]);
+                var cst_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.CstateEvts; })])
+                                .range([2,mainlaneHeight - 2]);
+                var c0_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.cstate0; })])
+                                .range([2,mainlaneHeight - 2]);
+                var c1_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.cstate1; })])
+                                .range([2,mainlaneHeight - 2]);
+                var c2_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.cstate2; })])
+                                .range([2,mainlaneHeight - 2]);
+                var c3_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.cstate3; })])
+                                .range([2,mainlaneHeight - 2]);
+                var iops_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.IO_ps; })])
+                                .range([2,mainlaneHeight - 2]);
+                var mbps_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.MB_ps; })])
+                                .range([2,mainlaneHeight - 2]);
+                var avgsize_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.AvIOsz; })])
+                                .range([2,mainlaneHeight - 2]);
+                var avginflt_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.AvInFlt; })])
+                                .range([2,mainlaneHeight - 2]);
+                var avgwait_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.QuTm; })])
+                                .range([2,mainlaneHeight - 2]);
+                var avgsvc_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.SvcTm; })])
+                                .range([2,mainlaneHeight - 2]);
+                var w_iops_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wIO_ps; })])
+                                .range([2,mainlaneHeight - 2]);
+                var w_mbps_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wMB_ps; })])
+                                .range([2,mainlaneHeight - 2]);
+                var w_avgsize_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wAvIOsz; })])
+                                .range([2,mainlaneHeight - 2]);
+                var w_avginflt_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wAvInFlt; })])
+                                .range([2,mainlaneHeight - 2]);
+                var w_avgwait_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wQuTm; })])
+                                .range([2,mainlaneHeight - 2]);
+                var w_avgsvc_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wSvcTm; })])
+                                .range([2,mainlaneHeight - 2]);
+                var r_iops_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rIO_ps; })])
+                                .range([2,mainlaneHeight - 2]);
+                var r_mbps_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rMB_ps; })])
+                                .range([2,mainlaneHeight - 2]);
+                var r_avgsize_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rAvIOsz; })])
+                                .range([2,mainlaneHeight - 2]);
+                var r_avginflt_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rAvInFlt; })])
+                                .range([2,mainlaneHeight - 2]);
+                var r_avgwait_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rQuTm; })])
+                                .range([2,mainlaneHeight - 2]);
+                var r_avgsvc_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rSvcTm; })])
+                                .range([2,mainlaneHeight - 2]);
+                var reque_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.requeues_ps; })])
+                                .range([2,mainlaneHeight - 2]);
+                var barr_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.barriers_ps; })])
+                                .range([2,mainlaneHeight - 2]);
+                var events_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.Events; })])
+                                .range([2,mainlaneHeight - 2]);
+                var mevents_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.MissedEvents; })])
+                                .range([2,mainlaneHeight - 2]);
+                var mbuffers_h2 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.MissedBufs; })])
+                                .range([2,mainlaneHeight - 2]);
+
+
+		var pct_h1 = d3.scale.linear().domain([0,100])
+                                .range([2,16]);
+                var acpu_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.switch_cnt; })])
+                                .range([2,16]);
+                var avrq_h1 = d3.scale.linear().domain([d3.min(csvdata, function(d) { return d.AvRunqTm; }),
+                                        d3.max(csvdata, function(d) { return d.AvRunqTm; })])
+                                .range([2,16]);
+                var maxrq_h1 = d3.scale.linear().domain([d3.min(csvdata, function(d) { return d.MaxRunqTm; }),
+                                        d3.max(csvdata, function(d) { return d.MaxRunqTm; })])
+                                .range([2,16]);
+                var ldmigin_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.LdomMigIn; })])
+                                .range([2,16]);
+                var ldmigout_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.LdomMigOut; })])
+                                .range([2,16]);
+                var cst_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.CstateEvts; })])
+                                .range([2,16]);
+                var c0_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.cstate0; })])
+                                .range([2,16]);
+                var c1_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.cstate1; })])
+                                .range([2,16]);
+                var c2_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.cstate2; })])
+                                .range([2,16]);
+                var c3_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.cstate3; })])
+                                .range([2,16]);
+                var iops_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.IO_ps; })])
+                                .range([2,16]);
+                var mbps_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.MB_ps; })])
+                                .range([2,16]);
+                var avgsize_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.AvIOsz; })])
+                                .range([2,16]);
+                var avginflt_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.AvInFlt; })])
+                                .range([2,16]);
+                var avgwait_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.QuTm; })])
+                                .range([2,16]);
+                var avgsvc_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.SvcTm; })])
+                                .range([2,16]);
+                var w_iops_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wIO_ps; })])
+                                .range([2,16]);
+                var w_mbps_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wMB_ps; })])
+                                .range([2,16]);
+                var w_avgsize_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wAvIOsz; })])
+                                .range([2,16]);
+                var w_avginflt_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wAvInFlt; })])
+                                .range([2,16]);
+                var w_avgwait_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wQuTm; })])
+                                .range([2,16]);
+                var w_avgsvc_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.wSvcTm; })])
+                                .range([2,16]);
+                var r_iops_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rIO_ps; })])
+                                .range([2,16]);
+                var r_mbps_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rMB_ps; })])
+                                .range([2,16]);
+                var r_avgsize_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rAvIOsz; })])
+                                .range([2,16]);
+                var r_avginflt_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rAvInFlt; })])
+                                .range([2,16]);
+                var r_avgwait_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rQuTm; })])
+                                .range([2,16]);
+                var r_avgsvc_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.rSvcTm; })])
+                                .range([2,16]);
+                var reque_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.requeues_ps; })])
+                                .range([2,16]);
+                var barr_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.barriers_ps; })])
+                                .range([2,16]);
+                var events_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.Events; })])
+                                .range([2,16]);
+                var mevents_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.MissedEvents; })])
+                                .range([2,16]);
+                var mbuffers_h1 = d3.scale.linear().domain([0,d3.max(csvdata, function(d) { return d.MissedBufs; })])
+                                .range([2,16]);
+
+	
+
+
+                function  bcpu_fill(d) {return pct_colorScale(d.busy_pct);}
+                function bcpu_c(d) {
+                        fill_c = bcpu_fill;
+                        main.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.busy_pct); });
+                        mini.selectAll("rect").attr("fill",function(d) { return pct_colorScale(d.busy_pct); });
+                }
+
+
+
+	
+                // Height mapping methods run when brushing and selecting new encoding schemes
+		function bcpu_height2(d) {return pct_h2(d.busy_pct); }
+		function bcpu_y2(d) {return y2(d.hostid + 1) - pct_h2(d.busy_pct); }
+		function bcpu_height1(d) {return pct_h1(d.busy_pct); }
+		function bcpu_h(d) {
+			y2_h =  bcpu_y2;
+			rect_h2 = bcpu_height2; rect_h1 = bcpu_height1; 
+			main.selectAll("rect").attr("height",function(d) {return pct_h2(d.busy_pct); })
+				.attr("y", function(d) {return y2(d.hostid + 1) -  pct_h2(d.busy_pct); });
+			mini.selectAll(".miniItems").attr("height",function(d) {return pct_h1(d.busy_pct); })
+				.attr("y", function(d) {return y1(d.hostid + 1) -  pct_h1(d.busy_pct); });
+                }
+
+		function acpu_height2(d) {return acpu_h2(d.switch_cnt); }
+		function acpu_y2(d) {return y2(d.hostid + 1) -  acpu_h2(d.switch_cnt); }
+                function acpu_height1(d) {return acpu_h1(d.switch_cnt); }
+                function acpu_h(d) {
+			y2_h = acpu_y2;
+			rect_h2 = acpu_height2; rect_h1 = acpu_height1;
+                        main.selectAll("rect").attr("height",function(d) {return acpu_h2(d.switch_cnt); })
+				.attr("y", function(d) {return y2(d.hostid + 1) -  acpu_h2(d.switch_cnt); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return acpu_h1(d.switch_cnt); })
+				.attr("y", function(d) {return y1(d.hostid + 1) -  acpu_h1(d.switch_cnt); });
+                }
+
+                function scpu_height2(d) {return pct_h2(d.sys_pct); }
+                function scpu_y2(d) {return y2(d.hostid + 1) - pct_h2(d.sys_pct); }
+                function scpu_height1(d) {return pct_h1(d.sys_pct); }
+                function scpu_h(d) {
+                        y2_h =  scpu_y2;
+                        rect_h2 = scpu_height2; rect_h1 = scpu_height1;
+                        main.selectAll("rect").attr("height",function(d) {return pct_h2(d.sys_pct); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  pct_h2(d.sys_pct); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return pct_h1(d.sys_pct); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  pct_h1(d.sys_pct); });
+                }
+
+                function ucpu_height2(d) {return pct_h2(d.user_pct); }
+                function ucpu_y2(d) {return y2(d.hostid + 1) - pct_h2(d.user_pct); }
+                function ucpu_height1(d) {return pct_h1(d.user_pct); }
+                function ucpu_h(d) {
+                        y2_h =  ucpu_y2;
+                        rect_h2 = ucpu_height2; rect_h1 = ucpu_height1;
+                        main.selectAll("rect").attr("height",function(d) {return pct_h2(d.user_pct); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  pct_h2(d.user_pct); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return pct_h1(d.user_pct); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  pct_h1(d.user_pct); });
+                }
+
+                function shirq_height2(d) {return pct_h2(d.hardirq_sys_pct); }
+                function shirq_y2(d) {return y2(d.hostid + 1) - pct_h2(d.hardirq_sys_pct); }
+                function shirq_height1(d) {return pct_h1(d.hardirq_sys_pct); }
+                function shirq_h(d) {
+                        y2_h =  shirq_y2;
+                        rect_h2 = shirq_height2; rect_h1 = shirq_height1;
+                        main.selectAll("rect").attr("height",function(d) {return pct_h2(d.hardirq_sys_pct); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  pct_h2(d.hardirq_sys_pct); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return pct_h1(d.hardirq_sys_pct); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  pct_h1(d.hardirq_sys_pct); });
+                }
+
+		function uhirq_height2(d) {return pct_h2(d.hardirq_user_pct); }
+                function uhirq_y2(d) {return y2(d.hostid + 1) - pct_h2(d.hardirq_user_pct); }
+                function uhirq_height1(d) {return pct_h1(d.hardirq_user_pct); }
+                function uhirq_h(d) {
+                        y2_h =  uhirq_y2;
+                        rect_h2 = uhirq_height2; rect_h1 = uhirq_height1;
+                        main.selectAll("rect").attr("height",function(d) {return pct_h2(d.hardirq_user_pct); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  pct_h2(d.hardirq_user_pct); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return pct_h1(d.hardirq_user_pct); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  pct_h1(d.hardirq_user_pct); });
+                }
+
+                function ihirq_height2(d) {return pct_h2(d.hardirq_idle_pct); }
+                function ihirq_y2(d) {return y2(d.hostid + 1) - pct_h2(d.hardirq_idle_pct); }
+                function ihirq_height1(d) {return pct_h1(d.hardirq_idle_pct); }
+                function ihirq_h(d) {
+                        y2_h =  ihirq_y2;
+                        rect_h2 = ihirq_height2; rect_h1 = ihirq_height1;
+                        main.selectAll("rect").attr("height",function(d) {return pct_h2(d.hardirq_idle_pct); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  pct_h2(d.hardirq_idle_pct); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return pct_h1(d.hardirq_idle_pct); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  pct_h1(d.hardirq_idle_pct); });
+                }
+
+                function ssirq_height2(d) {return pct_h2(d.softirq_sys_pct); }
+                function ssirq_y2(d) {return y2(d.hostid + 1) - pct_h2(d.softirq_sys_pct); }
+                function ssirq_height1(d) {return pct_h1(d.softirq_sys_pct); }
+                function ssirq_h(d) {
+                        y2_h =  ssirq_y2;
+                        rect_h2 = ssirq_height2; rect_h1 = ssirq_height1;
+                        main.selectAll("rect").attr("height",function(d) {return pct_h2(d.softirq_sys_pct); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  pct_h2(d.softirq_sys_pct); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return pct_h1(d.softirq_sys_pct); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  pct_h1(d.softirq_sys_pct); });
+                }
+
+                function usirq_height2(d) {return pct_h2(d.softirq_user_pct); }
+                function usirq_y2(d) {return y2(d.hostid + 1) - pct_h2(d.softirq_user_pct); }
+                function usirq_height1(d) {return pct_h1(d.softirq_user_pct); }
+                function usirq_h(d) {
+                        y2_h =  usirq_y2;
+                        rect_h2 = usirq_height2; rect_h1 = usirq_height1;
+                        main.selectAll("rect").attr("height",function(d) {return pct_h2(d.softirq_user_pct); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  pct_h2(d.softirq_user_pct); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return pct_h1(d.softirq_user_pct); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  pct_h1(d.softirq_user_pct); });
+                }
+
+                function isirq_height2(d) {return pct_h2(d.softirq_idle_pct); }
+                function isirq_y2(d) {return y2(d.hostid + 1) - pct_h2(d.softirq_idle_pct); }
+                function isirq_height1(d) {return pct_h1(d.softirq_idle_pct); }
+                function isirq_h(d) {
+                        y2_h =  isirq_y2;
+                        rect_h2 = isirq_height2; rect_h1 = isirq_height1;
+                        main.selectAll("rect").attr("height",function(d) {return pct_h2(d.softirq_idle_pct); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  pct_h2(d.softirq_idle_pct); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return pct_h1(d.softirq_idle_pct); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  pct_h1(d.softirq_idle_pct); });
+                }
+
+                function dbli_height2(d) {return pct_h2(d.dblidle); }
+                function dbli_y2(d) {return y2(d.hostid + 1) - pct_h2(d.dblidle); }
+                function dbli_height1(d) {return pct_h1(d.dblidle); }
+                function dbli_h(d) {
+                        y2_h =  dbli_y2;
+                        rect_h2 = dbli_height2; rect_h1 = dbli_height1;
+                        main.selectAll("rect").attr("height",function(d) {return pct_h2(d.dblidle); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  pct_h2(d.dblidle); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return pct_h1(d.dblidle); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  pct_h1(d.dblidle); });
+                }
+
+                function dblb_height2(d) {return pct_h2(d.dblbusy); }
+                function dblb_y2(d) {return y2(d.hostid + 1) - pct_h2(d.dblbusy); }
+                function dblb_height1(d) {return pct_h1(d.dblbusy); }
+                function dblb_h(d) {
+                        y2_h =  dblb_y2;
+                        rect_h2 = dblb_height2; rect_h1 = dblb_height1;
+                        main.selectAll("rect").attr("height",function(d) {return pct_h2(d.dblbusy); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  pct_h2(d.dblbusy); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return pct_h1(d.dblbusy); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  pct_h1(d.dblbusy); });
+                }
+
+                function vcsw_height2(d) {return pct_h2(d.vol_pct); }
+                function vcsw_y2(d) {return y2(d.hostid + 1) - pct_h2(d.vol_pct); }
+                function vcsw_height1(d) {return pct_h1(d.vol_pct); }
+                function vcsw_h(d) {
+                        y2_h =  vcsw_y2;
+                        rect_h2 = vcsw_height2; rect_h1 = vcsw_height1;
+                        main.selectAll("rect").attr("height",function(d) {return pct_h2(d.vol_pct); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  pct_h2(d.vol_pct); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return pct_h1(d.vol_pct); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  pct_h1(d.vol_pct); });
+                }
+
+                function fcsw_height2(d) {return pct_h2(d.forced_pct); }
+                function fcsw_y2(d) {return y2(d.hostid + 1) - pct_h2(d.forced_pct); }
+                function fcsw_height1(d) {return pct_h1(d.forced_pct); }
+                function fcsw_h(d) {
+                        y2_h =  fcsw_y2;
+                        rect_h2 = fcsw_height2; rect_h1 = fcsw_height1;
+                        main.selectAll("rect").attr("height",function(d) {return pct_h2(d.forced_pct); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  pct_h2(d.forced_pct); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return pct_h1(d.forced_pct); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  pct_h1(d.forced_pct); });
+                }
+
+                function avrq_height2(d) {return avrq_h2(d.AvRunqTm); }
+                function avrq_y2(d) {return y2(d.hostid + 1) - avrq_h2(d.AvRunqTm); }
+                function avrq_height1(d) {return avrq_h1(d.AvRunqTm); }
+                function avrq_h(d) {
+                        y2_h =  avrq_y2;
+                        rect_h2 = avrq_height2; rect_h1 = avrq_height1;
+                        main.selectAll("rect").attr("height",function(d) {return avrq_h2(d.AvRunqTm); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  avrq_h2(d.AvRunqTm); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return avrq_h1(d.AvRunqTm); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  avrq_h1(d.AvRunqTm); });
+                }
+
+                function maxrq_height2(d) {return maxrq_h2(d.MaxRunqTm); }
+                function maxrq_y2(d) {return y2(d.hostid + 1) - maxrq_h2(d.MaxRunqTm); }
+                function maxrq_height1(d) {return maxrq_h1(d.MaxRunqTm); }
+                function maxrq_h(d) {
+                        y2_h =  maxrq_y2;
+                        rect_h2 = maxrq_height2; rect_h1 = maxrq_height1;
+                        main.selectAll("rect").attr("height",function(d) {return maxrq_h2(d.MaxRunqTm); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  maxrq_h2(d.MaxRunqTm); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return maxrq_h1(d.MaxRunqTm); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  maxrq_h1(d.MaxRunqTm); });
+                }
+
+                function ldmigin_height2(d) {return ldmigin_h2(d.LdomMigIn); }
+                function ldmigin_y2(d) {return y2(d.hostid + 1) - ldmigin_h2(d.LdomMigIn); }
+                function ldmigin_height1(d) {return ldmigin_h1(d.LdomMigIn); }
+                function ldmigin_h(d) {
+                        y2_h =  ldmigin_y2;
+                        rect_h2 = ldmigin_height2; rect_h1 = ldmigin_height1;
+                        main.selectAll("rect").attr("height",function(d) {return ldmigin_h2(d.LdomMigIn); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  ldmigin_h2(d.LdomMigIn); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return ldmigin_h1(d.LdomMigIn); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  ldmigin_h1(d.LdomMigIn); });
+                }
+
+                function ldmigout_height2(d) {return ldmigout_h2(d.LdomMigOut); }
+                function ldmigout_y2(d) {return y2(d.hostid + 1) - ldmigout_h2(d.LdomMigOut); }
+                function ldmigout_height1(d) {return ldmigout_h1(d.LdomMigOut); }
+                function ldmigout_h(d) {
+                        y2_h =  ldmigout_y2;
+                        rect_h2 = ldmigout_height2; rect_h1 = ldmigout_height1;
+                        main.selectAll("rect").attr("height",function(d) {return ldmigout_h2(d.LdomMigOut); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  ldmigout_h2(d.LdomMigOut); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return ldmigout_h1(d.LdomMigOut); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  ldmigout_h1(d.LdomMigOut); });
+                }
+
+                function cst_height2(d) {return cst_h2(d.CstateEvts); }
+                function cst_y2(d) {return y2(d.hostid + 1) - cst_h2(d.CstateEvts); }
+                function cst_height1(d) {return cst_h1(d.CstateEvts); }
+                function cst_h(d) {
+                        y2_h =  cst_y2;
+                        rect_h2 = cst_height2; rect_h1 = cst_height1;
+                        main.selectAll("rect").attr("height",function(d) {return cst_h2(d.CstateEvts); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  cst_h2(d.CstateEvts); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return cst_h1(d.CstateEvts); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  cst_h1(d.CstateEvts); });
+                }
+
+                function c0_height2(d) {return c0_h2(d.cstate0); }
+                function c0_y2(d) {return y2(d.hostid + 1) - c0_h2(d.cstate0); }
+                function c0_height1(d) {return c0_h1(d.cstate0); }
+                function c0_h(d) {
+                        y2_h =  c0_y2;
+                        rect_h2 = c0_height2; rect_h1 = c0_height1;
+                        main.selectAll("rect").attr("height",function(d) {return c0_h2(d.cstate0); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  c0_h2(d.cstate0); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return c0_h1(d.cstate0); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  c0_h1(d.cstate0); });
+                }
+
+                function c1_height2(d) {return c1_h2(d.cstate1); }
+                function c1_y2(d) {return y2(d.hostid + 1) - c1_h2(d.cstate1); }
+                function c1_height1(d) {return c1_h1(d.cstate1); }
+                function c1_h(d) {
+                        y2_h =  c1_y2;
+                        rect_h2 = c1_height2; rect_h1 = c1_height1;
+                        main.selectAll("rect").attr("height",function(d) {return c1_h2(d.cstate1); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  c1_h2(d.cstate1); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return c1_h1(d.cstate1); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  c1_h1(d.cstate1); });
+                }
+
+                function c2_height2(d) {return c2_h2(d.cstate2); }
+                function c2_y2(d) {return y2(d.hostid + 1) - c2_h2(d.cstate2); }
+                function c2_height1(d) {return c2_h1(d.cstate2); }
+                function c2_h(d) {
+                        y2_h =  c2_y2;
+                        rect_h2 = c2_height2; rect_h1 = c2_height1;
+                        main.selectAll("rect").attr("height",function(d) {return c2_h2(d.cstate2); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  c2_h2(d.cstate2); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return c2_h1(d.cstate2); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  c2_h1(d.cstate2); });
+                }
+
+                function c3_height2(d) {return c3_h2(d.cstate3); }
+                function c3_y2(d) {return y2(d.hostid + 1) - c3_h2(d.cstate3); }
+                function c3_height1(d) {return c3_h1(d.cstate3); }
+                function c3_h(d) {
+                        y2_h =  c3_y2;
+                        rect_h2 = c3_height2; rect_h1 = c3_height1;
+                        main.selectAll("rect").attr("height",function(d) {return c3_h2(d.cstate3); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  c3_h2(d.cstate3); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return c3_h1(d.cstate3); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  c3_h1(d.cstate3); });
+                }
+
+                function iops_height2(d) {return iops_h2(d.IO_ps); }
+                function iops_y2(d) {return y2(d.hostid + 1) - iops_h2(d.IO_ps); }
+                function iops_height1(d) {return iops_h1(d.IO_ps); }
+                function iops_h(d) {
+                        y2_h =  iops_y2;
+                        rect_h2 = iops_height2; rect_h1 = iops_height1;
+                        main.selectAll("rect").attr("height",function(d) {return iops_h2(d.IO_ps); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  iops_h2(d.IO_ps); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return iops_h1(d.IO_ps); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  iops_h1(d.IO_ps); });
+                }
+
+                function mbps_height2(d) {return mbps_h2(d.MB_ps); }
+                function mbps_y2(d) {return y2(d.hostid + 1) - mbps_h2(d.MB_ps); }
+                function mbps_height1(d) {return mbps_h1(d.MB_ps); }
+                function mbps_h(d) {
+                        y2_h =  mbps_y2;
+                        rect_h2 = mbps_height2; rect_h1 = mbps_height1;
+                        main.selectAll("rect").attr("height",function(d) {return mbps_h2(d.MB_ps); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  mbps_h2(d.MB_ps); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return mbps_h1(d.MB_ps); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  mbps_h1(d.MB_ps); });
+                }
+
+                function avgsize_height2(d) {return avgsize_h2(d.AvIOsz); }
+                function avgsize_y2(d) {return y2(d.hostid + 1) - avgsize_h2(d.AvIOsz); }
+                function avgsize_height1(d) {return avgsize_h1(d.AvIOsz); }
+                function avgsize_h(d) {
+                        y2_h =  avgsize_y2;
+                        rect_h2 = avgsize_height2; rect_h1 = avgsize_height1;
+                        main.selectAll("rect").attr("height",function(d) {return avgsize_h2(d.AvIOsz); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  avgsize_h2(d.AvIOsz); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return avgsize_h1(d.AvIOsz); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  avgsize_h1(d.AvIOsz); });
+                }
+
+                function avginflt_height2(d) {return avginflt_h2(d.AvInFlt); }
+                function avginflt_y2(d) {return y2(d.hostid + 1) - avginflt_h2(d.AvInFlt); }
+                function avginflt_height1(d) {return avginflt_h1(d.AvInFlt); }
+                function avginflt_h(d) {
+                        y2_h =  avginflt_y2;
+                        rect_h2 = avginflt_height2; rect_h1 = avginflt_height1;
+                        main.selectAll("rect").attr("height",function(d) {return avginflt_h2(d.AvInFlt); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  avginflt_h2(d.AvInFlt); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return avginflt_h1(d.AvInFlt); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  avginflt_h1(d.AvInFlt); });
+                }
+
+                function avgwait_height2(d) {return avgwait_h2(d.QuTm); }
+                function avgwait_y2(d) {return y2(d.hostid + 1) - avgwait_h2(d.QuTm); }
+                function avgwait_height1(d) {return avgwait_h1(d.QuTm); }
+                function avgwait_h(d) {
+                        y2_h =  avgwait_y2;
+                        rect_h2 = avgwait_height2; rect_h1 = avgwait_height1;
+                        main.selectAll("rect").attr("height",function(d) {return avgwait_h2(d.QuTm); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  avgwait_h2(d.QuTm); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return avgwait_h1(d.QuTm); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  avgwait_h1(d.QuTm); });
+                }
+
+                function avgsvc_height2(d) {return avgsvc_h2(d.SvcTm); }
+                function avgsvc_y2(d) {return y2(d.hostid + 1) - avgsvc_h2(d.SvcTm); }
+                function avgsvc_height1(d) {return avgsvc_h1(d.SvcTm); }
+                function avgsvc_h(d) {
+                        y2_h =  avgsvc_y2;
+                        rect_h2 = avgsvc_height2; rect_h1 = avgsvc_height1;
+                        main.selectAll("rect").attr("height",function(d) {return avgsvc_h2(d.SvcTm); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  avgsvc_h2(d.SvcTm); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return avgsvc_h1(d.SvcTm); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  avgsvc_h1(d.SvcTm); });
+                }
+
+                function w_iops_height2(d) {return w_iops_h2(d.wIO_ps); }
+                function w_iops_y2(d) {return y2(d.hostid + 1) - w_iops_h2(d.wIO_ps); }
+                function w_iops_height1(d) {return w_iops_h1(d.wIO_ps); }
+                function w_iops_h(d) {
+                        y2_h =  w_iops_y2;
+                        rect_h2 = w_iops_height2; rect_h1 = w_iops_height1;
+                        main.selectAll("rect").attr("height",function(d) {return w_iops_h2(d.wIO_ps); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  w_iops_h2(d.wIO_ps); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return w_iops_h1(d.wIO_ps); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  w_iops_h1(d.wIO_ps); });
+                }
+
+                function w_mbps_height2(d) {return w_mbps_h2(d.wMB_ps); }
+                function w_mbps_y2(d) {return y2(d.hostid + 1) - w_mbps_h2(d.wMB_ps); }
+                function w_mbps_height1(d) {return w_mbps_h1(d.wMB_ps); }
+                function w_mbps_h(d) {
+                        y2_h =  w_mbps_y2;
+                        rect_h2 = w_mbps_height2; rect_h1 = w_mbps_height1;
+                        main.selectAll("rect").attr("height",function(d) {return w_mbps_h2(d.wMB_ps); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  w_mbps_h2(d.wMB_ps); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return w_mbps_h1(d.wMB_ps); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  w_mbps_h1(d.wMB_ps); });
+                }
+
+                function w_avgsize_height2(d) {return w_avgsize_h2(d.wAvIOsz); }
+                function w_avgsize_y2(d) {return y2(d.hostid + 1) - w_avgsize_h2(d.wAvIOsz); }
+                function w_avgsize_height1(d) {return w_avgsize_h1(d.wAvIOsz); }
+                function w_avgsize_h(d) {
+                        y2_h =  w_avgsize_y2;
+                        rect_h2 = w_avgsize_height2; rect_h1 = w_avgsize_height1;
+                        main.selectAll("rect").attr("height",function(d) {return w_avgsize_h2(d.wAvIOsz); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  w_avgsize_h2(d.wAvIOsz); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return w_avgsize_h1(d.wAvIOsz); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  w_avgsize_h1(d.wAvIOsz); });
+                }
+
+                function w_avginflt_height2(d) {return w_avginflt_h2(d.wAvInFlt); }
+                function w_avginflt_y2(d) {return y2(d.hostid + 1) - w_avginflt_h2(d.wAvInFlt); }
+                function w_avginflt_height1(d) {return w_avginflt_h1(d.wAvInFlt); }
+                function w_avginflt_h(d) {
+                        y2_h =  w_avginflt_y2;
+                        rect_h2 = w_avginflt_height2; rect_h1 = w_avginflt_height1;
+                        main.selectAll("rect").attr("height",function(d) {return w_avginflt_h2(d.wAvInFlt); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  w_avginflt_h2(d.wAvInFlt); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return w_avginflt_h1(d.wAvInFlt); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  w_avginflt_h1(d.wAvInFlt); });
+                }
+
+                function w_avgwait_height2(d) {return w_avgwait_h2(d.wQuTm); }
+                function w_avgwait_y2(d) {return y2(d.hostid + 1) - w_avgwait_h2(d.wQuTm); }
+                function w_avgwait_height1(d) {return w_avgwait_h1(d.wQuTm); }
+                function w_avgwait_h(d) {
+                        y2_h =  w_avgwait_y2;
+                        rect_h2 = w_avgwait_height2; rect_h1 = w_avgwait_height1;
+                        main.selectAll("rect").attr("height",function(d) {return w_avgwait_h2(d.wQuTm); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  w_avgwait_h2(d.wQuTm); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return w_avgwait_h1(d.wQuTm); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  w_avgwait_h1(d.wQuTm); });
+                }
+
+		function w_avgsvc_height2(d) {return w_avgsvc_h2(d.wSvcTm); }
+                function w_avgsvc_y2(d) {return y2(d.hostid + 1) - w_avgsvc_h2(d.wSvcTm); }
+                function w_avgsvc_height1(d) {return w_avgsvc_h1(d.wSvcTm); }
+                function w_avgsvc_h(d) {
+                        y2_h =  w_avgsvc_y2;
+                        rect_h2 = w_avgsvc_height2; rect_h1 = w_avgsvc_height1;
+                        main.selectAll("rect").attr("height",function(d) {return w_avgsvc_h2(d.wSvcTm); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  w_avgsvc_h2(d.wSvcTm); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return w_avgsvc_h1(d.wSvcTm); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  w_avgsvc_h1(d.wSvcTm); });
+                }
+
+                function r_iops_height2(d) {return r_iops_h2(d.rIO_ps); }
+                function r_iops_y2(d) {return y2(d.hostid + 1) - r_iops_h2(d.rIO_ps); }
+                function r_iops_height1(d) {return r_iops_h1(d.rIO_ps); }
+                function r_iops_h(d) {
+                        y2_h =  r_iops_y2;
+                        rect_h2 = r_iops_height2; rect_h1 = r_iops_height1;
+                        main.selectAll("rect").attr("height",function(d) {return r_iops_h2(d.rIO_ps); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  r_iops_h2(d.rIO_ps); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return r_iops_h1(d.rIO_ps); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  r_iops_h1(d.rIO_ps); });
+                }
+
+                function r_mbps_height2(d) {return r_mbps_h2(d.rMB_ps); }
+                function r_mbps_y2(d) {return y2(d.hostid + 1) - r_mbps_h2(d.rMB_ps); }
+                function r_mbps_height1(d) {return r_mbps_h1(d.rMB_ps); }
+                function r_mbps_h(d) {
+                        y2_h =  r_mbps_y2;
+                        rect_h2 = r_mbps_height2; rect_h1 = r_mbps_height1;
+                        main.selectAll("rect").attr("height",function(d) {return r_mbps_h2(d.rMB_ps); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  r_mbps_h2(d.rMB_ps); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return r_mbps_h1(d.rMB_ps); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  r_mbps_h1(d.rMB_ps); });
+                }
+
+                function r_avgsize_height2(d) {return r_avgsize_h2(d.rAvIOsz); }
+                function r_avgsize_y2(d) {return y2(d.hostid + 1) - r_avgsize_h2(d.rAvIOsz); }
+                function r_avgsize_height1(d) {return r_avgsize_h1(d.rAvIOsz); }
+                function r_avgsize_h(d) {
+                        y2_h =  r_avgsize_y2;
+                        rect_h2 = r_avgsize_height2; rect_h1 = r_avgsize_height1;
+                        main.selectAll("rect").attr("height",function(d) {return r_avgsize_h2(d.rAvIOsz); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  r_avgsize_h2(d.rAvIOsz); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return r_avgsize_h1(d.rAvIOsz); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  r_avgsize_h1(d.rAvIOsz); });
+                }
+
+
+                function r_avginflt_height2(d) {return r_avginflt_h2(d.rAvInFlt); }
+                function r_avginflt_y2(d) {return y2(d.hostid + 1) - r_avginflt_h2(d.rAvInFlt); }
+                function r_avginflt_height1(d) {return r_avginflt_h1(d.rAvInFlt); }
+                function r_avginflt_h(d) {
+                        y2_h =  r_avginflt_y2;
+                        rect_h2 = r_avginflt_height2; rect_h1 = r_avginflt_height1;
+                        main.selectAll("rect").attr("height",function(d) {return r_avginflt_h2(d.rAvInFlt); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  r_avginflt_h2(d.rAvInFlt); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return r_avginflt_h1(d.rAvInFlt); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  r_avginflt_h1(d.rAvInFlt); });
+                }
+
+                function r_avgwait_height2(d) {return r_avgwait_h2(d.rQuTm); }
+                function r_avgwait_y2(d) {return y2(d.hostid + 1) - r_avgwait_h2(d.rQuTm); }
+                function r_avgwait_height1(d) {return r_avgwait_h1(d.rQuTm); }
+                function r_avgwait_h(d) {
+                        y2_h =  r_avgwait_y2;
+                        rect_h2 = r_avgwait_height2; rect_h1 = r_avgwait_height1;
+                        main.selectAll("rect").attr("height",function(d) {return r_avgwait_h2(d.wQuTm); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  r_avgwait_h2(d.wQuTm); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return r_avgwait_h1(d.wQuTm); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  r_avgwait_h1(d.wQuTm); });
+                }
+
+                function r_avgsvc_height2(d) {return r_avgsvc_h2(d.rSvcTm); }
+                function r_avgsvc_y2(d) {return y2(d.hostid + 1) - r_avgsvc_h2(d.rSvcTm); }
+                function r_avgsvc_height1(d) {return r_avgsvc_h1(d.rSvcTm); }
+                function r_avgsvc_h(d) {
+                        y2_h =  r_avgsvc_y2;
+                        rect_h2 = r_avgsvc_height2; rect_h1 = r_avgsvc_height1;
+                        main.selectAll("rect").attr("height",function(d) {return r_avgsvc_h2(d.rSvcTm); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  r_avgsvc_h2(d.rSvcTm); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return r_avgsvc_h1(d.rSvcTm); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  r_avgsvc_h1(d.rSvcTm); });
+                }
+
+                function reque_height2(d) {return reque_h2(d.requeues_ps); }
+                function reque_y2(d) {return y2(d.hostid + 1) - reque_h2(d.requeues_ps); }
+                function reque_height1(d) {return reque_h1(d.requeues_ps); }
+                function reque_h(d) {
+                        y2_h =  reque_y2;
+                        rect_h2 = reque_height2; rect_h1 = reque_height1;
+                        main.selectAll("rect").attr("height",function(d) {return reque_h2(d.requeues_ps); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  reque_h2(d.requeues_ps); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return reque_h1(d.requeues_ps); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  reque_h1(d.requeues_ps); });
+                }
+
+                function barr_height2(d) {return barr_h2(d.barriers_ps); }
+                function barr_y2(d) {return y2(d.hostid + 1) - barr_h2(d.barriers_ps); }
+                function barr_height1(d) {return barr_h1(d.barriers_ps); }
+                function barr_h(d) {
+                        y2_h =  barr_y2;
+                        rect_h2 = barr_height2; rect_h1 = barr_height1;
+                        main.selectAll("rect").attr("height",function(d) {return barr_h2(d.barriers_ps); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  barr_h2(d.barriers_ps); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return barr_h1(d.barriers_ps); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  barr_h1(d.barriers_ps); });
+                }
+
+                function events_height2(d) {return events_h2(d.Events); }
+                function events_y2(d) {return y2(d.hostid + 1) - events_h2(d.Events); }
+                function events_height1(d) {return events_h1(d.Events); }
+                function events_h(d) {
+                        y2_h =  events_y2;
+                        rect_h2 = events_height2; rect_h1 = events_height1;
+                        main.selectAll("rect").attr("height",function(d) {return events_h2(d.Events); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  events_h2(d.Events); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return events_h1(d.Events); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  events_h1(d.Events); });
+                }
+
+                function mevents_height2(d) {return mevents_h2(d.MissedEvents); }
+                function mevents_y2(d) {return y2(d.hostid + 1) - mevents_h2(d.MissedEvents); }
+                function mevents_height1(d) {return mevents_h1(d.MissedEvents); }
+                function mevents_h(d) {
+                        y2_h =  mevents_y2;
+                        rect_h2 = mevents_height2; rect_h1 = mevents_height1;
+                        main.selectAll("rect").attr("height",function(d) {return mevents_h2(d.MissedEvents); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  mevents_h2(d.MissedEvents); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return mevents_h1(d.MissedEvents); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  mevents_h1(d.MissedEvents); });
+                }
+
+                function mbuffers_height2(d) {return mbuffers_h2(d.MissedBufs); }
+                function mbuffers_y2(d) {return y2(d.hostid + 1) - mbuffers_h2(d.MissedBufs); }
+                function mbuffers_height1(d) {return mbuffers_h1(d.MissedBufs); }
+                function mbuffers_h(d) {
+                        y2_h =  mbuffers_y2;
+                        rect_h2 = mbuffers_height2; rect_h1 = mbuffers_height1;
+                        main.selectAll("rect").attr("height",function(d) {return mbuffers_h2(d.MissedBufs); })
+                                .attr("y", function(d) {return y2(d.hostid + 1) -  mbuffers_h2(d.MissedBufs); });
+                        mini.selectAll(".miniItems").attr("height",function(d) {return mbuffers_h1(d.MissedBufs); })
+                                .attr("y", function(d) {return y1(d.hostid + 1) -  mbuffers_h1(d.MissedBufs); });
+                }
+
+	});
+
+                </script>
+        </body>
+</html>
+

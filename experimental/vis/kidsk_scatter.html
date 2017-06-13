@@ -1,0 +1,399 @@
+<!DOCTYPE html> 
+<html>
+    <head>
+	<meta charset="utf-8">
+	<style>
+	body {
+	  font: 14px sans-serif;
+	}
+
+	.axis path,
+	.axis line {
+	  fill: none;
+	  stroke: #000;
+	  shape-rendering: crispEdges;
+	}
+
+	.iodot {
+	  stroke: #000;
+	  opacity: 0.8 
+	}
+
+	.label {
+	  font-weight: bold;
+	}
+	
+	rect.pane {
+	  cursor: move;
+	  fill: none;
+	  pointer-events: all;
+	}
+
+	.canvas {
+	    position: absolute;
+	}
+
+	.popup {
+	    position: absolute;
+	    left: 0;
+	    top: 0;
+	    background-color: #fff;
+	    width: 200px;
+	    border: 1px #ccc solid;
+	    border-radius: 6px;
+	    box-shadow: #333 2px 2px 4px;
+	    padding: 8px;
+	    white-space:pre;
+            font-family: courier new;
+            font-size: 10px;
+            font-weight: bold;
+	    opacity: 0.9
+	}
+
+	.popup h2 {
+	    margin: 0 0 1rem 0;
+	}
+
+	.tooltip {
+	  position: absolute;
+	  width: 200px;
+	  height: 28px;
+	  pointer-events: none;
+	}
+	</style>
+        <script src="D3/lib/jquery-1.11.2.js"></script>
+        <script src="D3/d3.v3.min.js"></script>
+    </head>
+
+    <body>
+      <div id="Main Menu" >
+        <h2>Disk device I/O's (first 20K records after start time...)</h2>
+        <div>
+          Color indicates:
+          <select>
+            <option value="rw">Read or Write</option>
+            <option value="dskdev">Disc device</option>
+            <option value="enqpid">Enqueue PID</option>
+          </select>
+        </div>
+	Successive filters are additive.  To reset filters, place cursor in form submit field and hit enter.
+      </div>
+      <div id="tooltip" class="hidden"> </div>
+
+      <form id="entry_field" method="post">
+        <input type="text" id="addr_target"/>
+      </form>
+
+      <form id="qpid" method="post">
+        <input type="submit" value="Filter on qpid" >
+      </form>
+
+      <form id="dev_t" method="post">
+        <input type="submit" value="Filter on dev_t" >
+      </form>
+
+      <form id="rw" method="post">
+        <input type="submit" value="Filter on 'read' or 'write' " >
+      </form>
+
+      <form id="len_lt" method="post">
+        <input type="submit" value="Filter on length less than" >
+      </form>
+
+      <form id="len_gt" method="post">
+        <input type="submit" value="Filter on length greater than" >
+      </form>
+
+
+<script>
+var margin = {top: 20, right: 20, bottom: 38, left: 88},
+    width = 1200 - margin.left - margin.right,
+    height = 600 - margin.top - margin.bottom;
+
+// setup x 
+var xValue = function(d) { return d.time;}, // data -> value
+    xScale = d3.scale.linear().range([0, width]), // value -> display
+    xMap = function(d) { return xScale(xValue(d));}, // data -> display
+    xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+// setup y
+var yValue = function(d) { return d["svctime"];}, // data -> value
+    yScale = d3.scale.linear().range([height, 0]), // value -> display
+    yMap = function(d) { return yScale(yValue(d));}, // data -> display
+    yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+// setup fill color
+var rwValue = function(d) { return d.rw;},
+    rwcolor = d3.scale.category10();
+
+// setup device color
+var devValue = function(d) { return d.device;},
+    dcolor = d3.scale.category10();
+
+// setup enqueue PID color
+var eqpValue = function(d) { return d.qpid;},
+    qcolor = d3.scale.category10();
+
+// add the graph canvas to the body of the webpage
+var svg = d3.select("body").append("div").attr("class", "canvas").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// add the tooltip area to the webpage
+var tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+var hex = d3.format("#x8x");
+var max_time = 0;
+var min_time = 0;
+
+// load data
+d3.csv("kidsk_global.csv", function(error, data) {
+  data.forEach(function(d) {
+    d.time = +d.time;
+    d.device = +d.device;
+    d.svctime = +d.svctime;
+    d.length = +d.length;
+  });
+
+  var min_radius = 3;
+  var max_radius = 6
+
+
+  var max_length = d3.max(data, function(d) { return d.length});
+  var min_length = d3.min(data, function(d) { return d.length});
+  var rScale = d3.scale.linear()
+            .domain([min_length, max_length])
+            .range([min_radius,max_radius]);
+  
+  var max_svctime = d3.max(data, function(d) { return d.svctime});
+  var min_svctime = d3.min(data, function(d) { return d.svctime});
+  
+  max_time = d3.max(data, function(d) { return d.time});
+  min_time = d3.min(data, function(d) { return d.time});
+  var pad_time = (max_time - min_time)/10;   // 10% padding
+
+  // don't want dots overlapping axis, so add in buffer to data domain
+  xScale.domain([(d3.min(data, xValue) - 0.001) > 0.0 ? (d3.min(data, xValue) - 0.001) : 0 ,(d3.max(data, xValue) < 22.0 ? d3.max(data, xValue): 22.0) + 0.02]);
+  //xScale.domain([d3.min(data, xValue) ,(d3.max(data, xValue) < 22.0 ? d3.max(data, xValue): 22.0) + 0.02]);
+  //yScale.domain([Math.max(0,(d3.min(data, yValue) - d3.mean(data, yValue))), Math.max(0.01,(4 * d3.median(data, yValue))) ]);
+  yScale.domain([0 - Math.max(0.01,(4 * d3.median(data, yValue)))/10, Math.max(0.01,(4 * d3.median(data, yValue))) ]);
+
+  // x-axis
+  svg.append("g")
+      .attr("class", "x axis")
+      .style("opacity", 1)
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("x", width)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .text("Trace timestamp (secs)");
+
+  // y-axis
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Service time (secs)");
+
+  svg.append("clipPath")
+      .attr("id", "clip")
+    .append("rect")
+      .attr("x", 0.01 * width)
+      .attr("y", 0)
+      .attr("width", 0.90 * width)
+      .attr("height", 0.95 * height);
+
+  svg.append("rect")
+      .attr("class", "pane")
+      .attr("width", width)
+      .attr("height", height)
+      .call(d3.behavior.zoom().scale([1.0]).x(xScale).y(yScale).scaleExtent([0, 400]).on("zoom", draw));
+  //    .call(d3.behavior.zoom().x(xScale).scaleExtent([1, 400]).on("zoom", draw));
+
+  // draw dots
+
+    svg.selectAll(".g")
+      .data(data, function(d) { return d.time ; })
+    .enter().append("g").attr("class", "iodots");
+
+    /* 
+    ** var rejects = svg.selectAll("g.iodots").filter(function(d) { return (d.time > 60.0) || (d.svctime > 5.1) } );  
+    ** rejects.remove();
+    */
+
+    svg.selectAll("g.iodots").append("a")
+//      .attr("xlink:show", "new")
+//      .attr("xlink:href", function(d){return "./VIS/" + d.qpid + "/pid_detail.html";})
+//      .attr("xlink:href", function(d){return "./VIS/" + d.qpid + "/kidsk_io.html";})
+    .append("circle")
+      .attr("class", "iodot")
+      .attr("r", function(d) { return rScale(d.length);})
+      .attr("cx", xMap)
+      .attr("cy", yMap)
+      .attr("clip-path", "url(#clip)")
+      .style("opacity", 0.8)
+      .style("fill", function(d) { return ( rwcolor(rwValue(d)));}) 
+//      .on("mouseover", function(d) {
+//          tooltip.transition()
+//               .duration(200)
+//               .style("opacity", .9);
+//          tooltip.html("R/W = " + d.rw + "<br/>qpid = " + d.qpid + "<br/>dev_t = " + hex(d.device) + "<br/>   len = " + d.length + "<br/> time = " + xValue(d) 
+//	        + "<br/> svctime = " + yValue(d))
+//               .style("left", (d3.event.pageX + 15) + "px")
+//               .style("top", (d3.event.pageY - 28) + "px");
+//      })
+//      .on("mouseout", function(d) {
+//          tooltip.transition()
+//               .duration(500)
+//               .style("opacity", 0);
+//      })
+      .call(d3.behavior.zoom().x(xScale).scaleExtent([1, 800]).on("zoom", draw));
+      // .call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([1, 100]).on("zoom", draw));
+
+  d3.select("select").on("change", function() {
+    this.value == "rw" ? rw() : (this.value == "dskdev" ? dskdev() : (this.value == "enqpid" ? enqpid() : rw() )); 
+  });
+
+  $( "#qpid" ).submit(function( event ) {
+    var val = $("input:first").val();
+    event.preventDefault();
+    var rejects = svg.selectAll("g.iodots").filter(function(d) { return (d.qpid != val) });
+    rejects.remove();
+  });
+
+  $( "#dev_t" ).submit(function( event ) {
+    var val = $("input:first").val();
+    event.preventDefault();
+    var rejects = svg.selectAll("g.iodots").filter(function(d) { return (d.device != val)  });
+    rejects.remove();
+  });
+
+  $( "#rw" ).submit(function( event ) {
+    var val = $("input:first").val();
+    event.preventDefault();
+    var rejects = svg.selectAll("g.iodots").filter(function(d) { return (d.rw != val)   });
+    rejects.remove();
+  });
+
+  $( "#len_lt" ).submit(function( event ) {
+    var val = $("input:first").val();
+	val = +val;
+	console.log("len = " + val );
+    event.preventDefault();
+    var rejects = svg.selectAll("g.iodots").filter(function(d) { return (d.length > val)   });
+    rejects.remove();
+  });
+
+  $( "#len_gt" ).submit(function( event ) {
+    var val = $("input:first").val();
+    event.preventDefault();
+    var rejects = svg.selectAll("g.iodots").filter(function(d) { return (d.length < val)   });
+    rejects.remove();
+  });
+});
+
+function rw(d) {
+    svg.selectAll("circle.iodot").style("fill", function(d) { return rwcolor(rwValue(d)); } );
+    rwlegend = svg.selectAll("legend.g.rect").data["read","write"];
+}
+
+function dskdev(d) {
+    svg.selectAll("circle.iodot").style("fill", function(d) { return dcolor(devValue(d)); } );
+}
+
+function enqpid(d) {
+    svg.selectAll("circle.iodot").style("fill", function(d) { return qcolor(eqpValue(d)); } );
+}
+
+function draw() {
+    svg.select(".x.axis").call(xAxis);
+    svg.select(".y.axis").call(yAxis);
+    svg.selectAll("circle.iodot").attr("cx", xMap).attr("cy", yMap);
+};
+
+
+/* 
+ * Attach a context menu to a D3 element
+ */
+
+contextMenuShowing = false;
+
+d3.select("body").on('contextmenu',function (d,i) {
+    if(contextMenuShowing) {
+        d3.event.preventDefault();
+        d3.select(".popup").remove();
+        contextMenuShowing = false;
+    } else {
+        d3_target = d3.select(d3.event.target);
+        if (d3_target.classed("iodot")) {
+            d3.event.preventDefault();
+            contextMenuShowing = true;
+            d = d3_target.datum();
+            // Build the popup
+            var start_time = d.time - d.svctime;
+            var end_time = d.time + 2*(d.svctime);
+            canvas = d3.select(".canvas");
+            mousePosition = d3.mouse(canvas.node());
+            
+            popup = canvas.append("div")
+                .attr("class", "popup")
+                .style("left", mousePosition[0] + "px")
+                .style("top", mousePosition[1] + "px");
+            popup.append("h2").text(d.display_division);
+            popup.append("p").text(
+                    "Time       = " + xValue(d) 
+                + "\nEnqueu PID = " + d.qpid 
+                + "\ndev_t      = " + hex(d.device) 
+                + "\nR/W        = " + d.rw 
+                + "\nLen        = " + d.length 
+                + "\nSvctime    = " + yValue(d))
+            popup.append("p")
+            .append("a")
+            .attr("href", "./VIS/" + d.qpid + "/pid_detail.html")
+            .text("PID activity chart\n") 
+	    .append("a")
+            .attr("href", "kidsk_trace_view.php?start=" + start_time + "&end=" + end_time + "&pid=" + d.qpid + "&iotime=" +d.time )
+            .text("View kitrace IO record \n")
+	    .append("a")
+            .attr("href", "./VIS/" + d.qpid + "/pid_detail.html")
+            .text("Disc Heatmap (future)");
+            
+            canvasSize = [
+                canvas.node().offsetWidth,
+                canvas.node().offsetHeight
+            ];
+            
+            popupSize = [ 
+                popup.node().offsetWidth,
+                popup.node().offsetHeight
+            ];
+            
+            if (popupSize[0] + mousePosition[0] > canvasSize[0]) {
+                popup.style("left","auto");
+                popup.style("right",0);
+            }
+            
+            if (popupSize[1] + mousePosition[1] > canvasSize[1]) {
+                popup.style("top","auto");
+                popup.style("bottom",0);
+            }
+        }
+    }
+});
+
+</script>
+</div>
+</body>
+</html>

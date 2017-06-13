@@ -1,0 +1,419 @@
+<!DOCTYPE html> <html xmlns:xlink="http://www.w3.org/1999/xlink">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <script src="D3/d3.v3.min.js"></script>    
+    <script src="../../D3/d3.v3.min.js"></script>    
+    <style type="text/css">
+
+	body {
+	  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+          font-size: 11px;
+	  margin: auto;
+	  margin-left: 20px;
+	  position: absolute;
+	  float: left;
+	  border: solid 1px black;
+	  display: block;
+	  width: 1200px;
+	}
+
+ 	.chartsummary {
+          pointer-events: none;
+          font: 14px sans-serif;
+          white-space:pre;
+        }
+
+        .title {
+	  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+          font-size: 11px;
+          margin: auto;
+          margin-left: 330px;
+          position: absolute;
+          width: 1200px;
+	  white-space: pre;
+	}
+
+        .nodetext {
+          pointer-events: none;
+          font: 11px sans-serif;
+        }
+
+        .link {
+          stroke: #949;
+          stroke-opacity: 0.75;
+        }
+
+	.depth {
+	  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	  font-size: 11px;
+	  margin: auto;
+	  margin-left: 600px;
+	  margin-top: 10px;
+	  position: absolute;
+	  width: 330px;
+	}
+
+        circle {
+          stroke: #fff;
+          stroke-width: 1.5px;
+          fill: #aaa;
+        }
+
+	rect.parent {
+	  cursor: pointer;
+	  fill: royalblue;
+	}
+
+	text {
+	  pointer-events: none;
+          white-space:pre;
+	}
+
+	#tooltip {
+		position: absolute;
+		width: auto;
+		height: auto;
+		padding: 10px;
+		background-color: cornsilk;
+                opacity:0.8;
+		-webkit-border-radius: 10px;
+		-moz-border-radius: 10px;
+		border-radius: 10px;
+		-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+		-moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+		box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+		pointer-events: none;
+                white-space: pre;
+	}
+
+	#tooltip.hidden {
+		display: none;
+	}
+
+	#tooltip p {
+		margin: 0;
+		font-family: courier new;
+		font-size: 11px;
+		line-height: 13px;
+	}
+
+    </style>
+  </head>
+  <body>
+
+  <div id="body">
+    <div class="chartsummary"><p><b>Task Wait Dependency Chart</b></p></div>
+    <div id="tooltip" class="hidden">
+          <p><span id="pid_details">100 </span></p> 
+    </div>
+
+    <div class="depth">
+	<input id="depth1" type="radio" name="depth" value=2>
+	<label for="depth1">Depth 1</label>
+	<input id="depth2" type="radio" name="depth" value=3>
+	<label for="depth2">Depth 2</label>
+	<input id="depth3" type="radio" name="depth" value=4>
+	<label for="depth3">Depth 3</label>
+	<input id="depth4" type="radio" name="depth" value=100>
+	<label for="depth4">Depth All</label>
+    </div>
+
+    <div id=charts>
+    </div>
+
+    <script type="text/javascript">
+    
+    var w = 1024,
+        h = 800,
+        x = d3.scale.linear().range([0, w]),
+        y = d3.scale.linear().range([0, h]),
+        color = d3.scale.category20c();
+
+    var link_color = d3.scale.linear()
+        .domain([0,101])
+        .range(["#00ff00", "#ff0000"])
+        .interpolate(d3.interpolateHcl);
+
+    var node_color = d3.scale.linear()
+        .domain([0,101])
+        .interpolate(d3.interpolateHcl)
+        .range(["#00ff00", "#ff0000"]);
+
+    var vis2 = d3.select("#charts")
+      .append("svg:svg")
+        .attr("width", w)
+        .attr("height", h);
+
+    var data1 = d3.range(22);
+
+    var cpuheat= vis2.selectAll("rect")
+        .data(data1);
+
+    var colorScale = d3.scale.linear()
+        .domain([d3.min(data1), d3.max(data1)])
+        .interpolate(d3.interpolateHcl)
+        .range(["#00ff00", "#ff0000"]);
+
+    cpuheat.enter()
+      .append("rect")
+        .attr({
+          width: 6,
+          height: 20,
+          y: 18,
+          x: function(d,i) {
+            return i * 7 + 285;
+          },
+          fill: function(d,i) {
+            return colorScale(d);
+          },
+          opacity: 1.00,
+        });
+
+    var num = d3.format("5.6f");
+   
+    var numpct = d3.format("5.2f");
+
+
+    vis2.append("svg:text")
+        .attr("class", "nodetext")
+        .attr("x", 280)
+        .attr("y", 10)
+        .text(function(d) { return " Task %CPU   &   Link %sleep_time" });
+    vis2.append("svg:text")
+        .attr("class", "nodetext")
+        .attr("x", 269)
+        .attr("y", 44)
+        .text(function(d) { return "0%   ___________>___________  100% " });
+    vis2.append("svg:circle")
+        .attr("cx", 15)
+        .attr("cy", 10)
+        .attr("r", 10)
+        .style("fill","#E005FD") ;
+    vis2.append("svg:text")
+        .attr("class", "nodetext")
+        .attr("x", 24)
+        .attr("y", 12)
+        .text(function(d) { return " - ICS node" });
+    vis2.append("svg:circle")
+        .attr("cx", 130)
+        .attr("cy", 10)
+        .attr("r", 8)
+        .style("stroke", "#000")
+        .style("fill","#FFF") ;
+    vis2.append("svg:text")
+        .attr("class", "nodetext")
+        .attr("x", 140)
+        .attr("y", 12)
+        .text(function(d) { return " - Primary task node" });
+    vis2.append("svg:circle")
+        .attr("cx", 15)
+        .attr("cy", 30)
+        .attr("r", 10)
+        .style("fill","#00ee00") ;
+    vis2.append("svg:text")
+        .attr("class", "nodetext")
+        .attr("x", 24)
+        .attr("y", 32)
+        .text(function(d) { return " - Raduis indicates time 'waited-for' by others" });
+    vis2.append("svg:line")
+        .attr("x1", 7)
+        .attr("y1", 45)
+        .attr("x2", 25)
+        .attr("y2", 45)
+        .style("stroke", "#FF0A00")
+        .style("stroke-width", 2)
+        .style("marker-end", 'url(#end-arrow)');
+    vis2.append("svg:text")
+        .attr("class", "nodetext")
+        .attr("x", 22)
+        .attr("y", 48)
+        .text(function(d) { return "   Arrows indicate direction of wakeup" });
+
+
+// define arrow markers for graph links
+
+    vis2.append('svg:defs').append('svg:marker')
+        .attr('id', 'end-arrow')
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refX', 6)
+        .attr('markerWidth', 3)
+        .attr('markerHeight', 3)
+        .attr('orient', 'auto')
+      .append('svg:path')
+        .attr('d', 'M0,-5L10,0L0,5')
+        .attr('fill', '#000');
+
+    vis2.append('svg:defs').append('svg:marker')
+        .attr('id', 'start-arrow')
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refX', 4)
+        .attr('markerWidth', 3)
+        .attr('markerHeight', 3)
+        .attr('orient', 'auto')
+      .append('svg:path')
+        .attr('d', 'M10,-5L0,0L10,5')
+        .attr('fill', '#000');
+
+//chart for the vis2 SVG area
+
+// The physics
+
+    d3.json("pid_wtree.json", function(json) {
+	var force = self.force = d3.layout.force()
+	    .nodes(json.nodes)
+	    .links(json.links)
+	    .gravity(.15)
+	    .distance(380)
+	    .charge(-580)
+	    .size([w, h])
+	    .start();
+
+//Adding links and arrows
+
+	var link = vis2.selectAll("line.link")
+	    .data(json.links)
+	    .enter().append("svg:line")
+	    .attr("class", "link")
+	    .style("stroke", function(d) { return link_color(d.value*100.0/d.target.sleep_time) ; })
+	    .style("stroke-width", function(d) { return Math.min(Math.max((d.value/1000),2.0),5); })
+	    .style('marker-end', function(d) { return 'url(#end-arrow)' ; })
+            .style("display", function(d) { return d.depth <=  2  ? null : "none"; })
+	    .attr("transform", function(d) { return "translate(" + d + ")"; });
+
+	link.append("title")
+	    .text(function(d) { return d.target.name + " woken.\nCnt: " + d.cnt + " Avg: " + numpct(d.target.sleep_time/d.cnt) + " msec\nSlptime: " + num(d.value/1000.0) + " secs\n" + numpct(d.value*100.0/d.target.sleep_time) + "% of total sleep_time" });
+
+        var node_drag = d3.behavior.drag()
+            .on("dragstart", dragstart)
+            .on("drag", dragmove)
+            .on("dragend", dragend);
+
+        function dragstart(d, i) {
+            d.fixed = true;
+            d3.select(this).classed("fixed", true);
+        }
+
+        function dragmove(d, i) {
+            d.px += d3.event.dx;
+            d.py += d3.event.dy;
+            d.x += d3.event.dx;
+            d.y += d3.event.dy;
+            tick(); // this is the key to make it work together with updating both px,py,x,y on d !
+        }
+
+        function dragend(d, i) {
+            d.fixed = true;
+            tick();
+            force.resume();
+        }
+
+// Adding nodes
+
+        var node = vis2.selectAll("g.node")
+            .data(json.nodes)
+          .enter().append("svg:g")
+            .attr("class", "node")
+            .call(node_drag);
+
+// Scaling node radius to a non-linear range of the  datas 'waited-for' values
+
+	var max_waited_for =  d3.max(json.nodes, function(d) { return d.waitedfor});
+	var min_waited_for =  d3.min(json.nodes, function(d) { return d.waitedfor});
+
+	 var nodeScale = d3.scale.sqrt()
+            .domain([ min_waited_for,  max_waited_for ])
+	    .range([5,25]);
+
+        node.append("a")
+            .attr("class", "node")
+//          .attr("xlink:show", "new")
+            .attr("xlink:href",  function(d){return d.wlink;})
+          .append("circle")
+            .attr("class", "node")
+//          .attr("r", function(d) { return Math.max((Math.sqrt(d.waitedfor)/15),5); })
+            .attr("r", function(d) { return nodeScale(d.waitedfor); })
+            .style("stroke", function(d) {
+              if (d.depth == 1)
+              return "#000" })
+            .style("fill", function(d) {
+              if (d.name == "PID -1 (ICS)")
+                  return  "#E005FD";
+              else
+		  return node_color(100.0 * d.run/(d.run + d.runq + d.sleep_time)); })
+//          .style("fill", function(d) { return color(d.depth); })
+            .on("dragstart", dragstart)
+            .attr("transform", function(d) { return "translate(" + d + ")"; });
+
+//      node.append("svg:image")
+//          .attr("class", "circle")
+//          .attr("xlink:href", "https://github.com/favicon.ico")
+//          .attr("x", "-8px")
+//          .attr("y", "-8px")
+//          .attr("width", "16px")
+//          .attr("height", "16px");
+
+        node.append("svg:text")
+            .attr("class", "nodetext")
+            .attr("dx", 16)
+            .attr("dy", ".35em")
+            .text(function(d) { 
+		if (d.thr_cmd != "(null)") 
+			return d.cmd + " (" + d.thr_cmd +  ")" 
+		else
+			return d.cmd 
+	    });
+        
+	node.append("title")
+            .text(function(d) { return d.name + "  " + d.cmd + "\nThrd cmd: " + d.thr_cmd + "\nRun time: " + num(d.run/1000) + " secs\nRunQ time: " + num(d.runq/1000) + " secs\nSleep time: " + num(d.sleep_time/1000)  + " secs\nWaitedfor time: " + num(d.waitedfor/1000) + " secs"; });
+
+	vis2.selectAll(".node")
+            .style("display", function(d) { return d.depth <= 2 ? null : "none"; })
+
+        force.on("tick", tick);
+
+        function tick() {
+            link.attr("x1", function(d) { return d.source.x; })
+                .attr("y1", function(d) { return d.source.y; })
+                .attr("x2", function(d) {
+                    var deltaX = d.target.x - d.source.x,
+                      deltaY = d.target.y - d.source.y,
+                      dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY),
+    
+                      normX = deltaX / dist,
+//                    targetPadding = 1.5 + Math.max((Math.sqrt(d.target.waitedfor)/15),5) + Math.min(Math.max((d.value/1000),2),5),
+                      targetPadding = 1.5 + nodeScale(d.target.waitedfor) + Math.min(Math.max((d.value/1000),2),5),
+                      targetX = d.target.x - (targetPadding * normX);
+                      return targetX;
+                    })
+                .attr("y2", function(d) {
+                    var deltaX = d.target.x - d.source.x,
+                      deltaY = d.target.y - d.source.y,
+                      dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY),
+                      normY = deltaY / dist,
+//                    targetPadding = 1.5 + Math.max((Math.sqrt(d.target.waitedfor)/15),5) + Math.min(Math.max((d.value/1000),2),5),
+                      targetPadding = 1.5 + nodeScale(d.target.waitedfor) + Math.min(Math.max((d.value/1000),2),5),
+                      targetY = d.target.y - (targetPadding * normY);
+                      return targetY;
+                    })
+
+	    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+        };
+    });
+
+    function depthchange() {
+        var depth = this.value;
+        vis2.selectAll(".node")
+            .style("display", function(d) { return d.depth <= depth ? null : "none"; })
+        vis2.selectAll(".link")
+            .style("display", function(d) { return d.depth <= depth ? null : "none"; });
+	force.resume();
+    }
+
+    d3.selectAll("input[name=depth]").on("change", depthchange);
+
+    </script>
+
+    </div> 
+  </body>
+</html>
+

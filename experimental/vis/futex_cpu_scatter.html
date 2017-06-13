@@ -1,0 +1,484 @@
+<!DOCTYPE html> 
+<html>
+    <head>
+	<meta charset="utf-8">
+	<style>
+	body {
+	  font: 14px sans-serif;
+	}
+
+	.axis path,
+	.axis line {
+	  fill: none;
+	  stroke: #000;
+	  shape-rendering: crispEdges;
+	}
+
+	.lockdot {
+	  stroke: #000;
+	  opacity: 0.8 
+	}
+
+	.label {
+	  font-weight: bold;
+	}
+	
+	rect.pane {
+	  cursor: move;
+	  fill: none;
+	  pointer-events: all;
+	}
+
+        .canvas {
+            position: absolute;
+        }
+
+        .popup {
+            position: absolute;
+            left: 0;
+            top: 0;
+            background-color: #fff;
+            width: 400px;
+            border: 1px #ccc solid;
+            border-radius: 6px;
+            box-shadow: #333 2px 2px 4px;
+            padding: 8px;
+            white-space:pre;
+	    font-family: courier new;
+            font-size: 12px;
+	    font-weight: bold;
+            opacity: 0.9
+        }
+
+        .popup h2 {
+            margin: 0 0 1rem 0;
+        }
+
+        .tooltip {
+            position: absolute;
+	    left: 0;
+            top: 0;
+            background-color:  cornsilk;
+            width: 400px;
+            border: 1px #ccc solid;
+            border-radius: 6px;
+            box-shadow: #333 2px 2px 4px;
+            padding: 8px;
+            white-space:pre;
+            font-family: courier new;
+            font-size: 12px;
+            font-weight: bold;
+	    color: blue;
+            opacity: 0.9
+            height: 28px;
+          pointer-events: none;
+        }
+
+	</style>
+	<script src="D3/lib/jquery-1.11.2.js"></script>
+	<script src="D3/d3.v3.min.js"></script>
+    </head>
+
+    <body>
+      <div id="Main Menu">
+        <h2>Global Futex usage (first 20K records after start time...)</h2>
+        <div>
+          Color indicates:
+        <div>
+          <select>
+            <option value="addr">Futex Addr</option>
+            <option value="op">Operation</option>
+            <option value="pid">PID</option>
+            <option value="cpu">CPU</option>
+	    <option value="retval">RetVal</option>
+          </select>
+        </div>
+	Successive filters are additive.  To reset filters, place cursor in form submit field and hit enter.
+      </div>
+
+      <div id="chart"></div>
+
+      <form id="addr" method="post">
+        <input type="text" id="addr_target"/>
+      </form>
+
+      <form id="addr_t" method="post">
+	<input type="submit" value="Filter on Futex Addr " >
+      </form>
+ 
+      <form id="op_t" method="post">
+        <input type="submit" value="Filter on Futex Oper" >
+      </form>
+
+      <form id="pid_t" method="post">
+        <input type="submit" value="Filter on PID  " >
+      </form>
+
+      <form id="cpu_t" method="post">
+        <input type="submit" value="Filter on CPU" >
+      </form>
+
+
+<script>
+var margin = {top: 20, right: 20, bottom: 38, left: 88},
+    width = 1200 - margin.left - margin.right,
+    height = 600 - margin.top - margin.bottom;
+
+// setup x 
+var xValue = function(d) { return d.time;}, // data -> value
+    xScale = d3.scale.linear().range([0, width]), // value -> display
+    xMap = function(d) { return xScale(xValue(d));}, // data -> display
+    xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+// setup y
+var yValue = function(d) { return d.cpu;}, // data -> value
+    yScale = d3.scale.linear().range([height, 0]), // value -> display
+    yMap = function(d) { return yScale(yValue(d));}, // data -> display
+    yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+// setup addr color
+var addrValue = function(d) { return d.addr;},
+    addrcolor = d3.scale.category10();
+
+// setup op color
+var opValue = function(d) { return d.op;},
+    opcolor = d3.scale.category10();
+
+// setup PID color
+var pidValue = function(d) { return d.pid;},
+    pidcolor = d3.scale.category10();
+
+// setup PID color
+var cpuValue = function(d) { return d.cpu;},
+    cpucolor = d3.scale.category10();
+
+// setup RetVal color
+var retvalValue = function(d) { return d.retval;},
+    retvalcolor = d3.scale.category10();
+
+
+// add the graph canvas to the body of the webpage
+var svg = d3.select("body").append("div").attr("class", "canvas").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// add the tooltip area to the webpage
+var tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+var hex = d3.format("#x8x");
+
+// load data
+d3.csv("futex_global.csv", function(error, data) {
+  data.forEach(function(d) {
+    d.time = +d.time;
+//    d.pid = +d.pid;
+    d.sctime = +d.sctime;
+    d.op = +d.op;
+    d.addr = +d.addr;
+    d.cpu = +d.cpu;
+    if (d.retval == -4)
+	d.retval = "EINTR";
+    if (d.retval == -11)
+	d.retval = "EWOULDBLOCK/EAGAIN"
+    if (d.retval == -110)
+        d.retval = "ETIMEDOUT";
+
+  });
+
+  var min_radius = 4;
+  var max_radius = 20;
+
+  var max_sctime = d3.max(data, function(d) { return d.sctime});
+  var min_sctime = d3.min(data, function(d) { return d.sctime});
+  var rScale = d3.scale.linear()
+            .domain([min_sctime, max_sctime])
+            .range([min_radius,max_radius]);
+  
+  var pad_sctime = (max_sctime - min_sctime)/4;
+  
+  var max_time = d3.max(data, function(d) { return d.time});
+  var min_time = d3.min(data, function(d) { return d.time});
+  var pad_time = (max_time - min_time)/10;   // 10% padding
+
+  // don't want lockdots overlapping axis, so add in buffer to data domain
+  xScale.domain([(d3.min(data, xValue) - 0.05) > 0.0 ? (d3.min(data, xValue) - 0.05) : 0 ,(d3.max(data, xValue) < 22.0 ? d3.max(data, xValue): 22.0) + 0.02]);
+  yScale.domain([d3.min(data, function(d) { return d.cpu }), d3.max(data, function(d) { return d.cpu })]);
+
+  // x-axis
+  svg.append("g")
+      .attr("class", "x axis")
+      .style("opacity", 1)
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("x", width)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .text("Trace timestamp (secs)");
+
+  // y-axis
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("CPU");
+
+  svg.append("clipPath")
+      .attr("id", "clip")
+    .append("rect")
+      .attr("x", 0.01 * width)
+      .attr("y", 0)
+      .attr("width", 0.90 * width)
+      .attr("height", 0.95 * height);
+
+  svg.append("rect")
+      .attr("class", "pane")
+      .attr("width", width)
+      .attr("height", height)
+      .call(d3.behavior.zoom().scale([1.0]).x(xScale).y(yScale).scaleExtent([0, 400]).on("zoom", draw));
+//      .call(d3.behavior.zoom().x(xScale).scaleExtent([1, 8000]).on("zoom", draw));
+
+  // draw lockdots
+
+    svg.selectAll(".g")
+      .data(data, function(d) { return d.time ; })
+    .enter().append("g").attr("class", "lockdots");
+
+//    var rejects = svg.selectAll("g.lockdots").filter(function(d) { return (d.time > 11.0) 
+//                                                                 || (d.addr != 0x7F1571B91EA8)
+//								 || (d.time < 10.0)  });
+//    rejects.remove();
+
+    svg.selectAll("g.lockdots").append("a")
+      .attr("xlink:show", "new")
+      .attr("xlink:href", function(d){return "./VIS/" + d.pid + "/pid_detail.html";})
+      //  .attr("xlink:href", function(d){return "./VIS/" + d.pid + "/kidsk_io.html";})
+    .append("circle")
+      .attr("class", "lockdot")
+      .attr("r", function(d) { return rScale(d.sctime);})
+      .attr("cx", xMap)
+      .attr("cy", yMap)
+      .attr("clip-path", "url(#clip)")
+      .style("opacity", 0.8)
+      .style("fill", function(d) { return ( addrcolor(addrValue(d)));}) 
+      .on("mouseover", function(d) {
+        var opstring = "";
+            if (d.op & 0x100)
+                opstring += " CLOCK_REALTIME |";
+            if (d.op & 0x80)
+                opstring += " PRIVATE |";
+            if ((d.op & 0xf) == 0)
+                opstring += " WAIT |";
+            if ((d.op & 0xf) == 1)
+                opstring += " WAKE |";
+            if ((d.op & 0xf) == 2)
+                opstring += " FD |";
+            if ((d.op & 0xf) == 3)
+                opstring += " REQUEUE |";
+            if ((d.op & 0xf) == 4)
+                opstring += " CMP_REQUEUE |";
+            if ((d.op & 0xf) == 5)
+                opstring += " WAKE_OP |";
+            if ((d.op & 0xf) == 6)
+                opstring += " LOCK_PI |";
+            if ((d.op & 0xf) == 7)
+                opstring += " UNLOCK_PI |";
+            if ((d.op & 0xf) == 8)
+                opstring += " TRYLOCK_PI |";
+            if ((d.op & 0xf) == 9)
+                opstring += " WAIT_BITSET |";
+            if ((d.op & 0xf) == 10)
+                opstring += " WAKE_BITSET |";
+            if ((d.op & 0xf) == 11)
+                opstring += " WAIT_REQUEUE_PI |";
+            if ((d.op & 0xf) == 12)
+                opstring += " WAKE_REQUEUE_PI |";
+
+          tooltip.transition()
+               .duration(200)
+               .style("opacity", .9);
+          tooltip.html("Left click to see pid detail" 
+		+ "<br/><font color=black><br/>Time  =    " + d.time
+                + "<br/>Futex =    " + hex(d.addr)
+                + "<br/>PID   =    " + d.pid
+                + "<br/>Op    =    (" + hex(d.op) + ")" + opstring
+                + "<br/>Rval  =    " + d.retval
+                + "<br/>CPU   =    " + d.cpu
+                + "<br/>Scall Time = " + d.sctime )
+               .style("left", (d3.event.pageX + 15) + "px")
+               .style("top", (d3.event.pageY - 28) + "px");
+      })
+      .on("mouseout", function(d) {
+          tooltip.transition()
+               .duration(500)
+               .style("opacity", 0);
+      })
+      .call(d3.behavior.zoom().x(xScale).scaleExtent([1, 800]).on("zoom", draw));
+      // .call(d3.behavior.zoom().x(xScale).y(yScale).scaleExtent([1, 100]).on("zoom", draw));
+
+  d3.select("select").on("change", function() {
+    this.value == "addr" ? addr() : (this.value == "op" ? op() : (this.value == "pid" ? pid() : ( this.value == "cpu" ? cpu() : ( this.value == "retval" ? retval() : addr() )))); 
+  });
+
+  $( "#addr_t" ).submit(function( event ) {
+    var val =  $("input:first").val();
+    event.preventDefault();
+    var rejects = svg.selectAll("g.lockdots").filter(function(d) { return (d.addr != val) });
+    rejects.remove();
+  });
+  
+   $( "#op_t" ).submit(function( event ) {
+    var val = $("input:first").val();
+    event.preventDefault();
+    var rejects = svg.selectAll("g.lockdots").filter(function(d) { return (d.op != val)});
+    rejects.remove();
+  });
+
+ $( "#pid_t" ).submit(function( event ) {
+    var val = $("input:first").val();
+    event.preventDefault();
+    var rejects = svg.selectAll("g.lockdots").filter(function(d) { return (d.pid != val)});
+    rejects.remove();
+  });
+
+ $( "#cpu_t" ).submit(function( event ) {
+    var val = $("input:first").val();
+    event.preventDefault();
+    var rejects = svg.selectAll("g.lockdots").filter(function(d) { return (d.cpu != val) });
+    rejects.remove();
+  });
+});
+
+
+/*
+ * Attach a context menu to a D3 element
+ */
+
+contextMenuShowing = false;
+
+d3.select("body").on('contextmenu',function (d,i) {
+    if(contextMenuShowing) {
+        d3.event.preventDefault();
+        d3.select(".popup").remove();
+        contextMenuShowing = false;
+    } else {
+        d3_target = d3.select(d3.event.target);
+        if (d3_target.classed("lockdot")) {
+            d3.event.preventDefault();
+            contextMenuShowing = true;
+            d = d3_target.datum();
+            // Build the popup
+
+            canvas = d3.select(".canvas");
+            mousePosition = d3.mouse(canvas.node());
+
+            popup = canvas.append("div")
+                .attr("class", "popup")
+                .style("left", mousePosition[0] + "px")
+                .style("top", mousePosition[1] + "px");
+            popup.append("h2").text(d.display_division);
+	    var opstring = "";
+            if (d.op & 0x100)
+                opstring += " CLOCK_REALTIME |";
+            if (d.op & 0x80)
+                opstring += " PRIVATE |";
+            if ((d.op & 0xf) == 0)
+                opstring += " WAIT |";
+            if ((d.op & 0xf) == 1)
+                opstring += " WAKE |";
+            if ((d.op & 0xf) == 2)
+                opstring += " FD |";
+            if ((d.op & 0xf) == 3)
+                opstring += " REQUEUE |";
+            if ((d.op & 0xf) == 4)
+                opstring += " CMP_REQUEUE |";
+            if ((d.op & 0xf) == 5)
+                opstring += " WAKE_OP |";
+            if ((d.op & 0xf) == 6)
+                opstring += " LOCK_PI |";
+            if ((d.op & 0xf) == 7)
+                opstring += " UNLOCK_PI |";
+            if ((d.op & 0xf) == 8)
+                opstring += " TRYLOCK_PI |";
+            if ((d.op & 0xf) == 9)
+                opstring += " WAIT_BITSET |";
+            if ((d.op & 0xf) == 10)
+                opstring += " WAKE_BITSET |";
+            if ((d.op & 0xf) == 11)
+                opstring += " WAIT_REQUEUE_PI |";
+            if ((d.op & 0xf) == 12)
+                opstring += " WAKE_REQUEUE_PI |";
+
+            popup.append("p").text(
+                    "Time  =    " + d.time
+                + "\nFutex =    " + hex(d.addr)
+                + "\nPID   =    " + d.pid
+                + "\nOp    =    (" + hex(d.op) + ")" + opstring
+                + "\nRval  =    " + d.retval
+                + "\nCPU   =    " + d.cpu
+                + "\nScall Time = " + d.sctime );
+
+            canvasSize = [
+                canvas.node().offsetWidth,
+                canvas.node().offsetHeight
+            ];
+
+            popupSize = [
+                popup.node().offsetWidth,
+                popup.node().offsetHeight
+            ];
+
+            if (popupSize[0] + mousePosition[0] > canvasSize[0]) {
+                popup.style("left","auto");
+                popup.style("right",0);
+            }
+
+            if (popupSize[1] + mousePosition[1] > canvasSize[1]) {
+                popup.style("top","auto");
+                popup.style("bottom",0);
+            }
+        }
+    }
+});
+
+
+function addr(d) {
+    svg.selectAll("circle.lockdot").style("fill", function(d) { return addrcolor(addrValue(d)); } );
+}
+
+function op(d) {
+    svg.selectAll("circle.lockdot").style("fill", function(d) { return opcolor(opValue(d)); } );
+}
+
+function pid(d) {
+    svg.selectAll("circle.lockdot").style("fill", function(d) { return pidcolor(pidValue(d)); } );
+}
+
+function cpu(d) {
+    svg.selectAll("circle.lockdot").style("fill", function(d) { return cpucolor(cpuValue(d)); } );
+}
+
+function retval(d) {
+    svg.selectAll("circle.lockdot").style("fill", function(d) { return retvalcolor(retvalValue(d)); } );
+}
+
+function draw() {
+    svg.select(".x.axis").call(xAxis);
+    svg.select(".y.axis").call(yAxis);
+    svg.selectAll("circle.lockdot").attr("cx", xMap).attr("cy", yMap);
+};
+
+
+</script>
+</body>
+</html>

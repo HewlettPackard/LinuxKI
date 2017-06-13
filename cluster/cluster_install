@@ -1,0 +1,83 @@
+#**************************************************************************
+# Copyright 2017 Hewlett Packard Enterprise Development LP.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version. This program is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details. You
+# should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#***************************************************************************
+#!/bin/bash
+
+if [ ! -f /opt/linuxki/config ]; then
+        echo Linux KI Toolset config file /opt/linuxki/config not found. >&2
+        echo Linux KI Toolset not properly installed... >&2
+        exit 10
+fi
+
+. /opt/linuxki/config
+
+[ -z "$CMU_DATADIR" ] && echo "CMU_DATADIR not set in config???" && exit 11
+
+#
+# setup
+#
+[ -z "$WCOLL" ] && echo "WCOLL (file containing list of target hosts) not set???" >&2 && exit 12
+export WCOLL
+TMPFILE=`mktemp`
+
+#
+# Copy preparation script to nodes
+# 
+$PDCP -p /opt/linuxki/cluster/node_install /tmp/linuxki_node_install 2> $TMPFILE
+if [ $? -ne 0 ]; then
+	echo " " >&2
+	echo !!!Distribution of node installation script failed!!! >&2
+	echo non-zero pdcp return code >&2
+	cat $TMPFILE >&2
+	rm -f $TMPFILE
+	exit 14
+fi
+grep -q "exit code" $TMPFILE
+if [ $? -eq 0 ]; then
+	echo " " >&2
+	echo !!!Distribution of node installation script failed!!! >&2
+	echo Most likely pdcp is not installed on target nodes. >&2
+	cat $TMPFILE >&2
+	rm -f $TMPFILE
+	exit 15
+fi
+
+$PDCP -p /opt/linuxki/config /tmp/linuxki_config 2> $TMPFILE
+if [ $? -ne 0 ]; then
+	echo " " >&2
+	echo !!!Distribution of config script failed!!! >&2
+	echo Could not copy the config file to target nodes. >&2
+	echo non-zero pdcp return code >&2
+	cat $TMPFILE >&2
+	rm -f $TMPFILE
+	exit 16
+fi
+grep -q "exit code" $TMPFILE
+if [ $? -eq 0 ]; then
+	echo " " >&2
+	echo !!!Distribution of config script failed!!! >&2
+	echo Could not copy the config file to target nodes. >&2
+	cat $TMPFILE >&2
+	rm -f $TMPFILE
+	exit 17
+fi
+
+
+#
+# run install script on nodes
+#
+$PDSH -S /tmp/linuxki_node_install
+
+rm -f $TMPFILE
+
+exit 0

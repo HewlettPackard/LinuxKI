@@ -1,0 +1,81 @@
+#**************************************************************************
+# Copyright 2017 Hewlett Packard Enterprise Development LP.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version. This program is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details. You
+# should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#***************************************************************************
+#!/bin/bash
+
+CMU_HOST=`echo $SSH_CLIENT|awk '{print $1}'`
+CMU_CLIENT=`echo $SSH_CONNECTION|awk '{print $3}'`
+
+# if its a PDSH to the same CMU Host, then simply return
+# as there as there is nothing to install
+if [ $CMU_HOST == $CMU_CLIENT ]; then
+        exit 0;
+fi
+
+date > /tmp/linuxki.last.run
+echo $0 >> /tmp/linuxki.last.run
+mount >> /tmp/linuxki.last.run
+
+echo --- Linux KI Toolset node uninstall starting...
+
+# Check for stale NFS mount point and remount if stale
+grep -q -e " /opt/linuxki " /etc/fstab
+if [ $? -eq 0 ]; then
+	TMPFILE=`mktemp`
+	ls /opt/linuxki/config > /dev/null 2> $TMPFILE
+	grep -q Stale $TMPFILE && umount -f /opt/linuxki && mount /opt/linuxki 
+	rm -f $TMPFILE
+fi
+
+[ -f /opt/linuxki/config ] && . /opt/linuxki/config
+
+[ -z $CMU_DATADIR ] && CMU_DATADIR=/var/linuxki
+
+#
+# Remove NFS mounts from /etc/fstab
+# Its OK if one or more are not present
+#
+grep -q -e " /opt/linuxki " -e " $CMU_DATADIR " /etc/fstab
+if [ $? -eq 0 ]; then
+	TMPFILE=`mktemp`
+	grep -v -e " /opt/linuxki " -e " $CMU_DATADIR " -e "Linux KI" /etc/fstab > $TMPFILE
+	mv $TMPFILE /etc/fstab
+	chmod 644 /etc/fstab
+	rm -f $TMPFILE
+fi
+
+#
+# if directories are NFS mounted, then unmount them
+#
+mount | grep " /opt/linuxki " | grep -q " nfs"
+if [ $? -eq 0 ]; then
+	umount -f /opt/linuxki
+fi
+
+mount | grep " $CMU_DATADIR " | grep -q " nfs"
+if [ $? -eq 0 ]; then
+	umount -f $CMU_DATADIR
+fi
+
+#
+# Remove module
+#
+modprobe -r -q likit
+rm -f /lib/modules/`uname -r`/misc/likit.ko 2>> /dev/null
+depmod
+
+rm -f /tmp/linuxki_node_remove
+
+date >> /tmp/linuxki.last.run
+echo --- Linux KI Toolset node uninstall complete!
+exit 0

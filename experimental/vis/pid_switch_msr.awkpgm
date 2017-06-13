@@ -1,0 +1,4 @@
+{
+     if ($5 == "sched_wakeup")       print $1,$2,$3,$4,$5,$6,$8,$9
+      else if ($5 == "sched_switch") print $1,$2,$3,$4,$5,$6,$8,$9,$22
+}

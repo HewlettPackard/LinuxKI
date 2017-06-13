@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+
+      #tooltip {
+        color: blue;
+        background: #FFF;
+        padding: 5px;
+        border: 2px solid grey;
+        border-radius: 5px;
+        position: absolute;
+        z-index: 10;
+        visibility: hidden;
+        font: 12px sans-serif;
+        white-space: pre;
+        pointer-events: none;
+      }
+
+      .popup {
+        position: absolute;
+        left: 0;
+        top: 0;
+        background-color: #fff;
+        width: 200px;
+        border: 1px #ccc solid;
+        border-radius: 6px;
+        box-shadow: #333 2px 2px 4px;
+        padding: 8px;
+        white-space:pre;
+        font-family: courier new;
+        font-size: 10px;
+        font-weight: bold;
+        opacity: 0.9
+      }
+
+      .popup h2 {
+        margin: 0 0 1rem 0;
+      }
+
+      .canvas {
+         position: absolute;
+      }
+
+      .chartsummary {
+          pointer-events: none;
+          font: 18px sans-serif;
+          white-space:pre;
+      }
+
+      #circle circle {
+        fill: none;
+        pointer-events: all;
+      }
+
+      path.group {
+        fill-opacity: .8;
+      }
+
+      path.chord {
+        fill-opacity: .8;
+        stroke: #000;
+        stroke-width: .25px;
+      }
+
+      #circle:hover path.fade {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chartsummary"><p><b>Network Traffic Flow Rates: </b></p></div>
+    <div class="chartsummary"><p><b>    Local PID+IP+Port <-> Remote IP+Port  </b></p></div>
+    <div id="tooltip"></div>
+    <script src="D3/d3.v3.min.js"></script>
+    <script src="D3/lib/underscore-min.js"></script>
+    <script src="D3/lib/mapper.js"></script>
+    <script>
+      //*******************************************************************
+      //  CREATE MATRIX AND MAP
+      //*******************************************************************
+      d3.csv('kisock.csv', function (error, data) {
+        var mpr_conn = chordMpr(data);
+        mpr_conn
+	  .addToMap('PID')
+          .addValuesToMap('Local_conn')
+          .addValuesToMap('Remote_conn')
+          .setFilter(function (row, a, b) {
+            return (row.Local_conn === a.name && row.Remote_conn === b.name) ||
+                   (row.Local_conn === b.name && row.Remote_conn === a.name)
+          })
+          .setAccessor(function (recs, a, b) {
+            if (!recs[0]) return 0;
+              return recs[0].Local_conn === a.name ? +recs[0].NetTx : +recs[0].NetRx;
+          });
+        drawChords(mpr_conn.getMatrix(), mpr_conn.getMap());
+      });
+
+      //*******************************************************************
+      //  DRAW THE CHORD DIAGRAM
+      //*******************************************************************
+      function drawChords (matrix, mmap) {
+        var w = 980, h = 980, r1 = h / 2, r0 = r1 - 210;
+
+	var fill = d3.scale.category20c();
+
+        var chord = d3.layout.chord()
+            .padding(.02)
+            .sortSubgroups(d3.descending)
+            .sortChords(d3.descending);
+
+        var arc = d3.svg.arc()
+            .innerRadius(r0)
+            .outerRadius(r0 + 20);
+
+        var svg = d3.select("body").append("div").attr("class", "canvas").append("svg")
+            .attr("width", w)
+            .attr("height", h)
+          .append("svg:g")
+            .attr("id", "circle")
+            .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")");
+
+            svg.append("circle")
+                .attr("r", r0 + 20);
+
+        var rdr = chordRdr(matrix, mmap);
+        chord.matrix(matrix);
+
+        var g = svg.selectAll("g.group")
+            .data(chord.groups())
+          .enter().append("svg:g")
+            .attr("class", "group")
+            .on("mouseover", mouseover)
+            .on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
+
+        g.append("svg:path")
+            .style("stroke", "black")
+            .style("fill", function(d) { return fill(rdr(d).gname); })
+	    .attr("class", "endpoint")
+            .attr("d", arc);
+
+        g.append("svg:text")
+            .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
+            .attr("dy", ".35em")
+            .style("font-family", "helvetica, arial, sans-serif")
+            .style("font-size", "12px")
+            .attr("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
+            .attr("transform", function(d) {
+              return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
+                  + "translate(" + (r0 + 26) + ")"
+                  + (d.angle > Math.PI ? "rotate(180)" : "");
+            })
+            .text(function(d) { return rdr(d).gname; });
+
+          var chordPaths = svg.selectAll("path.chord")
+                .data(chord.chords())
+              .enter().append("svg:path")
+                .attr("class", "chord")
+                .style("stroke", function(d) { return d3.rgb(fill(rdr(d).sname)).darker(); })
+                .style("fill", function(d) { return fill(rdr(d).sname); })
+                .attr("d", d3.svg.chord().radius(r0))
+                .on("mouseover", function (d) {
+                  d3.select("#tooltip")
+                    .style("visibility", "visible")
+                    .html(chordTip(rdr(d)))
+                    .style("top", function () { return (d3.event.pageY - 170)+"px"})
+                    .style("left", function () { return (d3.event.pageX - 100)+"px";})
+                })
+                .on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
+
+          function chordTip (d) {
+            var p = d3.format(".0%"), q = d3.format(".0f")
+            return "Traffic Profile:<br/>"
+              +  d.sname + " Sent to " + d.tname
+              + ":    " + q(d.svalue) + " KB/sec<br/>"
+              + p(d.svalue/d.stotal) + " of " + d.sname + "'s Total   (" + q(d.stotal) + " KB/sec)<br/>"
+              + p(d.svalue/d.mtotal) + " of Server Total   (" + q(d.mtotal) + " KB/sec)<br/>"
+              + "<br/>"
+              + d.tname + " Sent to " + d.sname
+              + ":    " + q(d.tvalue) + " KB/sec<br/>"
+              + p(d.tvalue/d.ttotal) + " of " + d.tname + "'s Total   (" + q(d.ttotal) + " KB/sec)<br/>"
+              + p(d.tvalue/d.mtotal) + " of Server Total   (" + q(d.mtotal) + " KB/sec)";
+          }
+
+          function groupTip (d) {
+            var p = d3.format(".0%"), q = d3.format(".0f")
+            return "Connection Traffic Summary:<br/>"
+                + d.gname + " :    " + q(d.gvalue) + " KB/sec<br/>"
+                + p(d.gvalue/d.mtotal) + " of Server Total   (" + q(d.mtotal) + " KB/sec)"
+          }
+
+          function mouseover(d, i) {
+            d3.select("#tooltip")
+              .style("visibility", "visible")
+              .html(groupTip(rdr(d)))
+              .style("top", function () { return (d3.event.pageY - 80)+"px"})
+              .style("left", function () { return (d3.event.pageX - 130)+"px";})
+
+            chordPaths.classed("fade", function(p) {
+              return p.source.index != i
+                  && p.target.index != i;
+            });
+          }
+      }
+
+      /*
+       * Attach a context menu to a D3 element
+       */
+
+      contextMenuShowing = false;
+
+      d3.select("body").on('contextmenu',function (d,i) {
+          if(contextMenuShowing) {
+              d3.event.preventDefault();
+              d3.select(".popup").remove();
+              contextMenuShowing = false;
+          } else {
+	      console.log ("Context detected");
+              d3_target = d3.select(d3.event.target);
+              if (d3_target.classed("endpoint")) {
+                  d3.event.preventDefault();
+		  console.log ("got here");
+                  contextMenuShowing = true;
+                  d = d3_target.datum();
+                  // Build the popup
+		  canvas = d3.select(".canvas");
+            mousePosition = d3.mouse(canvas.node());
+	    console.log("Mouse position is:" + mousePosition[0] + " and " + mousePosition[1]);
+            popup = canvas.append("div")
+                .attr("class", "popup")
+                .style("left", mousePosition[0] + "px")
+                .style("top", mousePosition[1] + "px");
+            popup.append("h2").text(d.display_division);
+            popup.append("p").text( "Test");
+            popup.append("p")
+            .append("a")
+            .attr("href", "./VIS/" +  + "/pid_detail.html")
+            .text("PID activity chart\n");
+
+            canvasSize = [
+                canvas.node().offsetWidth,
+                canvas.node().offsetHeight
+            ];
+
+            popupSize = [
+                popup.node().offsetWidth,
+                popup.node().offsetHeight
+            ];
+
+            if (popupSize[0] + mousePosition[0] > canvasSize[0]) {
+                popup.style("left","auto");
+                popup.style("right",0);
+            }
+
+            if (popupSize[1] + mousePosition[1] > canvasSize[1]) {
+                popup.style("top","auto");
+                popup.style("bottom",0);
+            }
+        }
+    }
+});
+
+
+    </script>
+  </body>
+</html>

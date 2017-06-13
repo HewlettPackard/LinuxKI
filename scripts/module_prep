@@ -1,0 +1,83 @@
+#**************************************************************************
+# Copyright 2017 Hewlett Packard Enterprise Development LP.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version. This program is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details. You
+# should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#***************************************************************************
+#!/bin/bash
+DIR=/opt/linuxki
+#
+# Check if we already have the module installed
+#
+[ -f /lib/modules/`uname -r`/misc/likit.ko ] && exit
+#
+# Find right module version for current platform
+#
+if [ -f $DIR/modules/likit.ko.`uname -r` ]; then
+        GOODMOD=$DIR/modules/likit.ko.`uname -r`
+else 
+	if [ "`uname -r | cut -b 1,2`"  == "2." ]; then
+#		Note we only try to match with RHEL 6.X, otherwise
+#		this can cause some insmod errors for each module it fails to load
+#		as is searches for the good module
+        	echo -e \\tFinding compatible LiKI loadable kernel module ...
+        	echo -e \\tPlease ignore any messages about incompatible modules in syslog
+        	for MOD in $DIR/modules/likit.ko $DIR/modules/likit.ko.2.*; do
+			if [ -f $MOD ]; then
+                		insmod $MOD 2> /dev/null
+                		if [ $? -eq 0 ]; then
+                        		echo -e "\\tFound compatible LiKI module: " $MOD
+                        		rmmod likit
+               		         	export GOODMOD=$MOD
+               		         	break
+                		fi
+			fi
+       		 done
+	fi
+fi
+
+#
+# Link the appropriate module to /lib/modules
+#
+if [ ${GOODMOD+xxx} ]; then
+	rm -f $DIR/likit.ko
+        mkdir -p /lib/modules/`uname -r`/misc 2> /dev/null
+	rm -f /lib/modules/`uname -r`/misc/likit.ko 
+        ln -s $GOODMOD /lib/modules/`uname -r`/misc/likit.ko
+        echo -e \\tRunning depmod - this might take a moment or two ...
+        depmod
+	exit
+fi
+
+#
+# Last resort: lets try compiling the module
+#
+echo -e "\\tUnable to find compatible module - attempting to build from source ..."
+TMP_SRC_DIR=`mktemp -d -p /tmp`
+cp $DIR/src/* $TMP_SRC_DIR
+cd $TMP_SRC_DIR
+make
+insmod likit.ko 2> /dev/null
+if [ $? -eq 0 ]; then
+	echo -e "\\tCompiled compatible LiKI module successfully"
+	#rm -f $DIR/likit.ko
+	rmmod likit
+	GOODMOD=$DIR/modules/likit.ko.`uname -r`
+	chmod 744 likit.ko
+	mv likit.ko $GOODMOD
+        mkdir -p /lib/modules/`uname -r`/misc 2> /dev/null
+	rm -f /lib/modules/`uname -r`/misc/likit.ko 
+        ln -s $GOODMOD  /lib/modules/`uname -r`/misc/likit.ko
+        echo -e \\tRunning depmod - this might take a moment or two ...
+        depmod
+else
+        echo -e \\tUnable to build compatible LiKI module - you may still be able to use ftrace mode
+fi
+rm -rf $TMP_SRC_DIR

@@ -1,0 +1,89 @@
+#**************************************************************************
+# Copyright 2017 Hewlett Packard Enterprise Development LP.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version. This program is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details. You
+# should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#***************************************************************************
+#!/bin/bash
+
+. /opt/linuxki/config
+
+#
+# Remove module(s)
+#
+echo -e \\tRemoving LiKI kernel module\(s\) ...
+modprobe -r -q likit
+rm -f /lib/modules/*/misc/likit.ko 2> /dev/null
+
+#
+# If this installation is on a cluster, then there are a few additional tasks...
+#
+grep -q CLUSTER /opt/linuxki/.configured
+if [ $? -eq 0  ]; then
+	[ -z "$EXPORTS" ] && echo "EXPORTS not set in /opt/linuxki/config???" && exit 12
+	[ -z "$CMU_DATADIR" ] && echo "CMU_DATADIR not set in /opt/linuxki/config???" && exit 12
+
+	if [ -f $EXPORTS ]; then
+		#
+		# Un-export the data and binaries directories
+		#
+		grep -q "Linux KI Toolset Integration" $EXPORTS
+		if [ $? -eq 0 ]; then
+       		 	echo -e \\tRemoving Linux KI Toolset NFS exports from $EXPORTS ...
+			TMPFILE=`mktemp`
+			grep -v -e "Linux KI" -e linuxki -e $CMU_DATADIR $EXPORTS > $TMPFILE
+			mv $TMPFILE $EXPORTS
+			exportfs -r 
+			rm -f $TMPFILE
+		fi
+	fi
+
+	if [ -f /opt/cmu/etc/cmu_custom_menu ]; then
+		#
+		# Remove CMU context menu
+		#
+		grep -q "Linux KI Toolset Integration" /opt/cmu/etc/cmu_custom_menu
+		if [ $? -eq 0 ]; then
+			echo -e \\tRemoving Linux KI Toolset context menu items from /opt/cmu/etc/cmu_custom_menu ...
+			TMPFILE=`mktemp`
+			grep -v "Linux KI" /opt/cmu/etc/cmu_custom_menu > $TMPFILE
+			mv $TMPFILE /opt/cmu/etc/cmu_custom_menu
+			rm -f $TMPFILE
+		fi
+	fi
+
+	#
+	# unmount NFS mount
+	#
+	grep -q $CMU_DATADIR /etc/fstab && umount -f $CMU_DATADIR
+
+	#
+	# Remove NFS mounts from /etc/fstab
+	#
+	grep -q "Linux KI Toolset Integration" /etc/fstab
+	if [ $? -eq 0 ]; then
+	        TMPFILE=`mktemp`
+	        grep -v -e linuxki -e $CMU_DATADIR -e "Linux KI" /etc/fstab > $TMPFILE
+	        mv $TMPFILE /etc/fstab
+	        chmod 644 /etc/fstab
+	        rm -f $TMPFILE
+	fi
+fi
+
+#
+# Remind user of data directory on head node
+#
+[ ! -z $CMU_DATADIR ] && [ -d $CMU_DATADIR ] && echo -e "\t*** Remember, there may be data collections in $CMU_DATADIR ***"
+
+#
+# Remove the config files
+#
+rm -f /opt/linuxki/.configured /opt/linuxki/.cmode
+exit 0

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html xmlns:xlink="http://www.w3.org/1999/xlink">
+        <head>
+                <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+                <title>Timeline of task scheduling activity</title>
+                <script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>
+                <style type="text/css">
+                        #body {
+                                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                                font-size: 14px;
+                                width:1024px;
+                                height: 800px;
+                                position: absolute;
+                                // border: solid 1px black;
+                        }
+
+                        #Description_text {
+                                position: absolute;
+                                top: 0px;
+                                left: 0px;
+                                width:1024px;
+                                height:48px;
+                                // border: solid 1px black;
+                        }
+
+                        #Timeline_chart {
+                                position: absolute;
+                                top: 48px;
+                                left: 0px;
+                                width:1024px;
+  	                        height:300px;
+                                border: solid 1px black;
+				white-space:pre;
+                        }
+
+			#rect_popup {
+                                position: relative;
+                        }
+
+                        .pagesummary {
+                                pointer-events: none;
+                                font: 18px sans-serif;
+                                white-space:pre;
+                        }
+
+                        .chartsummary {
+                                pointer-events: none;
+                                font: 14px sans-serif;
+                                white-space:pre;
+                        }
+
+			.canvas {
+                                position: absolute;
+                        }
+
+			.popup {
+                                position: absolute;
+                                left: 0;
+                                top: 0;
+                                background-color: cornsilk;
+                                border: 1px #ccc solid;
+                                border-radius: 6px;
+                                box-shadow: #333 2px 2px 4px;
+                                padding: 8px;
+                                white-space:pre;
+                                font-family: courier new;
+                                font-size: 11px;
+                                font-weight: bold;
+                                opacity: 0.95
+                        }
+
+			.popup h2 {
+				margin: 0 0 1rem 0;
+			}
+
+
+                        text {
+                                pointer-events: none;
+                                white-space:pre;
+                        }
+
+	                .chart {
+  	                        shape-rendering: crispEdges;
+	                }
+
+	                .mini text {
+	                        font: 12px sans-serif;
+	                }
+
+	                .main text {
+	                        font: 12px sans-serif;
+	                }
+
+			.axis path,
+			.axis line {
+    				fill: none;
+    				stroke: black;
+    				shape-rendering: crispEdges;
+			}
+
+			.axis text {
+    				font-family: sans-serif;
+    				font-size: 11px;
+			}
+		
+			.baxis path,
+                        .baxis line {
+                                fill: none;
+                                stroke: black;
+                                shape-rendering: crispEdges;
+                        }
+
+                        .baxis text {
+                                font-family: sans-serif;
+                                font-size: 11px;
+                        }
+
+	                .brush .extent {
+	                        stroke: gray;
+	                        fill: dodgerblue;
+	                        fill-opacity: .365;
+	                }
+                </style>
+        </head>
+        <body>
+                <div id="body">
+                        <div id="Description_text">
+                                <div class="pagesummary"><p><b>  Task Scheduling Timeline</b></p></div>
+			</div>
+                        <div id="Timeline_chart" class="canvas">
+                        </div>
+                <div>
+                <script type="text/javascript">
+
+	var TID = -2;	// Needs to be visible to the popup code at bottom
+
+ 	d3.csv("pid_switch.csv", function(csvdata) {
+//		csvdata = csvdata.filter(function(row) {
+//			return row['cpu'] > 75 && row['start'] > 1.0 && row['end'] < 2.0;
+//		})
+
+//	CSV fields are:
+//	start,end,cpu,pid,tgid,type,waker,scall_tgt,state,next_tgtcpu,func_ok,id
+
+		var pids = [];
+		var last_wakeup_index = 0;
+		var last_switchout_index = 0;
+		var last_switchon_index = 0;
+                var last_switchout_start = 0;
+                var last_switchout_cpu =  -1;
+                var last_switchon_start= 0;
+
+		// convert CSV strings to numbers and assign endtime based on previous record
+		csvdata.forEach(function (d,i) {
+                        if (d.type == "sched_wakeup") 
+                                TID = d.scall_tgt;
+		});
+		csvdata.forEach(function (d,i) {
+			d.pid = +d.pid;
+			d.waker = 0;
+			d.start = +d.start;
+			d.end = +d.start;
+			d.cpu = +d.cpu;
+			d.next_tgtcpu = +d.next_tgtcpu;
+
+			if (d.type == "sched_wakeup") {	
+				d.next_tgtcpu = d.state;  // fixup to misaligned sched_wakeup records due to added 'state' field.
+				last_wakeup_index=i;
+				d.type = "On_Runq";
+				if (last_switchout_index < i) {
+					csvdata[last_switchout_index].end = d.start;
+					csvdata[last_switchout_index].waker = d.pid;
+					if (d.next_tgtcpu != last_switchout_cpu)
+						d.type = "Migr"
+				}
+				d.id = 1;
+			}
+			if ((d.type == "sched_switch") && (d.next_tgtcpu == TID)) {
+				last_switchon_index=i;
+				if (last_wakeup_index < i)
+					csvdata[last_wakeup_index].end = d.start;
+				d.type = "Running";
+				d.id = 2;
+			} 
+			if (d.type == "sched_switch" && d.pid == TID) {
+				if (d.state == "RUN")  {
+					last_wakeup_index=i;
+					last_switchout_index=i;
+					csvdata[last_switchon_index].end = d.start;
+					d.type = "On_Runq";
+					d.next_tgtcpu = d.cpu;
+                                	d.id = 1;
+				} else if ((d.state == "SLEEP") || (d.state == "SSLEEP")) {
+					last_switchout_index = i;
+					if (last_switchon_index < i)
+						csvdata[last_switchon_index].end = d.start;
+					d.type = "Sleeping";
+					d.id = 3;
+					last_switchout_cpu = d.cpu;
+				}
+			}
+			pids.push({"pid": d.pid})
+			if (d.id == 0)
+				console.log(" record does not map as expected.  Start= %f Type= %s", d.start, d.type);
+                });
+
+
+
+                var colorScale = d3.scale.ordinal()
+                        .domain(["On_Runq", "Running", "Sleeping", "ICS", "Migr"])
+                        .range(["#ffc700", "#00d73d", "#00ccff", "#0000ff", "#ff0000"]);
+
+                // extract a list of just the unique pids
+                pids = d3.keys(d3.nest()
+                        .key(function(d) {return d.pid;})
+                        .map(pids));
+
+
+
+                var pid_cnt = 4;
+                var timeBegin = d3.min(csvdata, function(d) { return d.start});
+                var timeEnd = d3.max(csvdata, function(d) { return d.end});
+
+		// Defining margins and lane sizes
+		var m = [5, 5, 15, 20], //top right bottom left
+                        w = 1024 - m[1] - m[3],
+                        h = (pid_cnt + 1)*50 - m[0] - m[2],
+                        miniHeight = pid_cnt * 10,
+                        mainHeight = h - miniHeight - 90,
+			minilaneHeight = miniHeight/pid_cnt;
+			mainlaneHeight = mainHeight/pid_cnt;
+
+
+                //scales  
+
+		var xScale = d3.scale.linear()
+                     .domain([ d3.min(csvdata, function(d) { return d.start; }), 
+                               d3.max(csvdata, function(d) { return d.end; })])
+                     .range([0, w]);
+
+		var xbrushScale = d3.scale.linear()
+                     .domain([ d3.min(csvdata, function(d) { return d.start; }),
+                               d3.max(csvdata, function(d) { return d.end; })])
+                     .range([0, w]);
+
+                var x = d3.scale.linear()
+                                .domain([timeBegin, timeEnd])
+                                .range([0, w]);
+                var x1 = d3.scale.linear()
+                                .range([0, w]);
+                var y2 = d3.scale.linear()
+                                .domain([0, pid_cnt])
+                                .range([0, mainHeight]);
+                var y1 = d3.scale.linear()
+                                .domain([0, pid_cnt])
+                                .range([0, miniHeight]);
+		var h1 = d3.scale.linear()
+				.domain([0,100])
+				.range([2,9]); 
+		var h2 = d3.scale.linear()
+                                .domain([0,100])
+                                .range([2,mainlaneHeight - 2]);
+
+                // Define an X-axis function
+
+ 		var xAxis = d3.svg.axis()
+                .scale(xScale)
+		.tickFormat(d3.format(".3f"))
+                .orient("bottom");
+
+
+		// Add the SVG canvas
+                var chart = d3.select("#Timeline_chart")
+                                        .append("svg")
+                                        .attr("width", w + m[1] + m[3])
+                                        .attr("height", h + m[0] + m[2])
+                                        .attr("class", "chart");
+
+		// Add the clipping path to the top larger window
+                chart.append("defs").append("clipPath")
+                        .attr("id", "clip")
+                        .append("rect")
+                        .attr("width", w)
+                        .attr("height", mainHeight);
+
+		// Create two 'g' group elements...one for main window, one for mini window
+                var mini = chart.append("g")
+                                        .attr("transform", "translate(" + m[3] + "," +  m[0] + ")")
+                                        .attr("width", w)
+                                        .attr("height", miniHeight)
+                                        .attr("class", "mini");
+
+                var main = chart.append("g")
+                                        .attr("transform", "translate(" + m[3] + "," + (miniHeight + m[0] + 40) + ")")
+                                        .attr("width", w)
+                                        .attr("height", mainHeight+200)
+                                        .attr("class", "main");
+
+                var itemRects = main.append("g")
+                        .attr("clip-path", "url(#clip)");
+
+                //Add mini item rects... main rects don't appear till you start brushing...see display()
+
+                mini.append("g").selectAll(".miniItems")
+                        .data(csvdata)
+                        .enter().append("rect")
+                        .attr("x", function(d) {return x(d.start);})
+                        .attr("y", function(d) {return y1(d.id ) ;})
+                        //.attr("y", function(d) {return y1(d.id + 1) - h1(d.cpu) ;})
+                        .attr("width", (function(d) {return Math.max(5,x(d.end) - x(d.start)) - 3 ;}) )
+                        .attr("height", function(d) {return h1(100) })
+                        .attr("stroke-width", 0)
+			.attr("stroke", "lightgray")
+                        .attr("fill-opacity", .9)
+                        .attr("fill", function(d) {return d.waker == -1?colorScale("ICS"):colorScale(d.type);})
+			.attr("class", "miniItems");
+
+                //brush
+                var brush = d3.svg.brush()
+                          .x(x)
+                          .on("brush", display);
+
+		var  labels;
+                
+		minExtent = brush.extent()[0],
+                maxExtent = brush.extent()[1];
+
+
+                mini.append("g")
+                        .attr("class", "x brush")
+                        .call(brush)
+                        .selectAll("rect")
+                        .attr("y", 1)
+                        .attr("height", miniHeight - 1);
+
+		mini.append("g")
+			.attr("class", "axis") 
+			.attr("transform", "translate(0," + (miniHeight) + ")")
+			.call(xAxis);
+
+		var xBrushScale = d3.scale.linear()
+               		.domain([ minExtent,maxExtent ])
+                       	.range([0, w]);
+
+                var xBrushAxis = d3.svg.axis()
+                        .scale(xBrushScale)
+                        .tickFormat(d3.format(".4f"))
+                        .orient("bottom");
+
+                var baxis = main.append("g")
+                        .attr("class", "baxis")
+                        .attr("transform", "translate(0," + (mainHeight + 2) + ")")
+                        .call(xBrushAxis);
+
+                main.append("rect")
+                        .attr("x", 250)
+                        .attr("y", 140)
+                        .attr("width", 8)
+                        .attr("height", 15)
+                        .attr("stroke-width", 1)
+                        .attr("fill-opacity", .9)
+                        .attr("fill", function(d) {return colorScale("Migr")});
+                main.append("text").attr("x",260).attr("y",152).text(" - CPU Migr");
+
+		main.append("rect")
+			.attr("x", 350)
+                        .attr("y", 140)
+                        .attr("width", 8)
+                        .attr("height", 15)
+                        .attr("stroke-width", 1)
+                        .attr("fill-opacity", .9)
+                        .attr("fill", function(d) {return colorScale("On_Runq")});
+		main.append("text").attr("x",360).attr("y",152).text(" - On_Runq");
+
+                main.append("rect")
+                        .attr("x", 450)
+                        .attr("y", 140)
+                        .attr("width", 8)
+                        .attr("height", 15)
+                        .attr("stroke-width", 1)
+                        .attr("fill-opacity", .9)
+                        .attr("fill", function(d) {return colorScale("Running")});
+                main.append("text").attr("x",460).attr("y",152).text(" - Running");
+
+                main.append("rect")
+                        .attr("x", 550)
+                        .attr("y", 140)
+                        .attr("width", 8)
+                        .attr("height", 15)
+                        .attr("stroke-width", 1)
+                        .attr("fill-opacity", .9)
+                        .attr("fill", function(d) {return colorScale("Sleeping")});
+                main.append("text").attr("x",560).attr("y",152).text(" - Sleeping");
+
+		main.append("rect")
+                        .attr("x", 650)
+                        .attr("y", 140)
+                        .attr("width", 8)
+                        .attr("height", 15)
+                        .attr("stroke-width", 1)
+                        .attr("fill-opacity", .9)
+                        .attr("fill", function(d) {return colorScale("ICS")});
+                main.append("text").attr("x",660).attr("y",152).text(" - Sleeping (ICS is waker)");
+
+			
+
+
+                display();
+
+		var visitems,rects;
+
+                function display() {
+                        minExtent = brush.extent()[0],
+                        maxExtent = brush.extent()[1];
+			
+                        if (minExtent != maxExtent )
+                                visItems = csvdata.filter(function(d) {return (d);});
+                        else
+                                visItems = csvdata.filter(function(d) {return (d.end) < maxExtent && (d.start) > minExtent;});
+
+			mini.select(".brush")
+                                .call(brush.extent([minExtent, maxExtent]));
+			xBrushScale.domain([ minExtent,maxExtent ]);
+			main.select(".baxis")
+				.call(xBrushAxis);
+
+                        x1.domain([minExtent, maxExtent]);
+                        //update main item rects
+                        rects = itemRects.selectAll("a")
+                                .data(visItems, function (d) { return d; })
+                        rects.enter().append("svg:a")
+				.append("rect")
+				.attr("class", "mainrect")
+                                .attr("x", function(d) {return x1(d.start);})
+                                .attr("y", function(d) {return y2(d.id ) ;})
+				.attr("width", (function(d) {return Math.max(5,x1(d.end) - x1(d.start)) - 3 ;}) )
+                                .attr("height", function(d) {return mainlaneHeight ;})
+                        	.attr("stroke-width", 0)
+                        	.attr("stroke", "lightgray")
+				.attr("fill-opacity", .9)
+                        	.attr("fill", function(d) {return d.waker == -1?colorScale("ICS"):colorScale(d.type);})
+			
+                        rects.exit().remove();
+                }
+
+
+	});
+
+/*
+ * Attach a context menu to a D3 element
+ */
+
+
+        contextMenuShowing = false;
+
+        var minExtent = 0;
+        var maxExtent = 0;
+
+        d3.select("body").on('contextmenu',function (d,i) {
+                if(contextMenuShowing) {
+                        d3.event.preventDefault();
+                        d3.select(".popup").remove();
+                        contextMenuShowing = false;
+                } else {
+                        d3_target = d3.select(d3.event.target);
+                        if (d3_target.classed("mainrect")) {
+                                d3.event.preventDefault();
+                                contextMenuShowing = true;
+                                d = d3_target.datum();
+                                // Build the popup
+                                canvas = d3.select(".canvas");
+                                mousePosition = d3.mouse(canvas.node());
+
+                                var num = d3.format("5.6f");
+                                var num6 = d3.format("6.d");
+                                var num8 = d3.format("7.8");
+                                var numpct = d3.format("5.1f");
+
+                                popup = canvas.append("div")
+                                        .attr("class", "popup")
+                                        .style("left", mousePosition[0] + "px")
+                                        .style("top", mousePosition[1] + "px");
+                                popup.append("h2").text(d.display_division);
+
+				switch(d.type) 
+				{
+					case "Sleeping":
+					    popup.append("p")
+                                        	.text("PID  :" + num6(TID) + " (sleeping)\nWaker: " + d.waker + "\n\nStart:    " +  num(d.start)
+						      + "\tEnd: " + num(d.end)
+                                                      + "\nDuration: " + num(d.end - d.start) + "\tCPU: " + d.cpu + "\n\n" + "syscall      : " + d.scall_tgt
+                                                      + "\n" + "Blocking func: " + d.func_ok);
+					    popup.append("p")
+                                        	.append("a")
+                                        // 	.attr("href", "../../kivis.php?type=switch_add&start=" + minExtent + "&end=" + maxExtent + "&pid=" + d.waker + "&ts=" +d.timestamp )
+                                        	.text("Add waker pid timeline (not yet implemented)");
+					    break;
+					case "Migr":
+					case "On_Runq":
+					    popup.append("p")
+						.text("PID  :" + num6(TID) + " (on_runq)\nWaker: " + (d.pid==TID?"Preemted":d.pid) + "\n\nStart:    " +  num(d.start)
+                                                      + "\tEnd: " + num(d.end) + "\nDuration: " + num(d.end - d.start) + "\tCPU: " + (d.pid==TID?d.cpu:d.next_tgtcpu));
+					    break;
+					case "Running":
+					    popup.append("p")
+						.text("PID  :" + num6(TID) + " (running)\n\nStart:    " +  num(d.start)
+                                                      + "\tEnd: " + num(d.end) + "\nDuration: " + num(d.end - d.start) + "\tCPU: " + d.cpu);
+					    popup.append("p")
+                                                .append("a")
+                                                .attr("href", "../../kivis.php?type=kipid&start=" + d.start + "&end=" + d.end + "&pid=" + TID + "&ts=" +d.timestamp )
+						.attr("target", "pid_sched_detail")
+                                                .text("kipid report for this runtime period");
+					    break;
+					default:
+					     popup.append("p")
+                                                .text("Unknown data type\n");
+				}
+
+                                popup.append("p")
+                                        .append("a")
+                                        .attr("href", "../../kivis.php?type=kitrace&start=" + num(minExtent)
+					      + "&end=" + num(maxExtent) + "&pid=" + TID + "&ts=" +d.timestamp )
+					.attr("target", "pid_sched_detail")
+                                        .text("kitrace report (zoom timespan)\n");
+
+                                canvasSize = [
+                                        canvas.node().offsetWidth,
+                                        canvas.node().offsetHeight
+                                ];
+
+                                popupSize = [
+                                        popup.node().offsetWidth,
+                                        popup.node().offsetHeight
+                                ];
+
+                                if (popupSize[0] + mousePosition[0] > canvasSize[0]) {
+                                        popup.style("left","auto");
+                                        popup.style("right",0);
+                                }
+
+                                if (popupSize[1] + mousePosition[1] > canvasSize[1]) {
+                                        popup.style("top","auto");
+                                        popup.style("bottom",0);
+                                }
+                        }
+                }
+        });
+
+                </script>
+        </body>
+</html>
+

@@ -1,0 +1,100 @@
+#**************************************************************************
+# Copyright 2017 Hewlett Packard Enterprise Development LP.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version. This program is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details. You
+# should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#***************************************************************************
+#!/bin/bash
+
+if [ ! -f /opt/linuxki/config ]; then
+        echo Linux KI Toolset config file /opt/linuxki/config not found. >&2
+        echo Linux KI Toolset not properly installed... >&2
+        exit 10
+fi
+
+. /opt/linuxki/config
+
+[ -z "$CMU_DATADIR" ] && echo "CMU_DATADIR not set in /opt/linuxki/config???" >&2 && exit 11
+[ -z "$NODE_STAGEDIR" ] && echo "NODE_STAGEDIR not set in /opt/linuxki/config???" >&2 && exit 12
+
+#
+# setup
+#
+[ -z "$WCOLL" ] && echo "WCOLL (file containing list of target hosts) not set???" >&2 && exit 14
+export WCOLL
+
+RUNKI_TAG=`date +%m%d_%H%M`
+[ -f /var/run/linuxki.$RUNKI_TAG ] && echo "Collection $RUNKI_TAG already in progress..." && exit 0
+touch /var/run/linuxki.$RUNKI_TAG
+
+#
+# Copy the collect script to nodes
+#
+#TMPFILE="mktemp"
+#$PDCP -p /opt/linuxki/cluster/node_collect /tmp/linuxki_node_collect 2>$TMPFILE
+#if [ $? -ne 0 ]; then
+#        echo " " >&2
+#        echo !!!Distribution of node installation script failed!!! >&2
+#        echo non-zero pdcp return code >&2
+#        cat $TMPFILE >&2
+#        rm -f $TMPFILE /var/run/linuxki.$RUNKI_TAG
+#        exit 12
+#fi
+#grep -q "exit code" $TMPFILE
+#if [ $? -eq 0 ]; then
+#        echo " " >&2
+#        echo !!!Distribution of node installation script failed!!! >&2
+#        echo Most likely pdcp is not installed on target nodes. >&2
+#        cat $TMPFILE >&2
+#        rm -f $TMPFILE /var/run/linuxki.$RUNKI_TAG
+#        exit 14
+#fi
+#rm -f $TMPFILE
+
+#
+# Create the CMU_DATADIR if it does not already exist
+#
+mkdir -p $CMU_DATADIR >/dev/null 2>&1
+
+#
+# run data collection on nodes
+#
+
+echo "=== Linux KI Toolset data collection $RUNKI_TAG starting ==="
+
+$PDSH -S /opt/linuxki/cluster/node_collect $RUNKI_TAG
+if [ $? -ne 0 ]; then
+	echo "!!! WARNING: One or more data collections returned an error !!!"
+	echo '??? Did you perform a "Linux KI Toolset -> Install on nodes" from CMU   ???'
+	echo '??? or execute /opt/linuxki/cluster/cluster_install for non-CMU cluster ???'
+	echo '... NFS Stale file handle errors can usually be fixed by:'
+	echo '...    "Linux KI Toolset -> Install on nodes" from CMU'
+	echo '...     -or-'
+	echo '...    /opt/linuxki/cluster/cluster_install for non-CMU cluster'
+fi
+
+#
+# Look for KI data on the local node STAGEDIR
+# Be sure to strip off the last "hostname" that rpdcp appends to it.
+#
+echo "=== Copying $RUNKI_TAG collected data to $CMU_DATADIR ..."
+$RPDCP -r -p $NODE_STAGEDIR/linuxki $CMU_DATADIR  2>/dev/null
+$PDSH -S rm -rf $NODE_STAGEDIR/linuxki
+mv $CMU_DATADIR/linuxki.*/* $CMU_DATADIR 2> /dev/null
+rm -rf $CMU_DATADIR/linuxki.* 2> /dev/null
+
+echo $CMU_DATADIR:
+cd $CMU_DATADIR
+ls -l *$RUNKI_TAG*
+
+echo "=== Linux KI Toolset data collection $RUNKI_TAG finished ==="
+rm -f /var/run/linuxki.$RUNKI_TAG
+
+exit 0

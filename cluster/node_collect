@@ -1,0 +1,94 @@
+#**************************************************************************
+# Copyright 2017 Hewlett Packard Enterprise Development LP.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version. This program is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details. You
+# should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#***************************************************************************
+#!/bin/bash
+
+date > /tmp/linuxki.last.run
+echo $0 >> /tmp/linuxki.last.run
+mount >> /tmp/linuxki.last.run
+
+#
+# Verify that the Linux KI toolset is available
+#
+if [ ! -d /opt/linuxki ]  && [ ! -f /opt/linuxki/kiinfo ] && [ ! -f /opt/linuxki/runki ]; then
+	echo "!!!Linux KI Toolset missing - skipping collection!!!" >&2
+	echo 'Did you perform an "Install on nodes" via CMU or execute' >&2
+	echo "/opt/linuxki/cluster/cluster_install for non-CMU clusters\?" >&2
+	exit 10
+fi
+
+if [ ! -f /opt/linuxki/config ]; then
+	echo "Linux KI Toolset config file not found in /opt/linuxki???" >&2
+	echo "Possible stale /opt/linuxki NFS mount point???" >&2
+	exit 11
+fi
+
+. /opt/linuxki/config
+
+[ -z "$CMU_DATADIR" ] && echo "CMU_DATADIR not set in /opt/linuxki/config???" >&2 && exit 12
+[ -z "$NODE_STAGEDIR" ] && echo "NODE_STAGEDIR not set in /opt/linuxki/config???" >&2 && exit 14
+
+if [ ! -d $CMU_DATADIR ]; then
+	echo "!!!Linux KI Toolset $CMU_DATADIR directory missing - skipping collection!!!" >&2
+	echo 'Did you change CMU_DATADIR in /opt/linuxki/config without an "Uninstall from nodes"' >&2
+	echo 'followed by an "Install on nodes" from CMU or not execute /opt/linuxki/cluster/cluster_remove' >&2
+	echo "followed by /opt/linuxki/cluster/cluster_install for non-CMU clusters\?" >&2
+	exit 12
+fi
+
+#
+# Check for another collection in progress
+#
+if [ -f /var/run/linuxki.pid ]; then
+	echo "!!!Linux KI already running - skipping collection!!!" >&2
+	echo "If you are getting this message in error then delete /var/run/linuxki.pid on all your nodes," >&2
+	exit 0
+else
+	echo $$ > /var/run/linuxki.pid
+fi
+
+#
+# Determine local target directory in which to stage data
+#
+# TODO which has sufficient space /tmp or /var/tmp?
+rm -rf $NODE_STAGEDIR/linuxki
+mkdir -p $NODE_STAGEDIR/linuxki
+
+#
+# launch kitrace
+#
+cd $NODE_STAGEDIR/linuxki
+echo --- Linux KI Toolset data collection running...
+if [ -z $1 ]; then
+	/opt/linuxki/runki $RUNKI_OPTS >> /tmp/linuxki.last.run 2>&1 0</dev/null
+else
+	/opt/linuxki/runki $RUNKI_OPTS -T "$1" >> /tmp/linuxki.last.run 2>&1 0</dev/null
+fi
+
+#
+# save collection to data repository if using NFS, if not using NFS,
+# the head node will need to pull it from the $NODE_STAGEDIR
+#
+mount | grep " $CMU_DATADIR " | grep -q " nfs"
+if [ $? -eq 0 ]; then
+	cp $NODE_STAGEDIR/linuxki/ki_all.*$1*.tgz $CMU_DATADIR
+	rm -rf $NODE_STAGEDIR/linuxki
+fi
+
+#
+# clean up
+#
+rm -f /var/run/linuxki.pid
+date >> /tmp/linuxki.last.run
+echo --- Linux KI Toolset data collection complete!
+exit 0

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+export tag=$2
+echo "start,end,cpu,pid,tgid,type,waker,scall_tgt,state,next_tgtcpu,func_ok,id,timestamp" > VIS/$1/pid_switch.csv
+
+/opt/linuxki/kiinfo -kitrace pid=$1 -ts $2 -starttime $3 -endtime $4  | grep -E " sched_wakeup target_pid=$1 | sched_switch " | grep "pid=$1" | awk -f /opt/linuxki/experimental/vis/pid_switch.awkpgm | sed 's/=/ /g' | sed 's/n\/a/NA/g' | awk '{print $1",0,"$3","$5","$7","$8",0,"$10","$12","$14","$15",0,"ENVIRON["tag"]}'  >> VIS/$1/pid_switch.csv
+
+ln -s /opt/linuxki/experimental/vis/pid_switch.html VIS/$1/pid_switch.html
+

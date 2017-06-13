@@ -1,0 +1,1448 @@
+#**************************************************************************
+# Copyright 2017 Hewlett Packard Enterprise Development LP.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version. This program is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE. See the GNU General Public License for more details. You
+# should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#***************************************************************************
+#!/bin/bash  
+# runki script  -- captures LinuxKI trace data
+# @(#) runki for Linux $Date: 2017/06/07 $Revision: 5.1
+
+TOOLDIR=/opt/linuxki
+
+# need to make sure /usr/sbin and /sbin are in the path 
+PATH=$TOOLDIR:$PATH:/usr/sbin:/sbin
+version="runki for Linux version 5.1"
+tag=`date +%m%d_%H%M`
+HOSTNAME=`hostname -s`
+KIDIR=`pwd`
+ARCH=`uname -i`
+MaxCmdRuntime=120
+Event="nop"
+Subsys="nop"
+Varargs="nop"
+Comment=" "
+vxprintloc="/usr/sbin/vxprint"
+max_cstate=0
+declare -a cpu_cstate
+
+# 
+# default option settings
+#
+
+duration=20
+do_local=0
+do_collectl=0
+do_userspace=0
+do_sar=0
+do_annotate=0
+do_java=0
+do_tcpdump=""
+do_kmeminfo=1
+do_vxfs=1
+do_liki=1
+pid_filter="nop"
+tgid_filter="nop"
+cpu_filter="nop"
+dev_filter="nop"
+sysignore=""
+MSRARG="nop"
+
+help()
+{
+	printf "Usage: %s: [-h help] [-L] [-M] [-U] [-X] [-a] [-j] [-J path] [-f | -p] [-n interface] [-v] [-d duration] [-t maxrun] [-P pid] [-G tgid] [-C cpu] [-D dev] [-M] [-e event] [-s subsys] [-I sysignore] [-T timestamp] [-c \"comment\"]\n" "$0"
+	printf "		-h              Help\n"
+        printf "		-L              Gather minimal data for local analysis...no gzip/tar\n"
+	printf "		-M              Include Collectl/MeasureWare data collection\n"
+        printf "                -U              Include userspace profile (perf) data collection\n"
+        printf "                -X              Include sar data collection\n"
+        printf "                -a              Execute 'perf annotate' on userspace profile (perf) data\n"
+        printf "                -j              Collect Java stacks\n"
+        printf "                -J <path>       Location of Java jstack command\n"
+	printf "		-n <interface>  Gather tcpdump trace data\n"
+	printf "		-v              Skip vxfs, misc disc data collection\n"
+	printf "		-d <secs>       Duration of KI data collection. Defaults to 20 secs if not specified.\n"
+	printf "		-t <secs>       Maximum time for data collection tools to run. Defaults to 120 secs if not specified.\n"
+	printf "                -p              Use LiKI DLKM instead of kiinfo/ftrace to dump trace data (DEFAULT).\n"
+	printf "                -f              Use ftrace tracing instead of LiKI DLKM tracing to dump trace data.\n"
+	printf "                -P <pid>        Filter collection on Task ID or PID (liki only)\n"
+	printf "                -G <tgid>       Filter collection on Task Group ID or TGID (liki only)\n"
+	printf "                -C <cpu>        Filter collection on cpu (liki only)\n"
+	printf "                -D <dev>        Filter collection on device (liki only)\n"
+	printf "                -R              Advance CPU stats (Freq, CPI, LLC Hit%%) using MSR registers\n"
+	printf "                -e <event>      Identify events to dump. Possible values are: default | all | <event>\n"
+	printf "                -s <subsys>     Identify subsys to dump. For example: irq, scsi, block, etc.\n"
+	printf "                -I <sysignore>  File to specify ignored system call (liki only)\n"
+	printf "		-T <timestamp>  Should be of the form MMDD_HHMM \n"
+	printf "                -V \"<varargs>\"  Specify multiple filters and flags to pass to kiinfo -likidump\n"
+	printf "                -c \"comment\"    echo comment into comment.\$tag file\n"
+}
+
+
+#-------------------------------------------------------------------------------
+# function: runcmd
+#
+# Purpose : Execute a command making sure it does not run too long
+#
+# Input:
+#   - arg1 : command
+#   - arg2 : stdout output file
+#   - arg3 : stderr output file
+#   - arg4 : maximum number of seconds command should run
+#
+# Return: command exit status
+#         52 = command had to be killed for running too long
+#-------------------------------------------------------------------------------
+function runcmd {
+
+        if [ ! $# == 4 ]
+        then
+		echo "function: runcmd - incorrect number of args passed..."
+		exit 99
+	fi
+
+
+	$1 >> $2 2>> $3 &
+	Pid=$!
+
+	let i=$4
+	while [ $i -gt 0 ];
+	do
+		sleep 1
+		ps -l | awk '{print $4}' | grep -q $Pid
+		if [ $? -eq 0 ];
+		then
+			let i-=1
+		else
+			wait $Pid
+			return $?
+		fi
+	done
+
+	echo "Command: \"$1\" - did not complete in $4 seconds..." | tee -a ki.err.$tag
+	kill -9 $Pid
+	return 52 # ETIME
+}
+
+#-------------------------------------------------------------------------------
+# function: suruncmd
+#
+# Purpose : Execute a command making sure it does not run too long
+#
+# Input:
+#   - arg1 : command
+#   - arg2 : user
+#   - arg3 : stdout output file
+#   - arg4 : stderr output file
+#   - arg5 : maximum number of seconds command should run
+#
+# Return: command exit status
+#         52 = command had to be killed for running too long
+#-------------------------------------------------------------------------------
+function suruncmd {
+
+        if [ ! $# == 5 ]
+        then
+		echo "function: runcmd - incorrect number of args passed..."
+		runki_cleanup
+	fi
+
+	su -c "$1" $2 >> $3 2>> $4 &
+	Pid=$!
+
+	let i=$5
+	while [ $i -gt 0 ];
+	do
+		sleep 1
+		ps -l | awk '{print $4}' | grep -q $Pid
+		if [ $? -eq 0 ];
+		then
+			let i-=1
+		else
+			wait $Pid
+			return $?
+		fi
+	done
+
+	echo "Command: su -c \"$1\" $2 - did not complete in $5 seconds..." | tee -a ki.err.$tag
+	kill -9 $Pid
+	return 52 # ETIME
+}
+
+runki_cleanup()
+{
+	echo " "
+	echo "=== Signal caught.  Executing runki cleanup..." | tee -a ki.err.$tag
+        rmmod likit >/dev/null 2>&1
+
+	# turn off tcpdump tracing
+	if [ -n "$tcpdump_pid" ] ; then
+		echo "=== stopping tcpdump tracing."  
+		kill $tcpdump_pid
+		tcpdump_pid=
+	fi
+
+	if [ $RESET_TTWU_QUEUE -eq 1 ] ; 
+	then
+		echo "=== Enabling TTWU_QUEUE scheduling feature ===" | tee -a ki.err.$tag
+		echo "TTWU_QUEUE" > $debugfs_mount_point/sched_features    2>/dev/null
+	fi
+
+	if [ $debugfs_was_mounted -eq 0 ] ; then
+   		echo "=== Unmounting debugfs ..." | tee -a ki.err.$tag
+   		umount $debugfs_mount_point 2>> ki.err.$tag
+	fi
+	exit 1
+}
+
+#
+# start kitrace logging data, perform tcpdump collection if requested
+#
+
+kitrace_data()
+{
+	# start the kitrace
+	# first - remove any old liki DLKM
+        rmmod likit >/dev/null 2>&1
+
+	trap runki_cleanup SIGHUP SIGINT SIGQUIT SIGTERM
+
+	RESET_TTWU_QUEUE=0
+	cat $debugfs_mount_point/sched_features | grep  " TTWU_QUEUE "  > /dev/null 2>&1
+	if [ $? -eq 0 ];
+	then
+		echo "=== Disabling TTWU_QUEUE scheduling feature ===" | tee -a ki.err.$tag
+		echo "NO_TTWU_QUEUE" > /sys/kernel/debug/sched_features
+		RESET_TTWU_QUEUE=1
+	fi
+
+	# start tcpdump if requested...using 100MB trace files.
+	if [ -n "$do_tcpdump" ] ; then
+		echo "=== Starting tcpdump tracing."  
+		tcpdump -C 100 -i $do_tcpdump -s 128 -w tcpdump.$tag -W 10 -Z root >> ki.err.$tag 2>&1 &
+		tcpdump_pid=$!
+	fi
+
+	if [ $do_liki -eq 1 ]; then
+	    echo "=== Installing Linux KI trace points ===" | tee -a ki.err.$tag
+            [ ! -f /lib/modules/`uname -r`/misc/likit.ko ] && $TOOLDIR/module_prep
+            insmod /lib/modules/`uname -r`/misc/likit.ko 2>&1 >>ki.err.$tag
+	    if [ $? -eq 0 ]; then
+	        echo "=== Starting: Linux KI LiKI trace dump for $duration seconds ===" | tee -a ki.err.$tag
+		echo "=== "$Comment  | tee -a comment.$tag
+                echo "=== Starting: kiinfo -likidump dur="$duration",$Varargs,$Event,$Subsys,$pid_filter,$tgid_filter,$cpu_filter,$dev_filter,$MSRARG,debug_dir="$debugfs_mount_point",sysignore=$sysignore -ts "$tag >>ki.err.$tag 
+                $TOOLDIR/kiinfo -likidump dur="$duration",$Varargs,$Event,$Subsys,$pid_filter,$tgid_filter,$cpu_filter,$dev_filter,$MSRARG,debug_dir="$debugfs_mount_point",sysignore=$sysignore -ts $tag 2>>ki.err.$tag 
+		if [ $? -ne 0 ] ; then
+			echo "=== ERROR: likidump failed ===" 
+			tail -1 ki.err.$tag
+			echo "=== " 
+		else
+	        	echo "=== LinuxKI LiKI dump complete  ===" | tee -a ki.err.$tag
+		fi
+                cat /proc/kallsyms      > kallsyms.$tag
+                rmmod likit.ko
+	    else
+		# if we cannot install the DLKM, then default to ftrace
+		tail -1 ki.err.$tag
+		do_liki=0
+	    fi
+	fi
+
+	if [ $do_liki -eq 0 ]; then
+	    echo "=== Starting: Linux KI ftrace trace dump for $duration seconds ===" | tee -a ki.err.$tag
+	    echo "=== "$Comment  | tee -a comment.$tag
+	    echo "=== Starting: kiinfo -dump dur="$duration",$Event,$Subsys,debug_dir="$debugfs_mount_point" -ts "$tag  >>ki.err.$tag
+	    $TOOLDIR/kiinfo -dump dur="$duration",$Event,$Subsys,debug_dir="$debugfs_mount_point" -ts $tag  2>>ki.err.$tag
+	    if [ $? -ne 0 ] ; then
+		echo "=== ERROR: ftrace dump failed ===" 
+		tail -1 ki.err.$tag
+		echo "=== " 
+	    else
+	   	echo "=== LinuxKI ftrace dump complete  ===" | tee -a ki.err.$tag
+	    fi
+            cat /proc/kallsyms      > kallsyms.$tag
+	fi
+
+	echo "=== KI trace complete.  Collecting supplemental files."
+
+	# turn off tcpdump tracing
+	if [ -n "$tcpdump_pid" ] ; then
+		echo "=== stopping tcpdump tracing."  
+		kill $tcpdump_pid
+		tcpdump_pid=
+	fi
+
+	if [ $RESET_TTWU_QUEUE -eq 1 ]
+	then
+		echo "=== Enabling TTWU_QUEUE scheduling feature ===" | tee -a ki.err.$tag
+		echo "TTWU_QUEUE" > $debugfs_mount_point/sched_features    2>/dev/null
+	fi
+
+	cat $debugfs_mount_point/sched_features | grep  " NO_TTWU_QUEUE "  > /dev/null 2>&1
+	if [ $? -eq 0 ];
+	then
+		echo "=== WARNING: NO_TTWU_QUEUE is set in sched_features file ===" | tee -a ki.err.$tag
+	fi
+
+	# collect file information
+	echo "=== Running lsof ..."
+	runcmd "lsof -M -P -n" lsof.$tag ki.err.$tag $MaxCmdRuntime
+
+	# capture task stack traces 
+	echo "=== Collecting task stack traces from /proc ..."
+	for fname in `find /proc/*/stack 2>/dev/null`; do echo $fname >>stacks.$tag 2>/dev/null; cat $fname >>stacks.$tag 2>/dev/null; done
+	for fname in `find /proc/*/task/*/stack 2>/dev/null`; do echo $fname >>stacks.$tag 2>/dev/null; cat $fname >>stacks.$tag 2>/dev/null; done
+
+	# capture task maps
+	echo "=== Collecting task maps from /proc ..."
+	for fname in `find /proc/*/maps 2>/dev/null`; do echo $fname >>maps.$tag 2>/dev/null; cat $fname >>maps.$tag 2>/dev/null; done
+
+	# capture task numa_maps
+	echo "=== Collecting task numa_maps from /proc ..."
+	for fname in `find /proc/*/numa_maps 2>/dev/null`; do echo $fname >>numa_maps.$tag 2>/dev/null; cat $fname >>numa_maps.$tag 2>/dev/null; done
+
+	# capture ps listing immediately after the kitrace is started
+	ps aux > ps-aux.$tag
+	ps -eo pid,ppid,tid,user,class,rtprio,ni,pri,psr,pcpu,time,vsz,rss,stat,lstart,etime,wchan:25,comm -m >ps-eo.$tag
+	ps -eLf > ps-eLf.$tag
+	if [[ -x /usr/bin/pstree ]] ; then
+		/usr/bin/pstree -p > pstree.$tag
+	fi
+
+	# if this is a Dockers implementation...
+	if [[ -x /usr/bin/docker ]] ; then
+		/usr/bin/docker info > docker_info.$tag 2>/dev/null
+		/usr/bin/docker version > docker_version.$tag 2>/dev/null
+		/usr/bin/docker ps > docker_ps.$tag 2>/dev/null
+
+		# capture task cgroup
+		echo "=== Collecting task cgroups from /proc ..."
+		for fname in `find /proc/*/cgroup 2>/dev/null`; do echo $fname >>proc_cgroup.$tag 2>/dev/null; cat $fname >>proc_cgroup.$tag 2>/dev/null; done
+	fi
+
+	# find the binary executable and library names from the /proc/*/maps file 
+	# and then dump the symbol table for each file
+	if [ $do_liki -eq 1 ]; then
+		echo "=== Collecting binary executable and library symbol table information ..."
+		grep "xp " maps.$tag | awk '{print $6}' | grep "\/" | sort | uniq  >objfiles.$tag
+		$TOOLDIR/kiinfo -objdump -ts $tag  >/dev/null 2>>ki.err.$tag
+	fi
+}
+
+userspace_data()
+{
+	#
+	# collect perf sample
+	#
+
+	if [[ -x /usr/bin/perf && $do_userspace -eq 1 ]] ; then
+	        echo "=== Collecting $duration second perf sample ..." | tee -a ki.err.$tag
+	        perf record $PERF_PROFILE_OPTS -a -o perf_dat.$tag sleep $duration >> ki.err.$tag 2>&1
+	        perf report -i perf_dat.$tag -I -n > perf_func.txt.$tag 2>> ki.err.$tag
+	        [ $do_annotate -eq 1 ] && perf annotate -i perf_dat.$tag > perf_assem.txt.$tag 2>> ki.err.$tag
+		# The perf script can cause a very large output.
+	        # perf script -i perf_dat.$tag > perf_script.$tag 2>> ki.err.$tag
+	fi
+}
+
+java_data()
+{
+	#
+	# collect java stacks
+	#
+	if [ $do_java -eq 1 ] ; then
+	        echo "=== Collecting Java stacks ... " | tee -a ki.err.$tag
+	        TASK_FOUND=0
+
+	        for TASK in `ps -C java -o pid=` ; do
+
+	                TASK_FOUND=1
+	                #
+	                # First off, try to find the right jstack for the target JVM
+	                #
+
+	                # Try to find path of Java from ps output
+	                CMD=`ps -C java -o pid=,args= | grep $TASK | awk '{ print $2 }'`
+	                JLOC=`dirname $CMD`
+	
+	                # Else try to find path of Java from lsof output
+	                if [[ ! -x $JLOC/jstack ]]; then
+	                        CMDTMP=`grep $TASK lsof.$tag|grep "/bin/java"|awk '{print $9}'|head -1`
+	                        [ ! -z "$CMDTMP" ] && JLOC=`dirname $CMDTMP`
+				if [ ! -x $JLOC/jstack ] ; then
+					# try removing jre path
+					JLOC=`echo $JLOC|sed -e "s!/jre/bin!/bin!"` 
+				fi
+	                fi
+
+	                #
+	                # Failing that, use any java we can find...
+	                #
+
+	                # If the user specified a Java binary location, use that
+	                if [[ ! -x $JLOC/jstack && -x $jstack_path/jstack ]]; then
+	                        JLOC=$jstack_path
+	                fi
+
+	                # If JAVA_HOME is set, then use that
+	                if [[ ! -x $JLOC/jstack && -x $JAVA_HOME/bin/jstack ]]; then
+	                        JLOC=$JAVA_HOME/bin
+	                fi
+	                # Try just /usr/bin/pstack
+	                if [[ ! -x $JLOC/jstack && -x /usr/bin/jstack ]]; then
+	                        JLOC=/usr/bin
+	                fi
+
+	                if [[ ! -x "$JLOC"/jstack ]]; then
+	                        echo "=== Cannot find jstack!" | tee -a ki.err.$tag
+	                else
+				echo "=========================================" >> jstack.$tag
+				echo "Excuting: $JLOC/jstack $TASK" >> jstack.$tag
+				# jstack needs to run with the same uid as the target JVM?!?
+	                        #su -c "$JLOC/jstack $TASK" `ps --pid=$TASK -o user=` >> jstack.$tag 2>&1
+	                        suruncmd "$JLOC/jstack $TASK" `ps --pid=$TASK -o user=` jstack.$tag jstack.$tag $MaxCmdRuntime
+	                fi
+                done
+
+                if [ $TASK_FOUND -eq 0 ]; then
+                        echo "=== No Java tasks found." | tee -a ki.err.$tag
+                fi
+	fi
+
+}
+
+
+extfs_info()
+{
+
+        for MNTPNT in $(/bin/mount | grep ext[2,3,4] | awk '{print $1}')
+        do
+                echo "====================================================" >> extfs.$tag
+                echo "dumpe2fs settings for $MNTPNT :" >> extfs.$tag
+                echo " " >> extfs.$tag
+                /sbin/dumpe2fs -h $MNTPNT >> extfs.$tag 2>> ki.err.$tag
+                echo " " >> extfs.$tag
+                echo " " >> extfs.$tag
+        done
+}
+
+
+vxtunefs_info()
+{
+
+	for MNTPNT in $(/bin/mount | grep vxfs | awk '{print $1}')
+	do
+		echo "====================================================" >> vxtunefs.$tag
+		echo "vxtunefs settings for $MNTPNT :" >> vxtunefs.$tag
+		echo " " >> vxtunefs.$tag
+		/sbin/vxtunefs $MNTPNT >> vxtunefs.$tag 2>> ki.err.$tag
+		echo " " >> vxtunefs.$tag
+		echo " " >> vxtunefs.$tag
+	done
+}
+
+vxvm_data()
+{
+	if [ -x /usr/sbin/vxdisk ]
+	then
+	    ls -l /dev/dsk | awk '{print $5"/"$6, $NF}' > /tmp/dskdevs
+	    echo "=== Executing vxdisk to build mapping table ... " | tee -a ki.err.$tag
+	    /usr/sbin/vxdisk -o alldgs list -q > /tmp/lvm.tmp 2>/dev/null
+	    if [[ $? -ne 0 ]] ; then 
+ 			echo "!!! Bad return code from vxdisk. VxVm data not collected." | tee -a ki.err.$tag
+			badvxvm=1
+			return
+	    fi
+	    cat /tmp/lvm.tmp | grep -v '(' | awk '{print $1, $NF}' > /tmp/lvmORvxvm
+	else
+ 	    echo "vxdisk command not present and/or executable" | tee -a ki.err.$tag
+	    badvxvm=1
+	    return 
+	fi
+	mv /tmp/lvm.tmp vxdisk.$tag
+
+	if [ -f /tmp/lvmORvxvm ]
+	then
+	     :
+	else
+ 	      echo "PROBLEM: No disklist file created!!!" | tee -a ki.err.$tag
+ 	      echo "No output generated and exiting  script." | tee -a ki.err.$tag
+	      badvxvm=1
+	      break
+	fi
+
+	echo -e "Disk MinNum \t Disk Name \t Disk Usage" >> di.$tag 
+	for i in `cat /tmp/lvmORvxvm | awk '{print $1}'`
+	do
+         x=`grep $i /tmp/dskdevs|awk '{print $1}'`
+	 y=`grep $i /tmp/lvmORvxvm|awk '{print $NF}'`
+	 case $y in
+	   invalid ) y=RAW
+	        ;;
+	   online ) y=VXVM
+	        ;;
+	   LVM ) y=LVM
+	       ;;
+	     *) y=UNKNOWN
+	 esac
+	 echo -e "$x \t $i \t $y" >> di.$tag 
+	done
+	mv /tmp/dskdevs dskdevs.$tag
+	rm /tmp/lvmORvxvm
+}
+
+lvm_data()
+{
+	echo "=== Building LVM mapping table ... " | tee -a ki.err.$tag
+	# Build LVM mapping table
+	/sbin/pvs > /tmp/pvs.$tag 2>> ki.err.$tag
+	for vg in `/sbin/vgdisplay -A 2>> ki.err.$tag | grep -e " VG Name" | awk '{print $3}'`
+	do
+	   echo "/dev/$vg" >> lvm.$tag
+	   grep $vg /tmp/pvs.$tag | awk '{print $1}' >> lvm.$tag
+	done
+	rm -f /tmp/pvs.$tag
+	   
+}
+
+vol_data()
+{
+	echo "=== Collecting volume data ... " | tee -a ki.err.$tag
+
+        /sbin/lvs --all --noheadings > /tmp/lvs.$tag 2>> ki.err.$tag
+        for vol in `awk '{print $1}' /tmp/lvs.$tag`
+        do
+          vg=`grep $vol /tmp/lvs.$tag|awk '{print $2}'`
+          lv=$vol
+          fn=/dev/$vg/$lv
+          vol="`ls -l $fn 2>/dev/null`"
+          if [[ -n "$vol" ]] ; then
+            if [[ -h $fn ]] ; then
+              fn=`echo $vol|awk '{print $NF}'`
+              if `echo $fn|grep -q -e "\.\."` ; then
+                vol="`ls -l /dev/$vg/$fn 2>/dev/null`"
+                fn=`echo $vol|awk '{print $NF}'`
+              else
+                vol="`ls -l $fn 2>/dev/null`"
+              fi
+            fi
+            if [[ -b $fn ]] ; then
+              echo -e "`echo $vol | awk '{print $5 "/" $6}' | sed -e "s/,//"`\t\c" >> vol.$tag
+              echo -e "$vg\t$lv" >> vol.$tag
+            fi
+          fi
+        done
+	rm -f /tmp/lvs.$tag
+	
+	if [[ -d /dev/vx/dsk ]] ; then # some vxvm vols defined
+	   for d in `ls /dev/vx/dsk`
+	   do
+	      for f in `ls /dev/vx/dsk/$d`
+	      do
+	         vol=`ls -l /dev/vx/dsk/$d/$f 2>/dev/null`
+	         if [[ -n "$vol" ]] ; then
+	            echo -e "`echo $vol | awk '{print $5 "/" $6}'`\t\c" >> vol.$tag
+	            echo -e "`echo $vol | awk -F"/" '{print $5 "\t" $6}'`" >> vol.$tag
+	         fi
+	      done
+	   done
+	fi
+
+}
+
+determine_vmtype()
+{
+	# determine if VXVM is installed or LVM
+	if [ -r "$vxprintloc" ] ; then
+		badvxvm=0
+		vxvm_data
+		if [ $badvxvm -ne 0 ] ; then
+			echo "Failure in running vxdisk, attempting to get lvmdata" | tee -a ki.err.$tag
+			lvm_data
+		fi
+	else lvm_data
+	fi
+	vol_data
+}
+
+getdlkmlist()
+{
+	lsmod | grep -v "^Module" > lsmod.$tag
+	for mod in `awk '{print $1}' lsmod.$tag`
+	do
+	   echo "====================================================" >> modinfo.$tag
+	   modinfo $mod >> modinfo.$tag 2>> ki.err.$tag
+	done
+	cat /etc/modprobe.conf > modprobe.conf.$tag 2>> ki.err.$tag
+	cat /etc/modprobe.d/* > modprobe.d.$tag 2>> ki.err.$tag
+}
+
+getcollectldata()
+{
+	if [[ $do_collectl -eq 1 && -d /var/log/collectl ]] ; then
+	   echo "=== Copying Collectl logs ... " | tee -a ki.err.$tag
+	   cd /var/log/collectl
+           cp -p /etc/collectl.conf collectl.conf.$tag
+   	   tar -czf $KIDIR/collectl.$tag.tgz collectl.conf.$tag `find . -mtime -1|grep raw`
+           rm -f collectl.conf.$tag
+	   cd $KIDIR
+	fi
+	if [[ $do_collectl -eq 1 && -d /var/opt/perf/datafiles ]] ; then
+	   if [ -f /var/opt/perf/datafiles/logglob ] ; then
+	       echo "=== Copying MeasureWare logs ... " | tee -a ki.err.$tag
+	       cd /var/opt/perf/datafiles
+               cp ../parm parm.$tag
+   	       tar -czf $KIDIR/MW.$tag.tgz parm.$tag log*
+               rm -f parm.$tag
+	       cd $KIDIR
+	   fi
+	fi
+}
+
+getvxfsdata()
+{
+        if [ $do_vxfs -eq 1 ] ; then
+                extfs_info
+                vxtunefs_info
+                determine_vmtype
+        fi
+}
+
+
+mpsched_data()
+{
+
+#
+#  code to simulate mpsched output from HP-UX
+#
+
+	#=====================
+	#
+	#Locality Domain Count: 4
+	#Processor Count      : 32
+	#
+	#Domain    Processors
+	#------    ----------
+	#   0        0   1   2   3   4   5   6   7 
+	#   1       16  17  18  19  20  21  22  23 
+	#   2       32  33  34  35  36  37  38  39 
+	#   3       48  49  50  51  52  53  54  55 
+
+	if [[ ! -d /sys/devices/system/node ]] ;
+	then
+	   echo "/sys/devices/system/node does not exist - non-NUMA system?"
+	   let numnodes=1
+	   let numa=0
+	else
+	   let numnodes=$(ls -d /sys/devices/system/node/node* | wc -l)
+	   let numa=1
+	fi
+	let numlcpus=$(grep ^processor /proc/cpuinfo | wc -l)
+	let lcpuchk=0
+	echo "Locality Domain Count: $numnodes"
+	echo "Processor Count      : $numlcpus"
+	echo ""
+	echo "Domain   Processors"
+	echo "------   ----------"
+	let n=0
+	while [ $n -lt $numnodes ]
+	do
+	   echo -e "   $n     \c"
+	   if [ $numa -eq 1 ]; then
+	      cpulist="$(cat /sys/devices/system/node/node${n}/cpulist)"
+	   else
+	      cpulist="$(grep ^processor /proc/cpuinfo|awk '{printf("%s,",$3)}'|sed 's/,*$//')"
+	   fi
+	   if [[ $(echo $cpulist|grep -c "-") -gt 0 ]] ; then
+	      for cpus in $(echo $cpulist|awk -F"," --source '{for(i=1;i<=NF;i++){printf "%s ", $i}}')
+	      do
+	         startcpu=$(echo $cpus|awk -F"-" --source '{print $1}')
+                 if [[ $(echo $cpus|grep -c "-") -gt 0 ]] ; then
+                    endcpu=$(echo $cpus|awk -F"-" --source '{print $2}')
+                 else
+                    endcpu=$startcpu
+                 fi
+	         while [ $startcpu -le $endcpu ]
+	         do
+	            echo -e "$startcpu \c"
+	            let startcpu=$startcpu+1
+	            let lcpuchk=$lcpuchk+1
+	         done
+	      done
+	      echo ""
+	   else
+	      echo $cpulist | \
+	           awk -F"," --source '{for(i=1;i<=NF;i++){printf "%s ", $i}; printf "\n"}'
+	      let lcpuchk=$lcpuchk+$(echo $cpulist|awk -F"," --source '{print NF}')
+	   fi
+	   let n=$n+1
+	done
+	if [[ $lcpuchk -ne $numlcpus ]] ;
+	then
+	   echo "cpu count mismatch!  numlcpus=$numlcpus/lcpuchk=$lcpuchk"
+	fi
+
+}
+
+mpsched-S_data()
+{
+
+#
+#  code to simulate "mpsched -S" output from HP-UX
+#
+
+	#System Topology
+	#===============
+	#
+	#Locality Domain Count: 4
+	#Processor Count      : 32
+	#
+	#Domain: 0     
+	#    Proximity SPU set 0:
+	#        Socket 0                   :  [0 1] [2 3] [4 5] [6 7] 
+
+	if ! grep -q "^physical id" /proc/cpuinfo;
+	then
+	   echo "No 'physical id' field in /proc/cpuinfo..."
+	   return
+	fi
+	if [[ ! -d /sys/devices/system/node ]];
+	then
+	   echo "/sys/devices/system/node does not exist - non-NUMA system?"
+	   let numnodes=1
+	   let numa=0
+	else
+	   let numnodes=$(ls -d /sys/devices/system/node/node* | wc -l)
+	   let numa=1
+	fi
+	let numlcpus=$(grep ^processor /proc/cpuinfo | wc -l)
+	if ! grep -q "^cpu cores" /proc/cpuinfo;
+	then
+	   let numcores=$numlcpus
+	   let numsiblings=$numlcpus
+	else
+	   let numcores=$(grep "^cpu cores" /proc/cpuinfo|head -1|awk '{print $4}')
+	   let numsiblings=$(grep ^siblings /proc/cpuinfo|head -1|awk '{print $3}')
+	fi
+	if [ $numcores -eq $numsiblings ]; then
+	   ht=0
+	else
+	   let numthreads=$numsiblings/$numcores
+	   if [ $numthreads -gt 2 ]; then
+	      echo "More than 2 threads per core???"
+	      return
+	   fi
+	   ht=1
+	fi
+	let lcpuchk=0
+	echo "System Topology"
+	echo "==============="
+	echo ""
+	echo "Locality Domain Count: $numnodes"
+	echo "Processor Count      : $numlcpus"
+
+	grep -e "^processor" -e "^physical id" -e "^core id" /proc/cpuinfo \
+	     | awk '{ if ($1 == "processor") {printf("%s ",$3)} \
+	         else if ($1 == "physical") {printf("%s ",$4)} \
+	         else if ($1 == "core") print $4" "}' \
+	     | sort -n -k2 -k3 -k1 > cpuinfo.$tag
+
+	let n=0
+	while [ $n -lt $numnodes ]
+	do
+	   echo -e "\nDomain: $n"
+	   if [ $numa -eq 1 ]; then
+	      cpulist="$(cat /sys/devices/system/node/node${n}/cpulist)"
+	   else
+	      cpulist="$(grep ^processor /proc/cpuinfo|awk '{printf("%s,",$3)}'|sed 's/,*$//')"
+	   fi
+	   #
+	   # load up logical cpu array (lcpu)
+	   #
+	   let i=0
+	   if [[ $(echo $cpulist|grep -c "-") -gt 0 ]]; then
+	      for cpus in $(echo $cpulist|awk -F"," --source '{for(i=1;i<=NF;i++){printf "%s ", $i}}')
+	      do
+	         startcpu=$(echo $cpus|awk -F"-" --source '{print $1}')
+                 if [[ $(echo $cpus|grep -c "-") -gt 0 ]] ; then
+                    endcpu=$(echo $cpus|awk -F"-" --source '{print $2}')
+                 else
+                    endcpu=$startcpu
+                 fi
+	         while [ $startcpu -le $endcpu ]
+	         do
+	            lcpus[$i]=$startcpu
+	            let i++
+	            let startcpu++
+	            let lcpuchk++
+	         done
+	      done
+	   else
+	      for cpu in $(echo $cpulist | \
+	           awk -F"," --source '{for(i=1;i<=NF;i++){printf "%s ", $i}; printf "\n"}')
+	      do
+	         lcpus[$i]=$cpu
+	         let i++
+	      done
+	      let lcpuchk=$lcpuchk+$(echo $cpulist|awk -F"," --source '{print NF}')
+	   fi
+	   let j=0
+	   let physid=$(grep -e "^${lcpus[$j]} " cpuinfo.$tag|awk '{print $2}')
+	   echo -e "  Socket: $physid\n    \c"
+	   if [[ $ht -ne 0 ]];
+	   then
+	      until [ $j -eq $i ]
+	      do
+	         if [ ${lcpus[$j]} -eq -1 ]; then
+	            let j++
+	            continue
+	         fi
+	         let k=$(grep -e "^${lcpus[$j]} " cpuinfo.$tag|awk '{print $2}')
+	         if [ $k -ne $physid ]; then
+	            let physid=$k
+	               echo -e "\n   Physical id: $physid\n   "
+	         fi
+	         echo -e "[${lcpus[$j]} \c"
+	         htpair_physid=$(grep -e "^${lcpus[$j]} " cpuinfo.$tag|awk '{print $2}')
+	         htpair_core=$(grep -e "^${lcpus[$j]} " cpuinfo.$tag|awk '{print $3}')
+	         let htpair_lcpu=$(grep -e " $htpair_physid $htpair_core " cpuinfo.$tag|tail -1|awk '{print $1}')
+	         echo -e "$htpair_lcpu] \c"
+	         let k=0
+	         while [ $k -lt $numlcpus ]
+	         do
+	            if [ ${lcpus[$k]} -eq $htpair_lcpu ]; then
+	               let lcpus[$k]=-1
+	               break
+	            fi
+	            let k++
+	         done
+	         let j++
+	      done
+	   else
+	      until [[ $j -eq $i ]]
+	      do
+	         echo -e "[${lcpus[$j]}] \c"
+	         let j++
+	      done
+	   fi
+	   echo ""
+	   let n++
+	done
+	if [[ $lcpuchk -ne $numlcpus ]];
+	then
+	   echo "cpu count mismatch!  numlcpus=$numlcpus/lcpuchk=$lcpuchk"
+	fi
+	rm -f cpuinfo.$tag
+
+}
+
+get_cstates_initial()
+{
+    max_cstate=0
+    for idx in {0..5110}; do
+	cpu_cstate[$idx]=0
+    done
+
+    for cpu in {0..511}; do
+        if [ -d /sys/devices/system/cpu/cpu$cpu ]; then
+                for state in {0..9}; do
+                        file=/sys/devices/system/cpu/cpu$cpu/cpuidle/state$state/time
+                        if [ -e $file ]; then
+				idx=$((($cpu*10)+$state))
+                                cpu_cstate[$idx]=`cat $file`
+                                if [ $state -gt $max_cstate ]; then
+                                        max_cstate=$state
+                                fi
+                        fi
+                done 
+        fi
+    done
+}
+
+get_cstates_diff()
+{
+    printf "cstate    name        latency\n" >cstates.$tag
+    for state in {1..9}; do
+        path=/sys/devices/system/cpu/cpu0/cpuidle/state$state
+        if [ -d $path ] ; then
+            printf "%-8s  %-10s  %-4s\n" $state `cat $path/name` `cat $path/latency` >>cstates.$tag
+        fi
+    done
+    printf "\n" >>cstates.$tag
+	
+    printf " CPU" >>cstates.$tag
+    for state in {0..9}; do
+        printf "    cstate$state" >>cstates.$tag
+    done
+    printf "\n" >>cstates.$tag
+    if [ $max_cstate -gt 0 ]; then
+        for cpu in {0..511}; do
+          if [ -d /sys/devices/system/cpu/cpu$cpu ]; then
+            for state in {0..9}; do
+                file=/sys/devices/system/cpu/cpu$cpu/cpuidle/state$state/time
+                if [ -e $file ]; then
+			idx=$((($cpu*10)+$state))
+                        cpu_cstate[$idx]=$((`cat $file` - ${cpu_cstate[$idx]}))
+                fi
+            done 
+            printf "%4d" $cpu >>cstates.$tag
+            for state in {0..9}; do
+		idx=$((($cpu*10)+$state))
+                printf "  %9lld" ${cpu_cstate[$idx]} >>cstates.$tag
+            done
+            printf "\n" >>cstates.$tag
+          fi
+        done
+    fi
+
+}
+
+get_numastat_initial()
+{
+        shopt -s extglob
+
+        while read LINE; do
+                if [ "${LINE:0:4}" == "node" ] ; then
+                        NODES=${LINE//+( )/ }
+                else
+                        STATS=${LINE//+( )/ }
+                        STATNAME=${STATS%% *}
+                        for NODE in ${NODES} ; do
+                                STATS=${STATS#* }
+                                VALUE=${STATS%% *}
+                                eval "export INITIAL_${NODE}_${STATNAME}=${VALUE}"
+                        done
+                fi
+        done < <(numastat)
+
+        shopt -s extglob
+}
+
+get_numastat_final()
+{
+        shopt -s extglob
+
+        while read LINE; do
+                        if [ "${LINE:0:4}" == "node" ] ; then
+                        NODES=${LINE//+( )/ }
+                        printf '%*s' 16 ' '
+                        for NODE in ${NODES} ; do
+                                printf '%*s' 16 "${NODE}"
+                        done
+                        printf '\n'
+                else
+                        STATS=${LINE//+( )/ }
+                        STATNAME=${STATS%% *}
+                        printf '%-16s' ${STATNAME}
+                        for NODE in ${NODES} ; do
+                                STATS=${STATS#* }
+                                VALUE=${STATS%% *}
+                                IVALUEVAR="INITIAL_${NODE}_${STATNAME}"
+                                eval IVALUE=\$${IVALUEVAR}
+                                DIFF=$(( ${VALUE} - ${IVALUE} ))
+                                printf '%*s' 16 "${DIFF}"
+                        done
+                        printf '\n'
+                fi
+        done < <(numastat)
+
+        shopt -s extglob
+}
+
+#----------------------------------------------------------------------
+# main
+#----------------------------------------------------------------------
+
+numargs=$#
+cmdargs=$@
+
+#
+# source config file, if it exists
+#
+[ -f $TOOLDIR/config ] && . $TOOLDIR/config
+
+# 
+# configuration file options processing
+#
+ARGS=$(getopt -o d:t:LT:V:P:G:C:D:I:FRMUXmuxpajJ:n:e:s:c:v -n "$0" -- $RUNKI_OPTS)
+RETVAL=$?
+if [ $RETVAL -ne 0 ] ; then
+   echo "!!! Invalid RUNKI_OPTS in $TOOLDIR/config !!!"
+   help
+   exit $RETVAL
+fi
+eval set -- "$ARGS"
+while true
+do
+    case "$1" in
+            -L)     do_local=1;;
+	    -M)     do_collectl=1;;
+            -m)     do_collectl=0;;
+	    -U)     do_userspace=1;;
+            -u)     do_userspace=0;;
+	    -X)     do_sar=1;;
+	    -x)     do_sar=0;;
+            -a)     do_annotate=1;;
+            -j)     do_java=1;;
+            -J)     shift;jstack_path=$1;;
+            -n)     shift;do_tcpdump=$1;;
+            -v)     do_vxfs=0;;
+            -d)     shift;duration=$1;;
+	    -p)     do_liki=1;;
+            -t)     shift;MaxCmdRuntime=$1;;
+	    -e)     shift;Event="events=$1";;
+	    -s)     shift;Subsys="subsys=$1";;
+	    -c)     shift;Comment=$1;;
+	    -T)	    tag=$1;;
+	    -V)     shift;Varargs="$1";;	
+	    -P)     pid_filter="pid=$1";;
+	    -G)     tgid_filter="tgid=$1";;
+	    -C)     cpu_filter="cpu=$1";;
+	    -D)     dev_filter="dev=$1";;
+	    -R)     MSRARG="msr";;
+	    -I)     sysignore=$1;;
+            --)     shift
+                    break;;
+           esac
+     shift
+done
+
+ARGS=$cmdargs
+while getopts :d:t:hLMUXmuxpfajJ:n:e:s:V:T:P:G:C:D:I:FRc:v optname $ARGS
+do
+    case $optname in
+            h)     help;exit 2;;
+            L)     do_local=1;;
+	    M)     do_collectl=1;;
+            m)     do_collectl=0;;
+	    U)     do_userspace=1;;
+            u)     do_userspace=0;;
+	    X)     do_sar=1;;
+            x)     do_sar=0;;
+            a)     do_annotate=1;;
+            j)     do_java=1;;
+            J)     jstack_path=$OPTARG;;
+            n)     do_tcpdump=$OPTARG;;
+            v)     do_vxfs=0;;
+            d)     duration="$OPTARG";;
+            p)     do_liki=1;;
+	    f)	   do_liki=0;;
+            t)     MaxCmdRuntime="$OPTARG";;
+            e)     Event="events=$OPTARG";;
+            s)     Subsys="subsys=$OPTARG";;
+	    T)	   tag="$OPTARG";;
+	    V)     Varargs="$OPTARG";;	
+	    P)     pid_filter="pid=$OPTARG";;
+	    G)     tgid_filter="tgid=$OPTARG";;
+	    C)     cpu_filter="cpu=$OPTARG";;
+	    D)     dev_filter="dev=$OPTARG";;
+	    R)     MSRARG="msr";;
+	    I)     sysignore=$OPTARG;;
+            c)     Comment="$OPTARG";;
+            ?)     help
+                   exit 2;;
+           esac
+done
+if [[ $OPTIND -le $numargs ]]; then
+        echo "!!! invalid command line option/parameter !!!"
+        help
+        exit 2
+fi
+
+if [ $do_local -eq 1 ]; then
+	do_vxfs=0
+	do_collectl=0
+fi
+
+echo "=== $version" | tee -a ki.err.$tag
+if [ -f $TOOLDIR/config ]; then
+	echo === $TOOLDIR/config:RUNKI_OPTS=$RUNKI_OPTS >> ki.err.$tag
+	echo === $TOOLDIR/config:RUNKI_AUX_CMDS=$RUNKI_AUX_CMDS >> ki.err.$tag
+	echo === $TOOLDIR/config:PERF_PROFILE_OPTS=$PERF_PROFILE_OPTS >> ki.err.$tag
+	echo === $TOOLDIR/config:SAR_OPTS=$SAR_OPTS >> ki.err.$tag
+fi
+echo "=== trace invocation: $0 $cmdargs" >> ki.err.$tag
+
+#
+# Verify running as root and that we can find kiinfo binary
+#
+
+if [ $UID != 0 ] ; then
+   echo "!!! runki script must be run as root"
+   echo "!!! currently logged in with UID $UID"
+   exit 1 
+fi
+
+type -P kiinfo >/dev/null 2>&1
+RETVAL=$?
+if [ $RETVAL -ne 0 ] ; then
+   echo "!!! Could not find kiinfo... Is it in your PATH?"
+   exit 1
+fi
+
+#
+# Check open file limit
+#
+ulimit -n hard
+ncpus=`grep "^processor" /proc/cpuinfo | tail -1 | awk '{print $3}'`
+let nfiles=$ncpus*2
+let nfiles=$nfiles+10
+if (( "`ulimit -n`" < $nfiles )) ;
+then
+        echo "!!! Open file hard limit `ulimit -n -H` too small for number of CPUs"
+	exit 1
+fi
+unset ncpus nfiles
+
+#
+# set the duration of collection within sane limits
+#
+
+if [[ $duration != [0-9]* ]] ; then
+   echo "Valid duration not specified.  Using 20 seconds"
+   duration=20
+fi
+
+#
+# Mount debugfs, if it's not already mounted...
+#
+
+grep debugfs /proc/mounts >/dev/null 2>&1
+RETVAL=$?
+if [ $RETVAL -ne 0 ] ; then
+   debugfs_was_mounted=0
+   echo "=== Mounting debugfs ..." | tee -a ki.err.$tag
+   mount -t debugfs debugfs /sys/kernel/debug >> ki.err.$tag 2>&1
+   RETVAL=$?
+   if [ $RETVAL -ne 0 ] ; then
+      echo "!!! Failed to mount debugfs... return=$RETVAL" | tee -a ki.err.$tag
+      exit 1
+   fi
+else
+   debugfs_was_mounted=1
+fi
+debugfs_mount_point=$(grep debugfs /proc/mounts | head -1 | awk '{print $2}')
+
+#
+# Check to see if the flightrecorder installed and/or running...
+#
+service trace-cmd status  >/dev=null 2&>/dev/null
+RETVAL=$?
+if [ $RETVAL -eq 0 ]; then
+	echo "!!! WARNING flightrecorder is installed and active" | tee -a ki.err.$tag
+	echo "!!! WARNING Please note that flightrecorder can impact system performance" | tee -a ki.err.$tag
+	echo "!!! You can temporarily disable the flight recorder using the following command" | tee -a ki.err.$tag
+	echo "    # service trace-cmd stop" | tee -a ki.err.$tag
+fi
+
+#
+# The main event...kicking off kitrace, etc...
+#
+
+# get initial c-state data 
+get_cstates_initial
+
+# get intial numastat data
+if [[ -d /sys/devices/system/node && -f /usr/bin/numastat ]]; then
+	echo "=== Getting Initial NUMA statistics information ..." | tee -a ki.err.$tag
+	get_numastat_initial
+fi
+
+date                    >> netstat-s.$tag 2>&1
+netstat -s              >> netstat-s.$tag 2>&1
+
+kitrace_data
+
+date                    >> netstat-s.$tag 2>&1
+netstat -s              >> netstat-s.$tag 2>&1
+
+echo "=== Getting Processor C-state information ..." | tee -a ki.err.$tag
+get_cstates_diff
+
+userspace_data
+
+if [[ ! -z "$SAR_OPTS" && -x /usr/bin/sar &&  $do_sar -eq 1 ]] ; then
+	echo "=== Collecting $duration second sar sample ..." | tee -a ki.err.$tag
+	LC_ALL=C sar $SAR_OPTS 1 $duration > sar.$tag 2>&1
+fi
+
+java_data
+
+getdlkmlist
+
+#
+# execute any additional commands specified in the config file
+#
+[ ! -z "$RUNKI_AUX_CMDS" ] && /bin/bash -c "$RUNKI_AUX_CMDS" > aux_commands.$tag 2>&1
+
+# build a dev_t mapping table for disk devices
+# comment it out if you don't need the mapping
+echo "=== Getting disk information ..." | tee -a ki.err.$tag
+
+getvxfsdata
+
+#
+# Misc nice-to-have data files
+#
+
+echo "=== Gathering misc supporting data ... " | tee -a ki.err.$tag
+
+if [[ $do_local -eq 0 ]] ; then
+	getcollectldata
+	echo "=== Copying the syslog files ... " | tee -a ki.err.$tag
+	dmesg >dmesg.$tag
+	if [ -e /var/log/messages ];then
+		MESSAGES_SIZE=$(stat -c%s "/var/log/messages") 
+		if [[ $MESSAGES_SIZE -gt 10485760 ]]; then
+			tail --bytes=10485760 /var/log/messages >messages.$tag 2>/dev/null
+		else 
+        		cp /var/log/messages messages.$tag >/dev/null 2>&1
+		fi
+	fi
+	if [ -e /var/log/syslog ]; then
+		MESSAGES_SIZE=$(stat -c%s "/var/log/syslog") 
+		if [[ $MESSAGES_SIZE -gt 10485760 ]]; then
+			tail --bytes=10485760 /var/log/syslog >syslog.$tag 2>/dev/null
+		else 
+        		cp /var/log/syslog syslog.$tag >/dev/null 2>&1
+		fi
+	fi
+fi
+
+mount -v 		> mount-v.$tag 2>&1
+cat /etc/fstab 		> fstab.$tag 2>&1
+ipcs -m 		> ipcs-m.$tag 2>&1
+hostname 		> hostname.$tag 2>&1
+netstat -neopa 		> netstat-neopa.$tag 2>&1
+route -n 		> route-n.$tag 2>&1
+ifconfig 		> ifconfig.$tag 2>&1
+for INTFC in `ip link 2>/dev/null | grep "state UP"  | grep -v "LOOPBACK" | awk '{print $2}' | sed 's/\://g'`
+do
+	echo -e "\n===== $INTFC" >> ethtool.$tag
+	ethtool $INTFC	>> ethtool.$tag 2>&1
+	ethtool -i $INTFC >> ethtool.$tag 2>&1
+	ethtool -a $INTFC >> ethtool.$tag 2>&1
+	ethtool -k $INTFC >> ethtool.$tag 2>&1
+	ethtool -c $INTFC >> ethtool.$tag 2>&1
+	ethtool -S $INTFC >> ethtool.$tag 2>&1
+done
+cat /proc/net/bonding/bond* > bonds.$tag 2>&1
+cat /proc/interrupts	> interrupts.$tag 2>&1
+sysctl -a		> sysctl-a.$tag 2>&1
+cat /etc/sysctl.conf	> sysctl.conf.$tag 2>&1
+cat /boot/grub/grub.conf > grub.conf.$tag 2>&1
+
+# collect a sorted list of hard irq node and CPU assignments
+printf '\n%6s %6s %16s  %-20s  %s\n' IRQ node cpu_list affinity_mask name >irqlist.$tag
+printf '==================================================================== \n' >> irqlist.$tag
+for IRQ in $(ls /proc/irq | grep -v def)
+do
+        node="-1"
+        smp_affinity="-"
+        smp_affinity_list="-"
+        if [ -f /proc/irq/$IRQ/node ] ; then
+                node=`cat /proc/irq/$IRQ/node`
+        fi
+        if [ -f /proc/irq/$IRQ/smp_affinity ] ; then
+                smp_affinity=`cat /proc/irq/$IRQ/smp_affinity`
+        fi
+        if [ -f /proc/irq/$IRQ/smp_affinity_list ] ; then
+                smp_affinity_list=`cat /proc/irq/$IRQ/smp_affinity_list`
+        fi
+        dvr=`ls /proc/irq/$IRQ | grep -v -E  'affinity|node|spur'`
+        if [ -z "$dvr" ] ; then
+                dvr="-"
+        fi
+	printf '%6s %6s %16s  %-20s  %s %s %s %s\n' $IRQ $node $smp_affinity_list $smp_affinity $dvr >> .irqlist2
+done
+sort -n -k 1,1 .irqlist2 >> irqlist.$tag
+rm -f .irqlist2
+
+# collect memory information
+printf "\n--- free ---\n" 		>mem_info.$tag 2>&1
+free	 				>> mem_info.$tag 2>&1
+if [ -d /sys/devices/system/node ]; then
+	printf "\n--- numa memory ---\n"	>> mem_info.$tag 2>&1
+	printf "%24s %15s %15s %15s %20s %20s %20s\n" \
+        	`grep -ie "Mem\|HugePages" /sys/devices/system/node/node0/meminfo | \
+        	sed 's/^.* \(.*\):.*/\1/' | xargs echo` >> mem_info.$tag 2>&1
+	for (( i=0 ; i < `ls -1 /sys/devices/system/node | grep -c ^node` ; i++ ))
+	do
+        	printf "%-8s %15s %15s %15s %15s %20s %20s %20s\n" \
+        	`echo "Node_$i " $(grep -ie "Mem\|HugePages" \
+        	/sys/devices/system/node/node${i}/meminfo | \
+        	sed 's/^.*: *\(.*$\)/\1/' | sed 's/ /_/' | xargs echo)` >>mem_info.$tag 2>&1
+	done
+fi
+printf "%-8s %15s %15s                 %15s %20s %20s %20s\n" \
+	`echo "Total " $(grep -ie "MemTotal\|MemFree\|Shmem\|HugePages_Total\|HugePages_Free\|HugePages_Surp" \
+        /proc/meminfo | \
+        sed 's/^.*: *\(.*$\)/\1/' | sed 's/ /_/' | xargs echo)` >>mem_info.$tag 2>&1
+printf "\n--- meminfo ---\n" 		>> mem_info.$tag 2>&1
+cat /proc/meminfo 			>> mem_info.$tag
+printf "\n--- buddyinfo ---\n"		>> mem_info.$tag 2>&1
+cat /proc/buddyinfo			>> mem_info.$tag
+printf "\n--- slabinfo ---\n"		>> mem_info.$tag 2>&1
+cat /proc/slabinfo			>> mem_info.$tag
+
+if [[ -d /sys/devices/system/node && -f /usr/bin/numastat ]]; then
+	numactl --hardware 	                       > numa_info.$tag 2>&1
+	printf "\n--- NUMA Stats Since Boot ---\n"    >> numa_info.$tag 2>&1
+	numastat 		                      >> numa_info.$tag 2>&1
+	printf "\n--- NUMA Stats This Trace ---\n"    >> numa_info.$tag 2>&1
+	echo "=== Getting Final NUMA statistics information ..." | tee -a ki.err.$tag
+	get_numastat_final                            >> numa_info.$tag 2>&1
+fi
+multipath -ll 		> multipath-l.$tag 2>&1
+dmsetup ls --tree -o blkdevname	> dmsetup_ls.$tag 2>&1
+echo "--- dmsetup table ---" >> dmsetup_ls.$tag 2>&1
+dmsetup table		>> dmsetup_ls.$tag 2>&1
+cat /etc/multipath.conf	> multipath.conf.$tag 2>&1
+mpsched_data		> mpsched.$tag 2>> ki.err.$tag
+mpsched-S_data		> mpsched-S.$tag 2>> ki.err.$tag
+cat /proc/cpuinfo 	> cpuinfo.$tag
+if [ -d /sys/devices/system/node ]; then
+	ls -R /sys/devices/system/node/node* > sysfs.node.$tag 2>&1
+	cat /sys/devices/system/node/node*/cpulist >> sysfs.node.$tag 2>&1
+fi
+uname -a	 	> uname-a.$tag
+cat /proc/cmdline 	> cmdline.$tag
+cat /proc/devices 	> devices.$tag
+getconf -a	 	> getconf-a.$tag
+lspci			> lspci.$tag 2>&1
+lspci -v		> lspci-v.$tag 2>&1
+if [ -x /usr/sbin/dmidecode ]; then
+	/usr/sbin/dmidecode > dmidecode.$tag
+fi
+cat /etc/*release	> release.$tag
+uptime			> uptime.$tag
+sestatus -vb		> sestatus.$tag 2>&1
+auditctl -s		> audit.$tag 2>&1
+auditctl -l		>> audit.$tag 2>&1
+cat /sys/devices/system/clocksource/clocksource0/current_clocksource > clocksource.$tag 2>/dev/null
+cat /sys/devices/system/clocksource/clocksource0/available_clocksource >> clocksource.$tag 2>/dev/null
+
+if [ -x /usr/sbin/tuned-adm ]; then
+	/usr/sbin/tuned-adm active	> tuned.active.$tag 2>&1
+	if [ -d /etc/tune-profiles ]; then
+		cp /etc/tuned.conf tuned.conf.$tag
+		cd /etc/tune-profiles
+		tar cf $OLDPWD/tuned.profiles.tar.$tag .
+		cd - > /dev/null
+	elif [ -d /usr/lib/tuned ]; then
+		cp /etc/tuned/tuned-main.conf tuned-main.conf.$tag
+		cd /usr/lib/tuned
+		tar cf $OLDPWD/tuned.profiles.tar.$tag .
+		cd - > /dev/null
+	fi
+fi
+
+cat /etc/cgconfig.conf	> cgconfig.conf.$tag 2>&1
+cat /etc/cgrules.conf	> cgrules.conf.$tag 2>&1
+for cg in `lscgroup`
+do
+   cgget -g `echo $cg|sed -e 's/:/ /'`
+done 			> cgget-g.$tag 2>&1
+
+ls -lR --time-style=locale /dev 		> ll_R_dev_all.$tag 2>&1 
+
+cat $debugfs_mount_point/sched_features >sched_features.$tag 2>&1
+
+fgrep "" /sys/block/*/queue/*	> block_params.$tag 2>&1
+
+if [ $do_liki -eq 0 ]; then
+  cp $debugfs_mount_point/tracing/events/block/block_rq_issue/format block_rq_issue.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/block/block_rq_insert/format block_rq_insert.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/block/block_rq_complete/format block_rq_complete.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/block/block_rq_abort/format block_rq_abort.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/block/block_rq_requeue/format block_rq_requeue.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/sched/sched_switch/format sched_switch.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/sched/sched_wakeup/format sched_wakeup.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/sched/sched_wakeup_new/format sched_wakeup_new.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/sched/sched_migrate_task/format sched_migrate_task.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/*syscalls/sys_enter/format sys_enter.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/*syscalls/sys_exit/format sys_exit.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/power/power_start/format power_start.fmt.$tag 2>/dev/null
+  cp $debugfs_mount_point/tracing/events/power/power_end/format power_end.fmt.$tag 2>/dev/null
+  cp $debugfs_mount_point/tracing/events/power/power_frequency/format power_frequency.fmt.$tag 2>/dev/null
+  cp $debugfs_mount_point/tracing/events/power/cpu_idle/format cpu_idle.fmt.$tag 2>/dev/null
+  cp $debugfs_mount_point/tracing/events/power/cpu_frequency/format cpu_frequency.fmt.$tag 2>/dev/null
+  cp $debugfs_mount_point/tracing/events/irq/irq_handler_entry/format irq_handler_entry.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/irq/irq_handler_exit/format irq_handler_exit.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/irq/softirq_entry/format softirq_entry.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/irq/softirq_exit/format softirq_exit.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/irq/softirq_raise/format softirq_raise.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/scsi/scsi_dispatch_cmd_start/format scsi_dispatch_cmd_start.fmt.$tag  
+  cp $debugfs_mount_point/tracing/events/scsi/scsi_dispatch_cmd_done/format scsi_dispatch_cmd_done.fmt.$tag
+  cp $debugfs_mount_point/tracing/events/workqueue/workqueue_insertion/format workqueue_insertion.fmt.$tag 2>/dev/null
+  cp $debugfs_mount_point/tracing/events/workqueue/workqueue_execution/format workqueue_execution.fmt.$tag 2>/dev/null
+  cp $debugfs_mount_point/tracing/events/workqueue/workqueue_queue_work/format workqueue_queue_work.fmt.$tag 2>/dev/null
+  cp $debugfs_mount_point/tracing/events/workqueue/workqueue_execute_start/format workqueue_execute_start.fmt.$tag 2>/dev/null
+  cp $debugfs_mount_point/tracing/events/exceptions/page_fault_user/format page_fault_user.fmt.$tag 2>/dev/null
+  cp $debugfs_mount_point/tracing/events/exceptions/page_fault_kernel/format page_fault_kernel.fmt.$tag 2>/dev/null
+  cp $debugfs_mount_point/tracing/events/kmem/mm_anon_fault/format mm_anon_fault.fmt.$tag 2>/dev/null 2>/dev/null
+  cp $debugfs_mount_point/tracing/events/kmem/mm_filemap_fault/format mm_filemap_fault.fmt.$tag 2>/dev/null 
+  cp $debugfs_mount_point/tracing/events/kmem/mm_kernel_pagefault/format mm_kernel_pagefault.fmt.$tag 2>/dev/null 
+  cp $debugfs_mount_point/tracing/events/filemap/mm_filemap_add_to_page_cache/format mm_filemap_add_to_page_cache.fmt.$tag 2>/dev/null 
+  cp $debugfs_mount_point/tracing/events/filemap/mm_filemap_delete_from_page_cache/format mm_filemap_delete_from_page_cache.fmt.$tag 2>/dev/null 
+  cp $debugfs_mount_point/tracing/events/ftrace/print/format print.fmt.$tag
+
+fi
+
+
+#
+# unmount debugfs if it was not mounted when we started
+#
+if [ $debugfs_was_mounted -eq 0 ] ; then
+   echo "=== Unmounting debugfs ..." | tee -a ki.err.$tag
+   umount $debugfs_mount_point 2>> ki.err.$tag
+fi
+
+if [ -x /bin/rpm ]; then
+	/bin/rpm --query --all > rpm_list.$tag 2>&1
+	echo "=== Linux KI Toolset Version: " `grep linuxki rpm_list.$tag` >> ki.err.$tag
+fi
+if [ -x /usr/bin/dpkg ]; then
+	echo "=== Linux KI Toolset " `/usr/bin/dpkg --status linuxki | grep "Version" ` >> ki.err.$tag
+fi
+
+#
+# Packaging it all up unless otherwise requested
+#
+
+if [ $do_local -eq 0 ] ; then
+
+    echo "=== Tarring up the results ... " | tee -a ki.err.$tag
+    # tar will gzip output via 'z' option
+    if [ -f collectl.$tag* ] && [ -f MW.$tag* ] ; then
+       tar -czSf ki_all.$HOSTNAME.$tag.tgz *.$tag collectl.$tag* MW.$tag*
+    elif [ -f collectl.$tag* ] ; then
+       tar -czSf ki_all.$HOSTNAME.$tag.tgz *.$tag collectl.$tag*
+    elif [ -f MW.$tag* ] ; then
+       tar -czSf ki_all.$HOSTNAME.$tag.tgz *.$tag MW.$tag*
+    elif [ -f tcpdump.$tag* ] ; then
+	tar -czSf ki_all.$HOSTNAME.$tag.tgz *.$tag tcpdump.$tag*
+    else
+       tar -czSf ki_all.$HOSTNAME.$tag.tgz *.$tag
+    fi
+    # remove the individual files
+    rm -rf objdump.$tag 2>/dev/null
+    rm -f *.$tag
+    rm -f collectl.$tag* 2>/dev/null
+    rm -f MW.$tag.* 2>/dev/null
+    echo "=== Trace completed and archived as ki_all.$HOSTNAME.$tag.tgz"
+    exit 0
+fi
+
+if [ $do_local -eq 1 ] ; then
+    mkdir dir_$tag
+    mv *$tag* dir_$tag > /dev/null 2>&1
+    echo "=== Data for collection $tag has been moved to dir_$tag  directory"
+fi

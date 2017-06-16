@@ -5,7 +5,7 @@ The LinuxKI Toolset (or LinuxKI for short) is an opensourced advanced mission cr
 * If its running, whats it doing?
 * If its waiting, whats it waiting on?
 
-LinuxKI analyzed the kernel trace data in different and often unique ways to help performance specialist drill down on issues.   The following output is an example of data displayed for a specific task:
+LinuxKI analyzes the kernel trace data in different and often unique ways to help performance specialist drill down on often complex performance issues.   The following output is an example of data displayed for a specific task:
 
     PID:  133343 /home/mcr/bin/iotest8
 
@@ -50,7 +50,7 @@ LinuxKI analyzed the kernel trace data in different and often unique ways to hel
 
 LinuxKI is designed to be easy to install, collect data, and generate reports.   It runs on Linux kernels 2.6.32 or later running on x86_64 and arm64 platforms. It collects low-level detailed traces reflecting the behavior of the running workload, which can be analyzed online or bundled along with configuration and other performance data into a single gzip file suitable for transfer and offline analysis.  
 
-LinuxKI only enables key tracepoints in the performance paths, such as schedule events, system call events, block I/O events, and CPU profiling events.   It has the ability to collect system and user stack traces during sched_switch events and CPU profiling events, and much more.   LinuxKI can analyze the detailed trace data in many different ways - per-PID, per-device, per-CPU, per-LDOM, per-interrupt, per-Docker container, and much more.  
+LinuxKI only enables key tracepoints in the performance paths, such as scheduler events, system call events, block I/O events, interrupt events, and CPU profiling events.   It has the ability to collect system and user stack traces during sched_switch events and CPU profiling events, and much more.   LinuxKI can analyze the detailed trace data in many different ways - per-PID, per-device, per-HBA path, per-CPU, per-LDOM, per-interrupt, per-Docker container, and much more.  
 
 LinuxKI can collect its trace data from either of two sources: the Linux ftrace facility, or the LiKI DLKM supplied as part of this toolset.   The default tracing mechanism used is LiKI, however you may chose to use ftrace if desired.  Here are some considerations:
 
@@ -95,13 +95,11 @@ If LiKI fails to compile, you can resolve the dependency issue and execute the m
 
 ### Installation
 
-The LinuxKI Toolset is provided in an RPM Package and can be installed as
-follows:
+The LinuxKI Toolset is provided in an RPM Package and can be installed as follows:
 
     # rpm --install --nodeps linuxki.<version>.noarch.rpm
 
-Or for Debian-related kernels, the toolset can be installed using the dpkg
-command:
+Or for Debian-related kernels, the toolset can be installed using the dpkg command:
 
     # dpkg --install linuxki.<version>_all.deb
 
@@ -132,17 +130,17 @@ You can remove the LinuxKI toolset using rpm or dpkg as follows:
 
 ### Data collection
 
-When the system is experiencing performance problems, the runki script can be run to collect data. By default 20 seconds of sample data will be collected, and then runki will spend some time longer gathering other performance and configuration data and bundling this into a single gzip archive. It might take several minutes in all to complete. Only superuser can collect data.  Data is stored in the current working directory, and may require several hundred megabytes or gigabytes of space per collection run, depending on the size of the system and amount of trace data generated.  The filesystem on which data is stored should be enabled to use the filesystem cache; directIO is not recommended.  If sufficient memory is available, the current working directory can be changed to /dev/shm and the runki script can collect the data in-memory and then copied to persistent storage later.
+When the system is experiencing performance problems, the runki script can be executed to collect data. By default 20 seconds of trace data will be collected, and then runki will spend some time gathering other configuration and supplemental data, and then bundle this into a single gzip archive. It might take several minutes in all to complete. Root/superuser privilege is required to collect the trace data.  The data is stored in the current working directory, and may require several hundred megabytes or gigabytes of space per collection run, depending on the size of the system and amount of trace data generated.  The filesystem on which data is stored should be enabled to use the filesystem cache; directIO is not recommended.  If sufficient memory is available, the current working directory can be changed to /dev/shm and the runki script can collect the data in-memory and then copied to persistent storage later.
 
 After installing the LinuxKI Toolset, a 20-second trace dump can easily be obtained as follows:
 
     $ export PATH=$PATH:/opt/linuxki 
-    $ /dev/shm        # to collect data in memory, optional
-    $ runki           # use LiKI 
+    $ /dev/shm        # optional, to collect data in memory
+    $ runki           # use LiKI tracing mechanism
 
 or
 
-    $ runki -f         # use ftrace tracing
+    $ runki -f         # use ftrace tracing mechanism
     
 When the data collection is complete, you will see a message similar to the following...
 

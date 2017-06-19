@@ -505,8 +505,13 @@ print_stktrc_info_live(void *arg1, void *arg2)
                         }
 
                         if (pregp = find_vtext_preg(pidp, key)) {
-                                sym = symlookup(pregp, key, &offset);
-                                sprintf (symname, "  %s", sym);
+                                if (sym = symlookup(pregp, key, &offset)) {
+                                	sprintf (symname, "  %s", sym);
+				} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
+					sprintf (symname, " %s", sym);
+                        	} else {
+                                	sprintf (symname, "  0x%llx", key);
+				}
 			} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
 				sprintf (symname, " %s", sym);
                         } else {
@@ -569,8 +574,13 @@ print_hc_stktrc_live(void *arg1, void *arg2)
                         }
 
                         if (pregp = find_vtext_preg(pidp, key)) {
-                                sym = symlookup(pregp, key, &offset);
-                                sprintf (symname, "  %s", sym);
+                                if (sym = symlookup(pregp, key, &offset)) {
+                                	sprintf (symname, "  %s", sym);
+				} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
+					sprintf (symname, " %s", sym);
+                        	} else {
+                                	sprintf (symname, "  0x%llx", key);
+                        	}
 			} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
 				sprintf (symname, " %s", sym);
                         } else {

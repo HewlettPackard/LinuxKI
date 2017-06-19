@@ -89,11 +89,14 @@ collect_pc_info(hardclock_t *rec_ptr, hc_info_t *hcinfop, pid_info_t *pidp)
 				key = pc - offset;
 			}
 		} else if (pidp) {
-			/* if multi-threaded, just TGID */
+			/* if multi-threaded, use TGID */
 			if (pidp->PID != pidp->tgid) pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
 
 			if (pregp = find_vtext_preg(pidp, pc)) {
 				if (symlookup(pregp, pc, &offset)) {
+					key = pc - offset;
+				} else if (maplookup(pidp->mapinfop, pc, &offset)) {
+					pregp = pidp->mapinfop;
 					key = pc - offset;
 				}
 			} else if (maplookup(pidp->mapinfop, pc, &offset)) {

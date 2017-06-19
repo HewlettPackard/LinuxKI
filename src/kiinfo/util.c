@@ -1370,6 +1370,9 @@ print_user_sym(unsigned long ip, uint64 pid, char print_objfile)
 			} else {
 				printf ("%s+0x%llx", sym, offset);
 			}
+		} else if (sym = maplookup(pidp->mapinfop, ip, &offset)) {
+			printf ("%s+0x%llx", sym, offset);
+			return 1;
 		} else {
 			printf ("0x%llx", ip);
 		}
@@ -1395,16 +1398,15 @@ print_user_sym(unsigned long ip, uint64 pid, char print_objfile)
 
 			if (sym = symlookup(pregp, ip, &offset)) {
 				printf ("%s+0x%llx", sym, offset);
-			} else {
-				printf ("0x%llx", ip);
-			}
-		} else if (pidp->mapinfop) {
-			if (sym = maplookup(pidp->mapinfop, ip, &offset)) {
+			} else if (sym = maplookup(pidp->mapinfop, ip, &offset)) {
 				printf ("%s+0x%llx", sym, offset);
 				return 1;
 			} else {
 				printf ("0x%llx", ip);
 			}
+		} else if (sym = maplookup(pidp->mapinfop, ip, &offset)) {
+			printf ("%s+0x%llx", sym, offset);
+			return 1;
 		} else {
 			printf ("0x%llx", ip);
 		}

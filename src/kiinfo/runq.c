@@ -1478,15 +1478,15 @@ print_stktrc_info(void *p1, void *p2)
                         }
 
                         if (pregp = find_vtext_preg(pidp, key)) {
-                                sym = symlookup(pregp, key, &offset);
-                                pid_printf ("  %s", sym);
-                        } else if (pidp->mapinfop) {
-                                if (sym = maplookup(pidp->mapinfop, key, &offset)) {
-                                        pid_printf ("  %s", sym);
-                                        break;
+                                if (sym = symlookup(pregp, key, &offset)) {
+                                	pid_printf ("  %s", sym);
+                                } else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
+                                	pid_printf ("  %s", sym);
 				} else {
-                                	pid_printf ("  0x%llx", key);
+                                	pid_printf ("  0x%llx", sym);
 				}
+                        } else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
+                                pid_printf ("  %s", sym);
                         } else {
                                 pid_printf ("  0x%llx", key);
                         }

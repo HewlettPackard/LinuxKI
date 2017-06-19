@@ -1631,7 +1631,7 @@ kp_dev_entries(void *arg1, void *arg2)
 
 	if (devinfop->iostats[IOTOT].compl_cnt == 0) return 0;
 
-	if (devinfop->mp_policy == MP_ROUND_ROBIN) {
+	if (warnflagp && (devinfop->mp_policy == MP_ROUND_ROBIN)) {
         	/* check  for RHEL 7.3 round-robin bug 1422567 */
         	if (strstr(globals->os_vers, "3.10.0-514.el7") ||
             	    strstr(globals->os_vers, "3.10.0-514.2.2") ||
@@ -1990,7 +1990,7 @@ kp_hiserv_mapper_devs()			/* Section 4.3.2 */
         lineno=1;
 	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
 	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
-        foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, kp_dev_entries_over5, dev_sort_by_avserv_over5, 10, &warnflag);
+        foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, kp_dev_entries_over5, dev_sort_by_avserv_over5, 10, NULL);
 	CSV_FIELD("kidsk", "[CSV]");
 }
 

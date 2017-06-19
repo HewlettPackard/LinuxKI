@@ -57,7 +57,7 @@ uint64 idle_time_buckets[IDLE_TIME_NBUCKETS-1]={
         10, 20, 50, 100, 250, 500, 750, 1000, 1250, 1500, 2000, 3000, 5000, 10000, 20000};
 char input_str[4096];
 char util_str[512];
-char *warnurl_dir = "https://github.com/HewlettPackard/LinuxKI/wiki";
+char *warnurl_dir = "http://htmlpreview.github.io/?https://github.com/HewlettPackard/LinuxKI/blob/master/documentation";
 char *tab = "\0";    /* report indentation variable; */
 char *tab0 = "\0";    /* report indentation variable; */
 char *tab4 = "    ";

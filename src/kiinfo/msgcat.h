@@ -116,6 +116,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define _HTTP_XFS_DIOREAD "XfsDirectIOReadPerf.htm"
 #define _HTTP_TASKLET "TaskletIRQs.htm"
 #define _HTTP_POWER "power_vs_perf.htm"
+#define _HTTP_MULTIPATH_BUG "multipath_bug.htm"
 #define _HTTP_4_5 "#subsection4.5"
 
 #define _MSG_LINK_INFO \

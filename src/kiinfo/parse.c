@@ -1044,7 +1044,7 @@ parse_mpath()
 	int major, minor;
 	uint32 dev;
 	dev_info_t *devinfop, *mdevinfop = NULL;
-	int nargs = 0;
+	int nargs = 0, mp_policy=0;
 
 	sprintf(fname,"multipath-l.%s", timestamp);
         if ( (f = fopen(fname,"r")) == NULL) {
@@ -1078,6 +1078,15 @@ parse_mpath()
 			mdevinfop->devlist = NULL;
 		}
 
+		if (strstr(input_str, "round-robin")) {
+			mp_policy = MP_ROUND_ROBIN;
+		} else if (strstr(input_str, "queue-length")) {
+			mp_policy = MP_QUEUE_LENGTH;
+		} else if (strstr(input_str, "service-time")) {
+			mp_policy = MP_SERVICE_TIME;
+		}
+			
+
 		if ((strncmp(input_str, "  |- ", 5) == 0) || (strncmp(input_str, "  `- ",5) == 0)) {
 			sscanf(&input_str[5], "%d:%d:%d:%d %s %d:%d", 
 				&path1, &path2, &path3, &path4, devname, &major, &minor);
@@ -1093,6 +1102,7 @@ parse_mpath()
 				devinfop->mdevinfop = mdevinfop;
 				devinfop->siblingp = mdevinfop->devlist;	
 				mdevinfop->devlist = devinfop;	
+				mdevinfop->mp_policy = mp_policy;
 			}
 		}
 

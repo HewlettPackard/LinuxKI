@@ -268,6 +268,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define NO_HBA		((uint64)-1)
 #define NO_DOCKID	((uint64)-1)
 
+#define MP_ROUND_ROBIN	1
+#define MP_QUEUE_LENGTH	2
+#define MP_SERVICE_TIME	3
+
 #define PREEMPT_USER    0xffffffff
 #define PREEMPT_MASK	0x000000ff
 #define SOFTIRQ_MASK    0x0000ff00
@@ -820,7 +824,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 /* macros for managing the Notes and Warnings messages and links.  */
 /* update with warnmsg[] definitions in globals.c */
-#define MAXWARNMSG		17
+#define MAXWARNMSG		18
 #define MAXNOTEMSG		0
 #define MAXNOTEWARN		MAXWARNMSG+MAXNOTEMSG
 #define WARN_CPU_BOTTLENECK		0		
@@ -840,6 +844,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARN_XFS_DIOREAD		14
 #define WARN_TASKLET			15
 #define WARN_POWER			16
+#define WARN_MULTIPATH_BUG		17
 #define NOTE_NUM1		MAXWARNMSG+0
 
 /* warn flags passed to "foreach" functions for detection */
@@ -859,6 +864,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARNF_XFS_DIOREAD		0x2000ull
 #define WARNF_TASKLET			0x4000ull
 #define WARNF_POWER			0x8000ull
+#define WARNF_MULTIPATH_BUG		0x10000ull
 
 /* warn flags specific to Oracle warnflag */
 #define WARNF_ORASCHED			0x01ull
@@ -1744,6 +1750,7 @@ typedef struct dev_info {
 	/* for mapper devices */
 	char		*mapname;	/* /dev/mapper device name */
 	void		*devlist;	/* hash of devices belonging to the this mapper devices */
+	int		mp_policy;	/* 1=MP_ROUND_ROBIN, 2=MP_QUEUE_LENGTH, 3=MP_SERVICE_TIME */
 
 	struct iostats	iostats[3];     /* TOTAL=0/READ=1/WRITE=2 */
 } dev_info_t;

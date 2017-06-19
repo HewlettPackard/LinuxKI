@@ -1631,8 +1631,21 @@ kp_dev_entries(void *arg1, void *arg2)
 
 	if (devinfop->iostats[IOTOT].compl_cnt == 0) return 0;
 
+	if (devinfop->mp_policy == MP_ROUND_ROBIN) {
+        	/* check  for RHEL 7.3 round-robin bug 1422567 */
+        	if (strstr(globals->os_vers, "3.10.0-514.el7") ||
+            	    strstr(globals->os_vers, "3.10.0-514.2.2") ||
+            	    strstr(globals->os_vers, "3.10.0-514.6.1") ||
+            	    strstr(globals->os_vers, "3.10.0-514.6.2") ||
+            	    strstr(globals->os_vers, "3.10.0-514.10.2")) {
+                	(*warnflagp) |= WARNF_MULTIPATH_BUG;
+			RED_FONT;
+        	}
+	}
+
         dev = devinfop->lle.key;
-	PRINT_DEVNAME(devinfop);
+	PRINT_DEVNAME(devinfop); 
+	BLACK_FONT;
 	DSPACE;
 	print_iostats_totals(globals, &devinfop->iostats[0], arg2);
 
@@ -1655,6 +1668,8 @@ kp_dev_entries(void *arg1, void *arg2)
         if ((statsp[IOTOT].barrier_cnt > 20) && (warnflagp != NULL)) {
                 (*warnflagp) |= WARNF_BARRIER;
         }
+
+
 }
 
 void
@@ -1943,7 +1958,13 @@ kp_active_mapper_devs()			/* Section 4.3.1 */
 
 	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
 	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
-        foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, kp_dev_entries, dev_sort_by_count, 10, NULL);
+        foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, kp_dev_entries, dev_sort_by_count, 10, &warnflag);
+
+        if (warnflag & WARNF_MULTIPATH_BUG) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_MULTIPATH_BUG, _LNK_4_3_1);
+                kp_warning(globals->warnings, warn_indx, _LNK_4_3_1); T("\n");
+        }
+
 	CSV_FIELD("kidsk", "[CSV]");
 }
 

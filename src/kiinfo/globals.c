@@ -5236,5 +5236,6 @@ warnmsg_t warnmsg[MAXNOTEWARN] = {
 	{ "Warning: Suspect Unaligned XFS Direct I/O", _HTTP_XFS_DIO_UNALIGNED},
 	{ "Warning: Suspect XFS Direct I/O with cached pages", _HTTP_XFS_DIOREAD},
 	{ "Warning: Excessive Tasklet SoftIRQs", _HTTP_TASKLET},
-	{ "Warning: System enabled for power savings", _HTTP_POWER}
+	{ "Warning: System enabled for power savings", _HTTP_POWER},
+	{ "Warning: RHEL 7.3 Multipath bug may impact I/O performance", _HTTP_MULTIPATH_BUG}
 };

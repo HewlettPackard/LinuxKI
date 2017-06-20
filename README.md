@@ -1,4 +1,4 @@
-# LinuxKI Toolset v5.1
+# LinuxKI Toolset v5.2
 
 The LinuxKI Toolset (or LinuxKI for short) is an opensourced advanced mission critical performance troubleshooting tool for Linux.  It is designed to identify performance issues beyond the typical performance metrics and results in faster root cause for many performance issues. LinuxKI is a kernel tracing toolkit designed to answer two primary questions about the system:
 
@@ -76,8 +76,8 @@ The following documentation provides a brief overview for downloading and instal
 ### Download
 Pre-packaged RPM and DEB files are available at the following locations:
 
-* [LinuxKI RPM package](https://github.com/HewlettPackard/LinuxKI/raw/master/rpms/linuxki-5.1-1.noarch.rpm)
-* [LinuxKI DEB package](https://github.com/HewlettPackard/LinuxKI/raw/master/rpms/linuxki_5.1-1_all.deb)
+* [LinuxKI RPM package](https://github.com/HewlettPackard/LinuxKI/raw/master/rpms/linuxki-5.2-1.noarch.rpm)
+* [LinuxKI DEB package](https://github.com/HewlettPackard/LinuxKI/raw/master/rpms/linuxki_5.2-1_all.deb)
 
 
 ### Prerquisites
@@ -114,10 +114,10 @@ You can also use your favorite package manager, such as yum.
 You can verify the version of the LinuxKI toolset using rpm or dpkg as follows:
 
      $ rpm --query linuxki
-     linuxki-5.1-1.noarch
+     linuxki-5.2-1.noarch
 
      $ dpkg --status linuxki | grep Version
-     Version: 5.1-1
+     Version: 5.2-1
 
 ### Removing the LinuxKI toolset
 

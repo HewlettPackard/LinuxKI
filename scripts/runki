@@ -13,7 +13,7 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #***************************************************************************
 # runki script  -- captures LinuxKI trace data
-# @(#) runki for Linux $Date: 2017/06/07 $Revision: 5.1
+# @(#) runki for Linux $Date: 2017/06/07 $Revision: 5.2
 
 TOOLDIR=/opt/linuxki
 

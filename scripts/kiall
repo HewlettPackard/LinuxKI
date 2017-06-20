@@ -1,3 +1,4 @@
+#!/bin/bash
 #**************************************************************************
 # Copyright 2017 Hewlett Packard Enterprise Development LP.
 # This program is free software; you can redistribute it and/or modify
@@ -11,7 +12,6 @@
 # with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #***************************************************************************
-#!/bin/bash
 # kiall script  -- generate default LinuxKI reports 
 #
 # version 2.2   05/19/2011
@@ -40,6 +40,8 @@
 # version 4.1   02/29/2016   added new symlinks for pid_timeline.html and kivis.php
 #                            added open file ulimit check
 # version 5.0   04/21/2017   removed checkaccess check since passwd is not needed.
+# version 5.1   06/14/2017   Added Copyright
+# version 5.2   06/20/2017   Moved copyright after shell designation
 # 
 # DESCRIPTION:
 #  

@@ -1,3 +1,4 @@
+#!/bin/bash  
 #**************************************************************************
 # Copyright 2017 Hewlett Packard Enterprise Development LP.
 # This program is free software; you can redistribute it and/or modify
@@ -11,7 +12,6 @@
 # with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #***************************************************************************
-#!/bin/bash  
 # runki script  -- captures LinuxKI trace data
 # @(#) runki for Linux $Date: 2017/06/07 $Revision: 5.1
 
@@ -19,7 +19,7 @@ TOOLDIR=/opt/linuxki
 
 # need to make sure /usr/sbin and /sbin are in the path 
 PATH=$TOOLDIR:$PATH:/usr/sbin:/sbin
-version="runki for Linux version 5.1"
+version="runki for Linux version 5.2"
 tag=`date +%m%d_%H%M`
 HOSTNAME=`hostname -s`
 KIDIR=`pwd`

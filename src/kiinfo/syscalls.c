@@ -1358,6 +1358,7 @@ socket_update_fdinfo(void *arg1, void *arg2)
 	unsigned long bytes;
 	char *varptr;
 
+	printf ("socket_update_fdinfo BEGIN\n");
 	/* printf ("socket_update_fdinfo() rec_ptr: 0x%llx  reclen: %d %d\n", rec_ptr, rec_ptr->reclen, sizeof(syscall_exit_t));  */
 	if (rec_ptr->reclen <= sizeof(syscall_exit_t)) return;
 
@@ -1376,10 +1377,13 @@ socket_update_fdinfo(void *arg1, void *arg2)
                 case __NR_readv:
                 case __NR_write :
                 case __NR_writev :	
+			printf ("socket_update_fdinfo\n");
 			if (fdinfop->lsock || fdinfop->rsock) {
 				break;
 			}
 	                addr = (struct sockaddr_in *)varptr;
+			
+			printf ("socket_update_fdinfo sin_family %d\n", addr->sin_family == AF_INET);
 			if (addr->sin_family == AF_INET) {
 				lsock_src = addr;
                         	rsock_src = (struct sockaddr_in *)(varptr+sizeof(struct sockaddr_in));
@@ -1395,6 +1399,7 @@ socket_update_fdinfo(void *arg1, void *arg2)
 							fdinfop->lsock = lsock_dest;
 							fdinfop->rsock = rsock_dest;
 							fdinfop->ftype = F_IPv4;
+							fdinfop->node = TCP_NODE;
 						}
 					}
 				}
@@ -1421,6 +1426,7 @@ socket_update_fdinfo(void *arg1, void *arg2)
 							fdinfop->lsock = lsock_dest;
 							fdinfop->rsock = rsock_dest;
 							fdinfop->ftype = F_IPv6;
+							fdinfop->node = TCP_NODE;
 						}
 					}
 				}
@@ -1594,15 +1600,14 @@ pid_update_fdinfo(void *arg1, void *arg2)
 				if (fdinfop->lsock && fdinfop->rsock) {
 					ldest = fdinfop->lsock;
 					rdest = fdinfop->rsock;
-				} else {
-					if (ldest = calloc(1, sizeof(struct sockaddr_in6))) {
-						CALLOC_LOG(ldest, 1, sizeof(struct sockaddr_in6));
-						if (rdest = calloc(1, sizeof(struct sockaddr_in6))) {
-							CALLOC_LOG(rdest, 1, sizeof(struct sockaddr_in6));
-							fdinfop->lsock = ldest;
-							fdinfop->rsock = rdest;
-							fdinfop->ftype = F_IPv4;
-						}
+				} else if (ldest = calloc(1, sizeof(struct sockaddr_in6))) {
+					CALLOC_LOG(ldest, 1, sizeof(struct sockaddr_in6));
+					if (rdest = calloc(1, sizeof(struct sockaddr_in6))) {
+						CALLOC_LOG(rdest, 1, sizeof(struct sockaddr_in6));
+						fdinfop->lsock = ldest;
+						fdinfop->rsock = rdest;
+						fdinfop->ftype = F_IPv4;
+						fdinfop->node = TCP_NODE;
 					}
 				}
 
@@ -1639,6 +1644,7 @@ pid_update_fdinfo(void *arg1, void *arg2)
 							fdinfop->lsock = ldest;
 							fdinfop->rsock = rdest;
 							fdinfop->ftype = F_IPv6;
+							fdinfop->node = TCP_NODE;
 						}
 					}
 				}

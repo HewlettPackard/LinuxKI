@@ -851,12 +851,25 @@ set_ioflags()
   	 */
 	globals->req_op_mask = 0x1;
 	globals->req_op_shift = 0;
+	globals->cmd_flag_mask = 0xfffffffffffffffe;
 	globals->cmd_flag_shift = 1;
 	globals->req_op = req_op_name_2;
 	if (!IS_LIKI || (globals->os_vers[0] == '2')) {
 		/* For Ftrace, just use the version 2.6.32 flags */
-		globals->io_flags = ioflags_name_2;
-		globals->sync_bit = 1 << 18;
+		if (strncmp(globals->os_vers, "2.6.36", 6) == 0) {
+			globals->io_flags = ioflags_name_2_6_36;
+			globals->sync_bit = 1 << 5;
+		} else if ((strncmp(globals->os_vers, "2.6.37", 6) == 0) ||
+		         (strncmp(globals->os_vers, "2.6.38", 6) == 0)) {
+			globals->io_flags = ioflags_name_2_6_37;
+			globals->sync_bit = 1 << 4;
+		} else if (strncmp(globals->os_vers, "2.6.39", 6) == 0) {
+			globals->io_flags = ioflags_name_2_6_39;
+			globals->sync_bit = 1 << 4;
+		} else {
+			globals->io_flags = ioflags_name_2;
+			globals->sync_bit = 1 << 18;
+		}
 	} else if ((strncmp(globals->os_vers, "3.0.", 4) == 0) ||
 		  (strncmp(globals->os_vers, "3.1.", 4) == 0)) {
 		globals->io_flags = ioflags_name_3_0;
@@ -897,25 +910,28 @@ set_ioflags()
 		  (strncmp(globals->os_vers, "4.9.", 4) == 0)) {
 		globals->io_flags = ioflags_name_4_8;
 		globals->sync_bit = 1 << 3;
-		globals->req_op_mask = 0x7ull << 61;
+		globals->req_op_mask = 0xe000000000000000;
 		globals->req_op_shift = 61;
+		globals->cmd_flag_mask = 0x1fffffffffffffff;
 		globals->cmd_flag_shift = 0;
 		globals->req_op = req_op_name_4_8;
 	} else if (strncmp(globals->os_vers, "4.10.", 5) == 0) {
 		globals->io_flags = ioflags_name_4_10;
+		globals->req_op = req_op_name_4_10;
 		globals->sync_bit = 1 << 11;
 		globals->req_op_mask = 0xff;
 		globals->req_op_shift = 0;
+		globals->cmd_flag_mask = 0xffffffffffffff00;
 		globals->cmd_flag_shift = 8;
-		globals->req_op = req_op_name_4_10;
 	} else { 
 		/* place holder for next change*/
 		globals->io_flags = ioflags_name_4_10;
+		globals->req_op = req_op_name_4_10;
 		globals->sync_bit = 1 << 11;
 		globals->req_op_mask = 0xff;
 		globals->req_op_shift = 0;
+		globals->cmd_flag_mask = 0xffffffffffffff00;
 		globals->cmd_flag_shift = 8;
-		globals->req_op = req_op_name_4_10;
 	}
 }
 
@@ -937,7 +953,7 @@ reqop_name(uint64 f)
 	int op;
 
 	op = (f & globals->req_op_mask) >> globals->req_op_shift;
-	if (op < 10) return globals->req_op[op];
+	if (op < 36) return globals->req_op[op];
 	return "ukn";
 }
 	
@@ -950,9 +966,9 @@ ioflags(uint64 f)
 	int i;
 	int op;
 	uint64 cmd_flags;
-	
-	cmd_flags = (f & ((1ull << 61) - 1)) >> globals->cmd_flag_shift;
-	/* skip bit 0 as the REQ_WRITE is already reported */
+
+	cmd_flags = (f & globals->cmd_flag_mask) >> globals->cmd_flag_shift;
+
 	for (i = 0; i < REQ_NRBIT; i++) {   	
 		if ((cmd_flags & (1 << i)) && globals->io_flags[i]) {
 			strcat(str, globals->io_flags[i]);
@@ -960,10 +976,11 @@ ioflags(uint64 f)
 		}
 	}
 
+	/* take off the last "|" character */
 	if (strlen(str)) {
 		str[strlen(str)-1] = 0;
 	} else {
-		sprintf(str, "0x%x", f);
+		sprintf(str, "0x%x", cmd_flags);
 	}
 
 	return(str);
@@ -1415,6 +1432,23 @@ print_user_sym(unsigned long ip, uint64 pid, char print_objfile)
 }
 
 void
+print_stacktrace_hex(unsigned long *stktrc, uint64 depth)
+{
+        int i;
+	uint64 argval;
+	int idx;
+	uint64 offset;
+
+        printf (" HEXTRACE:");
+        for (i=0; i < depth; i++) {
+		printf (" 0x%llx", stktrc[i]);
+	}
+
+        return;
+}
+
+
+void
 print_stacktrace(unsigned long *stktrc, unsigned long depth, int start, uint64 pid)
 {
         int i;
@@ -1422,10 +1456,13 @@ print_stacktrace(unsigned long *stktrc, unsigned long depth, int start, uint64 p
 	int idx;
 	int is_user = 0;
 
+	/* print_stacktrace_hex (stktrc, depth); */
+
 	if (depth == 0) return;
 
        	for (i=0; i < depth; i++) {
 		switch (stktrc[i]) {
+			case END_STACK: continue;
 			case STACK_CONTEXT_KERNEL:     is_user = 0; continue;
 			case STACK_CONTEXT_USER:      
 				if (i > 0) printf ("%c|", fsep);
@@ -1442,22 +1479,6 @@ print_stacktrace(unsigned long *stktrc, unsigned long depth, int start, uint64 p
 		} else {
 			print_kernel_sym(stktrc[i], 1);	
 		}
-	}
-
-        return;
-}
-
-void
-print_stacktrace_hex(unsigned long *stktrc, uint64 depth)
-{
-        int i;
-	uint64 argval;
-	int idx;
-	uint64 offset;
-
-        printf (" HEXTRACE:");
-        for (i=0; i < depth; i++) {
-		printf (" 0x%llx", stktrc[i]);
 	}
 
         return;

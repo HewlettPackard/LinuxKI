@@ -2000,6 +2000,7 @@ typedef struct server_info {
 	char **io_flags;		/* based off os_vers */
 	char **req_op;
 	uint64 req_op_mask;
+	uint64	cmd_flag_mask;
 	int	req_op_shift;
 	int	cmd_flag_shift;
 	uint64 sync_bit;		/* varies based on os_vers, used for Barrier I/O detection */
@@ -2191,6 +2192,9 @@ extern uint64 cold_bring_in_pages_pc;
 
 extern char *ftype_name_index[];
 extern char *ioflags_name_2[];
+extern char *ioflags_name_2_6_36[];
+extern char *ioflags_name_2_6_37[];
+extern char *ioflags_name_2_6_39[];
 extern char *ioflags_name_3_0[];
 extern char *ioflags_name_3_2[];
 extern char *ioflags_name_3_6[];

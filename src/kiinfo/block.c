@@ -258,7 +258,7 @@ block_global_insert_stats(block_rq_insert_t *rec_ptr)
 {
 	uint32 rw;
 	rw = reqop(rec_ptr->cmd_flags); 
-	if ((rw > IO_WRITE) || INVALID_SECTOR(rec_ptr->sector)) return;
+	if (rw > IO_WRITE) return;
 
 	incr_insert_iostats (rec_ptr, &globals->iostats[rw], NULL);
 }
@@ -273,7 +273,7 @@ block_dev_insert_stats(block_rq_insert_t *rec_ptr)
 	
 	if (debug) printf ("block_dev_insert_stats\n");
 	rw = reqop(rec_ptr->cmd_flags); 
-	if ((rw > IO_WRITE) || INVALID_SECTOR(rec_ptr->sector)) return;
+	if (rw > IO_WRITE) return;
 	
         devinfop = GET_DEVP(DEVHASHP(globals,dev),dev);
 	incr_insert_iostats (rec_ptr, &devinfop->iostats[rw], &rndio_flag);	
@@ -291,7 +291,7 @@ block_perpid_insert_stats(block_rq_insert_t *rec_ptr, pid_info_t *pidp)
 
 	if (pidp == NULL) return;
 	rw = reqop(rec_ptr->cmd_flags); 
-	if ((rw > IO_WRITE) || INVALID_SECTOR(rec_ptr->sector)) return;
+	if (rw > IO_WRITE) return;
 
 	incr_insert_iostats(rec_ptr, IOSTATSP(pidp, dev, rw), NULL);
 
@@ -526,7 +526,7 @@ print_block_rq_insert_rec(void *a, char *scsi_cmd_addr)
 	printf ("%cdev_t=0x%08llx%cwr=%s%cflags=%s%csector=0x%llx%clen=%d",
 		fsep, DEV(rec_ptr->dev),
 		fsep, reqop_name(rec_ptr->cmd_flags),
-		fsep, ioflags(rec_ptr->cmd_flags),  
+		fsep, ioflags(rec_ptr->cmd_flags), 
 		fsep, rec_ptr->sector,
 		fsep, rec_ptr->nr_sectors * 512);
 
@@ -535,7 +535,7 @@ print_block_rq_insert_rec(void *a, char *scsi_cmd_addr)
 			fsep, rec_ptr->async_in_flight, 
 			fsep, rec_ptr->sync_in_flight);
 	}
-	/* printf ("%cflags: 0x%016llx", fsep, rec_ptr->cmd_flags); */
+	/* printf ("%cflags: 0x%016llx", fsep, rec_ptr->cmd_flags);  */
 	printf ("\n");
 	return 0;
 }

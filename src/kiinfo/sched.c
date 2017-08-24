@@ -1292,7 +1292,7 @@ print_sched_switch_rec(sched_switch_t *rec_ptr, pid_info_t *pidp)
 
 	if (STEAL_ON) printf ("%cstealtime=%12.06f", fsep, SECS(rec_ptr->stealtime));
  
-	print_msr_stats(rec_ptr);
+	if (msr_flag) print_msr_stats(rec_ptr);
 
 	start = find_switch_start(&rec_ptr->ips[0], rec_ptr->stack_depth);
 	/* printf (" start: %d, depth: %d", start, rec_ptr->stack_depth); */

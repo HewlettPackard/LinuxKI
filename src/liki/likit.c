@@ -18,7 +18,7 @@
  *
  * likit.c	LInux Kernel Instrumentation
  *
- *		v5.1
+ *		v5.3
  *		colin.honess@gmail.com
  *		mark.ray@hpe.com
  *		pokilfoyle@gmail.com
@@ -263,6 +263,10 @@ STATIC int 	tt_fork_hook_installed = FALSE;
 
 /* Function pointers for unexported functions */
 static struct socket *(*sockfd_lookup_light_fp)(int, int *, int *);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
+static struct stack_trace *(*save_stack_trace_regs_fp)(struct pt_regs*, struct stack_trace*);
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,1,0)
 static unsigned long (*copy_from_user_nmi_fp)(void *, const void __user *, unsigned long);
 #endif
@@ -407,8 +411,8 @@ struct tp_struct tp_table[];
 #define CHUNK_MASK(TB, PTR)						\
 	(1ULL << (((char *)PTR - TB->buffer) / CHUNK_SIZE))
 
-
-/* Stack unwinding is the most troublesome thing to get sorted when porting
+/* Documented by Colin Hones
+ * Stack unwinding is the most troublesome thing to get sorted when porting
  * to a new distro/release. V2 kernels passed fewer parameters to dump_trace()
  * so they need to be treated differently to V3. Some platforms can follow 
  * the back-pointer successfully and others cannot; and what works when 
@@ -423,99 +427,87 @@ struct tp_struct tp_table[];
  * need to tinker here for a while to get good unwinds on a new platform.
  */
 
+/* Documented by Mark Rauy - 08/11/2017
+ * I have tried to simplify this.   While save_stack_trace_regs() is
+ * not exported, we can do a lookup from kallsyms.   This will abstract
+ * some of the complexities.
+ */
+
 #ifdef CONFIG_X86_64
 
-STATIC int 
+#if LINUX_VERSION_CODE > KERNEL_VERSION(4,0,0)
+#define STACK_TRACE(DATA, REGS)						\
+	save_stack_trace_regs_fp(REGS, DATA);
+
+#else
+STATIC int
 liki_backtrace_stack(void *data, char *name)
 {
         return(0);
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,6,0)
-STATIC int
-#else
 STATIC void
-#endif
 liki_backtrace_address(void *data, unsigned long addr, int reliable)
 {
-	struct stack_trace *trace = (struct stack_trace *)data;
+        struct stack_trace *trace = (struct stack_trace *)data;
 
-	if (trace->skip > 0) {
-		trace->skip--;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,6,0)
-                return  0;
-#else
+        if (trace->skip > 0) {
+                trace->skip--;
                 return;
-#endif
-	}
+        }
 
-	if (trace->nr_entries < trace->max_entries)
+        if (trace->nr_entries < trace->max_entries)
                 trace->entries[trace->nr_entries++] = addr;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,6,0)
-        return 0;
-#else
         return;
-#endif
 }
 
-
-/* Later versions of the Linux kernel omit several fields from 
- * stacktrace_ops, only requiring .stack, .address and .walk_stack.
- */
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
-
-#if (defined SLES11  || defined SLES12)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(3,0,0)
+#if (defined SLES11 || defined SLES12)
 STATIC struct stacktrace_ops unwind_ops = {
-        .stack                  = liki_backtrace_stack,		/* Text header stack type */
-        .address                = liki_backtrace_address,	/* Print/record address */
-        .walk_stack             = print_context_stack,		/* Traversal function */
+        .stack                  = liki_backtrace_stack,         /* Text header stack type */
+        .address                = liki_backtrace_address,       /* Print/record address */
+        .walk_stack             = print_context_stack,          /* Traversal function */
 };
-
 #else
-
 STATIC struct stacktrace_ops unwind_ops = {
-        .stack                  = liki_backtrace_stack,		/* Text header stack type */
-        .address                = liki_backtrace_address,	/* Print/record address */
-        .walk_stack             = print_context_stack_bp,	/* Traversal function */
+        .stack                  = liki_backtrace_stack,         /* Text header stack type */
+        .address                = liki_backtrace_address,       /* Print/record address */
+        .walk_stack             = print_context_stack_bp,       /* Traversal function */
 };
 #endif
 
 #define STACK_TRACE(DATA, REGS)						\
 	dump_trace(current, REGS, NULL, 0, &unwind_ops, DATA);
-
-#else // Very old kernels 
-
-STATIC void 
+#else  // Very old kernels
+STATIC void
 liki_trace_warning(void *data, char *msg)
 {
-	return;
+        return;
 }
 
-STATIC void 
+STATIC void
 liki_trace_warning_symbol(void *data, char *msg, unsigned long symbol)
 {
-	return;
+        return;
 }
 
 STATIC struct stacktrace_ops unwind_ops = {
-	.warning 		= liki_trace_warning,
-	.warning_symbol		= liki_trace_warning_symbol,
-        .stack                  = liki_backtrace_stack,		/* Text header stack type */
-        .address                = liki_backtrace_address,	/* Print/record address */
-        .walk_stack             = print_context_stack_bp,	/* Traversal function */
+        .warning                = liki_trace_warning,
+        .warning_symbol         = liki_trace_warning_symbol,
+        .stack                  = liki_backtrace_stack,         /* Text header stack type */
+        .address                = liki_backtrace_address,       /* Print/record address */
+        .walk_stack             = print_context_stack_bp,       /* Traversal function */
 };
 
-#define STACK_TRACE(DATA, REGS)						\
-	dump_trace(current, REGS, NULL, &unwind_ops, DATA);
-
-#endif	// LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+#define STACK_TRACE(DATA, REGS)                                         \
+        dump_trace(current, REGS, NULL, &unwind_ops, DATA);
+#endif  //  LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+#endif  //  LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
 
 #elif defined CONFIG_ARM64
-
 #define STACK_TRACE(DATA, REGS)						\
-	save_stack_trace(DATA);
+	save_stack_trace_regs(REGS, DATA);
 
 #endif // CONFIG_ARM64
 
@@ -615,7 +607,7 @@ liki_stack_unwind(struct pt_regs *regs, int skip, int *start)
 
 		STACK_TRACE(&st, regs);
 
-		/* If dump_trace() gives us a useful stack then prepend
+		/* If STACK_TRACE() gives us a useful stack then prepend
 		 * the kernel marker
 		 */
 		if (st.nr_entries > 1) {
@@ -2528,6 +2520,16 @@ sched_migrate_task_trace(RXUNUSED struct task_struct *p, unsigned int new_cpu)
 }
 
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0)					
+#define POPULATE_COMMON_BLOCK_FIELDS(q, r, T)						\
+	T->dev = r->rq_disk ? disk_devt(r->rq_disk) : 0;				\
+	T->sector = blk_rq_is_passthrough(r) ? 0 : blk_rq_pos(r);			\
+	T->nr_sectors = blk_rq_is_passthrough(r) ? 0 : blk_rq_sectors(r);	 	\
+	T->cmd_type = 0;								\
+	T->cmd_flags = r->cmd_flags;							\
+	T->async_in_flight = q->in_flight[BLK_RW_ASYNC];				\
+	T->sync_in_flight = q->in_flight[BLK_RW_SYNC];
+#else
 #define POPULATE_COMMON_BLOCK_FIELDS(q, r, T)						\
 	T->dev = r->rq_disk ? disk_devt(r->rq_disk) : 0;				\
 	T->sector = (unsigned long)((r->cmd_type == REQ_TYPE_BLOCK_PC) ? 		\
@@ -2537,6 +2539,7 @@ sched_migrate_task_trace(RXUNUSED struct task_struct *p, unsigned int new_cpu)
 	T->cmd_flags = r->cmd_flags;							\
 	T->async_in_flight = q->in_flight[BLK_RW_ASYNC];				\
 	T->sync_in_flight = q->in_flight[BLK_RW_SYNC];
+#endif
 
 
 STATIC void
@@ -2643,10 +2646,22 @@ block_rq_issue_trace(RXUNUSED struct request_queue *q, struct request *r)
 	return;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,12,0)
+STATIC void 
+block_rq_complete_trace(RXUNUSED struct request *r, int error, unsigned int nr_bytes)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,14,5)
+STATIC void 
+block_rq_complete_trace(RXUNUSED struct request_queue *q, struct request *r, unsigned int nr_bytes)
+#else
 STATIC void 
 block_rq_complete_trace(RXUNUSED struct request_queue *q, struct request *r)
+#endif
 {
 	block_rq_complete_t	*t;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,12,0)
+	struct request_queue	*q = r->q;
+#endif
+
 	TRACE_COMMON_DECLS;
 
 	if (unlikely(tracing_state == TRACING_DISABLED))
@@ -2658,6 +2673,10 @@ block_rq_complete_trace(RXUNUSED struct request_queue *q, struct request *r)
 #endif
 		return;
 	}
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,12,0)
+	q = r->q;
+#endif
 
 	if (unlikely(tracing_state == TRACING_RESOURCES)) {
 
@@ -2697,6 +2716,8 @@ block_rq_complete_trace(RXUNUSED struct request_queue *q, struct request *r)
 	return;
 }
 
+/* This is obsolete, but keeping for now */
+#if 0
 STATIC void
 block_rq_abort_trace(RXUNUSED struct request_queue *q, struct request *r)
 {
@@ -2734,7 +2755,7 @@ block_rq_abort_trace(RXUNUSED struct request_queue *q, struct request *r)
 
 	POPULATE_COMMON_FIELDS(t, TT_BLOCK_RQ_ABORT, TRACE_SIZE(block_rq_abort_t), ORDERED);
 	POPULATE_COMMON_BLOCK_FIELDS(q, r, t);
-	t->errors = r->errors;
+	t->errors = 0;
 #ifdef CONFIG_BLK_CGROUP
 	t->start_time_ns = r->start_time_ns;
 	t->io_start_time_ns = r->io_start_time_ns;
@@ -2749,6 +2770,7 @@ block_rq_abort_trace(RXUNUSED struct request_queue *q, struct request *r)
 
 	return;
 }
+#endif
 
 STATIC void
 block_rq_requeue_trace(RXUNUSED struct request_queue *q, struct request *r)
@@ -2788,7 +2810,7 @@ block_rq_requeue_trace(RXUNUSED struct request_queue *q, struct request *r)
 	POPULATE_COMMON_FIELDS(t, TT_BLOCK_RQ_REQUEUE, TRACE_SIZE(block_rq_requeue_t), ORDERED);
 	POPULATE_COMMON_BLOCK_FIELDS(q, r, t);
 
-	t->errors = r->errors;
+	t->errors = 0;
 #ifdef CONFIG_BLK_CGROUP
 	t->start_time_ns = r->start_time_ns;
 	t->io_start_time_ns = r->io_start_time_ns;
@@ -6117,7 +6139,7 @@ struct tp_struct tp_table[TT_NUM_PROBES] = {
 	{NULL, "block_rq_insert", block_rq_insert_trace},
 	{NULL, "block_rq_issue", block_rq_issue_trace},
 	{NULL, "block_rq_complete", block_rq_complete_trace},
-	{NULL, "block_rq_abort", block_rq_abort_trace},
+	{NULL, NULL, NULL},
 	{NULL, "block_rq_requeue", block_rq_requeue_trace},
 	{NULL, NULL, NULL},
 	{NULL, "sys_enter", syscall_enter_trace},
@@ -6825,12 +6847,14 @@ liki_initialize(void)
 	int	i;
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,9,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,13,0)
 	printk(KERN_INFO "LiKI: unsupported kernel version\n");
 	return(-EINVAL);
 #else
 	printk(KERN_INFO "LiKI: tracing starting up...\n");
 #endif
+
+
 
 /* REVISIT: state_mutex ? */
 
@@ -6853,6 +6877,14 @@ liki_initialize(void)
 		printk(KERN_WARNING "LiKI: tracing initialization failed\n");
 		return(-EINVAL);
 	}
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
+        if ((save_stack_trace_regs_fp = (void *)kallsyms_lookup_name("save_stack_trace_regs")) == 0) {
+		printk(KERN_WARNING "LiKI: cannot find save_stack_trace_regs()\n");
+		printk(KERN_WARNING "LiKI: tracing initialization failed\n");
+		return(-EINVAL);
+	}
+#endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,1,0)
 	if ((copy_from_user_nmi_fp = (void *)kallsyms_lookup_name("copy_from_user_nmi")) == 0) {

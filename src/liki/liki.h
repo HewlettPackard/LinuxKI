@@ -68,7 +68,7 @@
 #define TT_BLOCK_RQ_INSERT		3
 #define TT_BLOCK_RQ_ISSUE		4
 #define TT_BLOCK_RQ_COMPLETE		5
-#define TT_BLOCK_RQ_ABORT		6
+#define TT_BLOCK_RQ_ABORT		6		/* OBSOLETE */
 #define TT_BLOCK_RQ_REQUEUE		7
 #define TT_HARDCLOCK			8
 #define TT_SYSCALL_ENTER		9		
@@ -124,10 +124,9 @@
 #define	TT_BITMASK_DEFAULT_TRACES \
 				(TT_BIT(TT_SCHED_SWITCH) | TT_BIT(TT_SCHED_WAKEUP) | \
 				 TT_BIT(TT_BLOCK_RQ_INSERT) | TT_BIT(TT_BLOCK_RQ_ISSUE) | \
-				 TT_BIT(TT_BLOCK_RQ_COMPLETE) | TT_BIT(TT_BLOCK_RQ_ABORT) | \
-				 TT_BIT(TT_BLOCK_RQ_REQUEUE) | TT_BIT(TT_HARDCLOCK) | \
+				 TT_BIT(TT_BLOCK_RQ_COMPLETE) | TT_BIT(TT_BLOCK_RQ_REQUEUE) | \
 				 TT_BIT(TT_SYSCALL_ENTER) | TT_BIT(TT_SYSCALL_EXIT) | \
-				 TT_BIT(TT_POWER_FREQ))
+				 TT_BIT(TT_HARDCLOCK) | TT_BIT(TT_POWER_FREQ))
 
 #define TT_BITMASK_FP_TRACES 	(TT_BIT(TT_FP_SWITCH) | TT_BIT(TT_FP_HARDCLOCK))
 
@@ -313,6 +312,7 @@ typedef struct block_rq_complete_trace {
 } block_rq_complete_t;
 
 
+/* this is obsolete, but keeping for now */
 typedef struct block_rq_abort_trace {
 	COMMON_FIELDS;
 	dev_t		dev;

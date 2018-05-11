@@ -1,0 +1,267 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-kiprof 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo \-kiprof [FLAGS] [OPTIONS]
+
+.SH DESCRIPTION
+
+\fBkiinfo -kiprof\fR is used to generate the CPU Profiling Report using the hardclock trace events from the LiKI tracing.    By profiling the kernel every 10 milliseconds, frequently accessed kernel functions and traces can be identified to understand how the CPUs and tasks are spending their time.  
+
+kiprof will report the following sections:
+ 
+.B ******** GLOBAL HARDCLOCK REPORT ********
+
+Reports total number of HARDCLOCK trace records by type (USER, SYS, INTR, IDLE), followed by the kernel function executed during the profile and their respective stack traces. 
+
+.B ******** PERCPU HARDCLOCK REPORT ********
+
+Similar to the Global Hardclock report, but broken out for each CPU.
+
+.B ******** PER-PROCESS HARDCLOCK REPORT ********
+
+Reports counts of kernel functions broken out for each process (PID).  Top <npid> processes listed (default 20)
+
+.SH NOTE
+
+CPUs will not log a hardclock trace event if the CPU is in a deep c-state wait.   The hardclock trace vent will only be logged as a CPU completes the MWAIT CPU idle-wait instruction, which may be longer than 10 milliseconds.
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B help
+.RS
+Provide help information for kiprof flags
+.RE
+
+.B pid=<pid>
+.RS
+Filter on pid
+.RE
+
+.B tgid=<tgid>
+.RS
+Filter on task group ID
+.RE
+
+.B cpu=<cpu>
+.RS
+Filter on CPU
+.RE
+
+.B npid=<npid>
+.RS
+Report Top Pids using most CPU
+.RE
+
+.B nsym=<nsym> 
+.RS
+Reports <nsym> kernel functions hardclock events
+.RE
+
+.B kitrace
+.RS
+Include formatted ASCII trace records prior to the standard report
+.RE
+
+.B abstime
+.RS
+Print absolute time (seconds since boot) for each record
+.RE
+
+.B fmttime
+.RS
+Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
+.RE
+
+.B symlookup
+.RS
+For live tracing, performs USER hardclock symbol table lookups
+.RE
+
+.B objfile=<filename>
+.RS
+For runki data collections, use objfile binary to perform symbol table lookups 
+.RE
+
+.B edus=<edus_file>
+.RS
+Specify output of "db2pd -edus" to get DB2 thread names.
+.RE
+
+.SH EXAMPLES
+
+1) Reading from a kitrace binary file, display top 50 functions and stack traces and top 20 PIDs:
+
+.B $ kiinfo -kiprof nsym=50,npid=20 -ts 0725_0733
+
+2) Reading from a live system for a specific PID and report every 10 seconds, for 3 passes:
+
+.B $ kiinfo -kiprof pid=26649 -a 10 -p 3
+
+.SH SAMPLE OUTPUT
+
+ Command line: kiinfo -kiprof nsym=5,npid=4 -ts 0816_0839
+
+ kiinfo (2.0)
+
+ KI Binary Version 3
+ Linux gwr-repo1.rose.hp.com 2.6.32-358.2.1.el6.x86_64 #1 SMP Wed Feb 20 12:17:37 EST 2013 x86_64 x86_64 x86_64 GNU/Linux
+
+ NOTE: idle hardclock traces are not always logged.
+
+ ******** GLOBAL HARDCLOCK REPORT ********
+   Count    USER     SYS    INTR    IDLE
+    4804     669    2936      38    1161 
+
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+ Kernel Functions executed during profile 
+    Count     Pct  State  Function 
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+     1155  24.04%  IDLE   native_safe_halt
+      882  18.36%  SYS    finish_task_switch
+      667  13.88%  USER   UNKNOWN
+      276   5.75%  SYS    copy_user_generic_string
+      226   4.70%  SYS    scsi_request_fn
+
+ non-idle GLOBAL HARDCLOCK STACK TRACES (sort by count):
+
+    Count     Pct  Stack trace 
+ ============================================================ 
+      545  11.34%  finish_task_switch
+      164   3.41%  scsi_request_fn  scsi_request_fn  native_sched_clock  __blk_run_queue  elv_insert  __elv_add_request  blk_insert_cloned_request  dm_dispatch_request  dm_request_fn  __generic_unplug_device  generic_unplug_device  dm_unplug_all  blk_unplug  dm_table_unplug_all  trace_nowake_buffer_unlock_commit  dm_unplug_all
+      161   3.35%  copy_user_generic_string  cpu_buf_read  security_file_permission  vfs_read  sys_read  tracesys
+       97   2.02%  copy_user_generic_string  __copy_from_user_inatomic  iov_iter_copy_from_user_atomic  generic_file_buffered_write  ext4_dirty_inode  __generic_file_aio_write  generic_file_aio_write  ext4_file_write  do_sync_write  autoremove_wake_function  native_sched_clock  sched_clock  trace_nowake_buffer_unlock_commit  security_file_permission  vfs_write  sys_write
+       89   1.85%  _spin_unlock_irqrestore  try_to_wake_up  wake_up_process  __mutex_unlock_slowpath  mutex_unlock  generic_file_aio_write  ext4_file_write  do_sync_write  autoremove_wake_function  native_sched_clock  sched_clock  trace_nowake_buffer_unlock_commit  security_file_permission  vfs_write  sys_write  tracesys
+
+ ******** PERCPU HARDCLOCK REPORT ********
+   CPU   Count    USER     SYS    INTR    IDLE
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     0     649      72     433       5     139
+     1     380      46     201      20     113
+     2    1101      18     984      10      89
+     3     285      22     156       1     106
+     4     250      39     132       0      79
+     5     622     258     250       2     112
+     6     378      19     278       0      81
+     7     249      72      86       0      91
+     8      82      19      26       0      37
+     9     189      20      82       0      87
+    10     281      14     206       0      61
+    11      94      26      26       0      42
+    12      51      15      12       0      24
+    13      79      12      16       0      51
+    14      73       8      37       0      28
+    15      41       9      11       0      21
+
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ Kernel Functions for CPU  0 
+ Sample count is 649/4804 -- Percent for this CPU is   13.51
+    Count     Pct  State  Function
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      138  21.26%  IDLE   native_safe_halt
+      115  17.72%  SYS    finish_task_switch
+       72  11.09%  USER   UNKNOWN
+       51   7.86%  SYS    scsi_request_fn
+       47   7.24%  SYS    _spin_unlock_irqrestore
+
+ non-idle CPU 0  HARDCLOCK STACK TRACES (sort by count):
+
+    Count     Pct  Stack trace
+ ============================================================
+       70  10.79%  finish_task_switch
+       47   7.24%  scsi_request_fn  scsi_request_fn  native_sched_clock  __blk_run_queue  elv_insert  __elv_add_request  blk_insert_cloned_request  dm_dispatch_request  dm_request_fn  __generic_unplug_device  generic_unplug_device  dm_unplug_all  blk_unplug  dm_table_unplug_all  trace_nowake_buffer_unlock_commit  dm_unplug_all
+       29   4.47%  _spin_unlock_irqrestore  try_to_wake_up  wake_up_process  __mutex_unlock_slowpath  mutex_unlock  generic_file_aio_write  ext4_file_write  do_sync_write  autoremove_wake_function  native_sched_clock  sched_clock  trace_nowake_buffer_unlock_commit  security_file_permission  vfs_write  sys_write  tracesys
+       12   1.85%  finish_task_switch  thread_return  trace_nowake_buffer_unlock_commit  prepare_to_wait  cfq_kick_queue  worker_thread  autoremove_wake_function  worker_thread  kthread  child_rip  kthread  child_rip
+       11   1.69%  _spin_unlock_irqrestore  qla24xx_start_scsi  scsi_done  qla2xxx_queuecommand  scsi_dispatch_cmd  scsi_request_fn  native_sched_clock  __blk_run_queue  elv_insert  __elv_add_request  blk_insert_cloned_request  dm_dispatch_request  dm_request_fn  __generic_unplug_device  generic_unplug_device  dm_unplug_all
+ 
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ Kernel Functions for CPU  1 
+ Sample count is 380/4804 -- Percent for this CPU is    7.91
+    Count     Pct  State  Function
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      113  29.74%  IDLE   native_safe_halt
+       62  16.32%  SYS    finish_task_switch
+       46  12.11%  USER   UNKNOWN
+       26   6.84%  SYS    _spin_unlock_irqrestore
+       14   3.68%  SYS    scsi_request_fn
+
+ non-idle CPU 1  HARDCLOCK STACK TRACES (sort by count):
+
+     Count     Pct  Stack trace
+  ============================================================
+       38  10.00%  finish_task_switch
+       14   3.68%  scsi_request_fn  scsi_request_fn  native_sched_clock  __blk_run_queue  elv_insert  __elv_add_request  blk_insert_cloned_request  dm_dispatch_request  dm_request_fn  __generic_unplug_device  generic_unplug_device  dm_unplug_all  blk_unplug  dm_table_unplug_all  trace_nowake_buffer_unlock_commit  dm_unplug_all
+        9   2.37%  _spin_unlock_irqrestore  try_to_wake_up  wake_up_process  __mutex_unlock_slowpath  mutex_unlock  generic_file_aio_write  ext4_file_write  do_sync_write  autoremove_wake_function  native_sched_clock  sched_clock  trace_nowake_buffer_unlock_commit  security_file_permission  vfs_write  sys_write  tracesys
+        7   1.84%  copy_user_generic_string  cpu_buf_read  security_file_permission  vfs_read  sys_read  tracesys
+        5   1.32%  _spin_unlock_irqrestore  qla24xx_intr_handler  handle_IRQ_event  handle_fasteoi_irq  handle_irq  do_IRQ  ret_from_intr  native_safe_halt  default_idle  c1e_idle  cpu_idle  start_secondary
+
+                    :                                          :
+
+ ******** PER-PROCESS HARDCLOCK REPORT ********
+
+ Pid: 0       Sys/Count:     552/2936    ( 18.80%)  Command: (null) 
+ -----------------------------------------------------------------
+   Count    USER     SYS    INTR   
+    1736       0     552      23  
+ -----------------------------------------------------------------
+    Count    %Pid  State  Function   
+     1155  66.53%  IDLE   native_safe_halt    
+      545  31.39%  SYS    finish_task_switch   
+       12   0.69%  INTR   _spin_unlock_irqrestore  
+        6   0.35%  SYS    thread_return  
+        4   0.23%  IDLE   cpu_idle      
+        3   0.17%  INTR   handle_IRQ_event  
+        2   0.12%  IDLE   tick_nohz_stop_sched_tick        
+        2   0.12%  INTR   rb_reserve_next_event    
+        1   0.06%  INTR   scsi_decide_disposition   
+        1   0.06%  INTR   __do_softirq  
+
+ Pid: 15572   Sys/Count:     457/2936    ( 15.57%)  Command: /home/mcr/bin/iotest8   
+ -----------------------------------------------------------------
+   Count    USER     SYS    INTR   
+     465       8     457       0   
+ -----------------------------------------------------------------
+    Count    %Pid  State  Function 
+       76  16.34%  SYS    scsi_request_fn                                                                  
+       58  12.47%  SYS    _spin_unlock_irqrestore       
+       51  10.97%  SYS    finish_task_switch         
+       25   5.38%  SYS    blk_queue_bio  
+       14   3.01%  SYS    mutex_spin_on_owner     
+       13   2.80%  SYS    trace_clock_local                                                               
+       13   2.80%  SYS    __rb_reserve_next  
+        9   1.94%  SYS    rb_reserve_next_event   
+        9   1.94%  SYS    __lookup  
+        8   1.72%  SYS    ring_buffer_lock_reserve
+
+ Pid: 15574   Sys/Count:     419/2936    ( 14.27%)  Command: /home/mcr/bin/iotest8   
+ -----------------------------------------------------------------
+   Count    USER     SYS    INTR   
+     423       4     419       0      
+ -----------------------------------------------------------------
+    Count    %Pid  State  Function  
+       64  15.13%  SYS    scsi_request_fn 
+       52  12.29%  SYS    _spin_unlock_irqrestore  
+       40   9.46%  SYS    finish_task_switch  
+       21   4.96%  SYS    blk_queue_bio   
+       12   2.84%  SYS    mutex_spin_on_owner      
+        7   1.65%  SYS    rb_end_commit 
+        7   1.65%  SYS    __blockdev_direct_IO_newtrunc  
+        7   1.65%  SYS    qla2xxx_queuecommand     
+        6   1.42%  SYS    trace_clock_local  
+        6   1.42%  SYS    ring_buffer_unlock_commit
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

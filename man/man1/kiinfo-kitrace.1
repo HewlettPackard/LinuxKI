@@ -1,0 +1,182 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-kitrace 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo \-kitrace [FLAGS] [OPTIONS]
+
+.SH DESCRIPTION
+
+\fBkiinfo -kitrace\fR reads kernel trace data from a LinuxKI dump or from a running system (LiKI only) and prints each trace record in ASCII format.  
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B help
+.RS
+Provide help information for kitrace flags
+.RE
+
+.B pid=<pid>
+.RS
+Filter on pid
+.RE
+
+.B tgid=<tgid>
+.RS
+Filter on task group ID
+.RE
+
+.B cpu=<cpu>
+.RS
+Filter on CPU
+.RE
+
+.B dev=<dev>
+.RS
+Filter on device
+.RE
+
+.B nosysenter
+.RS
+Do not print system call entry record 
+.RE
+
+.B nosysargs
+.RS
+Do not format system call arguments
+.RE
+
+.B printcmd
+.RS
+Print command with trace record (ftrace only)
+.RE
+
+.B symlookup
+.RS
+For running kiinfo live, perform user symbol lookups for filtered tasks
+.RE
+
+.B objfile=<filename>
+.RS
+For runki data collections, use objfile binary to perform symbol table lookups 
+.RE
+
+.B nomapper
+.RS
+Do not print trace records for mapper devices (multipath, lvm)
+.RE
+
+.B nomarker
+.RS
+Do not print trace records for mapper devices (multipath, lvm)
+.RE
+
+.B abstime
+.RS
+Print absolute time (seconds since boot) for each record
+.RE
+
+.B fmttime
+.RS
+Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
+.RE
+
+.B seqcnt
+.RS
+Print seqcnt in trace records (LiKI on only)
+.RE
+
+.B events=[default | all | <kitool> | event]
+.RS
+Trace events to be traced
+.RE
+
+.RS 7
+\fBdefault\fR - Only trace default events.
+.RE
+.RS 7
+\fBall\fR - Trace all valid ftrace events
+.RE
+.RS 7
+\fB<kitool>\fR - Only the events needed for a specific subtool is used.
+.RE
+.RS 7
+\fB<event>\fR - Trace a specific event.
+.RE
+
+.B subsys=<subsys>
+.RS
+Enable tracing only for certain subsystems.  Valid subsystems include: power, scsi, block, sched, syscalls, irq.
+.RE
+
+.B sysignore=<ignore_filee>
+.RS
+Do not trace system calls listed in the <ignore_file>. This can reduce trace data by eliminating frequently called system calls, such as getrusage(),gettimeofday(), time(), etc...
+.RE
+
+.B edus=<edus_file>
+.RS
+Specify output of "db2pd -edus" to get DB2 thread names.
+.RE
+
+.B msr
+.RS
+Collect adanced CPU statistics such as LLC Hit%, CPI, average CPU frequency, and SMI count
+.RE
+
+.SH EXAMPLES
+
+1) Format data from a LinuxKI dump fileset collected from the runki script printing the system call entry records and formatting the arguments:
+
+.B $ kiinfo -kitrace -ts 1215_0744
+
+2) Format data for a single process from a LinuxKI dump fileset collected from the runki script:
+
+.B $ kiinfo -kitrace pid=5250 -ts 1215_0744
+
+3) Collect LinuxKI data from a live process for 5 seconds, tracing only the block subsystem trace records:
+
+.B $ kiinfo -kitrace pid=22904,subsys=block -a 5 -p 1
+
+4) Collect LinuxKI data for all events (including non-default events) for all tasks in TGID 67304 and ignore getrusage() and gettimeofday() system calls:
+
+.B # cat syscall_ignore
+.B gettimeofday
+.B getrusage
+.B 
+.B# kiinfo -kitrace tgid=67304,events=all,sysignore=scall_ignore -a 60 -p 5
+
+.SH SAMPLE OUTPUT
+
+Command line: /opt/linuxki/kiinfo -kitrace -ts 0612_1157 
+
+kiinfo (4.3)
+
+Linux sut90.atlpss.hp.net 3.10.0-123.el7.x86_64 #1 SMP Mon May 5 11:16:57 EDT 2014 x86_64 x86_64 x86_64 GNU/Linux
+
+KI Binary Version 5
+Fri Jun 12 08:57:16 2015
+    0.000001 cpu=1 pid=122248 tgid=122248 rt_sigaction [13] entry sig=SIGALRM *act=0x7fff5f11e490 *oact=0x7fff5f11e530 sigsetsize=8
+    0.000001 cpu=1 pid=122248 tgid=122248 rt_sigaction [13] ret=0x0 syscallbeg=    0.000000 sig=SIGALRM *act=0x7fff5f11e490 *oact=0x7fff5f11e530 sigsetsize=8
+    0.000001 cpu=1 pid=122248 tgid=122248 alarm [37] entry seconds=50
+    0.000002 cpu=1 pid=122248 tgid=122248 alarm [37] ret=0x0 syscallbeg=    0.000000 seconds=50
+    0.000008 cpu=1 pid=122248 tgid=122248 select [23] entry nfds=9 *readfds=0x7fff5f11e6d0 *writefds=0x0 *exceptfds=0x0 *timeout=0x7fff5f11e660 timeout=50.000000 readfds=0x0001 writefds=0x0000 exceptfds=0x0000
+    0.000009 cpu=1 pid=122248 tgid=122248 select [23] ret=0x1 syscallbeg=    0.000001 nfds=9 *readfds=0x7fff5f11e6d0 *writefds=0x0 *exceptfds=0x0 *timeout=0x7fff5f11e660
+    0.000009 cpu=1 pid=122248 tgid=122248 recvfrom [45] entry sockfd=8 *buf=0x7f79bf1f6060 len=212 flags=0x0 *src_addr=0x0 *addrlen=0x0
+...
+
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

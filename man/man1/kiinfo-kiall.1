@@ -1,0 +1,76 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-kiall 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo \-kiall [FLAGS] [OPTIONS]
+
+.SH DESCRIPTION
+
+The \fBkiinfo -kiall\fR option generates all the LinuxKI reports (kparse, kipid, kidsk, kirunq, kiprof, kiwait, kifutex, kisock, and kifile) in a single pass of the LinuxKI data.     When executed from the kiall script, this option results in a performance improvement of nearly 5x compared to generating each LinuxKI report separately.    Note that this option does not generate the LinuxKI ASCII file (\fBkiinfo -kitrace\fR).      
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B help
+.RS
+Provide help information for kiall flags
+.RE
+
+.B oracle
+.RS
+Includes Oracle kipid output
+.RE
+
+.B mangle
+.RS
+Leave C++ function names mangled
+.RE
+
+.B edus=<edus_file>
+.RS
+Specify output of "db2pd -edus" to get DB2 thread names
+.RE
+
+.B csv
+.RS
+Generates CSV outputs for kipid, kidsk, kirunq, kifile, and kiwait
+.RE
+
+.SH EXAMPLES
+
+1) Running kiinfo -kiall on LinuxKI data from the runki script to generate all the LinuxKI reports and CSV files in a single pass:
+
+.B # kiinfo -kiall oracle,csv -html -ts 1422_0623
+
+After executing, the following reports (and appropriate CSV files) will be generated:
+
+    kp.0422_0623.html
+    kidsk.0422_0623.txt
+    kifile.0422_0623.txt
+    kifutex.0422_0623.txt
+    kipid.0422_0623.txt
+    kipid.oracle.0422_0623.txt
+    kiprof.0422_0623.txt
+    kirunq.0422_0623.txt
+    kiwait.0422_0623.txt
+    kisock.0422_0623.txt
+    kidsk.0422_0623.csv
+    kifile.0422_0623.csv
+    kipid.0422_0623.csv
+    kirunq.0422_0623.csv
+    kiwait.0422_0623.csv
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

@@ -1,0 +1,88 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-clparse 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo \-clparse [FLAGS] [OPTIONS]
+
+.SH DESCRIPTION
+
+The \fBkiinfo -clparse\fR option produces a report in either text or html format with a variety of information from the LinuxKI binary data created by the runki script from multiple nodes in a cluster. The clparse option will attempt to identify various patterns and provides warning if a condition _may_ be suspected of causing some performance issues and warrants additional investigation.  
+
+When the -clparse option is used, \fBkiinfo\fR will search all of the subdirectories looking for any LinuxKI data with the same timestamp.  
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B help
+.RS
+Provide help information for clparse flags
+.RE
+
+.B top
+.RS
+Only list the top <num> items in each section.  Default is 20.
+.RE
+
+.B nooracle
+.RS
+Do not print the Oracle section of the clparse report.
+.RE
+
+.B mangle
+.RS
+Leave C++ function names mangled
+.RE
+
+.B cltree
+.RS
+Links server names to appropriate kparse HTML report for respective server and links PID numbers to the appropropriate PID Reports.  Assumes use of \fBkiinfo -kparse kptree\fR and \fBkiinfo -kipid pidtree\fR was previously performed on each server's KI data
+.RE
+
+.B csv
+.RS
+Generates CSV output file with statistics for each server.
+.RE
+
+.SH EXAMPLES
+
+1) Running kiinfo -clparse on LinuxKI data from the runki script and link servers and PIDs to the respective server overview report or specific PID reports: 
+
+.B $ kiinfo -clparse csv,cltree -html -ts 1215_0744 >cp.1215_0744.html
+
+Typically, the generation of the Cluster Overview Report will be managed through the kiall script.   The   -c argument of the kiall script will cause a subdirectory of the form <timestamp>/<hostname> to be created for each ki_all.*.tgz file found in the current working directory.    The kiall script will proceed to generate the LinuxKI reports for each server.  After that, the Cluster Overview Report will be generated.  For example:
+
+    $ ls
+    ki_all.gwrlx1.0225_1129.tgz       ki_all.gwrlx2.0225_1129.tgz 
+    ki_all.localhost.0225_1129.tgz    ki_all.gwrlx11.0225_1129.tgz
+    ki_all.gwrlx5.0225_1129.tgz
+ 
+    $ kiall -c
+    Processing files in: /work/mcr/cluster/0225_1129/gwrlx1
+    Merging KI binary files.  Please wait...
+    ki.bin files merged by kiinfo -likimerge
+    /opt/linuxki/kiinfo -kitrace -ts 0225_1129
+    /opt/linuxki/kiinfo -kiall csv -html -ts 0225_1129...
+    ...
+    /opt/linuxki/kiinfo -clparse csv,cltree,top=20 -html -ts 0225_1129
+    Number of Servers to analyze: 5
+    Processing KI files in ./gwrlx5
+    Processing KI files in ./gwrlx11
+    Processing KI files in ./gwrlx2
+    Processing KI files in ./localhost
+    Processing KI files in ./gwrlx1
+    kiall complete
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

@@ -1,0 +1,232 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-kisock 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo \-kisock [FLAGS] [OPTIONS]
+
+.SH DESCRIPTION
+
+\fBkiinfo\fR -kisock generates the Network Socket Activity Report.     The kisock option will use the system call events as well as the switch/wakeup events identify network socket activity times.  The report will show the top network data flows based on the IP address, the top Local and remote IP and IP:Port activity, and the most active sockets on the system.    Note that this report is based on system call activity on the network sockets.   If there is network communication outside of a system call (perhaps from a system daemon), the activity will not be traced and reported.
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B help
+.RS
+Provide help information for kisock flags
+.RE
+
+.B nsock=<nsock>
+.RS
+Limit reports sections to Top <nsock> sockets
+.RE
+
+.B scdetail
+.RS
+Produce additional detail information on each system call
+.RE
+
+.B sysignore=<file>
+.RS
+Specify file of system calls to ignore when tracing (live tracing only)
+.RE
+
+.B csv
+.RS
+Create CSV report kisock.*.csv
+.RE
+
+.B kitrace
+.RS
+Include formatted ASCII trace records prior to the standard report
+.RE
+
+.B abstime
+.RS
+Print absolute time (seconds since boot) for each record
+.RE
+
+.B fmttime
+.RS
+Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
+.RE
+
+.B nosysenter
+.RS
+Do not print syscall entry records when using kitrace flag
+.RE
+
+.SH EXAMPLES
+
+1) Create a File Report and reporting on top 5 sockets: 
+
+.B $ kiinfo -kisock nsock=5,scdetail -ts 0204_0643
+
+.SH SAMPLE OUTPUT
+
+ Command line: kiinfo -kisock nsock=5,scdetail -ts 0204_0643
+
+ kiinfo (5.3)
+
+
+ ******** NETWORK SOCKET ACTIVITY REPORT ********
+
+ Top IP->IP dataflows sorted by System Call Count
+ ==================================================
+ Syscalls      Rd/s      RdKb/s      Wr/s      WrKb/s  Connection
+    40457    1011.4         9.8    1011.4      1011.4  L=15.3.104.152 R=15.43.209.141
+    35897     897.4         8.7     897.4       897.4  L=15.3.104.152 R=15.43.213.42
+       67       2.1         0.0       1.1         0.0  L=127.0.0.1 R=127.0.0.1
+        1       0.0         0.0       0.0         0.0  L=15.3.104.152 R=16.98.16.170
+
+ Local IP Statistics
+ ==================================================
+ L=15.3.104.152   Syscalls: 76355
+ System Call Name  Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ recvfrom             38176   1908.8   24.561136   0.000643   0.007056       0      10     18.6
+ sendto               38178   1908.9    0.379765   0.000010   0.000531       0    1024   1908.9
+ write                    1      0.0    0.000011   0.000011   0.000011       0      84      0.0
+
+ L=127.0.0.1   Syscalls: 67
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ sendmsg                 20      1.0    0.000251   0.000013   0.000022       0      41      0.0
+ read                    40      2.0    0.000131   0.000003   0.000024       0      20      0.0
+ write                    2      0.1    0.000110   0.000055   0.000100       0     242      0.0
+ recvmsg                  3      0.1    0.000024   0.000008   0.000016       1     161      0.0
+ getpeername              2      0.1    0.000002   0.000001   0.000001       0
+
+ Local IP:Port Statistics
+ ==================================================
+ L=15.3.104.152:5506   Syscalls: 76354
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ recvfrom             38176   1908.8   24.561136   0.000643   0.007056       0      10     18.6
+ sendto               38178   1908.9    0.379765   0.000010   0.000531       0    1024   1908.9
+
+ L=127.0.0.1:26512   Syscalls: 42
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ read                    40      2.0    0.000131   0.000003   0.000024       0      20      0.0
+ write                    2      0.1    0.000110   0.000055   0.000100       0     242      0.0
+
+ L=127.0.0.1:23331   Syscalls: 25
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ sendmsg                 20      1.0    0.000251   0.000013   0.000022       0      41      0.0
+ recvmsg                  3      0.1    0.000024   0.000008   0.000016       1     161      0.0
+ getpeername              2      0.1    0.000002   0.000001   0.000001       0
+
+ L=15.3.104.152:5632   Syscalls: 1
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ write                    1      0.0    0.000011   0.000011   0.000011       0      84      0.0
+
+ Remote IP Statistics
+ ==================================================
+ R=15.43.209.141   Syscalls: 40457
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ recvfrom             20228   1011.4   12.272651   0.000607   0.001607       0      10      9.9
+ sendto               20229   1011.4    0.199215   0.000010   0.000531       0    1024   1011.4
+
+ R=15.43.213.42   Syscalls: 35897
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ recvfrom             17948    897.4   12.288485   0.000685   0.007056       0      10      8.8
+ sendto               17949    897.4    0.180550   0.000010   0.000495       0    1024    897.4
+
+ R=127.0.0.1   Syscalls: 67
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ sendmsg                 20      1.0    0.000251   0.000013   0.000022       0      41      0.0
+ read                    40      2.0    0.000131   0.000003   0.000024       0      20      0.0
+ write                    2      0.1    0.000110   0.000055   0.000100       0     242      0.0
+ recvmsg                  3      0.1    0.000024   0.000008   0.000016       1     161      0.0
+ getpeername              2      0.1    0.000002   0.000001   0.000001       0
+
+ R=16.98.16.170   Syscalls: 1
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ write                    1      0.0    0.000011   0.000011   0.000011       0      84      0.0
+
+ Remote IP:Port Statistics
+ ==================================================
+ R=15.43.209.141:9120   Syscalls: 40457
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ recvfrom             20228   1011.4   12.272651   0.000607   0.001607       0      10      9.9
+ sendto               20229   1011.4    0.199215   0.000010   0.000531       0    1024   1011.4
+
+ R=15.43.213.42:47523   Syscalls: 35897
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ recvfrom             17948    897.4   12.288485   0.000685   0.007056       0      10      8.8
+ sendto               17949    897.4    0.180550   0.000010   0.000495       0    1024    897.4
+ 
+ R=127.0.0.1:23331   Syscalls: 42
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ read                    40      2.0    0.000131   0.000003   0.000024       0      20      0.0
+ write                    2      0.1    0.000110   0.000055   0.000100       0     242      0.0
+
+ R=127.0.0.1:26512   Syscalls: 25
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ sendmsg                 20      1.0    0.000251   0.000013   0.000022       0      41      0.0
+ recvmsg                  3      0.1    0.000024   0.000008   0.000016       1     161      0.0
+ getpeername              2      0.1    0.000002   0.000001   0.000001       0
+
+ R=16.98.16.170:12228   Syscalls: 1
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ write                    1      0.0    0.000011   0.000011   0.000011       0      84      0.0
+
+ Top Sockets sorted by System Call Count
+ Syscalls      Rd/s      RdKb/s      Wr/s      WrKb/s  Connection
+ ==================================================
+    40457    1011.4         9.8    1011.4      1011.4  L=15.3.104.152:5506 R=15.43.209.141:9120
+    35897     897.4         8.7     897.4       897.4  L=15.3.104.152:5506 R=15.43.213.42:47523
+       42       2.0         0.0       0.1         0.0  L=127.0.0.1:26512 R=127.0.0.1:23331
+       25       0.1         0.0       1.0         0.0  L=127.0.0.1:23331 R=127.0.0.1:26512
+        1       0.0         0.0       0.0         0.0  L=15.3.104.152:5632 R=16.98.16.170:12228
+
+ Top Sockets sorted by System Call Count (Detailed)
+ ==================================================
+ L=15.3.104.152:5506 -> R=15.43.209.141:9120   Syscalls: 40457
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ recvfrom             20228   1011.4   12.272651   0.000607   0.001607       0      10      9.9
+    SLEEP             20225   1011.2   11.621089   0.000575
+       Sleep Func     20224            11.621089   0.000575   0.001579  sk_wait_data
+    RUNQ                                0.108565
+    CPU                                 0.323236
+ sendto               20229   1011.4    0.199215   0.000010   0.000531       0    1024   1011.4
+    RUNQ                                0.002471
+    CPU                                 0.000016
+
+ L=15.3.104.152:5506 -> R=15.43.213.42:47523   Syscalls: 35897
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ recvfrom             17948    897.4   12.288485   0.000685   0.007056       0      10      8.8
+    SLEEP             17949    897.4   11.686403   0.000651
+       Sleep Func     17948            11.686403   0.000651   0.007006  sk_wait_data
+    RUNQ                                0.098323
+    CPU                                 0.293920
+ sendto               17949    897.4    0.180550   0.000010   0.000495       0    1024    897.4
+
+ L=127.0.0.1:26512 -> R=127.0.0.1:23331   Syscalls: 42
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ read                    40      2.0    0.000131   0.000003   0.000024       0      20      0.0
+ write                    2      0.1    0.000110   0.000055   0.000100       0     242      0.0
+
+ L=127.0.0.1:23331 -> R=127.0.0.1:26512   Syscalls: 25
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ sendmsg                 20      1.0    0.000251   0.000013   0.000022       0      41      0.0
+ recvmsg                  3      0.1    0.000024   0.000008   0.000016       1     161      0.0
+ getpeername              2      0.1    0.000002   0.000001   0.000001       0
+
+ L=15.3.104.152:5632 -> R=16.98.16.170:12228   Syscalls: 1
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ write                    1      0.0    0.000011   0.000011   0.000011       0      84      0.0
+
+ Note that the Sleep Functions are only available if the LiKI tracing mechanism is used.
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

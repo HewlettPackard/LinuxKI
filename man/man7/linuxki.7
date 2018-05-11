@@ -1,0 +1,88 @@
+.\" Process this file with
+.\" groff -man -Tascii LinuxKI-man.1
+.\"
+.ad 1
+.TH linuxki 7 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+linuxki - LinuxKI Performance Anslysis Toolset
+	
+.SH SYNOPSIS
+.B /opt/linuxki/runki [-h] [-L] [-M] [-U] [-X] [-a] [-j] [-J 
+.I path
+.B ] [-f | -p] [-n 
+.I interface
+.B ] [-v] [-d 
+.I duration
+.B ] [-t 
+.I maxrun
+.B ] [-P 
+.I pid
+.B ] [-G 
+.I tgid
+.B ] [-C 
+.I cpu
+.B ] [-D 
+.I dev
+.B ] [-R] [-e 
+.I event
+.B ] [-s 
+.I subsys
+.B ] [-I 
+.I sysignore
+.B ] [-T 
+.I timestamp
+.B ] [-c "
+.I comment
+.B "] 
+
+.B /opt/linuxki/kiall [-h] [-l] [-m] [-r] [-f] [-c] [-x] [-t]
+.I timestamp
+.B ]
+
+.B /opt/linuxki/kiclean [-h] [-r] [-f] [-p] [-v] 
+
+.B /opt/linuxki/kiinfo -<kitool> [FLAGS] [OPTIONS]
+
+.SH DESCRIPTION
+The LinuxKI Toolset (or LinuxKI for short) is an opensourced advanced mission critical performance troubleshooting tool for Linux. It is designed to identify performance issues beyond the typical performance metrics and results in a faster root cause analysis for many performance issues.
+
+LinuxKI is designed to be easy to install, collect data, and generate reports. It runs on Linux kernels 2.6.32 or later running on x86_64 and arm64 platforms. It collects low-level detailed traces reflecting the behavior of the running workload, which can be analyzed online or bundled along with configuration and other performance data into a single gzip file suitable for transfer and offline analysis.
+
+So make it easier to execute the tools in the LinuxKI Toolset, add /opt/linuxki to your PATH variable:
+
+.B $ export PATH=$PATH:/opt/linuxki
+
+.SH OPTIONS
+
+.B runki
+.RS
+see runki(1) manpage
+.RE
+
+.B kiall 
+.RS
+see kiall(1) manpage
+.RE
+
+.B kiclean
+.RS
+see kiclean(1) manpage
+.RE
+
+.B kiinfo
+.RS
+see kiinfo(1) manpage
+.RE
+
+
+.SH BUGS
+	
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+
+kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

@@ -1,0 +1,131 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad
+.TH runki 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+runki  -  LinuxKI trace dump collection script
+
+.SH SYNOPSIS
+.B runki [OPTIONS]
+
+.SH DESCRIPTION
+
+Script to collect a LinuxKI trace dump using the LiKI kernel tracking module (default), or the Linux ftrace tracking module.   The runki script will execute the kiinfo binary to setup the tracepoints and and initiate the trace for a specified period of time.    When the dump is complete, the runki script will gather some system information and place all of the trace data and supplemental data into a single gzipped tar file (ki_all.<HOSTNAME>.<TIMESTAMP>.tgz).
+
+.SH OPTIONS
+
+ -h              Help
+ -L              Gather minimal data for local analysis...no gzip/tar
+ -M              Include Collectl/MeasureWare data collection
+ -U              Include userspace profile (perf) data collection
+ -X              Include sar data collection
+ -a              Execute 'perf annotate' on userspace profile (perf) data
+ -j              Collect Java stacks
+ -J <path>       Location of Java jstack command
+ -n <interface>  Gather tcpdump trace data
+ -v              Skip vxfs, misc disc data collection
+ -d <secs>       Duration of KI data collection. Defaults to 20 secs if not specified.
+ -t <secs>       Maximum time for data collection tools to run. Defaults to 120 secs if not specified
+ -p              Skip Per-PID data (lsof, stacks, numa_maps, maps)
+ -f              Use ftrace tracing instead of LiKI DLKM tracing to dump trace data
+ -P <pid>        Filter collection on Task ID or PID (liki only)
+ -G <tgid>       Filter collection on Task Group ID or TGID (liki only)
+ -C <cpu>        Filter collection on cpu (liki only)
+ -D <dev>        Filter collection on device (liki only)
+ -R              Advance CPU stats (Freq, CPI, LLC Hit%) using MSR registers
+ -e <event>      Identify events to dump. Possible values are: default | all | <event>
+ -s <subsys>     Identify subsys to dump. For example: irq, scsi, block, etc.
+ -I <sysignore>  File to specify ignored system call (liki only)
+ -T <timestamp>  Should be of the form MMDD_HHMM
+ -V "<varargs>"  Specify multiple filters and flags to pass to kiinfo -likidump
+ -c "comment"    echo comment into comment.$tag file
+
+.SH OPERATION
+
+At its simplest, LinuxKI trace data is collected using the runki script, which will create a single compressed tar file.   There are two modes, depending on whether you want to collect data using ftrace or the LiKI kernel module (likit.ko):
+
+.B $ /opt/linuxki/runki        # Use kiinfo -likidump to enable LiKI and collect the trace data
+
+.B $ /opt/linuxki/runki -f     # use kiinfo -kitracedump to enable ftrace and collect the trace data         
+
+If there is sufficient available memory on the system, you should collect the data in memory using /dev/shm first and then copy the ki_all.*.tgz file to a disk filesystem afterwards.   This reduces the risk of missing LinuxKI events during the tracing and does not add to the disk workload during the collection as well. 
+
+.B $ cd /dev/shm
+.B $ /opt/linuxki/runki 
+
+The runki script will do all the work.   It will make sure the debug filesystem is mounted, insert the LiKI DLKM if needed, enable the trace points and dump the trace data to disk.   It will also collect supplemental information which can be used to interpret the trace data and help troubleshoot performance problems.    The result will be a single compress tar file of the format ki_all.<hostname>.<timestamp>.tgz, where the timestamp will be of the format MMDD_HHMM.   The amount of trace data depends on the number of CPU and the rate at which the trace events occur.   The data should be collected in a filesystem with plenty of disk space (200 MB - 5 GB) which is mounted for cached I/O.    Note that root privilege will be needed to execute the runki script.   Below is an example using the LiKI tracing:
+
+.B    $ /opt/linuxki/runki
+    === runki for Linux version 5.3
+    === Installing LinuxKI trace points ===
+    === Starting: LinuxKI liKI trace dump for 20 seconds ===
+    ===
+    Command line: /opt/linuxki/kiinfo -likidump dur=20,events=default,subsys=default,pid=0,tgid=0,cpu=-1,dev=-1,debug_dir=/sys/kernel/debug,sysignore= -ts 0209_1243
+ 
+    kiinfo (5.3)
+
+    kiinfo: spooling trace data to disk...
+    kiinfo: Tracing complete
+    === LinuxKI liKI dump complete  ===
+    === KI trace complete.  Collecting supplemental files.
+    === Running lsof ...
+    === Collecting task stack traces from /proc ...
+    === Collecting task maps from /proc ...
+    === Collecting task numa_maps from /proc ...
+    === Collecting binary executable and library symbol table information ...
+    === Getting Processor C-state information ...
+    === Getting disk information ...
+    === Building LVM mapping table ... 
+    === Collecting volume data ... 
+    === Gathering misc supporting data ... 
+    === Copying the syslog files ... 
+    === Tarring up the results ... 
+    === Trace completed and archived as ki_all.$HOSTNAME.$tag.tgz"
+
+If the LiKI DLKM (likit.ko) is not available, the runki script will use the ftrace tracing mechanism.  You can also use the "-f" option on the runki command to initiate an ftrace collection.   However, the ftrace collection has less functionality since it does not log any kernel function names or stack traces on switch records and does not perform any CPU profiling.  
+
+.SH WARNING
+Be sure to obtain the customer's permission before running the toolset in production.    Any defect in the Linux ftrace code or the LiKI trace module could cause a system failure and customers should be aware of the risks of running the toolset.   
+
+
+.SH NOTES
+
+In order to execute the runki script, you will need the following:
+
+\(bu You must have root permission
+
+\(bu You must be logging into a filesystem with plenty of disk space (recommended 500 MB - 3 GB) and it should be mounted for cached I/O.  The sizes of the trace files vary depending on the number of CPUs and the amount of activity on the system.  
+
+\(bu If you have sufficient memory, you can use an in-memory filesystem like /dev/shm to collect the data.   This is the preferred method!
+
+\(bu If you use a filesystem for collecting data, consider creating a new filesystem just for the LinuxKI data with journaling disabled to avoid spinlock contention in the jbd2 code when writing the LinuxKI data to the filesystem:
+
+.B    $ tune2fs -H ^has_journal /dev/<mnt_device>.
+
+\(bu For best results, use /dev/shm to collect the LinuxKI dump if there is sufficient memory.   
+
+.SH EXAMPLES
+
+1) Collect LinuxKI trace data using LiKI kernel tracing module for 20 seconds (default):
+
+.B $ runki
+
+2) Collect LinuxKI trace data and include non-default events (Interrupts, SCSI commands, etc.) and include Advanced CPU statistics (CPI, CPU Frequency, etc.)
+
+.B $ runki -e all -R
+
+3) Collect LinuxKI trace data using the ftrace tracing module for 10 seconds:
+
+.B $ runki -f -d 10
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1)
+kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1)
+kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1)
+kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

@@ -1,0 +1,128 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-kifutex 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo \-kifutex [FLAGS] [OPTIONS]
+
+.SH DESCRIPTION
+
+\fBkiinfo -kifutex\fR generates the Futex Activity Report.    Futex stands for Fast Userspace muTEX.    The kifutex option will use the system call and sched_wakeup trace records to identify the Futex activity times.  The kifutex report will show the Global Futex Report sorted by both Elapsed Time and Count.
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B help
+.RS
+Provide help information for kifutex flags
+.RE
+
+.B uaddr=<futex addr>
+.RS
+Filter on a specific futex address
+.RE
+
+.B nfutex=<nfutex>
+.RS
+Limit output only list top nfutex futexes
+.RE
+
+.B npid=<npid>
+.RS
+Limit per-futex details to list npids for each futex
+.RE
+
+.B sysignore=<file>
+.RS
+Specify file of system calls to ignore when tracing (live tracing only)
+.RE
+
+.B kitrace
+.RS
+Include formatted ASCII trace records prior to the standard report
+.RE
+
+.B abstime
+.RS
+Print absolute time (seconds since boot) for each record
+.RE
+
+.B fmttime
+.RS
+Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
+.RE
+
+.B nosysenter
+.RS
+Do not print syscall entry records when using kitrace flag
+.RE
+
+.SH EXAMPLES
+
+1) Create a Futex Report and reporting on top 5 futex and listing 10 PIDs for each futex:
+
+.B $ kiinfo -kifutex nfutex=5,npid=10 -ts 1115_1758
+
+2) Create a Futex Report for a specific futex address on a live system
+
+.B $ kiinfo -kifile uaddr=0x7f0b8b6a1ca0,npid=4 -a 15 -p 1
+
+.SH SAMPLE OUTPUT
+
+ Command line: /opt/linuxki/kiinfo -kifutex nfutex=2,npid=5 -ts 1115_1758
+
+ kiinfo (2.1)
+
+ KI Binary Version 3
+ Linux hphanar41 3.0.93-futex-0.8-default #2 SMP Fri Nov 1 11:39:57 MDT 2013 x86_64 x86_64 x86_64 GNU/Linux
+
+ ******** GLOBAL FUTEX REPORT ********
+ Top Futex Addrs & top PIDs by elapsed time
+ Total Futex count = 3922 (Top 2 listed)
+
+ Futex 0x7fbd0c94afe8     - Total PID count = 241     
+ Operation                         Count  EAGAIN  ETIMEDOUT  AvRetVal     ElpTime         Avg         Max   Max_waker
+  ALL                             42274       3      42212      0.00    4753.604    0.112447    8.158833   -1       (ICS)
+  FUTEX_WAIT_PRIVATE              42253       3      42212      0.00    4753.592    0.112503    8.158833   -1       (ICS)
+    PID= 28704                      176       0        175      0.00      27.850    0.158238    8.158833   -1       (ICS)
+    PID= 28748                      177       0        177      0.00      19.922    0.112553    0.173100   -1       (ICS)
+    PID= 28690                      178       0        178      0.00      19.921    0.111918    0.144126   -1       (ICS)
+    PID= 28800                      177       0        177      0.00      19.904    0.112450    0.153787   -1       (ICS)
+    PID= 28679                      176       0        176      0.00      19.901    0.113073    0.170339   -1       (ICS)
+    Total PID count = 240 (Top 5 listed)
+  FUTEX_WAKE_PRIVATE                 21       0          0      1.81       0.012    0.000561    0.004013   0        (NA)
+    PID= 25771                       21       0          0      1.81       0.012    0.000561    0.004013   0        (NA)
+    Total PID count = 1 (Top 1 listed)
+
+ Futex 0x7eff09b85fe8     - Total PID count = 241     
+ Operation                         Count  EAGAIN  ETIMEDOUT  AvRetVal     ElpTime         Avg         Max   Max_waker
+  ALL                             42244       0      42222      0.00    4746.187    0.112352    4.403012   -1       (ICS)
+  FUTEX_WAIT_PRIVATE              42235       0      42222      0.00    4746.182    0.112376    4.403012   -1       (ICS)
+    PID= 161377                     177       0        177      0.00      19.922    0.112552    0.180507   -1       (ICS)
+    PID= 161201                     176       0        176      0.00      19.910    0.113124    0.166394   -1       (ICS)
+    PID= 161329                     170       0        170      0.00      19.905    0.117086    0.444780   -1       (ICS)
+    PID= 161328                     178       0        178      0.00      19.900    0.111797    0.173277   -1       (ICS)
+    PID= 161340                     178       0        178      0.00      19.893    0.111761    0.145822   -1       (ICS)
+    Total PID count = 240 (Top 5 listed)
+  FUTEX_WAKE_PRIVATE                  9       0          0      1.44       0.005    0.000599    0.001188   0        (NA)
+    PID= 158536                       9       0          0      1.44       0.005    0.000599    0.001188   0        (NA)
+    Total PID count = 1 (Top 1 listed)
+
+ Top Futex Addrs & top PIDs by count
+ Total Futex count = 3922 (Top 2 listed)
+
+ ...
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

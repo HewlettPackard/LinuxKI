@@ -1,0 +1,303 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-kidsk 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo \-kidsk [FLAGS] [OPTIONS]
+
+.SH DESCRIPTION
+
+\fBkiinfo -kidsk\fR generates the Disk Analysis Report which reports IO related statistics.  There are 6 main sections reported:
+
+\(bu List of IOs with service times greater a given number of milliseconds (default 1000).
+
+\(bu Per-disk IO statistics including IO service times, average IO size, and throughput.  Statistics are reported for read IO, write IO, and total IO.   SCSI devices are listed first, followed by mapper block devices. 
+
+\(bu Multipath FC HBA statistics.
+
+\(bu IO service time histogram.
+
+\(bu Report on Top <npid> PIDs doing multipath I/O.  Only done if npid= flag is used.
+
+\(bu Report on Top <npid> PIDs doing physical I/O.  Only done if npid= flag is used.
+
+Keep in mind that all of the traces are measured at the block device level (block_rq_insert, block_rq_issue, and block_rq_complete).   
+
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B help
+.RS
+Provide help information for kidsk flags
+.RE
+
+.B dev=<dev>
+.RS
+Filter on SCSI device or multipath device
+.RE
+
+.B pid=<pid>
+.RS
+Filter on pid
+.RE
+
+.B tgid=<tgid>
+.RS
+Filter on task group ID
+.RE
+
+.B npid=<npid>
+.RS
+Report Top Pids using most CPU
+.RE
+
+.B percpu
+.RS
+Provide per-cpu stats where IOs are completed
+.RE
+
+.B nodev
+.RS
+Omit the per-device statistics
+.RE
+
+.B nomapper
+.RS
+Omit block device mapper statistics
+.RE
+
+.B mpath_detail
+.RS
+Omit block device mapper statistics
+.RE
+
+.B bkfname=<filename>
+.RS
+Used to change histogram values detail=<detail> default shows IOs that exceed 1000 msec (See examples)
+.RE
+
+.B detail=<0|1>
+.RS
+detail=0  - Do not show individual IOs
+detail=1  - Print IO on single line (default)
+.RE
+
+.B edus=<edus_file>
+.RS
+Specify output of "db2pd -edus" to get DB2 thread names.
+.RE
+
+.B csv
+.RS
+Create CSV report kidsk.*.csv
+.RE
+
+.B kitrace
+.RS
+Include formatted ASCII trace records prior to the standard report
+.RE
+
+.B abstime
+.RS
+Print absolute time (seconds since boot) for each record
+.RE
+
+.B fmttime
+.RS
+Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
+.RE
+
+.SH EXAMPLES
+
+1) Create Disk Activity Report with Top 5 PIDs doing physical IO:
+
+.B $ kiinfo -kidsk npid=5 -ts 0712_0838
+
+2) Get statistics on a physical device and display top 10 PIDs accessing the device:
+
+.B $ kiinfo -kidsk dev=0x042000c0,npid=10 -ts 0901_1743
+
+You can check the major and minor numbers of the device to create the device number:
+
+.B $ ll /dev/sdas
+.B brw-rw---- 1 root disk 66, 192 Aug  4 10:51 /dev/sdas
+
+Note the major number is 66 or 0x42.  The minor number is 192 or 0xc0.   The device number is the combination of the major and minor numbers in hexadecimal.  In this case - 0x042000c0.   
+
+3) Changing the msec times in the Physical I/O Histogram array
+
+.B $ echo "1 2 4 8 16 32 64 100" >buckets
+.B $ cat buckets
+1 2 4 8 16 32 64 100
+ 
+.B $ kiinfo -kidsk bkfname=buckets -ts 0901_1753 
+          :                   :
+Physical I/O Histogram
+     msecs <1    <2    <4    <8     <16    <32    <64    <100   >100
+    Write: 0     0     4     14     5      0      0      0      0
+    Read:  0     0     0      2     0      0      0      0      0
+
+4) Collect disk statistics every 30 seconds for 60 minutes on a live system to looks for IOs that take more than 1000 msecs.   Don't print device or  device mapper statistics or the top pids:
+
+.B $ kiinfo -kidsk nodev,nomapper,npid=0 -a 30 -p 120 >kidsk.txt
+
+.SH SAMPLE OUTPUT
+
+ Command line: /opt/linuxki/kiinfo -kidsk npid=10,csv -ts 0409_1620
+
+ kiinfo (5.4)
+
+ Linux saphana001 4.4.74-92.38-default #1 SMP Tue Sep 12 19:43:46 UTC 2017 (545c055) x86_64 x86_64 x86_64 GNU/Linux
+
+
+ Physical Device Statistics
+
+      device rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv
+ 0x00800020  /dev/sdc  (HW path: 0:0:0:52)   (mpath device: /dev/mapper/TW1_data)
+  0x00800020  r   0.50    0.80     16 269567 16337     0.00    79.72    330     14    317      0      0     0.0   131.3
+  0x00800020  w   0.50    1.00      0     13   256     0.00     0.93      1      0      1      0      0     0.0     0.9
+  0x00800020  t   0.50    0.80     17 269579 16288     0.00    79.48    331     14    318      0      0     0.0   131.3
+ 0x00800080  /dev/sdi  (HW path: 0:0:1:52)   (mpath device: /dev/mapper/TW1_data)
+  0x00800080  r   0.50    0.80     16 268287 16309     0.00    77.70    329     10    320      0      0     0.0   126.7
+  0x00800080  w   0.50    1.00      0     14    92     0.00     0.99      3      0      3      0      0     0.0     1.5
+  0x00800080  t   0.50    0.80     17 268300 16162     0.00    77.01    332     10    323      0      0     0.0   126.7
+ 0x008000e0  /dev/sdo  (HW path: 0:0:2:52)   (mpath device: /dev/mapper/TW1_data)
+  0x008000e0  r   0.50    0.75     16 266187 16380     0.00    75.65    325     12    314      0      0     0.0   125.0
+  0x008000e0  w   0.50    1.00      0     14   136     0.00     0.80      2      0      2      0      0     0.0     1.0
+  0x008000e0  t   0.50    0.75     16 266201 16281     0.00    75.19    327     12    316      0      0     0.0   125.0
+ 0x04100040  /dev/sdu  (HW path: 0:0:3:52)   (mpath device: /dev/mapper/TW1_data)
+  0x04100040  r   0.50    0.76     16 269208 16365     0.00    78.66    329     13    317      0      0     0.0   122.9
+  0x04100040  w   0.50    0.75      0     13    67     0.00     0.67      4      0      4      0      0     0.0     0.9
+  0x04100040  t   0.50    0.76     17 269222 16169     0.00    77.72    333     13    321      0      0     0.0   122.9
+...
+ 0x04200060  /dev/sdam  (HW path: 1:0:0:52)   (mpath device: /dev/mapper/TW1_data)
+  0x04200060  r   0.50    0.76     16 263781 16384     0.00    83.78    322     10    314      0      0     0.0   178.3
+  0x04200060  w   0.50    0.67      0     13    88     0.00     0.61      3      0      3      0      0     0.0     1.0
+  0x04200060  t   0.50    0.76     16 263794 16233     0.00    83.01    325     10    317      0      0     0.0   178.3
+ 0x042000c0  /dev/sdas  (HW path: 1:0:1:52)   (mpath device: /dev/mapper/TW1_data)
+  0x042000c0  r   0.50    0.79     16 257228 16384     0.00    84.83    314      6    310      0      0     0.0   241.7
+  0x042000c0  w   0.50    0.50      0      0     4     0.00     1.98      2      0      2      0      0     0.0     3.4
+  0x042000c0  t   0.50    0.79     16 257228 16280     0.00    84.31    316      6    312      0      0     0.0   241.7
+ 0x04300020  /dev/sday  (HW path: 1:0:2:52)   (mpath device: /dev/mapper/TW1_data)
+  0x04300020  r   0.50    0.73     16 260504 16384     0.00    85.29    318      7    312      0      0     0.0   190.0
+  0x04300020  w   0.50    1.00      0     38   256     0.00     1.01      3      0      3      0      0     0.0     1.1
+  0x04300020  t   0.50    0.73     16 260543 16233     0.00    84.51    321      7    315      0      0     0.0   190.0
+ 0x04300080  /dev/sdbe  (HW path: 1:0:3:52)   (mpath device: /dev/mapper/TW1_data)
+  0x04300080  r   0.50    0.73     16 263781 16333     0.00    84.72    323     11    313      0      0     0.0   185.8
+  0x04300080  w   0.50    0.80      0     39   155     0.00     1.46      5      0      5      0      0     0.0     3.3
+  0x04300080  t   0.50    0.73     16 263820 16086     0.00    83.45    328     11    318      0      0     0.0   185.8
+...
+
+Mapper Device Statistics
+
+      device rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv
+ 0x0fe00002   /dev/mapper/TW1_data  ->  /dev/dm-2  (HW path: unknown)
+  0x0fe00002  r   0.55   15.22    195 3192407 16354     0.00    81.11   3904     17   3902      0      0     0.0   241.8
+  0x0fe00002  w   0.50   15.25      2    209   130     0.00     1.11     32      0     32      0      0     0.0     3.5
+  0x0fe00002  t   0.55   15.22    197 3192616 16222     0.00    80.46   3936     17   3934      0      0     0.0   241.8
+
+ Multipath FC HBA Statistics
+
+       HBA   rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv
+ 0:0:0
+       0:0:0  r   0.00    0.80     16 269567 16337     0.00    79.72    330     14    317      0      0     0.0   131.3
+       0:0:0  w   0.00    0.14      0     15    44     0.00     0.70      7      0      7      0      0     0.0     1.1
+       0:0:0  t   0.00    0.78     17 269582 15999     0.00    78.08    337     14    324      0      0     0.0   131.3
+ 0:0:1
+       0:0:1  r   0.00    0.80     16 268287 16309     0.00    77.70    329     10    320      0      0     0.0   126.7
+       0:0:1  w   0.00    0.33      0     18    40     0.00     0.89      9      0      9      0      0     0.0     1.6
+       0:0:1  t   0.00    0.79     17 268305 15876     0.00    75.66    338     10    329      0      0     0.0   126.7
+ 0:0:2
+       0:0:2  r   0.00    0.75     16 266187 16380     0.00    75.65    325     12    314      0      0     0.0   125.0
+       0:0:2  w   0.00    0.25      0     20    49     0.00     0.71      8      0      8      0      0     0.0     1.1
+       0:0:2  t   0.00    0.74     17 266207 15988     0.00    73.85    333     12    322      0      0     0.0   125.0
+ 0:0:3
+       0:0:3  r   0.00    0.76     16 269208 16365     0.00    78.66    329     13    317      0      0     0.0   122.9
+       0:0:3  w   0.00    0.30      0     17    33     0.00     0.74     10      0     10      0      0     0.0     1.3
+       0:0:3  t   0.00    0.75     17 269225 15883     0.00    76.36    339     13    327      0      0     0.0   122.9
+ ...
+ 1:0:0
+       1:0:0  r   0.00    0.76     16 263781 16384     0.00    83.78    322     10    314      0      0     0.0   178.3
+       1:0:0  w   0.00    0.25      0     16    40     0.00     0.57      8      0      8      0      0     0.0     1.0
+       1:0:0  t   0.00    0.75     16 263797 15987     0.00    81.76    330     10    322      0      0     0.0   178.3
+ 1:0:1
+       1:0:1  r   0.00    0.79     16 257228 16384     0.00    84.83    314      6    310      0      0     0.0   241.7
+       1:0:1  w   0.00    0.14      0      3     9     0.00     1.16      7      0      7      0      0     0.0     3.4
+       1:0:1  t   0.00    0.77     16 257231 16026     0.00    83.01    321      6    317      0      0     0.0   241.7
+ 1:0:2
+       1:0:2  r   0.00    0.73     16 260504 16384     0.00    85.29    318      7    312      0      0     0.0   190.0
+       1:0:2  w   0.00    0.33      0     42    93     0.00     0.63      9      0      9      0      0     0.0     1.1
+       1:0:2  t   0.00    0.72     16 260546 15935     0.00    82.96    327      7    321      0      0     0.0   190.0
+ 1:0:3
+       1:0:3  r   0.00    0.73     16 263781 16333     0.00    84.72    323     11    313      0      0     0.0   185.8
+       1:0:3  w   0.00    0.36      1     43    77     0.00     1.93     11      0     11      0      0     0.0    11.6
+       1:0:3  t   0.00    0.72     17 263824 15797     0.00    81.99    334     11    324      0      0     0.0   185.8
+ ...
+
+ Physical I/O Histogram
+     msecs <5     <10    <20    <50    <100   <200   <300   <500   <1000  >1000
+    Read:  0      0      1      163    3011   727    2      0      0      0
+    Write: 99     0      1      0      0      0      0      0      0      0
+
+ Top 10 Tasks sorted by Multipath I/O
+
+     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process
+ ==============================================================================
+    3906      194        1 3172121.2    80.582    25660  hdbindexserver (SubmitThread-DA)
+      39        0        2      30.4     0.780    25395  /opt/quest/sbin/.vasd
+      15        1        0   12287.9    79.868    26734  hdbindexserver (PoolThread)
+      12        0        1       2.4     0.593    25658  hdbindexserver (SubmitThread-LO)
+       6        0        0       2.6     0.485    23619  [kworker/u194:6]
+       5        0        0       1.6     2.976     4971  [xfsaild/dm-11]
+       5        0        0    4096.0    64.154    26042  hdbindexserver (JobWrk0070)
+       5        0        0    4096.0    83.468    27064  hdbindexserver (JobWrk0197)
+       3        0        0       1.2     0.616    25525  hdbnameserver (PoolThread)
+       2        0        0       0.4     0.568    25385  hdbnameserver (PoolThread)
+
+ Top 10 Tasks sorted by physical I/O
+
+     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process
+ ==============================================================================
+    3936      195        2 3192615.9    80.393     1493  [kdmwork-254:2]
+      39        0        2      30.4     0.766     1404  [kdmwork-254:0]
+      14        0        1       3.6     0.626     1658  [kdmwork-254:5]
+      11        0        1       3.6     1.633     1890  [kdmwork-254:6]
+       4        0        0       2.6     0.389     1952  [kdmwork-254:7]
+
+.B Description of Fields
+
+    rw         values are read (r), write(w), reads+writes(t). 
+    avque      Average number of requests queued to the block device
+    avinflt    Average number of requests that have been issued from the block device and
+               are “inflight” to the lower layers
+    io/s       IOs per second
+    Kb/s       Kilobytes per second
+    avsz       Average size of the IOs
+    avwait     Average time in milliseconds a request spent on the block device queue
+               before it is issued to the lower layers
+    avserv     Average time in milliseconds after a block request has been issued to the
+               lower layers until it is completed by the block device. 
+    ios        Total IOs during kidsk pass
+    seq        Sequential IOs as seen by the disk. Can be misleading if path switching
+               software is used (multipath)
+    rnd        Random IOs
+               NOTE: seq + rnd = ios
+    reque      Number of IOs that had to be requeued
+    flush      Number of Barrier writes to the block device
+    maxwait    Max time in msecs that an IO spent on the device block queue
+    maxserv    Max time in msecs that an IO request took to complete
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-prof(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

@@ -1,0 +1,41 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-likimerge 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo [\-likimerge | \-likim] -ts <timestamp>
+
+.SH DESCRIPTION
+
+\fBkiinfo \-likimerge\fR is used to merge LiKI per\-CPU binary files into a single LinuxKI binary file, which can then be post\-processed by tools such as \fBkiinfo \-kipid\fR,\fB -kiinfo \-kparse\fR, etc.   Merging the data results in fewer LinuxKI binary files in the working directory and subsequent tools should run faster as the LinuxKI data is already merged.     Kiinfo -likimerge is run on behalf of the kiall script.
+
+\fBkiinfo -likimerge\fR does not work with the LinuxKI binary files generated using the ftrace mechanism. 
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B None
+
+.SH EXAMPLES
+
+1) Typical invocation performed by kiall:
+
+.B $ runki 
+
+2) Merge the ki.bin.<CPU>.0927_0857 files
+
+.B $ kiinfo -likimerge -ts 0927_0857
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

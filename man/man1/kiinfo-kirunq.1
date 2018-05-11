@@ -1,0 +1,161 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-kirunq 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo \-kirunq [FLAGS] [OPTIONS]
+
+.SH DESCRIPTION
+
+\fBkiinfo -kirunq\fR produces a CPU/RUNQ Analysis Report based on the switch and wakeup tracepoints. It also reports the top 10 tasks (default) by runq wait time, and optionally further reports the task level detail.   The CPU/RUNQ report will the Global CPU statistics, per-Node statistics, Hyperthread CPU-pair statistics, System-wide Runq statistics (per-CPU and per-Node), as well as Top PIDs (tasks) on the Runq, as well as taking CPU.    If the IRQ trace events were collected, then the CPU/RUNQ Report will include both soft and hard IRQ statistics.
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B help
+.RS
+Provide help information for kirunq flags
+.RE
+
+.B npid=<npid>
+.RS
+Report Top PIDs using CPU, System CPU, and waiting on  the CPU RunQ (default 10)
+.RE
+
+.B rqpid
+.RS
+Pid to monitor for runq delay detailed reporting (requires rqdetail be set)
+.RE
+
+.B rqwait=<usecs>
+.RS
+Runq wait in usecs that triggers delay warning one-liner 
+.RE
+
+.B events=[default | all | <kitool> | event]
+.RS
+Trace events to be traced
+.RE
+
+.RS 7
+\fBdefault\fR - Only trace default events.
+.RE
+.RS 7
+\fBall\fR - Trace all valid ftrace events
+.RE
+.RS 7
+\fB<kitool>\fR - Only the events needed for a specific subtool is used.
+.RE
+.RS 7
+\fB<event>\fR - Trace a specific event.
+.RE
+
+.B subsys=<subsys>
+.RS
+Enable tracing only for certain subsystems.  Valid subsystems include: power, scsi, block, sched, syscalls, irq.
+.RE
+
+.B edus=<edus_file>
+.RS
+Specify output of "db2pd -edus" to get DB2 thread names.
+.RE
+
+.B csv
+.RS
+Create CSV report kidsk.*.csv
+.RE
+
+.B kitrace
+.RS
+Include formatted ASCII trace records prior to the standard report
+.RE
+
+.B abstime
+.RS
+Print absolute time (seconds since boot) for each record
+.RE
+
+.B fmttime
+.RS
+Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
+.RE
+
+.SH EXAMPLES
+
+1) Reading from a kitrace binary file:
+
+.B $ kiinfo -kirunq -ts 1211_0900
+
+2) Running on a live system, listing the top 10 threads spending time on the RunQ, as well reporting on the IRQ times and events
+
+.B $ kiinfo -kirunq npid=10,subsys=sched,subsys=irq -a 10 -p 1 
+
+3) One-liner warning of runq delays for any task using rqwait flag.  Example using flags rqwait=50000  (Seeking one-liner warnings for any task with a delay above 50ms)
+
+.B $ kiinfo -kirunq rqwait=50000 -ts 0712_0838
+Command line: kiinfo -kirunq rqwait=50000 -ts 0712_0838
+
+kiinfo (2.0)
+
+Linux aps41-120 2.6.32-131.21.1.el6.x86_64 #1 SMP Fri Nov 11 11:50:54 EST 2011 x86_64 x86_64 x86_64 GNU/Linux
+
+    1.369216 cpu=20 pid=18718 sched_switch RUNQ Delay!  112.102ms next_pid=83 prev_state=PREEMPTED prio=0
+    3.369241 cpu=20 pid=83 sched_switch RUNQ Delay!  65.210ms next_pid=85 prev_state=SLEEPING prio=120
+    5.955957 cpu=0 pid=152087 sched_switch RUNQ Delay!  1051.963ms next_pid=4 prev_state=SLEEPING prio=120
+    7.972499 cpu=0 pid=152087 sched_switch RUNQ Delay!  96.072ms next_pid=4 prev_state=SLEEPING prio=120
+   16.000576 cpu=0 pid=152087 sched_switch RUNQ Delay!  51.215ms next_pid=4 prev_state=SLEEPING prio=120
+   18.016705 cpu=0 pid=152087 sched_switch RUNQ Delay! 421.002ms next_pid=4 prev_state=SLEEPING prio=120
+
+4) Hyperthreaded CPU reporting
+
+The hyperthreaded CPU reporting has two distinct parts.  First, there is a CPU utilization report for each physical CPUs.   The report shows the amount of time (and percentage of time) that both logical CPUs (LCPU) of a physical CPU (PCPU) were idle, busy, or one LCPU was idle while the other was busy.   Below is an example:
+
+Hyper-threading CPU pair status
+
+     PCPU     double idle   lcpu1 busy   lcpu2 busy  double busy
+  [  0  40]:     0.252331     9.537897     3.982534     6.180018
+  [  1  41]:     0.041383     7.284849     9.471828     3.129207
+  [  2  42]:     0.037760     7.870877     8.058199     3.960363
+  [  3  43]:     0.022695     7.298441     5.639476     6.979489
+
+     PCPU     double idle   lcpu1 busy   lcpu2 busy  double busy
+  [  0  40]:         1.3%        47.8%        20.0%        31.0%
+  [  1  41]:         0.2%        36.6%        47.5%        15.7%
+  [  2  42]:         0.2%        39.5%        40.4%        19.9%
+  [  3  43]:         0.1%        36.6%        28.3%        35.0%
+
+The above report gives a better picture of how much idle time (and thus capacity) is truly on the system.
+
+5) Double-Busy Double-Idle historgrams
+
+The next section provides two histograms showing how often a PCPU is double idle when there is one or more PCPUs that are double busy.   The histograms reflects the greatest amount of time a PCPU was double-idle when the designated PCPU went double-busy.   There is a system-wide histogram where any PCPU on the system could be double-idle, and a locality-wide histogram where only PCPUs on the same LDOM as the designated PCPU are analyzed.  The reports are similar to the following:
+
+System-Wide Double-Busy Double-Idle CPU Time Histogram.
+Idle time in Usecs
+     PCPU        <10    <20    <50    <100   <250   <500   <750  <1000  <1250  <1500  <2000  <3000  <5000 <10000 <20000 >20000
+  [  0  40]:     544      3      8      9     17      8      3      2      3      3      0      6      2      2      2      0
+  [  1  41]:     250      6      4      6      9      2      2      2      4      2      2      2      0      0      1      0
+  [  2  42]:     215      4      4      6     12      5      1      0      0      1      2      2      4      1      4      2
+  [  3  43]:     421      6      5     16     21      4      0      2      1      5      3      0      2      0      3      0
+
+Locality-Wide Double-Busy Double-Idle CPU Time Histogram.
+Idle time in Usecs
+     PCPU  NODE     <10    <20    <50   <100   <250   <500   <750  <1000  <1250  <1500  <2000  <3000  <5000 <10000 <20000 >20000
+  [  0  40][ 0]:    581      4      2      6     13      4      1      0      0      1      0      0      0      0      0      0
+  [  1  41][ 0]:    277      3      3      2      6      0      0      1      0      0      0      0      0      0      0      0
+  [  2  42][ 0]:    238      0      4      5      6      3      1      0      0      0      1      1      3      1      0      0
+  [  3  43][ 0]:    460      3      2      6     13      1      0      2      0      0      2      0      0      0      0      0
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

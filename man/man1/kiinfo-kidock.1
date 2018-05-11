@@ -1,0 +1,114 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-kidock 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo \-kidock [FLAGS] [OPTIONS]
+
+.SH DESCRIPTION
+
+\fBkiinfo -kidock\fR generates the Docker Activity Report.  The report will provide a summary of CPU and IO statistics for the dockers, and then for each docker, the top tasks using User CPU, System CPU, Memory, waiting for CPU, and performing Disk IO are shown.   
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B help
+.RS
+Provide help information for kidock flags
+.RE
+
+.B npid=<npid>
+.RS
+Limit per-docker container details to list npids for each docker container
+.RE
+
+.SH EXAMPLES
+
+1) Create a Docker Activity Report and reporting the top 10 PIDs for each docker container:
+
+.B $ kiinfo -kidock npid=10 -ts 1115_1758
+
+.SH SAMPLE OUTPUT
+
+ Command line: /opt/linuxki/kiinfo -kidock npid=10 -ts 0202_0236
+
+ kiinfo (5.0)
+
+ Linux npar1.atc-hp.com 3.10.0-229.el7.x86_64 #1 SMP Thu Jan 29 18:37:38 EST 2015 x86_64 x86_64 x86_64 GNU/Linux
+
+ CPU Statistics
+
+ Container                busy          sys         user         runq  
+ hammerdb2         1279.093769    82.100031  1180.303488    58.403992
+ hammerdb1          721.319254    27.197146   667.737309    30.576445
+ hammerdb3          417.054572    58.112565   353.545529    16.751530
+ hammerdb4          311.057596    55.096920   251.968391    12.914742
+ system             127.943019    72.027050    14.934374     9.728378
+
+ IO Statistics
+                 --------------------  Total  -------------------- 
+ Container          IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv
+ hammerdb2          1192     271     232    2.10     0.02     2.54
+ hammerdb1           624     135     222    0.46     0.01     1.44
+ hammerdb3           447      90     207    1.49     0.02     2.17
+ hammerdb4           380      65     176    1.31     0.02     2.30
+ system               73       1      20    4.21     0.00     0.47
+
+ ---------------------------------------------------
+ Container: hammerdb4
+
+ Top Tasks sorted by RunTime
+ PID       RunTime    SysTime   UserTime   RunqTime   SleepTime  Command
+ 179996   1.996742   0.361413   1.610582   0.062075   17.595848  oracleORCL <hammerdb4>
+ 180311   1.957356   0.309340   1.623354   0.128142   17.914383  oracleORCL <hammerdb4>
+ 180321   1.949744   0.341260   1.584101   0.088157   17.955171  oracleORCL <hammerdb4>
+ 179773   1.934043   0.320889   1.588971   0.100435   17.965523  oracleORCL <hammerdb4>
+ 179868   1.929099   0.329468   1.575442   0.092636   17.978401  oracleORCL <hammerdb4>
+
+ Top Tasks sorted by SysTime
+ PID       RunTime    SysTime   UserTime   RunqTime   SleepTime  Command
+ 179965   1.895105   0.379913   1.490881   0.070800   17.912243  oracleORCL <hammerdb4>
+ 180047   1.893537   0.362085   1.507738   0.109118   17.987523  oracleORCL <hammerdb4>
+ 179996   1.996742   0.361413   1.610582   0.062075   17.595848  oracleORCL <hammerdb4>
+ 179797   1.861143   0.356734   1.481493   0.068001   18.070745  oracleORCL <hammerdb4>
+ 180474   1.926227   1.353623   1.547788   0.043023   17.896793  oracleORCL <hammerdb4>
+
+ Top Tasks sorted by RunQTime
+ PID       RunTime    SysTime   UserTime   RunqTime   SleepTime  Command
+ 180311   1.957356   0.309340   1.623354   0.128142   17.914383  oracleORCL <hammerdb4>
+ 179705   1.877085   0.315917   1.538102   0.114456   18.008665  oracleORCL <hammerdb4>
+ 180453   1.669901   0.256388   1.391567   0.110270   18.100988  oracleORCL <hammerdb4>
+ 180371   1.836491   0.321230   1.492139   0.109970   17.934713  oracleORCL <hammerdb4>
+ 180047   1.893537   0.362085   1.507738   0.109118   17.987523  oracleORCL <hammerdb4>
+
+ Top Tasks sorted by Memory Usage
+      vss      rss      PID Command 
+ 44009596    13534    83230 ora_mmon_ORCL <hammerdb4>
+ 44008391     8542    83270 ora_cjq0_ORCL <hammerdb4>
+ 44007314     6676   179933 oracleORCL <hammerdb4>
+ 44007310     6672   180504 oracleORCL <hammerdb4>
+ 44007311     6660   179747 oracleORCL <hammerdb4>
+
+ Top Tasks sorted by physical IO
+     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process
+    1632        0       82   30806.0     4.032    83212  ora_lgwr_ORCL <hammerdb4>
+      89        4        0     102.0     1.109   180353  oracleORCL <hammerdb4>
+      71        4        0      92.4     0.616   180057  oracleORCL <hammerdb4>
+      65        3        0      78.0     0.945   179868  oracleORCL <hammerdb4>
+      61        2        1      48.8     0.356    83216  ora_ckpt_ORCL <hammerdb4>
+                      :                              :
+
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

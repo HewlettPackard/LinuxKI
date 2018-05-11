@@ -1,0 +1,190 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad
+.TH kiinfo 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo \-<kitool> [FLAGS] [OPTIONS]
+
+.SH DESCRIPTION
+\fBkiinfo\fR is one of the primary components of the LinuxKI Toolset. It is used to enable and dump the trace data using either ftrace or the LiKI tracing mechanisms and it is also used to analyze the trace data from either a LinuxKI dump collected with the runki script or from a running system.
+
+\fBkiinfo\fR is executed by both the \fBrunki\fR script to collect a LinuxKI dump as well as from the \fBkiall\fR script to generate the LinuxKI reports as part of the post-processing. Most of the time, using the runki and kiall scripts is sufficient. However, there are times when a more customized collection or a customized report is needed.
+
+\fBkiinfo\fR works on LinuxKI dump files using the -ts <timestamp> option, as well as live systems using the -a <secs> and -p <passes> options. Kiinfo also requires one of the subtools <kitool> listed in the Options, such as -kitrace.   See the Examples below for additional details.   
+
+
+.SH OPTIONS
+
+.B \-h | \-help
+.RS 
+Print kiinfo syntax
+.RE
+
+.B Options for KI Dump analysis
+
+.B \-ts | \-timestamp <timestamp>
+.RS 
+Used when analyzing LinuxKI dumps.   Timestamp is from ki.all.<timestamp>.tgz file created by runki script.  Cannot be used with -a option.
+.RE
+
+.B \-start | \-starttime <time_in_secs)
+.RS 
+Report only data after the start time.   Only used with KI dumps (-ts option)
+.RE
+
+.B \-start | \-starttime <time_in_secs)
+.RS 
+Report only data before the end time.   Only used with KI dumps (-ts option)
+.RE
+
+.B Options for online analysis
+
+.B \-a | \-alarm <seconds>
+.RS 
+Length of interval for online KI analysis using the LiKI tracing mechanism (default 5).  Cannot be used with -ts option.
+.RE
+
+.B \-p | \-passes <passes>
+.RS 
+Number of intervals/passes for online analysis (default 1).  Used with the -a option.
+.RE
+
+For online analysis, be sure the debug filesystem (debugfs) is mounted:
+
+.B $ mount -t debugfs debugfs /sys/kernel/debug 
+
+.B Kiinfo has a number of tool options.  Choose one of the following tool options to execute.
+
+.B \-dump | \-kitracedump 
+.RS 
+Enable Ftrace and dump debugfs per-cpu ring buffer data to disk. See kiinfo-kitracedump(1).
+.RE
+
+.B \-likid | \-likidump 
+.RS 
+Enable LiKI and dump debugfs per-cpu ring buffer data to disk. Assumes likit.ko DLKM module is loaded. See kiinfo-likidump(1). 
+.RE
+
+.B \-likim | \-likimerge
+.RS
+Merge ki.bin.<cpu>.<timetamp> files into a single ki.bin file (LiKI only). See kiinfo-likimerge(1). 
+.RE
+
+.B \-live [FLAGS]
+.RS
+curses-based user interface. See kiinfo-live(1).
+.RE
+
+.B \-kparse | \-kp [FLAGS]
+.RS
+Kparse System Overview report - first pass analysis tool
+.RE
+
+.B \-kitrace [FLAGS]
+.RS 
+KI ASCII trace format tool. See kiinfo-kitrace(1).
+.RE
+
+.B \-kipid [FLAGS]
+.RS 
+KI PID Analysis Tool. See kiinfo-kipid(1).
+.RE
+
+.B \-kiprof [FLAGS]
+.RS 
+KI CPU Profling Tool. See kiinfo-kiprof(1)
+.RE
+
+.B \-kidsk [FLAGS]
+.RS 
+KI Disk Analysis Tool. See kiinfo-kidsk(1).
+.RE
+
+.B \-kirunq [FLAGS]
+.RS 
+KI CPU and RunQ Analysis Tool. See kiinfo-kirunq(1).
+.RE
+
+.B \-kiwait [FLAGS]
+.RS 
+KI Kernel Wait Function Analysis Tool. See kiinfo-kiwait(1).
+.RE
+
+.B \-kifile [FLAGS]
+.RS 
+KI File Analysis Tool. See kiinfo-kifile(1).
+.RE
+
+.B \-kifutex [FLAGS]
+.RS 
+KI Futex Analysis Tool. See kiinfo-kifute(1).
+.RE
+
+.B \-kisock [FLAGS]
+.RS 
+KI Network Socket Activity Tool. See kiinfo-kisock(1).
+.RE
+
+.B \-kidock [FLAGS]
+.RS 
+KI Docker Activity Tool. See kiinfo-kidock(1).
+.RE
+
+
+.B \-kiall [FLAGS]
+.RS 
+Generate all KI reports in a single pass (except ASCII trace data).  Typically invoked by kiall script. See kiinfo-kiall(1).
+.RE
+
+.B \-clparse [FLAGS]
+.RS 
+KI Cluster Report.   KI Cluster Report.  Reports on several KI trace collections from difference nodes in a cluster.  Each KI trace collection must have the same. See kiinfo-clparse(1).
+.RE
+
+.SH EXAMPLES
+
+1) Collect LinuxKI trace data using ftrace for 30 seconds and provide a "tag" 
+using the current timestamp:
+
+.B $ kiinfo -kitracedump dur=30 -ts `date +%m%d_%H%M`
+
+2) Get kparse html output from files collected by runki
+
+.B $ kiinfo -kparse -html -ts 0901_1548 >kp.html
+
+3) Create the Disk Analysis report and also show top 10 tasks performing disk I/O
+
+.B $ kiinfo -kidsk npid=10 -ts 0901_1548
+
+4) Analyze disk with major=0x68 and minor=0x0 (0x68,0) on live system and show top 5 processes accessing the device. Show results every 5 seconds for 6 passes.
+
+.B $ kiinfo -kidsk dev=0x06800000,npid=5 -a 5 -p 6
+
+5) Trace a live process for 2 seconds
+
+.B $ kiinfo -kitrace pid=5836 -a 2 >pid.5836
+
+6) Generate a Cluster Overview Report for several nodes in a cluster with the same timestamp:
+
+.B $ kiinfo -clparse csv,cltree,top=20 -html -ts 0422_1517
+
+7) Get help information on the -kipid option:
+
+.B $ kiinfo -kipid help
+
+8) Start curses-based user interface with 5 second (default) updates
+
+.B $ kiinfo -live 
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki
+

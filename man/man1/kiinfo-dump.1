@@ -1,0 +1,100 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-dump 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo - LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo [\-kitracedump | \-dump] [flags, flags, ...] [OPTIONS]
+
+.SH DESCRIPTION
+\fBkiinfo -kitracedump\fR is used to collect the kernel trace records using ftrace.   The -kitracedump subtool will enable the key ftrace events, then it will read the debugfs per-cpu ring buffers and dump the trace records to the related ki.bin .<cpu>.<timestamp> files.  Kiinfo -kitracedump is executed by the runki script to collect the kernel trace data along with other helpful files used for post-processing by other options such as \fBkiinfo -kitrace\fR and \fBkiinfo -kparse\fR.
+
+Default ftrace events enabled are:
+
+.IP \(bu 2 
+Scheduler records - sched_swtch, sched_wakeup, sched_wakeup_new
+.IP \(bu 2 
+Block IO records - block_rq_insert, block_rq_issue, block_rq_complete, block_rq_requeue
+.IP \(bu 2
+Power frequency events - power_freq
+.IP \(bu 2
+System calls - sys_enter, sys_exit.
+.PP
+
+Note that \fBkiinfo -kitracedump\fR will enable the trace events and then pause for 10 seconds to allow the CPUs to sync up with regards to their time.   This helps avoid negative timestamps which can invalidate some of the data.  After 10 seconds, it will print a maker into the ftrace ring buffer.   Tools such as \fBkiinfo -kitrace\fR, \fBkiinfo -kipid\fR, etc., will ignore all trace records leading up to the marker. 
+
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B help
+.RS 
+Print syntax for kiinfo -kitracedump.
+.RE
+
+.B debug_dir=<dirname>
+.RS 
+debugfs mount point.  By default, uses /sys/kernel/debug.
+.RE
+
+.B 
+dur=<seconds>
+.RS 
+number of seconds to collect data.  Default value is 20.  This does not include the 10 seconds that kitracedump uses to sync the CPU clocks.
+.RE
+
+.B events=[default | all | <kitool> | <event>] 
+.RS 
+Trace events to be traced
+.RE
+
+.RS 7
+\fBdefault\fR - Only trace default events.
+.RE
+.RS 7
+\fBall\fR - Trace all valid ftrace events
+.RE
+.RS 7
+\fB<kitool>\fR - Only the events needed for a specific subtool is used.
+.RE
+.RS 7
+\fB<event>\fR - Trace a specific event.
+.RE
+
+.B subsys=<subsys>
+.RS
+Enable tracing only for certain subsystems.  Valid subsystems include: power, scsi, block, sched, syscalls, irq.   
+.RE
+
+.SH EXAMPLES
+
+1) Typical invocation performed by runki to collect data with kiinfo -kitracedump:
+
+.B $ runki -f
+
+2) Dump all ftrace events for 5 seconds using the default debugfs mount point:
+
+.RS 0
+.B $ mount -t debugfs debugfs /sys/kernel/debug
+.RE
+.RS 0
+.B $ kiinfo -dump events=all,dur=5
+.RE
+
+3) Note that the subsys and events could be combined.   For example, you can trace the same events used by kidsk and also add the scsi related events as well:
+
+.B $ kiinfo -dump events=kidsk,subsys=scsi,dur=20
+
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

@@ -1,0 +1,54 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad
+.TH kiclean 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiclean  -  LinuxKI cleanup script
+
+.SH SYNOPSIS
+.B kiclean [OPTIONS]
+
+.SH DESCRIPTION
+
+When you have completed your analysis on LinuxKI data, you can cleanup a subdirectory using the kiclean script.   This script will keep the ki_all.*.tgz file as well as the generated reports, but will remove the LinuxKI binary traces files and other related data (this data is saved in the ki_all.*.tgz file).    If the -f option is used, other miscellaneous files created during the analysis are also removed.  Below is an example:
+
+    $ cd node1/0828_1429
+    $ kiclean -f
+    Cleaning /work/mcr/node1/0828_1429
+    kiclean complete
+
+    $ ls
+    ki_all.node1.0828_1429.tgz    kifile.0828_1429.txt    kiprof.0828_1429.txt
+    kiwait.0828_1429.txt          PIDS                    kidsk.0828_1429.txt
+    kipid.0828_1429.txt           kirunq.0828_1429.txt    kp.0828_1429.html
+
+The -p option will remove the PIDS subdirectory as well as the other files as this can take a lot of additional space.   The -r option is useful when cleaning up multiple LinuxKI trace collections that reside somewhere under the current working directory.   For example:
+
+    $ pwd
+    /work/mcr/cust1
+    $ ls
+    1211_1335 1211_1435
+ 
+    $ kiclean -r -f -p
+    Cleaning /work/mcr/cust1/1211_1335
+    Cleaning /work/mcr/cust1/1211_1435
+
+.SH OPTIONS
+
+ -h           Help
+ -r           Recursively traverse sudirs looking for KI data to archive
+ -p           Remove PIDS subdirectory
+ -v           Remove VIS subdirectory & related sh/php/html files
+ -f           Force remove misc/tmp files
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1)
+kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1)
+kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1)
+kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

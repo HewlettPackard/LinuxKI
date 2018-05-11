@@ -1,0 +1,148 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-likidump 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo [\-likidump | \-likid] [flags, flags, ...] [OPTIONS]
+
+.SH DESCRIPTION
+\fBkiinfo -likidump\fR is used to collect the kernel trace records using the LiKI tracing mechanism.   The             -likidump option will enable the key LiKI trace records, then it will read the debugfs per-cpu ring buffers and dump the trace records to related ki.bin .<cpu>.<timestamp> files.  Kiinfo -likidump is executed by the runki script to collect the kernel trace data along with other helpful files used for post-processing by other options such as \fBkiinfo -kitrace\fR and \fBkiinfo -kparse\fR.
+
+Default LiKI trace events enabled are:
+
+.IP \(bu 2 
+Scheduler records - sched_swtch, sched_wakeup, sched_wakeup_new
+.IP \(bu 2 
+Block IO records - block_rq_insert, block_rq_issue, block_rq_complete, block_rq_requeue
+.IP \(bu 2
+Power frequency events - power_freq
+.IP \(bu 2
+System calls - sys_enter, sys_exit.
+.IP \(bu 2
+CPU profiling events - hardclock
+.PP
+
+In order to use \fBkiinfo -likidump\fR, the debugfs must be mounted and the likit.ko DLKM module must be loaded.
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B help
+.RS 
+Print syntax for kiinfo -kitracedump.
+.RE
+
+.B debug_dir=<dirname>
+.RS 
+debugfs mount point.  By default, uses /sys/kernel/debug.
+.RE
+
+.B 
+pid=<pid>
+.RS 
+Filter LiKI trace data on PID
+.RE
+
+.B 
+tgid=<tgid>
+.RS 
+Filter LiKI trace data on Task Group ID (TGID)
+.RE
+
+.B 
+dev=<dev>
+.RS 
+Filter LiKI trace data on device 
+.RE
+
+.B 
+cpu=<cpu>
+.RS 
+Filter LiKI trace data on CPU
+.RE
+
+.B 
+dur=<seconds>
+.RS 
+Number of seconds to collect data.  Default value is 20.
+.RE
+
+.B events=[default | all | <kitool> | event]
+.RS
+Trace events to be traced
+.RE
+
+.RS 7
+\fBdefault\fR - Only trace default events.
+.RE
+.RS 7
+\fBall\fR - Trace all valid ftrace events
+.RE
+.RS 7
+\fB<kitool>\fR - Only the events needed for a specific subtool is used.
+.RE
+.RS 7
+\fB<event>\fR - Trace a specific event.
+.RE
+
+.B subsys=<subsys>
+.RS
+Enable tracing only for certain subsystems.  Valid subsystems include: power, scsi, block, sched, syscalls, irq.   
+.RE
+
+.B sysignore=<ignore_filee>
+.RS
+Do not trace system calls listed in the <ignore_file>. This can reduce trace data by eliminating frequently called system calls, such as getrusage(),gettimeofday(), time(), etc...
+.RE
+
+.SH EXAMPLES
+
+Typical invocation performed by runki to collect data with kiinfo -likidump:
+
+.B $ runki 
+
+1) Dump all KI trace events for 5 seconds using the default debugfs mount point (this is invoked by the runki script).
+
+.RS 0
+.B $ mount -t debugfs debugfs /sys/kernel/debug
+.RE
+.RS 0
+.B $ insmod /opt/linuxki/likit.ko
+.RE
+.RS 0
+.B $ kiinfo -likidump events=all,dur=5
+.RE
+.RS 0
+.B $ rmmod likit.ko
+.RE
+
+2) Note that the subsys and events could be combined.   For example, you can trace the same events used by kidsk and also add the scsi related events as well:
+
+.B $ kiinfo -likid events=kidsk,subsys=scsi,dur=20
+
+3) Collect all event data (including non-default events) for specific tasks and ignore the gettimeofday() and getrusage() system calls:
+
+.B $ cat ignore_syscalls
+.RS 0
+getrusage
+.RE
+.RS 0
+gettimeofday
+.RE
+.RS 0 
+.B $ kiinfo -likid events=all,pid=1234,pid=62503,sysignore=ignore_syscalls
+.RE
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

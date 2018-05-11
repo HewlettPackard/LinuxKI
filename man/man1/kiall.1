@@ -1,0 +1,60 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad
+.TH kiall 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiall  -  LinuxKI trace dump post-processing script
+
+.SH SYNOPSIS
+.B kiall [OPTIONS]
+
+.SH DESCRIPTION
+
+Once the ki_all.*.tgz file is collected, the most useful LinuxKI reports can be generated with the kiall script, also called post-processing.   Note that the post-processing of the LinuxKI dump data can be done on a different system where the data was collected.  By default, the kiall script will explode the tar bundle in the current working directory and execute the kiinfo tool to generate the various LinuxKI reports:
+
+    \fB$ /opt/linuxki/kiall\fR
+
+The kiall script can handle multiple ki_all.*.tgz files from multiple hosts as it will search the current working directory for all of the ki_all.*.tgz files.    Also, the -r option can be used to create a <hostname>/<timestamp> subdirectory structure which can be used to organize multiple trace collections from different hosts:
+
+    \fB$ ls ki_all*\fR
+    ki_all.node1.0828_1429.tgz ki_all.node1.0828_1448.tgz
+    \fB$ kiall -r\fR
+    Running KI tools for 0828_1429 for host node1
+    ...
+    Running KI tools for 0828_1448 for host node1
+    ...
+
+After executing kiall above, the LinuxKI files and generated reports will be stored in a subdirectory of the form <hosthame>/<timestamp>.   For the example above, it will create 2 subdirectories:
+
+    node1/0828_1429
+    node2/0828_1448
+
+The -f option for kiall can be used to search for LinuxKI data in directory tree to be processed.   This option is useful for re-processing a number of LinuxKI trace collections without having to change the directories and execute kiall for each LinuxKI trace collection.    
+
+    \fB$ /opt/linuxki/kiall -f\fR
+
+.SH OPTIONS
+
+    -h              Help
+    -l              lite collection
+    -m              Skip MW processing
+    -r              restore into created subdir - <host>/<MMDD_HHMM>
+    -f              Find KI files in pwd and any directories below
+    -c              Cluster-wide processing
+    -x              Generate kparse text format instead of html format
+    -M		    Leave C++ function names mangled
+    -V              Use Visualization options where possible in reports
+    -t <timestamp>  Only runs KI reports bundle with matching timestamp
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1)
+kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1)
+kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1)
+kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki
+

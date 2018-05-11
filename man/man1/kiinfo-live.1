@@ -1,0 +1,66 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-live 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo \-live [FLAGS] [OPTIONS]
+
+.SH DESCRIPTION
+
+\fBkiinfo -live\fR option uses a curses-based user interface (similar to Glance on HP-UX) to explore the performance data. The LinuxKI data can be analyzed from a running system using the -a <secs> option to update every <secs> seconds, or LinuxKI data can be analyzed from a LinuxKI dump collected from the runki script using the -ts <timestamp> option.   Once \fBkiinfo\fR  is started, the question mark "?" can be entered to see the available commands.   Note that global statistics are typically shown with lower case commands, while per-task statistics are typically shown with uppercase commands.   
+
+For additional information, please see the Curses-base LinuxKI analysis (\fBkiinfo –live\fR) section.
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B help
+.RS
+Print help syntax
+.RE
+
+.B sysignore=<ignore_file>
+.RS
+Do not trace system calls listed in the <ignore_file>.  This can reduce trace data by eliminating frequently called system calls, such as getrusage(), ctime(), etc.
+.RE
+
+.B edus=<edus_file>
+.RS
+Specify output of "db2pd -edus" to get DB2 thread names
+.RE
+
+.B msr
+.RS
+Collect adanced CPU statistics such as LLC Hit%, CPI, average CPU frequency, and SMI count
+.RE
+
+.B step=<step_time>
+.RS
+Floating point time is seconds of the step interval
+.RE
+
+
+
+.SH EXAMPLES
+
+1) Analyze data on a running system updating the terminal screen every 5 seconds (default):
+
+.B $ kiinfo -live
+
+2) Analyze data from a LinuxKI dump collected using the runki script
+
+.B $ kiinfo -live -ts 0223_1536
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

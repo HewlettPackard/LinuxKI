@@ -1,0 +1,169 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-kiwait 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo \-kiwait [FLAGS] [OPTIONS]
+
+.SH DESCRIPTION
+
+\fBkiinfo -kiwai\fRt generates the Wait Event Report based on the switch tracepoints when using the LiKI tracing mechanism.   The Wait Event Report will identify the top kernel functions where tasks go to sleep and their corresponding stack traces.  It also prints the top tasks calling switch to go to sleep and statistics about each function where the task goes to sleep. 
+
+kiwait will report a section on the following:
+ 
+.B ********* GLOBAL SCHEDULER ACTIVITY REPORT ********
+
+Reports global information such as CPU migrations, Voluntary and Forced Context Switches, etc.
+
+.B ******** GLOBAL SWITCH REPORT ********
+
+.B Displays top kernel functions calling sleep and top kernel stack traces leading up to the switch events
+
+********* PER-PID SCHEDULER ACTIVITY REPORTS ********
+
+Reports Top PIDs calling switch() and their Scheduling Activity
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B help
+.RS
+Provide help information for kiwait flags
+.RE
+
+.B npid=<npid>
+.RS
+Report Top Tasks calling switch() frequently (default 10)
+.RE
+
+.B nsym=<nsym>
+.RS
+List Top <nsym> kernel functions calling SWTCH
+.RE
+
+.B edus=<edus_file>
+.RS
+Specify output of "db2pd -edus" to get DB2 thread names.
+.RE
+
+.B csv
+.RS
+Create CSV report kiwait.*.csv
+.RE
+
+.B kitrace
+.RS
+Include formatted ASCII trace records prior to the standard report
+.RE
+
+.B abstime
+.RS
+Print absolute time (seconds since boot) for each record
+.RE
+
+.B fmttime
+.RS
+Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
+.RE
+
+.SH EXAMPLES
+
+1) Create a Wait Event Report for the top 10 kernel functions and display top 5 tasks calling switch() from a LinuxKI dump:
+
+.B $ kiinfo -kiwait npid=5,nsym=10 -ts 1215_0744
+
+2) Create a Wait Event Report on a live system, creating a report every 5 seconds for 4 passes: 
+
+.B $ kiinfo -kiwait npid=10,nsym=20 -a 5 -p 4
+
+.SH SAMPLE OUTPUT
+
+ Command line: /opt/linuxki/kiinfo -kiwait nsym=10,npid=5,csv -ts 0414_1119
+
+ kiinfo (4.3)
+
+ Linux gwr-repo1.rose.rdlabs.hpecorp.net 2.6.32-504.el6.x86_64 #1 SMP Tue Sep 16 01:56:35 EDT 2014 x86_64 x86_64 x86_64 GNU/Linux
+
+ ********* GLOBAL SCHEDULER ACTIVITY REPORT ********
+     CPUs:       16  Seconds :    20.00  Migrations:        0
+ Switches:   218285  Forced  :     3446   Voluntary:   214839
+  TotTime: 320.0026  RunTime :   4.3445    CPU Util:    1.36%
+
+ ********* GLOBAL SWITCH REPORT ********
+
+ Kernel Functions calling sleep() - Top 10 Functions
+    Count     Pct    SlpTime    Slp%   Msec/Slp   MaxMsecs  Func
+    81609  37.99%    95.7483   3.48%      1.173    100.477 __mutex_lock_slowpath
+    65023  30.27%    21.1248   0.77%      0.325     95.061 io_schedule
+    63881  29.73%   630.8682  22.95%      9.876   2162.916 worker_thread
+     2663   1.24%   292.1936  10.63%    109.723  10010.000 poll_schedule_timeout
+      966   0.45%   213.8960   7.78%    221.424   8840.067 cpu_buf_read
+      167   0.08%   127.7838   4.65%    765.172  10279.996 ksoftirqd
+       80   0.04%   143.2621   5.21%   1790.776  20000.137 do_nanosleep
+       65   0.03%    16.3917   0.60%    252.181   6999.403 kjournald2
+       63   0.03%     0.0468   0.00%      0.743      8.191 jbd2_log_wait_commit
+       46   0.02%    62.4485   2.27%   1357.577   9985.955 futex_wait_queue_me
+
+ Globals switch stack traces (sort by count):
+    count   wpct       avg   Stack trace
+               %     msecs              
+ ============================================================
+    63881  22.95     9.876   worker_thread  kthread  child_rip
+    52267   0.67     0.352   io_schedule  __blockdev_direct_IO_newtrunc  __blockdev_direct_IO  ext4_ind_direct_IO  ext4_direct_IO  generic_file_direct_write  __generic_file_aio_write  generic_file_aio_write  ext4_file_write  do_sync_write  vfs_write  sys_write  tracesys
+    34961   1.51     1.184   __mutex_lock_slowpath  mutex_lock  generic_file_llseek_size  ext4_llseek  vfs_llseek  sys_lseek  tracesys
+    24186   0.96     1.096   __mutex_lock_slowpath  mutex_lock  generic_file_aio_write  ext4_file_write  do_sync_write  vfs_write  sys_write  tracesys
+    22451   1.01     1.241   __mutex_lock_slowpath  mutex_lock  __blockdev_direct_IO_newtrunc  __blockdev_direct_IO  ext4_ind_direct_IO  ext4_direct_IO  generic_file_aio_read  do_sync_read  vfs_read  sys_read  tracesys
+    12534   0.10     0.214   io_schedule  __blockdev_direct_IO_newtrunc  __blockdev_direct_IO  ext4_ind_direct_IO  ext4_direct_IO  generic_file_aio_read  do_sync_read  vfs_read  sys_read  tracesys
+     1440   4.12    78.691   poll_schedule_timeout  do_select  core_sys_select  sys_select  tracesys
+     1223   6.51   146.262   poll_schedule_timeout  do_sys_poll  sys_poll  tracesys
+      966   7.78   221.424   cpu_buf_read  vfs_read  sys_read  tracesys
+      167   4.65   765.172   ksoftirqd  kthread  child_rip
+      152   0.00     0.244   io_schedule  sync_buffer  __wait_on_bit  out_of_line_wait_on_bit  __wait_on_buffer  jbd2_journal_commit_transaction  kjournald2  kthread  child_rip
+       80   5.21  1790.776   do_nanosleep  hrtimer_nanosleep  sys_nanosleep  tracesys
+
+ ********* PER-PID SCHEDULER ACTIVITY REPORTS ********
+ ---------------------------------------------------
+ PID 202  [kblockd/0]
+ RunTime    :  0.044596  SysTime   :  0.044449   UserTime   :  0.000000
+ SleepTime  : 19.856610  Sleep Cnt :     33302   Wakeup Cnt :         0
+ RunQTime   :  0.098759  PreemptCnt:         0   Switch Cnt :     33302
+ Last CPU   :         0  CPU Migrs :         0   NODE Migrs :         0
+ schedpolicy: SCHED_NORMAL
+ Kernel Functions calling sleep() - Top 50 Functions
+    Count     Pct    SlpTime    Slp% TotalTime%   Msec/Slp   MaxMsecs  Func
+    33301 100.00%    19.8564 100.00%     99.28%      0.596     94.478  worker_thread
+ ---------------------------------------------------
+ PID 210  [kblockd/8]
+ RunTime    :  0.039336  SysTime   :  0.039118   UserTime   :  0.000000
+ SleepTime  : 19.893738  Sleep Cnt :     30075   Wakeup Cnt :         0
+ RunQTime   :  0.066857  PreemptCnt:         0   Switch Cnt :     30075
+ Last CPU   :         8  CPU Migrs :         0   NODE Migrs :         0
+ schedpolicy: SCHED_NORMAL
+ Kernel Functions calling sleep() - Top 50 Functions
+    Count     Pct    SlpTime    Slp% TotalTime%   Msec/Slp   MaxMsecs  Func
+    30074 100.00%    19.8937 100.00%     99.47%      0.661   2162.916  worker_thread
+ ---------------------------------------------------
+ PID 31550  /home/mcr/bin/iotest8
+ RunTime    :  0.531838  SysTime   :  0.511715   UserTime   :  0.019013
+ SleepTime  : 19.250368  Sleep Cnt :     29493   Wakeup Cnt :     19662
+ RunQTime   :  0.217716  PreemptCnt:      1093   Switch Cnt :     30586
+ Last CPU   :         8  CPU Migrs :      5556   NODE Migrs :        35
+ schedpolicy: SCHED_NORMAL
+ Kernel Functions calling sleep() - Top 50 Functions
+    Count     Pct    SlpTime    Slp% TotalTime%   Msec/Slp   MaxMsecs  Func
+    17511  59.37%     7.9291  41.19%     39.65%      0.453     87.119  io_schedule
+    11981  40.62%    11.3206  58.81%     56.60%      0.945     98.893  __mutex_lock_slowpath
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

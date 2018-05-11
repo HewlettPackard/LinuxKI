@@ -1,0 +1,389 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-kipid 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo \-kipid [FLAGS] [OPTIONS]
+
+.SH DESCRIPTION
+
+\fBkiinfo -kipid\fR is used to generate the PID Analysis Report on selected or all tasks on the system.  By default, \fBkiinfo -kipid\fR will report on all tasks.   You can filter on one or more PIDs as well (kiinfo -kipid pid=100,pid=200,pid=300).
+
+\fBkiinfo -kipid\fR works on a kernel trace dump collected by runki script when the -ts <timestamp> option is passed to \fBkiinfo\fR.    Kiinfo -kipid also works on running systems (LiKI only) when using the -a <secs> and   -p <passes> options.  
+
+The PID Analysis Report is made up of several sections or reports for each PID.   Below is a summary of data reported: 
+
+.B ********* SCHEDULER ACTIVITY REPORT ********
+
+Reports general scheduling activities, such as time spent sleeping, running, or on the run queue.  Also reports context witches and CPU/NODE migrations.   Includes IRQ time if the IRQ trace events are captured (not included by default).
+
+.B ********* CPU MSR REPORT *********
+
+Reports the advanced CPU statistics, such as the Last Level Cache Hit rate, Cycles per Instruction (CPI), average CPU frequency, and the System Management Interrupt count.    
+
+.B ******** PID RUNQ LATENCY REPORT ********
+
+Print when the rqhist flag is used.   Reports how much of the RunQ time is due to waiting on another process/task (RunQPri) and how much of the time is just due to the transition from the idle task (PID 0) to the target task.   Also adds a runq latency histogram on a per-CPU basis as well as other per-CPU information, such as the average RunQ latency per CPU in Usecs (microseconds).
+
+.B ******** COOPERATING/COMPETING TASKS REPORT ********
+
+Identified which tasks have woken up the specific task and how long the specific task was asleep before waking up.   Also identifies tasks that have been woken up by the specific task and how long they have been sleeping before they were woken up.  The coop flag reports additional detail about thread wait states, blocking syscalls, which threads are involved in waking the sleeper, etc.   When viewing the data generated with the coop flag, be sure to use a wide screen (180-200 columns).
+
+.B ******** SLEEP REPORT ********
+
+Provides list of functions where the task goes to sleep, the count and amount of time sleeping in each function.   Also shows the kernel stacktraces for the sleep events.  The Sleep Report is only printed if the LiKI tracing mechanism is used as ftrace does not log the sleep function. 
+
+In LinuxKI 5.0, the RunQ stack traces were included in this section.   While the threads are not technically “sleeping”, they are waiting for CPU in order to run.
+
+.B ******** CPU ACTIVITY REPORT ********
+
+Examines the HARDCLOCK traces to identify where the threads are taking CPU time.  Includes stack traces.   (LiKI only)
+
+.B ******** SYSTEM CALL REPORT ********
+
+Report lists each system call and how much time was spent in each system call.   If the scdetail flag is used, then for each system call, the amount of time spent in sleeping, running, and on the CPU runq is also printed.   If the trace data is from LiKi, then the SLEEP time is broken out into kernel functions where sleep is called. 
+
+.B ******** FUTEX REPORT ********
+
+Reports on activity on the top Fast User-space muTEXes (futex) for the process.  By default, the top 10 futexes are listed.  
+
+.B ******** FILE ACTIVITY REPORT ********
+
+Reports system call activity for each file.   If scdetail flag is set, then additional information for each system call is listed, similar to the SYSTEM CALL REPORT.
+
+.B ******** PHYSICAL DEVICE REPORT ********
+
+Reports physical IO statistics for each physical device
+
+.B ******** DEVICE-MAPPER REPORT ********
+
+Reports IO statistics for each multipath device-mapper device.  
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B help
+.RS
+Provide help information for kipid flags
+.RE
+
+.B pid=<pid>
+.RS
+Filter on pid
+.RE
+
+.B tgid=<tgid>
+.RS
+Filter on task group ID
+.RE
+
+.B scdetail 
+.RS
+Produce additional detail information on each system call such as how long the system call was running, sleeping, or on the run queue
+.RE
+
+.B nsym=<nsym> 
+.RS
+Reports <nsym> kernel functions for switch and hardclock 
+                             records (LiKI only)
+.RE
+
+.B nfutex=<nfutex>
+.RS
+Limit the number of futexes listed for each task (default 10)
+.RE
+
+.B npid=<npid>
+.RS
+Top <npid> tasks woken up or tasks that did wakeups in Schedule Activity Report (default 10)
+.RE
+
+.B pidtree
+.RS
+Create PIDS subdirectory and kipid output for each process. Used with kiinfo -kparse kptree 
+.RE
+
+.B rqhist
+.RS
+Include RunQ Histogram
+.RE
+
+.B oracle 
+.RS
+Report on Oracle processes
+.RE
+
+.B mangle
+.RS
+Leave C++ function names mangled
+.RE
+
+.B coop 
+.RS
+Include additionl details on cooperating/competing processes
+.RE
+
+.B csv
+.RS
+Create CSV report kipid.*.csv
+.RE
+
+.B kitrace
+.RS
+Include formatted ASCII trace records prior to the standard report
+.RE
+
+.B abstime
+.RS
+Print absolute time (seconds since boot) for each record
+.RE
+
+.B fmttime
+.RS
+Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
+.RE
+
+.B nosysenter
+.RS
+Do not print syscall entry records when using kitrace flag 
+.RE
+
+.B symlookup
+.RS
+For live tracing, performs USER hardclock symbol table lookups
+.RE
+
+.B sysignore=<ignore_filee>
+.RS
+Do not trace system calls listed in the <ignore_file>. This can reduce trace data by eliminating frequently called system calls, such as getrusage(),gettimeofday(), time(), etc...
+.RE
+
+.B objfile=<filename>
+.RS
+For runki data collections, use objfile binary to perform symbol table lookups 
+.RE
+
+.B events=[default | all | <kitool> | event]
+.RS
+Trace events to be traced
+.RE
+
+.RS 7
+\fBdefault\fR - Only trace default events.
+.RE
+.RS 7
+\fBall\fR - Trace all valid ftrace events
+.RE
+.RS 7
+\fB<kitool>\fR - Only the events needed for a specific subtool is used.
+.RE
+.RS 7
+\fB<event>\fR - Trace a specific event.
+.RE
+
+.B subsys=<subsys>
+.RS
+Enable tracing only for certain subsystems.  Valid subsystems include: power, scsi, block, sched, syscalls, irq.
+.RE
+
+.B report=<[-]asxhfopnm>
+.RS
+Customize what sections of the PID Analysis Report to show
+.RE
+
+.RS 7
+         - - Omit Reports
+         a - Scheduler Activity Report
+         s - System Call Report
+         x - Futex Report
+         h - CPU Activity Report
+         f - File Activity Report
+         o - Network/Socket Activity Report
+         p - Physical Volume Report
+         m - Memory Report 
+.RE
+
+.B edus=<edus_file>
+.RS
+Specify output of "db2pd -edus" to get DB2 thread names.
+.RE
+
+.B msr
+.RS
+Collect adanced CPU statistics such as LLC Hit%, CPI, average CPU frequency, and SMI count
+.RE
+
+.SH EXAMPLES
+
+1)  Reading from a kitrace binary file using the -ts option
+.RS 4
+Note that when the -ts option is used, kiinfo -kipid will attempt to open the lsof.{timestamp} file to resolve filenames in the File Activity Report, and open the ps-eLf.{timestamp} file to resolve process names.  This is the recommended option for running on a ki.bin.* file. The command below also creates the PIDS subdirectory (pidtree flag) for use with kiinfo -kparse kptree.
+.RE
+
+.B $ kiinfo -kipid npid=10,pidtree -ts 0901_1548 >kipid.0901_1548.txt
+
+2) Create a PID report for a specific process with additional system call details (scdetail flag) and runq histograms (rqhist flag).   Show up to 20 sleep functions or profile functions and 20 stacktraces for each (nsym=20 flag).  Also include additional details about the cooperating/competing processes (coop flag):
+
+.B $ kiinfo -kipid pid=26649,scdetail,rqhist,nsym=20,coop -ts 0814_2040
+
+3) Create a PID report for a specific online process for 30 seconds:
+
+.B $ kiinfo -kipid pid=5683,scdetail,nsym=10,npid=5 -a 30 -p 1
+
+.SH SAMPLE OUTPUT
+
+.B Note that stack trace and Hardclock profiling are available with the LiKI tracing mechanism is used:
+
+Command line: /opt/linuxki/kiinfo -kipid scdetail,pid=15572,nsym=5,npid=5 -ts 0816_0839
+
+kiinfo (2.0)
+
+KI Binary Version 3
+Linux gwr-repo1.rose.hp.com 2.6.32-358.2.1.el6.x86_64 #1 SMP Wed Feb 20 12:17:37 EST 2013 x86_64 x86_64 x86_64 GNU/Linux
+
+
+PID 15572  /home/mcr/bin/iotest8
+  PPID 1  /sbin/init
+
+    ********* SCHEDULER ACTIVITY REPORT ********
+    RunTime    :  1.478732  SysTime   :  1.400001   UserTime   :  0.073428
+    SleepTime  : 17.883474  Sleep Cnt :     37491   Wakeup Cnt :     29503
+    RunQTime   :  0.602830  Switch Cnt:     37504   PreemptCnt :        13
+    HardIRQ    :  0.000114  HardIRQ-S :  0.000098    HardIRQ-U :  0.000016
+    SoftIRQ    :  0.005190  SoftIRQ-S :  0.004943    SoftIRQ-U :  0.000247
+    Last CPU   :         2  CPU Migrs :       305   NODE Migrs :         9
+    Policy     : SCHED_NORMAL     vss :      1015          rss :       149
+
+    busy   :      7.41%
+      sys  :      7.01%
+      user :      0.37%
+      irq  :      0.03%
+    runQ   :      3.02%
+    sleep  :     89.60%
+
+    ******** COOPERATING/COMPETING TASKS REPORT ********
+
+    Tasks woken up by this task (Top 5)
+           PID    Count   SlpPcnt     Slptime  Command 
+         15573     5736     -nan%    0.000000  /home/mcr/bin/iotest8
+         15574     5049     -nan%    0.000000  /home/mcr/bin/iotest8
+         15577     4989     -nan%    0.000000  /home/mcr/bin/iotest8
+         15575     4855     -nan%    0.000000  /home/mcr/bin/iotest8
+         15578     4422     -nan%    0.000000  /home/mcr/bin/iotest8
+
+    Tasks that have woken up this task(Top 5)
+           PID    Count   SlpPcnt     Slptime  Command 
+            -1    29197    28.74%    5.139739   ICS 
+         15574     4444    11.40%    2.038824  /home/mcr/bin/iotest8
+         15573     3576    11.92%    2.131962  /home/mcr/bin/iotest8
+         15575       99    18.46%    3.301462  /home/mcr/bin/iotest8
+         15576       78    13.04%    2.331323  /home/mcr/bin/iotest8
+
+    ******** SLEEP REPORT ********
+ 
+    Kernel Functions calling sleep() - Top 5 Functions
+       Count     Pct    SlpTime    Slp% TotalTime%   Msec/Slp   MaxMsecs  Func
+        8294  22.12%    12.7437  71.26%     63.83%      1.536    198.951  __mutex_lock_slowpath
+       29196  77.87%     5.1397  28.74%     25.74%      0.176     30.659  io_schedule
+
+    Process Sleep stack traces (sort by % of total wait time) - Top 5 stack traces
+       count    wpct      avg   Stack trace
+                  %     msecs
+    ===============================================================
+        5415  47.77     1.578   __mutex_lock_slowpath  mutex_lock  generic_file_aio_write  ext4_file_write  do_sync_write  vfs_write  sys_write  tracesys
+       29196  28.74     0.176   io_schedule  __blockdev_direct_IO_newtrunc  __blockdev_direct_IO  ext4_ind_direct_IO  ext4_direct_IO  generic_file_direct_write  __generic_file_aio_write  generic_file_aio_write  ext4_file_write  do_sync_write  vfs_write  sys_write  tracesys
+        2879  23.49     1.459   __mutex_lock_slowpath  mutex_lock  ext4_llseek  vfs_llseek  sys_lseek  tracesys
+
+    ******** CPU ACTIVITY REPORT ********
+    The percentages below reflect the percentage 
+    of the Thread's total RunTime spent in either
+    User code or System code 
+    RunTime:   1.4787
+
+      Count    USER     SYS    INTR
+        465       8     457       0
+               1.72%  98.28%   0.00%
+
+    HARDCLOCK entries
+       Count     Pct  State  Function
+          76  16.34%  SYS    scsi_request_fn                                                                  
+          58  12.47%  SYS    _spin_unlock_irqrestore                                                          
+          51  10.97%  SYS    finish_task_switch                                                               
+          25   5.38%  SYS    blk_queue_bio                                                                    
+          14   3.01%  SYS    mutex_spin_on_owner                                                             
+
+       Count     Pct  HARDCLOCK Stack trace
+       ============================================================
+          64  13.76%  scsi_request_fn  scsi_request_fn  native_sched_clock  __blk_run_queue  elv_insert  __elv_add_request  blk_insert_cloned_request  dm_dispatch_request  dm_request_fn  __generic_unplug_device  generic_unplug_device  dm_unplug_all  blk_unplug  dm_table_unplug_all  trace_nowake_buffer_unlock_commit  dm_unplug_all
+          36   7.74%  _spin_unlock_irqrestore  try_to_wake_up  wake_up_process  __mutex_unlock_slowpath  mutex_unlock  generic_file_aio_write  ext4_file_write do_sync_write  autoremove_wake_function  native_sched_clock  sched_clock  trace_nowake_buffer_unlock_commit  security_file_permission  vfs_write  sys_write  tracesys
+          16   3.44%  _spin_unlock_irqrestore  qla24xx_start_scsi  scsi_done  qla2xxx_queuecommand  scsi_dispatch_cmd  scsi_request_fn  native_sched_clock  __blk_run_queue  elv_insert  __elv_add_request  blk_insert_cloned_request  dm_dispatch_request  dm_request_fn  __generic_unplug_device  generic_unplug_device  dm_unplug_all
+          13   2.80%  blk_queue_bio  blk_queue_bio  trace_nowake_buffer_unlock_commit  dm_request  generic_make_request  submit_bio  dio_bio_submit  __blockdev_direct_IO_newtrunc  __find_get_block  __getblk  __blockdev_direct_IO  ext4_get_block  find_get_pages  ext4_ind_direct_IO  ext4_get_block  ext4_direct_IO
+          12   2.58%  scsi_request_fn  scsi_request_fn  native_sched_clock  __blk_run_queue  elv_insert  __elv_add_request  blk_insert_cloned_request  dm_dispatch_request  dm_request_fn  __blk_run_queue  cfq_insert_request  elv_insert  __elv_add_request  blk_queue_bio  trace_nowake_buffer_unlock_commit  dm_request
+
+    ******** SYSTEM CALL REPORT ********
+    System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+    write                29196   1460.3   15.609013   0.000535   0.214018       0    4096   5841.3
+       SLEEP             34611   1731.2   13.682159   0.000395
+          Sleep Func     10830            17.084840   0.001578   0.198951  __mutex_lock_slowpath
+          Sleep Func     58392            10.279479   0.000176   0.030659  io_schedule
+       RUNQ                                0.581584
+       CPU                                 1.345270
+    lseek                29196   1460.3    4.282247   0.000147   0.157017       0
+       SLEEP              2880    144.1    4.201314   0.001459
+          Sleep Func      5758             8.402629   0.001459   0.147119  __mutex_lock_slowpath 
+       RUNQ                                0.021228
+       CPU                                 0.059760
+
+    ******** FILE ACTIVITY REPORT ********
+    FD: 3 REG      dev: 0xfd00006 /work/mcr/bigfile
+    System Call Name     Count     Rate     ElpTime        Avg        
+    write                29196   1460.3   15.609013   0.000535   0.214018       0    4096   5841.3
+       SLEEP             34611   1731.2   13.682159   0.000395
+          Sleep Func      5415             8.542420   0.001578   0.198951  __mutex_lock_slowpath
+          Sleep Func     29196             5.139739   0.000176   0.030659  io_schedule
+       RUNQ                                0.581584
+       CPU                                 1.345270
+    lseek                29196   1460.3    4.282247   0.000147   0.157017       0
+   SLEEP              2880    144.1    4.201314   0.001459
+          Sleep Func      2879             4.201314   0.001459   0.147119    __mutex_lock_slowpath
+       RUNQ                                0.021228
+       CPU                                 0.059760
+
+    ******** PHYSICAL DEVICE REPORT ********
+          device   rw  avque avinflt   io/s   Kb/s  avsz  avwait  avserv
+      0x00800070  /dev/sdh    
+        0x00800070  r   0.00    0.00      0      0     0    0.00    0.00      
+        0x00800070  w   0.50    0.05    731   2923     4    0.00    0.19  
+        0x00800070  t   0.50    0. 0  14610      0      0     0.0    30.7
+      0x008000a0  /dev/sdk
+        0x008000a0  r   0.00    0.00      0      0     0    0.00    0.00      
+        0x008000a0  w   0.50    0.07    729   2918     4    0.00    0.18  
+        0x008000a0  t   0.50    0.07    729   2918     4    0.00    0.18 
+ 
+    ******** DEVICE-MAPPER REPORT ********
+            device   rw  avque avinflt   io/s   Kb/s  avsz  avwait  avser
+        0x0fd00003   /dev/mapper/mpathb  ->  /dev/dm-3
+          0x0fd00003  r   0.00    0.00      0      0     0    0.00    0.00      
+          0x0fd00003  w   1.40    0.13   1460   5841     4    0.00    0.19  
+          0x0fd00003  t   1.40    0.13   1460   5841     4    0.00    0.19  
+
+    Totals:
+      Physical Writes:
+        Cnt   :  29193   Total Kb:  116772.0    ElpTime:   5.34646
+        Rate  : 1460.2   Kb/sec  :    5840.7    AvServ :   0.00018
+        Errs:        0   AvgSz   :       4.0    AvWait :   0.00000
+        Requeue :    0   MaxQlen :         1
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

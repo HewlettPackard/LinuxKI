@@ -1,0 +1,175 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-kifile 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo \-kifile [FLAGS] [OPTIONS]
+
+.SH DESCRIPTION
+
+\fBkiinfo -kifile\fR generates the File Activity Report.   The kifile option will use the System Call records as well as the switch/wakeup to identify file activity times.  The kifile report will show the Global File Activity Report followed by additional details on the system calls made to the top accessed files. 
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B help
+.RS
+Provide help information for kifile flags
+.RE
+
+.B nfile=<nfile>
+.RS
+Limit reports sections to Top <nfile> files 
+.RE
+
+.B scdetail
+.RS
+Produce additional detail information on each system call
+.RE
+
+.B sysignore=<file>
+.RS
+Specify file of system calls to ignore when tracing (live tracing only)
+.RE
+
+.B edus=<edus_file>
+.RS
+Specify output of "db2pd -edus" to get DB2 thread names.
+.RE
+
+.B csv
+.RS
+Create CSV report kifile.*.csv
+.RE
+
+.B kitrace
+.RS
+Include formatted ASCII trace records prior to the standard report
+.RE
+
+.B abstime
+.RS
+Print absolute time (seconds since boot) for each record
+.RE
+
+.B fmttime
+.RS
+Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
+.RE
+
+.SH EXAMPLES
+
+1) Create a File Activity Report and report on top 4 files: 
+
+.B $ kiinfo -kifile nfile=4,scdetail,csv -ts 0816_0839
+
+2) Create a File Activity Report for the top 5 active online files over a 15 second period
+
+.B $ kiinfo -kifile nfile=5,scdetail -a 15 -p 1
+
+.SH SAMPLE OUTPUT
+
+ Command line: kiinfo -kifile scdetail,nfile=5 -ts 0414_1119 
+
+ kiinfo (5.3)
+
+ Linux gwr-repo1.rose.rdlabs.hpecorp.net 2.6.32-504.el6.x86_64 #1 SMP Tue Sep 16 01:56:35 EDT 2014 x86_64 x86_64 x86_64 GNU/Linux
+
+ KI Binary Version 7
+ Thu Apr 14 11:19:44 2016
+ 
+ ******** GLOBAL FILE ACTIVITY REPORT ********
+
+ ---  Top Files sorted by System Call Count  ---
+ Syscalls   ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename
+   129604  119.8623   64803   12534   52267       0 0x000000000fd0000b  131334175      REG  /work/mcr/bigfile
+     3988    0.0078       0       0     997    2392 0xffff88101e507400      33397     unix  socket
+     2220    0.0053       0       0     599     802 0xffff88101e507740      33398     unix  socket
+       73    0.0472      12       0      53       0 0x000000000fd00007     262970      REG  /var/opt/perf/datafiles/logdev
+       24    0.0001       0      16       8       0 0xffff88201b789480      66603     unix  /var/run/libvirt/libvirt-sock-ro
+
+ ---  Top Files sorted by System Call Count (Detailed)  ---
+
+ device: 0x0fd0000b node: 131334175 fstype:      REG  filename:  /work/mcr/bigfile
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ write                52267   2613.3   46.725737   0.000894   0.101502       0    8192  20906.6
+    SLEEP             76456   3822.8   44.887961   0.000587
+       Sleep Func     24186            26.511726   0.001096   0.098893  __mutex_lock_slowpath
+       Sleep Func     52267            18.376235   0.000352   0.087119  io_schedule
+    RUNQ                                0.523166
+    CPU                                 1.131697
+ lseek                64803   3240.1   41.905358   0.000647   0.116171       0
+    SLEEP             34962   1748.1   41.382893   0.001184
+       Sleep Func     34961            41.382893   0.001184   0.100477  __mutex_lock_slowpath
+    RUNQ                                0.197993
+    CPU                                 0.183160
+ read                 12534    626.7   31.231226   0.002492   0.100681       0    8192   5013.6
+    SLEEP             34987   1749.3   30.539475   0.000873
+       Sleep Func     22451            27.851434   0.001241   0.099161  __mutex_lock_slowpath
+       Sleep Func     12534             2.688042   0.000214   0.095061  io_schedule
+    RUNQ                                0.200071
+    CPU                                 0.446576
+
+ device: 0xffff88101e507400 node:   33397 fstype:     unix  filename:  socket
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ writev                 997     49.8    0.004971   0.000005   0.000173       0      25      1.2
+    RUNQ                                0.001406
+    CPU                                 0.000190
+ recvfrom              2991    149.5    0.002870   0.000001   0.000012    2392       6      0.9
+    RUNQ                                0.000044
+    CPU                                 0.000050
+
+ device: 0xffff88101e507740 node:   33398 fstype:     unix  filename:  socket
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ recvmsg               1621     81.0    0.003159   0.000002   0.000029     802      15      1.2
+    RUNQ                                0.000009
+    CPU                                 0.000018
+ writev                 599     29.9    0.002100   0.000004   0.000021       0      32      0.9
+
+ device: 0x0fd00007 node:  262970 fstype:      REG  filename:  /var/opt/perf/datafiles/logdev
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ write                   53      2.6    0.047199   0.000891   0.001232       0     112      0.3
+    SLEEP               107      5.3    0.044917   0.000420
+       Sleep Func        53             0.032507   0.000613   0.000891  jbd2_log_wait_commit
+       Sleep Func        54             0.012411   0.000230   0.000268  io_schedule
+    RUNQ                                0.000611
+    CPU                                 0.001521
+ fcntl                    8      0.4    0.000008   0.000001   0.000001       0
+ lseek                   12      0.6    0.000003   0.000000   0.000001       0
+
+ device: 0xffff88201b789480 node:   66603 fstype:     unix  filename:  /var/run/libvirt/libvirt-sock-ro
+ System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s
+ write                    8      0.4    0.000039   0.000005   0.000010       0      28      0.0
+ read                    16      0.8    0.000024   0.000001   0.000003       0      14      0.0
+
+ ---  Top Files sorted by Errors  ---
+ Syscalls   ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename
+    3988    0.0078       0       0     997    2392 0xffff88101e507400      33397     unix  socket
+    2220    0.0053       0       0     599     802 0xffff88101e507740      33398     unix  socket
+      19    0.0000       0       0       5      11 0xffff882018c2ca80      35406     unix  socket
+      20    0.0000       0       0       4      11 0xffff881000316800      68971     unix  socket
+      13    0.0000       0       0       2       9 0xffff881026813480      33277     unix  socket
+
+ ---  Top Files sorted by Elapsed Time  ---
+ Syscalls   ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename
+   129604  119.8623   64803   12534   52267       0 0x000000000fd0000b  131334175      REG  /work/mcr/bigfile
+        7   20.1588       0       2       5       0 0x0000000000a000e5      15611      CHR  /dev/fuse
+        2    4.9912       0       2       0       0 0x000000000000000a          1      DIR  inotify
+       73    0.0472      12       0      53       0 0x000000000fd00007     262970      REG  /var/opt/perf/datafiles/logdev
+     3988    0.0078       0       0     997    2392 0xffff88101e507400      33397     unix  socket
+
+Note that the Sleep Functions are only available if the LiKI tracing mechanism is used.
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

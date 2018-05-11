@@ -91,6 +91,8 @@ trace_len(char *t)
 		case TT_TASKLET_ENQUEUE:
 		case TT_WORKQUEUE_ENQUEUE:
 		case TT_WORKQUEUE_EXECUTE:
+		case TT_MM_PAGE_ALLOC;
+		case TT_MM_PAGE_FREE;
 		case TT_CACHE_INSERT:
 		case TT_CACHE_EVICT:
 			return(cp->reclen);
@@ -102,14 +104,11 @@ trace_len(char *t)
 	return(cp->reclen);
 }
 
-
 int
-liki_init(char * user_debug_dir)
+init_debug_mountpoint(char * user_debug_dir) 
 {
 	char		debug_mountpoint[PATHLEN];
 	char		dirname[PATHLEN];
-	char		name[PATHLEN];
-	int		res;
 
 	/* If this is the first time through we need to wait until the kernel has
 	 * set up the debugfs interface, and everything is ready to go, then open
@@ -140,42 +139,62 @@ liki_init(char * user_debug_dir)
 	}
 
 	if (liki_dir == NULL) {
-		fprintf (stderr, "  Failed to open liki directory in debugfs.  Make sure debugfs is mounted or use debug_dir option to specify the correct location.\n");
-		return(-ENOENT);
+		fprintf(stderr, "Failed to open liki directory in debugfs.\n");
+		fprintf(stderr, "Make sure debugfs is mounted or use debug_dir\n"); 
+		fprintf(stderr, "option to specify the correct location.\n\n");
+		fprintf(stderr, "  $ mount -t debugfs debugfs /sys/kernel/debug\n"); 
+		_exit(-ENOENT);
 	}
 
 	/* We found the debugfs mountpoint. Stuff the name in the global */
 	strcpy(liki_debug_mountpoint, debug_mountpoint);
 
+	/* when we exit here, the globals liki_dir and liki_debug_mountpoint are set */
+	
+	return 0;
+}
+
+
+
+int
+liki_init(char *user_debug_dir)
+{
+	char		name[PATHLEN];
+	int		res;
+
+	if (liki_enabled) return -EINVAL;
+
+	if (liki_dir == NULL) init_debug_mountpoint(user_debug_dir) ;
+
 	/* Open the sync file */
-	sprintf(name, "%s/%s/%s", debug_mountpoint, DEBUGFS_DIR_NAME, SYNC_FILE);
+	sprintf(name, "%s/%s/%s", liki_debug_mountpoint, DEBUGFS_DIR_NAME, SYNC_FILE);
 	if ((liki_sf = open(name, O_RDWR)) < 0) {
 		fprintf (stderr, "Cannot open %s\n", name);
 		return -ENOENT;
 	}
 
 	/* Open the traced resources file */
-	sprintf(name, "%s/%s/%s", debug_mountpoint, DEBUGFS_DIR_NAME, TRACED_RESOURCES_FILE);
+	sprintf(name, "%s/%s/%s", liki_debug_mountpoint, DEBUGFS_DIR_NAME, TRACED_RESOURCES_FILE);
 	if ((liki_trf = open(name, O_RDWR)) < 0) {
 		fprintf (stderr, "Cannot open %s\n", name); 
 		return -ENOENT;
 	}
 
 	/* Open the ignored_syscalls files */
-	sprintf(name, "%s/%s/%s", debug_mountpoint, DEBUGFS_DIR_NAME, IGNORED_SYSCALLS32_FILE);
+	sprintf(name, "%s/%s/%s", liki_debug_mountpoint, DEBUGFS_DIR_NAME, IGNORED_SYSCALLS32_FILE);
 	if ((liki_isf32 = open(name, O_WRONLY)) < 0) {
 		fprintf (stderr, "Cannot open %s\n", name); 
 		return -ENOENT;
 	}
 
-	sprintf(name, "%s/%s/%s", debug_mountpoint, DEBUGFS_DIR_NAME, IGNORED_SYSCALLS64_FILE);
+	sprintf(name, "%s/%s/%s", liki_debug_mountpoint, DEBUGFS_DIR_NAME, IGNORED_SYSCALLS64_FILE);
 	if ((liki_isf64 = open(name, O_WRONLY)) < 0) {
 		fprintf (stderr, "Cannot open %s\n", name); 
 		return -ENOENT;
 	}
 
 	/* Open trace enable file */
-	sprintf(name, "%s/%s/%s", debug_mountpoint, DEBUGFS_DIR_NAME, TRACE_ENABLE_FILE);
+	sprintf(name, "%s/%s/%s", liki_debug_mountpoint, DEBUGFS_DIR_NAME, TRACE_ENABLE_FILE);
 	if ((liki_tef = open(name, O_RDWR)) < 0) {
 		fprintf (stderr, "Cannot open %s\n", name); 
 		return(-ENOENT);

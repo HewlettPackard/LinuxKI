@@ -120,6 +120,9 @@ typedef struct trace_ids_struct {
 	int trace_anon_fault;
 	int trace_filemap_fault;
 	int trace_kernel_pagefault;
+	int trace_mm_page_alloc;
+	int trace_mm_page_free;
+	int trace_mm_page_free_direct;
 } trace_ids_t;
 
 typedef struct ki_action {

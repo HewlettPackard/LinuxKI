@@ -243,6 +243,7 @@ void kp_toc()
 	    LI; ARF(_LNK_4_5, _MSG_4_5); NLt;
 	    LI; ARF(_LNK_4_6, _MSG_4_6); NLt;
 	    LI; ARF(_LNK_4_7, _MSG_4_7); NLt;
+	    LI; ARF(_LNK_4_8, _MSG_4_8); NLt;
 	  _UL;
 
 	  LI; ARF(_LNK_5_0, _MSG_5_0); NLt;
@@ -971,6 +972,11 @@ kp_hc_kernfuncs()			/* Section 1.4.3 */
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SEMLOCK, _LNK_1_4_3);
 		kp_warning(globals->warnings, warn_indx, _LNK_1_4_3); T("\n");
 	}
+
+	if ((*print_pc_args.warnflagp) & WARNF_SK_BUSY) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SK_BUSY, _LNK_1_4_3);
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_3); T("\n");
+	}
 }
 
 void
@@ -1134,6 +1140,11 @@ kp_softirqs()				/* Section 1.6.3 */
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_TASKLET, _LNK_1_6_3);
                 kp_warning(globals->warnings, warn_indx, _LNK_1_6_3); T("\n");
 	}
+
+        if (warnflag & WARNF_ADD_RANDOM) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_ADD_RANDOM, _LNK_1_6_3);
+                kp_warning(globals->warnings, warn_indx, _LNK_1_6_3); T("\n");
+	}
 }
 
 void
@@ -1243,10 +1254,17 @@ kp_freq_swtch_stktrc()          	/* Section 2.1.2 */
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_XFS_DIOREAD, _LNK_2_1_2);
 		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); T("\n");
 	}
+
 	if (print_stktrc_args.warnflag & WARNF_XFS_DIO_ALIGN) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_XFS_DIO_ALIGN, _LNK_2_1_2);
 		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); T("\n");
 	}
+
+	if (print_stktrc_args.warnflag & WARNF_MD_FLUSH) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_MD_FLUSH, _LNK_2_1_2);
+		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); T("\n");
+	}
+
 	T("\n");
 }
 
@@ -1637,7 +1655,29 @@ kp_dev_entries(void *arg1, void *arg2)
             	    strstr(globals->os_vers, "3.10.0-514.2.2") ||
             	    strstr(globals->os_vers, "3.10.0-514.6.1") ||
             	    strstr(globals->os_vers, "3.10.0-514.6.2") ||
-            	    strstr(globals->os_vers, "3.10.0-514.10.2")) {
+            	    strstr(globals->os_vers, "3.10.0-514.10.2") ||
+		    /* Snd check for SLES 12 SP2 */
+            	    strstr(globals->os_vers, "4.4.21-69") ||
+            	    strstr(globals->os_vers, "4.4.21-81") ||
+            	    strstr(globals->os_vers, "4.4.21-84") ||
+            	    strstr(globals->os_vers, "4.4.21-90") ||
+            	    strstr(globals->os_vers, "4.4.38-93") ||
+            	    strstr(globals->os_vers, "4.4.49-92.11") ||
+            	    strstr(globals->os_vers, "4.4.49-92.14") ||
+            	    strstr(globals->os_vers, "4.4.59-92.17") ||
+            	    strstr(globals->os_vers, "4.4.59-92.20") ||
+            	    strstr(globals->os_vers, "4.4.59-92.24") ||
+            	    strstr(globals->os_vers, "4.4.74-92.29") ||
+            	    strstr(globals->os_vers, "4.4.74-92.32") ||
+            	    strstr(globals->os_vers, "4.4.74-92.35") ||
+            	    strstr(globals->os_vers, "4.4.74-92.38") ||
+            	    strstr(globals->os_vers, "4.4.90-92.45") ||
+            	    strstr(globals->os_vers, "4.4.90-92.50") ||
+            	    strstr(globals->os_vers, "4.4.103-92.53") ||
+            	    strstr(globals->os_vers, "4.4.103-92.56") ||
+            	    strstr(globals->os_vers, "4.4.114-92.64") ||
+            	    strstr(globals->os_vers, "4.4.114-92.67") ||
+            	    strstr(globals->os_vers, "4.4.120-92.70")) {
                 	(*warnflagp) |= WARNF_MULTIPATH_BUG;
 			RED_FONT;
         	}
@@ -2055,7 +2095,7 @@ kp_fc_totals()				/* Section 4.4 */
 
 
 void
-kp_perpid_dev_totals()			/* Section 4.5 */
+kp_perpid_mdev_totals()			/* Section 4.5 */
 {
         GREEN_TABLE;
         TEXT("\n");
@@ -2073,7 +2113,29 @@ kp_perpid_dev_totals()			/* Section 4.5 */
         BOLD ("     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process\n");
         BOLD ("==============================================================================\n");
 
-        foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, calc_pid_iototals, NULL, 0, NULL);
+        foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_miosum,  pid_sort_by_miocnt, 10, NULL);
+	CSV_FIELD("kipid", "[CSV]");
+}
+
+void
+kp_perpid_dev_totals()			/* Section 4.6 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_6);
+        HEAD3(_MSG_4_6);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_5,"[Prev Subsection]");
+        ARFx(_LNK_4_7,"[Next Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        BOLD ("     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process\n");
+        BOLD ("==============================================================================\n");
+
         foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_iosum,  pid_sort_by_iocnt, 10, NULL);
 	CSV_FIELD("kipid", "[CSV]");
 }
@@ -2110,7 +2172,7 @@ kp_blk_read_entry(void *arg1, void *arg2)
 }
 
 void
-kp_dskblk_read()			/* Section 4.6 */
+kp_dskblk_read()			/* Section 4.7 */
 {
 
         uint64  warnflag = 0;
@@ -2118,17 +2180,17 @@ kp_dskblk_read()			/* Section 4.6 */
 
         GREEN_TABLE;
         TEXT("\n");
-        ANM(_LNK_4_6);
-        HEAD3(_MSG_4_6);
+        ANM(_LNK_4_7);
+        HEAD3(_MSG_4_7);
 
         FONT_SIZE(-1);
-        ARFx(_LNK_4_5,"[Prev Subsection]");
-        ARFx(_LNK_4_7,"[Next Subsection]");
+        ARFx(_LNK_4_6,"[Prev Subsection]");
+        ARFx(_LNK_4_8,"[Next Subsection]");
         ARFx(_LNK_4_0,"---[Prev Section]");
         ARFx(_LNK_5_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
-        T(_MSG_4_6_INFO);
+        T(_MSG_4_7_INFO);
         TEXTx("\n");
 
         BOLD("Freq    Dev             Block\n");
@@ -2170,15 +2232,15 @@ kp_blk_write_entry(void *arg1, void *arg2)
 }
 
 void
-kp_dskblk_write()			/* Section 4.7 */
+kp_dskblk_write()			/* Section 4.8 */
 {
         GREEN_TABLE;
         TEXT("\n");
-        ANM(_LNK_4_7);
-        HEAD3(_MSG_4_7);
+        ANM(_LNK_4_8);
+        HEAD3(_MSG_4_8);
 
         FONT_SIZE(-1);
-        ARFx(_LNK_4_6,"[Prev Subsection]");
+        ARFx(_LNK_4_7,"[Prev Subsection]");
         ARFx(_LNK_4_0,"---[Prev Section]");
         ARFx(_LNK_5_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");

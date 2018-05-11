@@ -826,11 +826,11 @@ sched_wakeup_func(void *a, void *v)
 
 	tpidp = GET_PIDP(&globals->pid_hash, rec_ptr->target_pid);
 
-	if (!check_filter(f->f_P_pid, (uint64)rec_ptr->target_pid, fnf) &&
-	    !check_filter(f->f_P_pid, (uint64)rec_ptr->pid, fnf) &&
-	    !check_filter(f->f_P_cpu, (uint64)rec_ptr->cpu, 0) &&
-	    !check_filter(f->f_P_tgid, (uint64)rec_ptr->tgid, fnf) &&
-	    !check_filter(f->f_P_tgid, (uint64)tpidp->tgid, fnf))
+	if (!check_filter(f->f_P_pid, (uint64)rec_ptr->target_pid) &&
+	    !check_filter(f->f_P_pid, (uint64)rec_ptr->pid) &&
+	    !check_filter(f->f_P_cpu, (uint64)rec_ptr->cpu) &&
+	    !check_filter(f->f_P_tgid, (uint64)rec_ptr->tgid) &&
+	    !check_filter(f->f_P_tgid, (uint64)tpidp->tgid))
 		return 0;
 
 	schedp = tschedp = NULL;
@@ -838,8 +838,8 @@ sched_wakeup_func(void *a, void *v)
 	if (pertrc_stats) incr_trc_stats(rec_ptr, pidp);
 
 	/* update Source PID stats */
-	if ((rec_ptr->pid && check_filter(f->f_P_pid, (uint64)rec_ptr->pid, fnf)) ||
-	    (rec_ptr->tgid && check_filter(f->f_P_tgid, (uint64)rec_ptr->tgid, fnf))) {
+	if ((rec_ptr->pid && check_filter(f->f_P_pid, (uint64)rec_ptr->pid)) ||
+	    (rec_ptr->tgid && check_filter(f->f_P_tgid, (uint64)rec_ptr->tgid))) {
         	/* printf ("%9.6f sched_wakeup_func() pid: %d\n", SECS(rec_ptr->hrtime), rec_ptr->pid); */
 		schedp = (sched_info_t *)find_sched_info(pidp);
 		statp = &schedp->sched_stats;
@@ -865,8 +865,8 @@ sched_wakeup_func(void *a, void *v)
 	/* update Target PID stats */
 	/* if success=0, then target pid is already running */
 	if (rec_ptr->success &&
-	    (rec_ptr->target_pid && check_filter(f->f_P_pid, (uint64)rec_ptr->target_pid, fnf)) ||
-	    (tpidp->tgid && check_filter(f->f_P_tgid, (uint64)tpidp->tgid, fnf))) {
+	    (rec_ptr->target_pid && check_filter(f->f_P_pid, (uint64)rec_ptr->target_pid)) ||
+	    (tpidp->tgid && check_filter(f->f_P_tgid, (uint64)tpidp->tgid))) {
         	tschedp = (sched_info_t *)find_sched_info(tpidp);
 		tstatp = &tschedp->sched_stats;
         	/* printf ("%9.6f sched_wakeup_func() target_pid: %d\n", SECS(rec_ptr->hrtime), rec_ptr->target_pid); */
@@ -1341,11 +1341,11 @@ trace_sched_switch_func(void *a, void *v)
 	next_pidp = GET_PIDP(&globals->pid_hash, rec_ptr->next_pid);
 	pidp = GET_PIDP(&globals->pid_hash, rec_ptr->pid);
 	
-	if (!check_filter(f->f_P_pid, (uint64)rec_ptr->next_pid, fnf) && 
-	    !check_filter(f->f_P_pid, (uint64)rec_ptr->pid, fnf) &&
-	    !check_filter(f->f_P_cpu, (uint64)rec_ptr->cpu, 0) && 
-	    !check_filter(f->f_P_tgid, (uint64)rec_ptr->tgid, fnf) &&
-	    !check_filter(f->f_P_tgid, (uint64)next_pidp->tgid, fnf))
+	if (!check_filter(f->f_P_pid, (uint64)rec_ptr->next_pid) && 
+	    !check_filter(f->f_P_pid, (uint64)rec_ptr->pid) &&
+	    !check_filter(f->f_P_cpu, (uint64)rec_ptr->cpu) && 
+	    !check_filter(f->f_P_tgid, (uint64)rec_ptr->tgid) &&
+	    !check_filter(f->f_P_tgid, (uint64)next_pidp->tgid))
 		return 0;
 
 	print_sched_switch_rec(rec_ptr, pidp);
@@ -1364,11 +1364,11 @@ trace_sched_wakeup_func(void *a, void *v)
 
         tpidp = GET_PIDP(&globals->pid_hash, rec_ptr->target_pid);
 	
-	if (!check_filter(f->f_P_tgid, (uint64)rec_ptr->tgid, fnf) &&
-	    !check_filter(f->f_P_tgid, (uint64)tpidp->tgid, fnf) &&
-	    !check_filter(f->f_P_pid, (uint64)rec_ptr->target_pid, fnf) && 
-	    !check_filter(f->f_P_pid, (uint64)rec_ptr->pid, fnf) &&
-	    !check_filter(f->f_P_cpu, (uint64)rec_ptr->cpu, 0)) 
+	if (!check_filter(f->f_P_tgid, (uint64)rec_ptr->tgid) &&
+	    !check_filter(f->f_P_tgid, (uint64)tpidp->tgid) &&
+	    !check_filter(f->f_P_pid, (uint64)rec_ptr->target_pid) && 
+	    !check_filter(f->f_P_pid, (uint64)rec_ptr->pid) &&
+	    !check_filter(f->f_P_cpu, (uint64)rec_ptr->cpu)) 
 		return 0;
 
 	print_sched_wakeup_rec(rec_ptr);
@@ -1409,11 +1409,11 @@ trace_sched_migrate_task_func(void *a, void *v)
 	rec_ptr = conv_sched_migrate_task(trcinfop, &tt_rec_ptr);
 
         tpidp = GET_PIDP(&globals->pid_hash, rec_ptr->target_pid);
-	if (!check_filter(f->f_P_tgid, rec_ptr->tgid, fnf) &&
-		!check_filter(f->f_P_tgid, (uint64)tpidp->tgid, fnf) &&
-		!check_filter(f->f_P_pid, (uint64)rec_ptr->target_pid, fnf) && 
-		!check_filter(f->f_P_pid, (uint64)rec_ptr->pid, fnf) &&
-		!check_filter(f->f_P_cpu, (uint64)rec_ptr->cpu, 0)) 
+	if (!check_filter(f->f_P_tgid, rec_ptr->tgid) &&
+		!check_filter(f->f_P_tgid, (uint64)tpidp->tgid) &&
+		!check_filter(f->f_P_pid, (uint64)rec_ptr->target_pid) && 
+		!check_filter(f->f_P_pid, (uint64)rec_ptr->pid) &&
+		!check_filter(f->f_P_cpu, (uint64)rec_ptr->cpu)) 
 		return 0;
 
 	print_sched_migrate_task_rec(rec_ptr);
@@ -1479,11 +1479,11 @@ sched_switch_func(void *a, void *v)
 	rec_ptr = conv_sched_switch(a, &tt_rec_ptr);	
 
 	tpidp = GET_PIDP(&globals->pid_hash, rec_ptr->next_pid);
-	if (!check_filter(f->f_P_pid, (uint64)rec_ptr->next_pid, fnf) &&
-            !check_filter(f->f_P_pid, (uint64)rec_ptr->pid, fnf) &&
-            !check_filter(f->f_P_cpu, (uint64)rec_ptr->cpu, 0) &&
-            !check_filter(f->f_P_tgid, (uint64)rec_ptr->tgid, fnf) &&
-            !check_filter(f->f_P_tgid, (uint64)tpidp->tgid, fnf))
+	if (!check_filter(f->f_P_pid, (uint64)rec_ptr->next_pid) &&
+            !check_filter(f->f_P_pid, (uint64)rec_ptr->pid) &&
+            !check_filter(f->f_P_cpu, (uint64)rec_ptr->cpu) &&
+            !check_filter(f->f_P_tgid, (uint64)rec_ptr->tgid) &&
+            !check_filter(f->f_P_tgid, (uint64)tpidp->tgid))
                 return 0;
 
 	/* if (debug) fprintf (stderr, "%12.6f cpu: %d  sched_switch  pid: %d  target pid: %d\n", SECS(rec_ptr->hrtime), rec_ptr->cpu, rec_ptr->pid, rec_ptr->next_pid); */
@@ -1496,8 +1496,8 @@ sched_switch_func(void *a, void *v)
         if (pertrc_stats) incr_trc_stats(rec_ptr, pidp);
 
 	/* update Source PID stats */
-	if ((rec_ptr->pid && check_filter(f->f_P_pid, (uint64)rec_ptr->pid, fnf)) ||
-	    (rec_ptr->tgid && check_filter(f->f_P_tgid, (uint64)rec_ptr->tgid, fnf))) {
+	if ((rec_ptr->pid && check_filter(f->f_P_pid, (uint64)rec_ptr->pid)) ||
+	    (rec_ptr->tgid && check_filter(f->f_P_tgid, (uint64)rec_ptr->tgid))) {
 		if ((pidp->tgid == 0) && IS_LIKI_V2_PLUS) pidp->tgid = rec_ptr->tgid;
 		schedp = (sched_info_t *)find_sched_info(pidp);
 		statp = &schedp->sched_stats;
@@ -1641,8 +1641,8 @@ sched_switch_func(void *a, void *v)
 	}
 
 	/* update Target PID stats */
-	if ((rec_ptr->next_pid && check_filter(f->f_P_pid, (uint64)rec_ptr->next_pid, fnf)) ||
-	    (tpidp->tgid && check_filter(f->f_P_tgid, (uint64)tpidp->tgid, fnf))) {
+	if ((rec_ptr->next_pid && check_filter(f->f_P_pid, (uint64)rec_ptr->next_pid)) ||
+	    (tpidp->tgid && check_filter(f->f_P_tgid, (uint64)tpidp->tgid))) {
 		update_cpu_last_pid(rec_ptr->cpu, rec_ptr->next_pid);
 		tgidp = GET_PIDP(&globals->pid_hash, rec_ptr->next_tgid);
 		if (IS_LIKI && (tpidp->tgid == 0)) {

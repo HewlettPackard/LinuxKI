@@ -503,6 +503,67 @@ get_devinfo(void *arg1, void *arg2)
 	get_mpinfo(devinfop, arg2);
 }
 
+char kgdboc_value[128];
+extern char *kgdboc_str;
+
+void
+clear_kgdboc() 
+{
+	int fd;
+
+	kgdboc_str = NULL;
+	/* first, save old value */
+        if ((fd = open("/sys/module/kgdboc/parameters/kgdboc",  O_RDONLY)) <= 0) {
+		return;
+        }	
+
+	/* if the file was not empty, then close it for read, then re-open and clear it */
+	if (get_fd_str(fd, kgdboc_value, 1) > 0 ) {
+		close(fd);
+        	if ((fd = open("/sys/module/kgdboc/parameters/kgdboc",  O_WRONLY)) <= 0) {
+			/* if we cannot clear the file, we must bail */
+			perror ("Cannot open /sys/module/kgdboc/parameters/kgdoc");
+			fprintf (stderr, "Exiting to avoid conflict with KGDB\n");
+			_exit(101);
+        	}	
+
+		/* clear the kgdboc value and save the old value */
+		if (put_fd_str(fd, " ", 0) < 0 ) {
+			/* if we cannot clear the file, we must bail */
+			perror ("Cannot clear /sys/module/kgdboc/parameters/kgdoc");
+			fprintf (stderr, "Exiting to avoid conflict with KGDB\n");
+			_exit(102);
+		}
+		kgdboc_str = &kgdboc_value[0];
+	}
+
+	close(fd);
+}
+
+void
+reset_kgdboc()
+{
+	int fd;
+
+	if (kgdboc_str == NULL) return;
+       	if ((fd = open("/sys/module/kgdboc/parameters/kgdboc",  O_WRONLY)) <= 0) {
+		/* if we cannot clear the file, we must bail */
+		perror ("Cannot open /sys/module/kgdboc/parameters/kgdoc");
+		fprintf (stderr, "KGDB will remain disabled\n");
+		close(fd);
+		return;
+       	}	
+
+	/* reset the kgdboc value to the old value */
+	if (put_fd_str(fd, kgdboc_str, 0) < 0 ) {
+		/* if we cannot clear the file, we must bail */
+		perror ("Cannot write /sys/module/kgdboc/parameters/kgdoc");
+		fprintf (stderr, "KGDB will remain disabled\n");
+	}
+
+	close(fd);
+}
+
 int 
 add_warning(void **warnarray_addr, int *next_warningp, int warn_num, char *lnk) 
 {
@@ -542,13 +603,12 @@ fmt_device(uint64 d)
 	}
 }
 
-int check_filter(void *list, uint64 value, uint64 fnf_flag)
+int check_filter(void *list, uint64 value)
 {
 	filter_item_t *fi;
 
 	/* return TRUE if there is no filter */
 	if (!filter_flag) return 1;
-	if (fnf_flag) return 1;
 
 	/* if the value is in the specified filter list
 	 * then return 1, and also return 1 if this filter
@@ -915,7 +975,11 @@ set_ioflags()
 		globals->cmd_flag_mask = 0x1fffffffffffffff;
 		globals->cmd_flag_shift = 0;
 		globals->req_op = req_op_name_4_8;
-	} else if (strncmp(globals->os_vers, "4.10.", 5) == 0) {
+	} else if ((strncmp(globals->os_vers, "4.10.", 5) == 0) ||
+		  (strncmp(globals->os_vers, "4.11.", 5) == 0) ||
+		  (strncmp(globals->os_vers, "4.12.", 5) == 0) ||
+		  (strncmp(globals->os_vers, "4.13.", 5) == 0) ||
+		  (strncmp(globals->os_vers, "4.14.", 5) == 0)) {
 		globals->io_flags = ioflags_name_4_10;
 		globals->req_op = req_op_name_4_10;
 		globals->sync_bit = 1 << 11;
@@ -924,8 +988,8 @@ set_ioflags()
 		globals->cmd_flag_mask = 0xffffffffffffff00;
 		globals->cmd_flag_shift = 8;
 	} else { 
-		/* place holder for next change*/
-		globals->io_flags = ioflags_name_4_10;
+		/* 4.13 through 4.16 as of 04/20/2018 */
+		globals->io_flags = ioflags_name_4_15;
 		globals->req_op = req_op_name_4_10;
 		globals->sync_bit = 1 << 11;
 		globals->req_op_mask = 0xff;
@@ -985,6 +1049,56 @@ ioflags(uint64 f)
 
 	return(str);
 }
+
+void
+set_gfpflags()
+{
+	if ((globals->os_vers[0] == '2') || (globals->os_vers[0] == '3')) {
+		globals->gfp_flags = gfp_name_3_0;
+	} else if ((strncmp(globals->os_vers, "4.0.", 4) == 0) ||
+		  (strncmp(globals->os_vers, "4.1.", 4) == 0) ||
+		  (strncmp(globals->os_vers, "4.2.", 4) == 0) ||
+		  (strncmp(globals->os_vers, "4.3.", 4) == 0)) {
+		globals->gfp_flags = gfp_name_4_0;
+	} else if ((strncmp(globals->os_vers, "4.4.", 4) == 0) ||
+		  (strncmp(globals->os_vers, "4.5.", 4) == 0) ||
+		  (strncmp(globals->os_vers, "4.6.", 4) == 0) ||
+		  (strncmp(globals->os_vers, "4.7.", 4) == 0) ||
+		  (strncmp(globals->os_vers, "4.8.", 4) == 0) ||
+		  (strncmp(globals->os_vers, "4.9.", 4) == 0)) {
+		globals->gfp_flags = gfp_name_4_4;
+	} else if ((strncmp(globals->os_vers, "4.10.", 5) == 0) || 
+		  (strncmp(globals->os_vers, "4.11.", 5) == 0) ||
+		  (strncmp(globals->os_vers, "4.12.", 5) == 0)) {
+		globals->gfp_flags = gfp_name_4_10;
+	} else {
+		/* 4.13 through 4.16 as of 04/20/2018 */
+		globals->gfp_flags = gfp_name_4_13;
+	}
+
+}
+
+char *
+gfp_flags_str(unsigned int f)
+{
+	char *str = util_str;
+	int i;
+	str[0] = 0;
+
+	for (i = 0; i < GFP_NRBIT; i++) {   	
+		if ((f & (1 << i)) && globals->gfp_flags[i]) {
+			strcat(str, globals->gfp_flags[i]);
+			strcat(str, "|");
+		}
+	}
+
+	if (strlen(str)) {
+		str[strlen(str)-1] = 0;
+	} else {
+		sprintf (str, "0x%llx", f);
+	}
+	return(str);
+}	
 
 #define SOCK_DOM_MASK 0x3f
 #define SOCK_DOM_MAX 64
@@ -1366,6 +1480,86 @@ print_kernel_sym(unsigned long addr, char print_offset)
 	return;
 }
 
+char *
+dmangle(char *sym)
+{
+	int i;
+	int len_pos, name_pos, util_pos;
+	int len;
+	int ret;
+
+	if (mangle_flag || (strncmp(sym, "_Z", 2))) {
+		/* doesn't need to be demangled */
+		return sym;
+	}
+	
+	/* we need to find the first number after _Z and the first character after 
+	 * the number.
+	 */
+
+	i = 2;	
+	util_str[0] = 0;
+	util_pos = 0;
+	/* we will allow _nested_ symbols, so we loop here */
+	while (sym[i] != 0) {
+		len_pos = 0;
+		name_pos = 0;
+		len = 0;
+		/* skip ofter any alpha characters to find the function length */
+		while (sym[i] != 0) {
+			if (isalpha(sym[i]) || (sym[i] == '_')) { 
+				i++;
+				continue;
+			} else if (isdigit(sym[i])) { 
+				len_pos = i;
+				break;
+			} else {
+				/* unexpected symbol,  return original sym */
+				return sym;
+			}
+		}
+
+		while (sym[i] != 0) {
+			if (isdigit(sym[i])) {
+				i++;
+				continue;
+			} else if (isalpha(sym[i]) || (sym[i] == '_')) {
+				name_pos = i;
+				break;
+			} else {
+				/* unexpected symbol,  return original sym */
+				return sym;
+			}
+		}
+
+		if ((name_pos == 0) || (len_pos == 0)) return sym;	
+
+		if (sscanf (&sym[len_pos], "%d", &len))  {
+			strncpy (&util_str[util_pos], &sym[name_pos], len);
+			i= i+len;
+			if (isdigit(sym[i])) {
+				util_str[util_pos+len] = ':';
+				util_str[util_pos+len+1] = ':';
+				util_pos = util_pos+len+2;
+				continue;
+			} else {
+				util_str[util_pos+len] = 0;
+				break;
+			}
+		} else {
+			return sym;
+		}
+	}
+
+	if ((name_pos == 0) || (len_pos == 0)) 
+		return sym;	
+	else 
+		return (util_str);
+	
+	/* we should not get here, but if we do just return what was passed in */
+
+}	
+
 /* we only return a value of 1 if maplookup is called
  * the .map stacks don't follow normal procedure calling
  * conventions, so we want to signal to the upper layers to
@@ -1383,12 +1577,12 @@ print_user_sym(unsigned long ip, uint64 pid, char print_objfile)
 	if (objfile_preg.elfp && (ip < 0x10000000)) { 
 		if (sym = symlookup(&objfile_preg, ip, &offset)) {
 			if (print_objfile) {
-				printf ("%s+0x%llx [%s]", sym, offset, objfile);
+				printf ("%s+0x%llx [%s]", dmangle(sym), offset, objfile);
 			} else {
-				printf ("%s+0x%llx", sym, offset);
+				printf ("%s+0x%llx", dmangle(sym), offset);
 			}
 		} else if (sym = maplookup(pidp->mapinfop, ip, &offset)) {
-			printf ("%s+0x%llx", sym, offset);
+			printf ("%s+0x%llx", dmangle(sym), offset);
 			return 1;
 		} else {
 			printf ("0x%llx", ip);
@@ -1414,15 +1608,15 @@ print_user_sym(unsigned long ip, uint64 pid, char print_objfile)
 			}
 
 			if (sym = symlookup(pregp, ip, &offset)) {
-				printf ("%s+0x%llx", sym, offset);
+				printf ("%s+0x%llx", dmangle(sym), offset);
 			} else if (sym = maplookup(pidp->mapinfop, ip, &offset)) {
-				printf ("%s+0x%llx", sym, offset);
+				printf ("%s+0x%llx", dmangle(sym), offset);
 				return 1;
 			} else {
 				printf ("0x%llx", ip);
 			}
 		} else if (sym = maplookup(pidp->mapinfop, ip, &offset)) {
-			printf ("%s+0x%llx", sym, offset);
+			printf ("%s+0x%llx", dmangle(sym), offset);
 			return 1;
 		} else {
 			printf ("0x%llx", ip);
@@ -2078,3 +2272,4 @@ syscallname_to_syscallno(char *name, int *syscallno32, int *syscallno64)
 		}
 	}
 }
+

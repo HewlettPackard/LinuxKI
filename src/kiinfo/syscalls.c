@@ -969,7 +969,7 @@ print_fd_set(char *label, char *varptr, int fds_bytes)
 	int i;
 
 	printf ("%c%s0x", fsep, label);	
-	for (i = 0; i < fds_bytes; i++) {
+	for (i = fds_bytes - 1; i >= 0; i--) {
 		printf ("%02hhx", varptr[i]);
 	}
 }
@@ -985,7 +985,7 @@ print_varargs_enter(syscall_enter_t *rec_ptr)
 	struct sockaddr_in *lsock;
 	struct sockaddr_in *rsock;
 
-	switch (globals->syscall_index_64[rec_ptr->syscallno]) {
+	switch (rec_ptr->syscallno) {
 		case __NR_open :
 		case __NR_openat :
 		case __NR_stat :
@@ -1046,7 +1046,7 @@ print_varargs_exit(syscall_exit_t *rec_ptr)
 	short *st_addr;
 	short sock_type = 0;
 
-	switch (globals->syscall_index_64[rec_ptr->syscallno]) {
+	switch (rec_ptr->syscallno) {
 		case __NR_recvmmsg :
 		case __NR_sendmmsg :	
 			printf ("%cbytes=%lld", fsep, *(unsigned long *)varptr);
@@ -1225,7 +1225,10 @@ print_sys_exit_rec(void *a, void *p)
                 PRINT_SYSCALL(pidp, rec_ptr->syscallno);
                 printf ("%c[%d]", fsep, rec_ptr->syscallno);
                 print_syscall_retval(pidp, rec_ptr->syscallno, rec_ptr->ret);
-                printf ("%csyscallbeg=%12.06f", fsep, SECS(syscallbegtm));
+                if (abstime_flag) 
+			printf ("%csyscallbeg=%12.09f", fsep, SECS(syscallbegtm));
+                else 
+			printf ("%csyscallbeg=%12.06f", fsep, SECS(syscallbegtm));
                 print_syscall_args(pidp, rec_ptr->syscallno, &pidp->last_syscall_args[0]);
                 /* printf (" reclen: %d, size: %d, elf: %d", rec_ptr->reclen, sizeof(syscall_exit_t), pidp->elf);  */
                 if (rec_ptr->reclen > sizeof(syscall_exit_t) && pidp->elf == ELF64) {
@@ -1363,7 +1366,7 @@ socket_update_fdinfo(void *arg1, void *arg2)
 	if (rec_ptr->reclen <= sizeof(syscall_exit_t)) return;
 
 	varptr = (char *)rec_ptr + sizeof(syscall_exit_t);
-	switch (globals->syscall_index_64[rec_ptr->syscallno]) {
+	switch (rec_ptr->syscallno) {
                 case __NR_recvmmsg :
                 case __NR_sendmmsg :
                         bytes = *(unsigned long *)varptr;
@@ -1466,7 +1469,7 @@ incr_socket_stats(void *arg1, void *arg2, uint64 syscalltm, int elf, int logio)
 
 	bytes = rec_ptr->ret;
 
-	switch (syscall_index[rec_ptr->syscallno]) {
+	switch (rec_ptr->syscallno) {
                 case __NR_recvfrom:
                 case __NR_recvmsg:
                 case __NR_read:
@@ -1580,7 +1583,7 @@ pid_update_fdinfo(void *arg1, void *arg2)
 	if (rec_ptr->reclen <= sizeof(syscall_exit_t)) return;
 
 	varptr = (char *)rec_ptr + sizeof(syscall_exit_t);
-	switch (globals->syscall_index_64[rec_ptr->syscallno]) {
+	switch (rec_ptr->syscallno) {
 		case __NR_recvmmsg :
 		case __NR_sendmmsg :
 			varptr += sizeof(unsigned long);
@@ -1868,7 +1871,7 @@ futex_sys_enter_func(void *a, void *v)
 
         /* we only want futex() system calls and ones that match the filter */
         if (!(KS_ACTION(pidp, syscallno).scallop & FUTEXOP))  return 0;
-        if (!check_filter(f->f_uaddr, rec_ptr->args[0], 0)) return 0;
+        if (!check_filter(f->f_uaddr, rec_ptr->args[0])) return 0;
 
         pidp->last_syscall_id = rec_ptr->syscallno;
         pidp->last_syscall_time = rec_ptr->hrtime;

@@ -18,7 +18,7 @@
  *
  * likit.c	LInux Kernel Instrumentation
  *
- *		v5.3
+ *		v5.4
  *		colin.honess@gmail.com
  *		mark.ray@hpe.com
  *		pokilfoyle@gmail.com
@@ -233,7 +233,12 @@ STATIC void msr_ops(struct MsrList *oplist);
 
 STATIC struct timer_list *timer_lists ____cacheline_aligned_in_smp;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
 STATIC void hardclock_timer(unsigned long cpu);
+#else
+STATIC void hardclock_timer(struct timer_list *t);
+#endif
+
 
 /* Ideally we'll allocate buffers from physical memory; but on a system
  * with fragmented memory may fall back to allocating from virtual 
@@ -253,18 +258,18 @@ STATIC unsigned long	enabled_features = 0;
 STATIC char		ignored_syscalls64[NR_syscalls];
 STATIC char		ignored_syscalls32[NR_syscalls];
 
-
 /* When we're tracing a target set of tasks we need to install a hook
  * in the task exit path so we can unregister tasks as they exit.
  */
 STATIC int 	tt_exit_hook_installed = FALSE;
 STATIC int 	tt_fork_hook_installed = FALSE;
 
-
 /* Function pointers for unexported functions */
 static struct socket *(*sockfd_lookup_light_fp)(int, int *, int *);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
 static struct stack_trace *(*save_stack_trace_regs_fp)(struct pt_regs*, struct stack_trace*);
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+static struct stack_trace *(*save_stack_trace_regs_fp)(struct stack_trace*, struct pt_regs*);
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,1,0)
@@ -350,6 +355,8 @@ struct tp_struct tp_table[];
 #define RXUNUSED			void * unused,
 #define TXUNUSED			0,
 
+#define LIKI_STACK_SKIP			0
+
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
 
 /* Newer kernels introduce a new parameter to probe registration
@@ -364,6 +371,8 @@ struct tp_struct tp_table[];
 #define RXUNUSED			void * unused,
 #define TXUNUSED			0,
 
+#define LIKI_STACK_SKIP			0
+
 #else
 
 #define liki_probe_register(TT)		(tp_table[TT].name ? tracepoint_probe_register(tp_table[TT].name, tp_table[TT].func) : 0)
@@ -371,6 +380,8 @@ struct tp_struct tp_table[];
 
 #define RXUNUSED
 #define TXUNUSED
+
+#define LIKI_STACK_SKIP			1
 
 #endif
 
@@ -427,7 +438,7 @@ struct tp_struct tp_table[];
  * need to tinker here for a while to get good unwinds on a new platform.
  */
 
-/* Documented by Mark Rauy - 08/11/2017
+/* Documented by Mark Ray - 08/11/2017
  * I have tried to simplify this.   While save_stack_trace_regs() is
  * not exported, we can do a lookup from kallsyms.   This will abstract
  * some of the complexities.
@@ -439,7 +450,15 @@ struct tp_struct tp_table[];
 #define STACK_TRACE(DATA, REGS)						\
 	save_stack_trace_regs_fp(REGS, DATA);
 
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0) && !(defined SLES11 || defined SLES12)
+#define STACK_TRACE(DATA, REGS)						\
+	save_stack_trace_regs_fp(REGS, DATA);
+
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0) && !(defined SLES11 || defined SLES12)
+#define STACK_TRACE(DATA, REGS)						\
+	save_stack_trace_regs_fp(DATA, REGS); 
 #else
+
 STATIC int
 liki_backtrace_stack(void *data, char *name)
 {
@@ -462,23 +481,15 @@ liki_backtrace_address(void *data, unsigned long addr, int reliable)
         return;
 }
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(3,0,0)
 #if (defined SLES11 || defined SLES12)
 STATIC struct stacktrace_ops unwind_ops = {
         .stack                  = liki_backtrace_stack,         /* Text header stack type */
         .address                = liki_backtrace_address,       /* Print/record address */
         .walk_stack             = print_context_stack,          /* Traversal function */
 };
-#else
-STATIC struct stacktrace_ops unwind_ops = {
-        .stack                  = liki_backtrace_stack,         /* Text header stack type */
-        .address                = liki_backtrace_address,       /* Print/record address */
-        .walk_stack             = print_context_stack_bp,       /* Traversal function */
-};
-#endif
-
 #define STACK_TRACE(DATA, REGS)						\
 	dump_trace(current, REGS, NULL, 0, &unwind_ops, DATA);
+
 #else  // Very old kernels
 STATIC void
 liki_trace_warning(void *data, char *msg)
@@ -502,12 +513,12 @@ STATIC struct stacktrace_ops unwind_ops = {
 
 #define STACK_TRACE(DATA, REGS)                                         \
         dump_trace(current, REGS, NULL, &unwind_ops, DATA);
-#endif  //  LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+#endif  //  (defined SLES11 || defined SLES12)
 #endif  //  LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
 
 #elif defined CONFIG_ARM64
 #define STACK_TRACE(DATA, REGS)						\
-	save_stack_trace_regs(REGS, DATA);
+	save_stack_trace(DATA);
 
 #endif // CONFIG_ARM64
 
@@ -595,7 +606,6 @@ liki_stack_unwind(struct pt_regs *regs, int skip, int *start)
 	callchain->nr = 0;
 
 	if (!user_mode(regs)) {
-
 		struct stack_trace	st;
 
 		st.entries = (unsigned long *)callchain->ip;
@@ -1492,8 +1502,14 @@ startup_ring_buffer(void)
 	 * those using these buffers may migrate between CPUs in a preemptible
 	 * kernel, so I can't do the CPU-local thing.
 	 */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,16,0)
 	if ((vldtmp_cache = kmem_cache_create("LiKI_vldtmp_cache", MAX_VLDATA_LEN, 0, 
 			      SLAB_HWCACHE_ALIGN, NULL)) == NULL) {
+#else
+	/* on 4.16 kernels, make the slab so it can be copied from user space */
+	if ((vldtmp_cache = kmem_cache_create_usercopy("LiKI_vldtmp_cache", MAX_VLDATA_LEN, 0, 
+			      SLAB_HWCACHE_ALIGN, 0, MAX_VLDATA_LEN, NULL)) == NULL) {
+#endif
 		printk(KERN_WARNING "LiKI: failed to allocate vldtmp cache\n");
 		goto startup_ring_buffer_failed;
 	}
@@ -1513,6 +1529,7 @@ startup_ring_buffer_failed:
 }
 
 /* if jprobes are not configured in  kernel, then use timers to perform hardclocks */
+/* node jprobes are obsolete in 4.15 kernels */
 STATIC int
 startup_timer_list(void)
 {
@@ -1533,10 +1550,15 @@ startup_timer_list(void)
 	/* initialize each per-cpu timer and arm it */
 	for (cpu=0; cpu<nr_cpu_ids; cpu++) {
 		if (cpumask_test_cpu(cpu, cpu_online_mask)) {
-			init_timer(&timer_lists[cpu]);
-			timer_lists[cpu].expires = jiffies + 1;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
+                        init_timer(&timer_lists[cpu]);
 			timer_lists[cpu].function = hardclock_timer;
 			timer_lists[cpu].data = cpu;
+#else
+			timer_setup(&timer_lists[cpu], hardclock_timer, 0);
+
+#endif
+			timer_lists[cpu].expires = jiffies + 1;
 			add_timer_on(&timer_lists[cpu], cpu);
 		}
 	}
@@ -1608,29 +1630,44 @@ startup_msr(void)
 		return(ENOTSUPP);
 	}
 
+	/* only allow Advanced CPU statistics on non-VMs */
+	if (boot_cpu_has(X86_FEATURE_HYPERVISOR)) {
+		/* printk(KERN_WARNING "LiKI: MSR Features disabled, Vendor ID is %d. \n",boot_cpu_data.x86_vendor); */
+		return(ENOTSUPP);
+	}
+
 	/* only allow Advanced CPU statistics on known CPUs */
 	switch (boot_cpu_data.x86_model) {
-		case 30:	/* 45nm Nahalem */
-		case 26: 	/* 45nm Nahalem-EP */
-		case 46: 	/* 45nm Nahalem-EP */
-		case 37:	/* 32nm Westmere */
-		case 44:	/* 32nm Westmere-EP */
-		case 47:	/* 32nm Westmere-EX */
-		case 42:	/* 32nm SandyBridge */
-		case 45:	/* 32nm SandyBridge-E/EN/EP */
-		case 58:	/* 22nm IvyBridge */
+		case 26: 	/* INTEL_FAM6_NEHALEM_EP - 45nm Nahalem-EP */
+		case 30:	/* INTEL_FAM6_NEHALEM - 45nm Nahalem */
+		case 46: 	/* INTEL_FAM6_NAHALEM_EX - 45nm Nahalem-EP */
+
+		case 37:	/* INTEL_FAM6_WESTMERE - 32nm Westmere */
+		case 44:	/* INTEL_FAM6_WESTMERE_EP - 32nm Westmere-EP */
+		case 45:	/* INTEL_FAM6_WESTMERE - 32nm SandyBridge-E/EN/EP */
+		case 47:	/* INTEL_FAM6_WESTMERE_EX - 32nm Westmere-EX */
+
+		case 42:	/* INTEL_FAM6_SANDYBRIDGE - 32nm SandyBridge */
+		case 58:	/* INTEL_FAM6_IVYBRIDGE - 22nm IvyBridge */
 		case 62:	/* 22nm IvyBridge-EP/EX */
+
 		case 60:	/* 22nm Haswell */
+		case 61:	/* 14nm Broadwell Core-M */
 		case 63:	
 		case 69:
 		case 70:
-		case 61:	/* 14nm Broadwell Core-M */
-		case 86:	/* 14nm Broadwell Xeon D */
 		case 71:	/* 14nm Broadwell +GT3e */
 		case 79:	/* 14nm Broadwell Server */
-		case 78:	/* 14nm SkyLake Mobile */
-		case 94:	/* 14nm SkyLake Desktop */		
+		case 86:	/* 14nm Broadwell Xeon D */
+
+		case 78:	/* 14nm SkyLake Mobile  */
+		case 85:	/* 14nm SkyLake (Purley) */
+		case 94:	/* 14nm SkyLake Desktop  */		
 			break;
+		case 87:	/* Knights Landing - needs testing!!! */
+		case 133:	/* Knights Mill - needs testing!!! */
+		case 142:	/* KabyLake-U/Y - needs testing!!! */
+		case 158:	/* KabyLake-H/S - needs testing!!! */
 		default:
 			printk(KERN_WARNING "LiKI: MSR Features disabled, x86_model is %d. \n",boot_cpu_data.x86_model);
 			return(ENOTSUPP);
@@ -2877,6 +2914,130 @@ mm_filemap_fault_trace(RXUNUSED struct mm_struct *vm_mm, unsigned long virtual_a
 }
 #endif
 
+STATIC void
+mm_page_alloc_trace(RXUNUSED struct page *page, unsigned int order, unsigned int gfp_flags, unsigned int migratetype )
+{
+	mm_page_alloc_t	*t;
+	unsigned int			sz, stksz;
+	unsigned int			first_entry;
+	struct perf_callchain_entry	*callchain;
+	TRACE_COMMON_DECLS;
+
+	if (unlikely(tracing_state == TRACING_DISABLED))
+		return;
+
+	if (unlikely(tracing_state == TRACING_RESOURCES)) {
+
+		if (!(resource_is_traced(PID_RESOURCE(current->pid)) ||
+		      resource_is_traced(TGID_RESOURCE(current->tgid)) ||
+		      resource_is_traced(CPU_RESOURCE(raw_smp_processor_id()))))
+
+			return;
+	}
+
+	/* Do the unwind early so I know how much space to allocate in
+	 * the trace (based on stack depth)
+	 */
+	callchain = liki_stack_unwind(NULL, LIKI_STACK_SKIP, &first_entry);
+
+	if (callchain)
+		stksz = sizeof(unsigned long) * (callchain->nr - first_entry);
+	else
+		stksz = 0;
+
+	sz = TRACE_ROUNDUP((sizeof(mm_page_alloc_t) + stksz));
+
+	raw_local_irq_save(flags);
+
+	mycpu = raw_smp_processor_id();
+	tb = &tbufs[mycpu];
+
+	if (unlikely((t = (mm_page_alloc_t *)trace_alloc(sz, FALSE)) == NULL)) {
+		raw_local_irq_restore(flags);
+		return;
+	}
+
+	POPULATE_COMMON_FIELDS(t, TT_MM_PAGE_ALLOC, sz, ORDERED);
+
+	t->page = page ? page_to_pfn(page) : 0;
+	t->order = order;
+	t->flags = (unsigned int)gfp_flags;
+	t->migratetype = migratetype;
+
+	/* Copy in stack trace if we got one */
+	if (callchain) {
+		t->stack_depth = callchain->nr - first_entry;
+		memcpy(t->ips, &callchain->ip[first_entry], stksz);
+	} else
+		t->stack_depth = 0;
+
+	trace_commit(t);
+
+	raw_local_irq_restore(flags);
+
+	return;
+}
+
+STATIC void
+mm_page_free_trace(RXUNUSED struct page *page, unsigned int order )
+{
+	mm_page_free_t	*t;
+	unsigned int			sz, stksz;
+	unsigned int			first_entry;
+	struct perf_callchain_entry	*callchain;
+	TRACE_COMMON_DECLS;
+
+	if (unlikely(tracing_state == TRACING_DISABLED))
+		return;
+
+	if (unlikely(tracing_state == TRACING_RESOURCES)) {
+
+		if (!(resource_is_traced(PID_RESOURCE(current->pid)) ||
+		      resource_is_traced(TGID_RESOURCE(current->tgid)) ||
+		      resource_is_traced(CPU_RESOURCE(raw_smp_processor_id()))))
+
+			return;
+	}
+
+	/* Do the unwind early so I know how much space to allocate in
+	 * the trace (based on stack depth)
+	 */
+	callchain = liki_stack_unwind(NULL, LIKI_STACK_SKIP, &first_entry);
+
+	if (callchain)
+		stksz = sizeof(unsigned long) * (callchain->nr - first_entry);
+	else
+		stksz = 0;
+
+	sz = TRACE_ROUNDUP((sizeof(mm_page_free_t) + stksz));
+	raw_local_irq_save(flags);
+
+	mycpu = raw_smp_processor_id();
+	tb = &tbufs[mycpu];
+
+	if (unlikely((t = (mm_page_free_t *)trace_alloc(sz, FALSE)) == NULL)) {
+		raw_local_irq_restore(flags);
+		return;
+	}
+
+	POPULATE_COMMON_FIELDS(t, TT_MM_PAGE_FREE, sz, ORDERED);
+
+	t->page = page ? page_to_pfn(page) : 0;
+	t->order = order;
+
+	/* Copy in stack trace if we got one */
+	if (callchain) {
+		t->stack_depth = callchain->nr - first_entry;
+		memcpy(t->ips, &callchain->ip[first_entry], stksz);
+	} else
+		t->stack_depth = 0;
+
+	trace_commit(t);
+
+	raw_local_irq_restore(flags);
+
+	return;
+}
 
 STATIC void
 page_cache_insert_trace(RXUNUSED struct page *page)
@@ -3137,7 +3298,7 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
 		 * to read in 3 args for read().
 		 */
 		syscall_get_arguments(current, regs, 0, 3, args_tmp);
-		fnlen=strlen_user((const char __user *)*args_tmp);
+		fnlen=strnlen_user((const char __user *)*args_tmp, 32767);
 
 		if (unlikely(fnlen==0))
 			goto scentry_skip_vldata;
@@ -3221,7 +3382,7 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
 		 * to read in 4 args for openat().
 		 */
 		syscall_get_arguments(current, regs, 0, 4, args_tmp);
-		fnlen=strlen_user((const char __user *)args_tmp[1]);
+		fnlen=strnlen_user((const char __user *)args_tmp[1], 32767);
 
 		if (unlikely(fnlen==0))
 			goto scentry_skip_vldata;
@@ -4381,6 +4542,7 @@ scexit_skip_vldata:
 	return;
 }
 
+
 /* The following is the expected preempt_count when not executing in driver/interrupt */
 #define HARDCLOCK_COUNT		0x10000
 
@@ -4430,7 +4592,7 @@ hardclock_trace(struct pt_regs *regs)
 
 	/* If we're idle we don't want any stacktrace. 
 	 */
-	if (!(current->pid == 0 && (preempt_cnt == 0))) 
+	if (!(current->pid == 0 && (preempt_cnt == 0)))
 		callchain = liki_stack_unwind(regs, HARDCLOCK_STACK_SKIP, &first_entry);
 
 	if (callchain)
@@ -4559,7 +4721,7 @@ hardclock_trace(struct pt_regs *regs)
  * should use it. However in the mean time we can hook ourselves back into the
  * profile_tick mechanism using jprobes.
  */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0) && LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
 
 STATIC void
 hardclock_jprobe(int type)
@@ -4580,9 +4742,16 @@ STATIC struct jprobe jphc = {
 
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
 STATIC void
-hardclock_timer(unsigned long cpu)
+hardclock_timer(unsigned long data)
 {
+#else
+STATIC void
+hardclock_timer(struct timer_list *t)
+{
+#endif
+	int cpu = raw_smp_processor_id();
 	struct pt_regs *regs = get_irq_regs();
 	unsigned long target_jiffy = jiffies + 1;
 
@@ -4590,7 +4759,6 @@ hardclock_timer(unsigned long cpu)
 
 	mod_timer(&timer_lists[cpu], target_jiffy);
 }
-
 
 STATIC void
 power_start_trace(RXUNUSED unsigned int type, unsigned int state, unsigned int cpu)
@@ -5008,6 +5176,7 @@ softirq_raise_trace(RXUNUSED struct softirq_action *h, struct softirq_action *ve
 }
 
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
 STATIC INLINE void
 __tasklet_enqueue_core(unsigned long hi, struct tasklet_struct *tst)
 {
@@ -5076,7 +5245,7 @@ STATIC struct jprobe thsj = {
 		.symbol_name = "__tasklet_hi_schedule",
 	},
 };
-
+#endif
 
 STATIC void
 __workqueue_enqueue_trace_common(int cpu, struct work_struct *work)
@@ -5357,192 +5526,7 @@ startup_trace(void)
 	return;
 }
 
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
-STATIC void
-fp_switch_trace(RXUNUSED struct task_struct *p, struct task_struct *n)
-#else
-STATIC void
-fp_switch_trace(RXUNUSED struct rq *rq, struct task_struct *p, struct task_struct *n)
-#endif
-{
-	fp_switch_t			*t;
-	unsigned int			sz, stksz;
-	int				first_entry;
-	struct perf_callchain_entry	*callchain = NULL;
-	TRACE_COMMON_DECLS;
-
-
-	if (unlikely(tracing_state == TRACING_DISABLED))
-		return;
-
-	if (unlikely(!p || !n)) {
-#ifdef __LIKI_DEBUG
-		printk(KERN_WARNING "LiKI: NULL pointer passed to fp_switch_trace()\n");
-#endif
-		return;
-	}
-
-	/* If we aren't doing global tracing, and neither next or aren't tracing
-	 * the switching-off task, or the switching-off task is the idle loop
-	 * then bail.
-	 */
-	if (unlikely(tracing_state == TRACING_RESOURCES)) {
-
-		if (!(resource_is_traced(PID_RESOURCE(p->pid)) ||
-		      resource_is_traced(TGID_RESOURCE(p->tgid)) ||
-		      resource_is_traced(PID_RESOURCE(n->pid)) ||
-		      resource_is_traced(TGID_RESOURCE(n->tgid)) ||
-		      resource_is_traced(CPU_RESOURCE(raw_smp_processor_id()))))
-
-			return;
-	}
-
-
-	/* Do the unwind early so I know how much space to allocate in
-	 * the trace (based on stack depth)
-	 */
-	callchain = liki_stack_unwind(NULL, OTHER_STACK_SKIP, &first_entry);
-
-	if (callchain)
-		stksz = sizeof(unsigned long) * (callchain->nr - first_entry);
-	else
-		stksz = 0;
-
-	sz = TRACE_ROUNDUP((sizeof(fp_switch_t) + stksz));
-
-	raw_local_irq_save(flags);
-
-	mycpu = raw_smp_processor_id();
-	tb = &tbufs[mycpu];
-
-	if (unlikely((t = (fp_switch_t *)trace_alloc(sz, FALSE)) == NULL)) {
-		raw_local_irq_restore(flags);
-		return;
-	}
-
-	POPULATE_COMMON_FIELDS(t, TT_FP_SWITCH, sz, ORDERED);
-
-#ifdef INCLUDE_SYSCALLS
-	t->syscallno = syscall_get_nr(current, regs);
-	syscall_get_arguments(current, regs, 0, N_SYSCALL_ARGS, t->args);
-#endif
-	t->prev_state = p->state;
-	t->next_pid = n->pid;
-
-	/* Copy in the stack trace if we have one. In the process take the two
-	 * pointless frames (fp_switch_trace() and schedule() off the stack
-	 */
-	if (callchain) {
-		memcpy(t->ips, &callchain->ip[first_entry], stksz);
-		t->stack_depth = callchain->nr - first_entry;
-	} else 
-		t->stack_depth = 0;
-
-	trace_commit(t);
-
-	raw_local_irq_restore(flags);
-
-	return;
-}
-
-STATIC void
-fp_hardclock_trace(struct pt_regs *regs)
-{
-	fp_hardclock_t			*t;
-	unsigned int			sz, stksz;
-	int				first_entry;
-	struct perf_callchain_entry	*callchain = NULL;
-	TRACE_COMMON_DECLS;
-
-	if (unlikely(tracing_state == TRACING_DISABLED))
-		return;
-
-	if (unlikely(regs == NULL)) {
-#ifdef __LIKI_DEBUG
-		printk(KERN_WARNING "LiKI: NULL pointer passed fp_ hardclock_trace()\n");
-#endif
-		return;
-	}
-
-	if (unlikely(tracing_state == TRACING_RESOURCES)) {
-
-		if (!(resource_is_traced(PID_RESOURCE(current->pid)) ||
-		      resource_is_traced(TGID_RESOURCE(current->tgid)) ||
-		      resource_is_traced(CPU_RESOURCE(raw_smp_processor_id()))))
-
-			return;
-	}
-
-	/* Not interested in ticks when we're idle */
-	if (current->pid == 0)
-		return;
-
-	/* If we cannot get an unwind then there's no point in generating
-	 * a trace
-	 */
-	if ((callchain = liki_stack_unwind(regs, HARDCLOCK_STACK_SKIP, &first_entry)) == NULL) 
-		return;
-
-	stksz = sizeof(unsigned long) * (callchain->nr - first_entry);
-	sz = TRACE_ROUNDUP((sizeof(fp_hardclock_t) + stksz));
-
-	raw_local_irq_save(flags);
-
-	mycpu = raw_smp_processor_id();
-	tb = &tbufs[mycpu];
-
-	if (unlikely((t = (fp_hardclock_t *)trace_alloc(sz, TRUE)) == NULL)) {
-		raw_local_irq_restore(flags);
-		return;
-	}
-
-	POPULATE_COMMON_FIELDS(t, TT_FP_HARDCLOCK, sz, UNORDERED);
-
-	/* The common fields in the hardclock trace are a little different.
-	 * Ordinarily we want the pid and cmd to indicate that we are in 
-	 * an ISR, but in this case we know we're in an ISR and we want to
-	 * know about the interrupted task.
-	 */
-	t->pid = current->pid;
-	t->tgid = current->tgid;
-
-	if (!user_mode(regs)) {
-		t->syscallno = syscall_get_nr(current, regs);
-		syscall_get_arguments(current, regs, 0, N_SYSCALL_ARGS, t->args);
-	} else
-		t->syscallno = -1;
-
-	t->stack_depth = callchain->nr - first_entry;
-	memcpy(t->ips, &callchain->ip[first_entry], stksz);
-
-	trace_commit(t);
-
-	raw_local_irq_restore(flags);
-
-	return;
-}
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
-STATIC void
-fp_hardclock_jprobe(int type)
-{
-	struct pt_regs *regs = get_irq_regs();
-
-	fp_hardclock_trace(regs);
-
-	jprobe_return();
-}
-
-STATIC struct jprobe jpfphc = {
-	.entry = (kprobe_opcode_t *)fp_hardclock_jprobe,
-	.kp = {
-		.symbol_name = "profile_tick",
-	},
-};
-#endif
-
-
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
 STATIC struct sock *
 listen_overflow_jprobe(struct sock *sk, struct sk_buff *skb,
 		       struct request_sock *req,
@@ -5590,6 +5574,7 @@ STATIC struct jprobe jplo = {
 		.symbol_name = "tcp_v4_syn_recv_sock",
 	},
 };
+#endif
 
 
 /* debugfs interface to the ring buffer
@@ -6163,14 +6148,13 @@ struct tp_struct tp_table[TT_NUM_PROBES] = {
 	{NULL, "scsi_dispatch_cmd_done", scsi_dispatch_cmd_done_trace},
 	{NULL, NULL, NULL},
 	{NULL, NULL, NULL},
-	{NULL, "sched_switch", fp_switch_trace},
+	{NULL, NULL, NULL},
 	{NULL, NULL, NULL},
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
 	{NULL, "mm_filemap_fault", mm_filemap_fault_trace},
 #else
 	{NULL, NULL, NULL},
 #endif
-	{NULL, NULL, NULL},
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
 	{NULL, "workqueue_insertion", workqueue_enqueue_trace},
 	{NULL, "workqueue_execution", workqueue_execute_trace},
@@ -6178,12 +6162,19 @@ struct tp_struct tp_table[TT_NUM_PROBES] = {
 	{NULL, "workqueue_queue_work", workqueue_enqueue_trace},
 	{NULL, "workqueue_execute_start", workqueue_execute_trace},
 #endif
+	{NULL, NULL, NULL},	/* tasklet is done with probes */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
 	{NULL, "mm_filemap_add_to_page_cache", page_cache_insert_trace},
 	{NULL, "mm_filemap_delete_from_page_cache", page_cache_evict_trace},
 #else
+	{NULL, NULL, NULL},	/* inserts and evicts used to be done with probes */
 	{NULL, NULL, NULL},
-	{NULL, NULL, NULL},
+#endif
+	{NULL, "mm_page_alloc", mm_page_alloc_trace},
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,3,0)
+	{NULL, "mm_page_free", mm_page_free_trace},
+#else 
+	{NULL, "mm_page_free_direct", mm_page_free_trace},
 #endif
 	{NULL, "sched_process_exit", exit_hook},
 	{NULL, "sched_process_fork", fork_hook}
@@ -6197,20 +6188,6 @@ change_installed_traces(unsigned long requested_traces)
 {
 	unsigned long	new_installed_traces = 0;
 	int 		i, err;
-
-
-	/* We cannot permit the hardclock and fingerprint hardclock traces
-	 * to co-exist as these both hook into the same tracepoint. For
-	 * simplicity we'll just make the rule that you either get the
-	 * regular traces or the fp traces.
-	 */
-	if ((requested_traces & (TT_BIT(TT_FP_SWITCH) | TT_BIT(TT_FP_HARDCLOCK))) && 
-	    (requested_traces & (TT_BIT(TT_SCHED_SWITCH) | TT_BIT(TT_HARDCLOCK)))) {
-
-		printk(KERN_WARNING "LiKI: cannot enable both fingerprinting and regular traces\n");
-		return(-EINVAL);
-	}
-
 
 	/* Turn off tracing while we adjust the installed traces. Don't want odd
 	 * selections of traces dribbling in at the start and end of the trace.
@@ -6226,6 +6203,9 @@ change_installed_traces(unsigned long requested_traces)
 		if (TRACE_ENABLED_IN(i, installed_traces))
 			liki_probe_unregister(i);
 	}
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
+/* jprobes are obsolete in 4.15 */
 
 	if (TRACE_ENABLED_IN(TT_LISTEN_OVERFLOW, installed_traces))
 		unregister_jprobe(&jplo);
@@ -6244,17 +6224,12 @@ change_installed_traces(unsigned long requested_traces)
 #endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
-	if (TRACE_ENABLED_IN(TT_FP_HARDCLOCK, installed_traces))
-		unregister_jprobe(&jpfphc);
-
 	if (TRACE_ENABLED_IN(TT_HARDCLOCK, installed_traces))
 		unregister_jprobe(&jphc);
 #else
-	if (TRACE_ENABLED_IN(TT_FP_HARDCLOCK, installed_traces))
-		unregister_timer_hook((int (*)(struct pt_regs *))fp_hardclock_trace);
-
 	if (TRACE_ENABLED_IN(TT_HARDCLOCK, installed_traces))
 		unregister_timer_hook((int (*)(struct pt_regs *))hardclock_trace);
+#endif
 #endif
 
 
@@ -6274,29 +6249,17 @@ change_installed_traces(unsigned long requested_traces)
 		}
 	}
 
-	if (TRACE_ENABLED_IN(TT_FP_HARDCLOCK, requested_traces)) {
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
-
-		memset(&jpfphc, 0, sizeof(struct jprobe));
-	        jphc.entry = (kprobe_opcode_t *)hardclock_jprobe;
-		jpfphc.kp.symbol_name = "profile_tick";
-
-		if (register_jprobe(&jpfphc) < 0)
-			printk(KERN_WARNING "LiKI: could not enable fp_hardclock jprobe\n");
-		else
-			new_installed_traces |= (TT_BIT(TT_FP_HARDCLOCK));
-#else
-		if (register_timer_hook((int (*)(struct pt_regs *))fp_hardclock_trace) != 0)
-			printk(KERN_WARNING "LiKI: could not enable fp_hardclock trace\n");
-		else 
-			new_installed_traces |= (TT_BIT(TT_FP_HARDCLOCK));
-#endif
-	}
-
 	if (TRACE_ENABLED_IN(TT_HARDCLOCK, requested_traces)) {
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,15,0)
+
+/* jprobes are obsolet in 4.15.   So use the timer list instead */
+
+		if (startup_timer_list() != 0) {
+			printk(KERN_WARNING "LiKI: failed to create timer_list entries. Hardclock traces disabled\n");
+		}
+
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
 
 		memset(&jphc, 0, sizeof(struct jprobe));
 	        jphc.entry = (kprobe_opcode_t *)hardclock_jprobe;
@@ -6305,7 +6268,7 @@ change_installed_traces(unsigned long requested_traces)
 		if (register_jprobe(&jphc) < 0) {
 			printk(KERN_WARNING "LiKI: could not enable hardclock jprobe - Attempting Kernel Timers\n");
 			if (startup_timer_list() != 0) {
-				printk(KERN_WARNING "LiKI: failed to create timer_list entries\n");
+				printk(KERN_WARNING "LiKI: failed to create timer_list entries. Hardclock traces disabled\n");
 			}
 		} else
 			new_installed_traces |= (TT_BIT(TT_HARDCLOCK));
@@ -6348,6 +6311,8 @@ change_installed_traces(unsigned long requested_traces)
 	}
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
+	/* jprobes are obsolete in 4.15 */
 	if (TRACE_ENABLED_IN(TT_LISTEN_OVERFLOW, requested_traces)) {
 
 		/* The probe location can be specified in two ways: through the kp.addr field
@@ -6388,6 +6353,7 @@ change_installed_traces(unsigned long requested_traces)
 				new_installed_traces |= (TT_BIT(TT_TASKLET_ENQUEUE));
 		}
 	}
+#endif
 
 	if (requested_traces & TT_BITMASK_READS_BLOCK)
 		new_installed_traces |= (TT_BITMASK_READS_BLOCK);
@@ -6847,7 +6813,7 @@ liki_initialize(void)
 	int	i;
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,13,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,4)
 	printk(KERN_INFO "LiKI: unsupported kernel version\n");
 	return(-EINVAL);
 #else
@@ -6878,7 +6844,7 @@ liki_initialize(void)
 		return(-EINVAL);
 	}
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
         if ((save_stack_trace_regs_fp = (void *)kallsyms_lookup_name("save_stack_trace_regs")) == 0) {
 		printk(KERN_WARNING "LiKI: cannot find save_stack_trace_regs()\n");
 		printk(KERN_WARNING "LiKI: tracing initialization failed\n");

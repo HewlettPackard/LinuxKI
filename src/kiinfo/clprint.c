@@ -345,6 +345,7 @@ void cl_toc()
               LI; ARF(_LNK_4_3_1, _MSG_4_3_1); NLt;
             _UL;
             LI; ARF(_LNK_4_4, _MSG_4_4); NLt;
+            LI; ARF(_LNK_4_5, _MSG_4_5); NLt;
           _UL;
           LI; ARF(_LNK_5_0, _MSG_5_0); NLt;
           UL;
@@ -1317,6 +1318,47 @@ cl_active_disks()                       /* Section 4.2.1 */
 }
 
 int 
+clpid_print_miostats(void *arg1, void *arg2)
+{
+	clpid_info_t *clpidp = (clpid_info_t *)arg1;
+	pid_info_t *pidp = clpidp->pidp;
+
+	if (pidp->miostats[IOTOT].compl_cnt == 0) return 0;
+	
+	globals = clpidp->globals;
+	PID_URL_FIELD8(pidp->PID);	
+	SPACE;
+	print_iostats_totals(globals, &pidp->miostats[0], NULL);
+	printf (" %s", pidp->cmd);
+	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
+	if (pidp->thread_cmd) printf ("  (%s)", pidp->thread_cmd);	
+	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	DSPACE;
+	SERVER_URL_FIELD_SECTION_BRACKETS(globals, _LNK_4_2_1);
+	printf ("\n");
+}
+
+void
+cl_perpid_mdev_totals()                  /* Section 4.4.0 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_4);
+        HEAD3(_MSG_4_4); 
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_3,"[Prev Subsection]");
+        ARFx(_LNK_4_5,"[Next Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	BOLD("         --------------------  Total  -------------------- --------------------  Write  -------------------- ---------------------  Read  --------------------\n");
+	BOLD("PID         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv  Command\n");
+	foreach_hash_entry((void **)clpid_hash, CLPID_HASHSZ, clpid_print_miostats, clpid_sort_by_miops, top, NULL);
+}
+ 
+int 
 clpid_print_iostats(void *arg1, void *arg2)
 {
 	clpid_info_t *clpidp = (clpid_info_t *)arg1;
@@ -1342,12 +1384,11 @@ cl_perpid_dev_totals()                  /* Section 4.4.0 */
 {
         GREEN_TABLE;
         TEXT("\n");
-        ANM(_LNK_4_4);
-        HEAD3(_MSG_4_4);
+        ANM(_LNK_4_5);
+        HEAD3(_MSG_4_5);
 
         FONT_SIZE(-1);
-        ARFx(_LNK_4_3,"[Prev Subsection]");
-        ARFx(_LNK_4_5,"[Next Subsection]");
+        ARFx(_LNK_4_4,"[Prev Subsection]");
         ARFx(_LNK_4_0,"---[Prev Section]");
         ARFx(_LNK_5_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");

@@ -765,8 +765,8 @@ pid_report(void *arg1, void *v)
 	if (pidp->num_tr_recs == 0) return 0;
 	if ((pidp->PID == -1) || (pidp->PID==0)) return 0;
 
-	if (!check_filter(f->f_P_pid, (uint64)pidp->PID, fnf) &&
-            !check_filter(f->f_P_tgid, (uint64)pidp->tgid, fnf))
+	if (!check_filter(f->f_P_pid, (uint64)pidp->PID) &&
+            !check_filter(f->f_P_tgid, (uint64)pidp->tgid))
                 return 0;
 
 	load_perpid_objfile_and_shlibs(pidp); 

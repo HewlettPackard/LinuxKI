@@ -130,7 +130,7 @@ collect_hc_stktrc(hardclock_t *rec_ptr, hc_info_t *hcinfop, pid_info_t *pidp)
 
 	state = get_cpu_state(rec_ptr);
 
-	if ((state == HC_IDLE) || (state == HC_INTR)) return 0;
+	if (state == HC_IDLE) return 0;
 
 	/* Only collect USER stack traces if we have potential mappings avaiable and
 	 * there is more then one function in the trace 

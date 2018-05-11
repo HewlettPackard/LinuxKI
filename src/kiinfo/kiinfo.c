@@ -36,6 +36,7 @@ extern int open_trace_files();
 extern int close_trace_files(int);
 extern int init_trace_files(int);
 extern int open_merged_file();
+extern int init_debug_mountpoint(char *);
 
 int debug=0;            /* debug code is off by default */
 int is_alive=0;         /* live analyze can be done with liki kernel module only */
@@ -71,6 +72,7 @@ char	liki_initialized = 0;
 char *cwd = NULL;
 int nfiles = 0;
 struct utsname utsname;
+char *kgdboc_str = NULL;
 
 trace_info_t  trace_files[MAXCPUS];
 trace_info_t  trace_file_merged;
@@ -159,12 +161,23 @@ main(int argc, char *argv[])
 	PRE;
 
 	if (likidump_flag) {
+		if (geteuid() != 0) { 
+			fprintf (stderr, "You must run kinfo as root to collect a trace dump\n");
+			_exit(-1);
+		}
+
 		if (uname(&utsname) == 0) {
 			if (strstr(utsname.machine, "aarch64")) arch_flag = AARCH64;
 		}
+		clear_kgdboc();
 		likidump();
+		if (kgdboc_str) reset_kgdboc();
 		_exit(0);
 	} else if (kitracedump_flag) {
+		if (geteuid() != 0) { 
+			fprintf (stderr, "You must run kinfo as root to collect a trace dump\n");
+			_exit(-1);
+		}
 		kitracedump();
 		_exit(0);
 	} else if (objdump_flag) {
@@ -203,6 +216,13 @@ main(int argc, char *argv[])
 
 	if (csv_flag) fsep = ',';               /* change field separator for CSV output */ 
 	if (is_alive) {
+
+		if (geteuid() != 0) { 
+			fprintf (stderr, "You must run kinfo as root to perform online tracing\n");
+			_exit(-1);
+		}
+		/* clear kgdboc file to avoid failure due to jprobe */
+		clear_kgdboc();
 		/* Disable time filters for live KI */
 		start_filter = 0;
 		end_filter = 0xfffffffffffffffull;
@@ -233,14 +253,19 @@ main(int argc, char *argv[])
 		init_trace_ids();
 		load_liki_module();
 
+		/* open debugfs directory needef or LiKI */
+		init_debug_mountpoint(debug_dir);
 		init_func(NULL);
 		developers_init();		/* calls liki_init_tracing */ 
 
 		set_ioflags(); 	/* needs to be called after setting IS_LIKI */
+		set_gfpflags();
 	 
 		read_liki_traces();		/* call instead of developers_call() */
 		liki_close_live_stream();
 		unload_liki_module();
+
+		if (kgdboc_str) reset_kgdboc();
 
 		if (!kilive) {
 			save_and_clear_server_stats(nfiles);
@@ -250,8 +275,6 @@ main(int argc, char *argv[])
 			live_cleanup_func(NULL);
 		}
 	} else if (timestamp && kilive) {
-		/* Friends and Family only works with likidump and liki live streaming */
-		CLEAR(FNF_FLAG);
 		cwd = get_current_dir_name();
 		for_each_file(".", "ki.bin.", timestamp, cluster_flag);
 		if (nservers == 0) {
@@ -279,6 +302,7 @@ main(int argc, char *argv[])
 
 		parse_uname(1);
 		set_ioflags();
+		set_gfpflags();
 		printf ("KI Binary Version %d\n", globals->kiversion);
 
 		if (arch_flag == AARCH64) {
@@ -311,8 +335,6 @@ main(int argc, char *argv[])
 		live_cleanup_func(NULL);
 		
 	} else if (timestamp) {
-		/* Friends and Family only works with likidump and liki live streaming */
-		CLEAR(FNF_FLAG);
 		cwd = get_current_dir_name();
 		for_each_file(".", "ki.bin.", timestamp, cluster_flag);
 		if (nservers == 0) {
@@ -343,6 +365,7 @@ main(int argc, char *argv[])
 
 				parse_uname(1);
 				set_ioflags();
+				set_gfpflags();
 				printf ("KI Binary Version %d\n", globals->kiversion);
 
 				if (arch_flag == AARCH64) {

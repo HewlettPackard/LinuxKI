@@ -57,6 +57,8 @@ int trace_tasklet_enqueue_func(void *, void *);
 int trace_sched_switch_func(void *, void *);
 int trace_sched_wakeup_func(void *, void *);
 int trace_sched_migrate_task(void *, void *);
+int trace_mm_page_alloc_func(void *, void *);
+int trace_mm_page_free_func(void *, void *);
 
 static inline void
 set_tgid(int pid, int tgid) {
@@ -138,6 +140,9 @@ set_trace_funcs()
 	if (TRACE_ANON_FAULT) ki_actions[TRACE_ANON_FAULT].func = trace_anon_fault_func;
 	if (TRACE_FILEMAP_FAULT) ki_actions[TRACE_FILEMAP_FAULT].func = trace_filemap_fault_func;
 	if (TRACE_KERNEL_PAGEFAULT) ki_actions[TRACE_KERNEL_PAGEFAULT].func = trace_kernel_pagefault_func;
+	if (TRACE_MM_PAGE_ALLOC) ki_actions[TRACE_MM_PAGE_ALLOC].func = trace_mm_page_alloc_func;
+	if (TRACE_MM_PAGE_FREE) ki_actions[TRACE_MM_PAGE_FREE].func = trace_mm_page_free_func;
+	if (TRACE_MM_PAGE_FREE_DIRECT) ki_actions[TRACE_MM_PAGE_FREE_DIRECT].func = trace_mm_page_free_func;
 
 	ki_actions[TRACE_PRINT].func = trace_ftrace_print_func;
 }
@@ -213,7 +218,6 @@ trace_filter_func (void *a, void *v)
 	rec_ptr = conv_common_rec(a, &tt_rec_ptr);
 	set_tgid(rec_ptr->pid, rec_ptr->tgid);
 
-	if (debug) printf ("trace_filter_func()\n");
         if (!ki_actions[rec_ptr->id].execute) {
 		if (debug) printf ("Execute field not set: ki_action[%d]\n", rec_ptr->id);
                 return NULL;
@@ -232,8 +236,6 @@ trace_filter_func (void *a, void *v)
                         }
                         fi = fi->fi_next;
                 }
-
-		if (fnf) return rec_ptr;
 
 		if ((rec_ptr->id == TRACE_SCHED_SWITCH) || (rec_ptr->id == TRACE_SCHED_WAKEUP) || 
 		    (rec_ptr->id == TRACE_SCHED_WAKEUP_NEW) || 
@@ -254,8 +256,6 @@ trace_filter_func (void *a, void *v)
                         }
                         fi = fi->fi_next;
                 }
-
-		if (fnf) return rec_ptr;;
 
 		if ((rec_ptr->id == TRACE_SCHED_SWITCH) || (rec_ptr->id == TRACE_SCHED_WAKEUP) || 
 		    (rec_ptr->id == TRACE_SCHED_WAKEUP_NEW) || (rec_ptr->id == TRACE_SCHED_MIGRATE_TASK) ||
@@ -300,7 +300,6 @@ trace_generic_func(void *a, void *v)
 	common_t *rec_ptr;
 	char *ptr;
 	event_t *eventp;
-	if (debug) printf ("print_generic_func()\n");
 
 	rec_ptr = conv_common_rec(a, &tt_rec_ptr);
 	PRINT_COMMON_FIELDS(rec_ptr);
@@ -454,6 +453,80 @@ trace_filemap_fault_func(void *a, void *v)
 
 	rec_ptr = conv_filemap_fault(trcinfop, &tt_rec_ptr);
 	print_filemap_fault_rec(rec_ptr);
+	
+	return 0;
+}
+
+int
+print_mm_page_alloc_rec(void *a)
+{
+	mm_page_alloc_t *rec_ptr = (mm_page_alloc_t *)a;
+
+	PRINT_COMMON_FIELDS(rec_ptr);
+	PRINT_EVENT(rec_ptr->id);
+
+	printf ("%cpage=0x%llx", fsep, rec_ptr->page);
+	printf ("%corder=%d", fsep, rec_ptr->order);
+	printf ("%cflags=%s", fsep, gfp_flags_str(rec_ptr->flags));
+	printf ("%cmigratetype=0x%x", fsep, rec_ptr->migratetype);
+
+	if (rec_ptr->stack_depth) {
+		print_stacktrace(&rec_ptr->ips[0], rec_ptr->stack_depth, 0, rec_ptr->pid);
+		/* print_stacktrace_hex(&rec_ptr->ips[0], rec_ptr->stack_depth); */ 
+	}
+
+	printf ("\n");
+
+	return 0;
+}
+
+trace_mm_page_alloc_func(void *a, void *v)
+{	
+	trace_info_t *trcinfop = (trace_info_t *)a;
+	filter_t *f = v;
+	mm_page_alloc_t tt_rec_ptr;
+	mm_page_alloc_t *rec_ptr;
+
+	if (debug) fprintf (stderr, "trace_mm_page_alloc()\n");
+
+	rec_ptr = conv_mm_page_alloc(trcinfop, &tt_rec_ptr);
+	print_mm_page_alloc_rec(rec_ptr);
+	
+	return 0;
+}
+
+int
+print_mm_page_free_rec(void *a)
+{
+	mm_page_free_t *rec_ptr = (mm_page_free_t *)a;
+
+	PRINT_COMMON_FIELDS(rec_ptr);
+	PRINT_EVENT(rec_ptr->id);
+
+	printf ("%cpage=0x%llx", fsep, rec_ptr->page);
+	printf ("%corder=%d", fsep, rec_ptr->order);
+
+	if (rec_ptr->stack_depth) {
+		print_stacktrace(&rec_ptr->ips[0], rec_ptr->stack_depth, 0, rec_ptr->pid); 
+		/* print_stacktrace_hex(&rec_ptr->ips[0], rec_ptr->stack_depth);  */
+	}
+
+	printf ("\n");
+
+	return 0;
+}
+
+trace_mm_page_free_func(void *a, void *v)
+{	
+	trace_info_t *trcinfop = (trace_info_t *)a;
+	filter_t *f = v;
+	mm_page_free_t tt_rec_ptr;
+	mm_page_free_t *rec_ptr;
+
+	if (debug) fprintf (stderr, "trace_mm_page_free()\n");
+
+	rec_ptr = conv_mm_page_free(trcinfop, &tt_rec_ptr);
+	print_mm_page_free_rec(rec_ptr);
 	
 	return 0;
 }

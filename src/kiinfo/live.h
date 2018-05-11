@@ -25,7 +25,7 @@ typedef struct win_action {
 #define WINDOCK		31
 #define WINDOCK_SEL	32
 #define WINMAIN_FLAGS (SORT_FLAG | SCHED_FLAG)
-#define WINMAIN_STATS (GLOBAL_STATS | PERPID_STATS | PERFD_STATS )
+#define WINMAIN_STATS (GLOBAL_STATS | PERPID_STATS | PERCPU_STATS | PERFD_STATS )
 #define WINMAIN_TRACEMASK \
                                 (TT_BIT(TT_SCHED_SWITCH) | TT_BIT(TT_SCHED_WAKEUP) | \
                                  TT_BIT(TT_BLOCK_RQ_INSERT) | TT_BIT(TT_BLOCK_RQ_ISSUE) | \

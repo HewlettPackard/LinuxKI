@@ -139,6 +139,18 @@ pid_sort_by_iocnt(const void *v1, const void *v2)
 }
 
 int
+pid_sort_by_miocnt(const void *v1, const void *v2)
+{
+	const uint64 *p1=v1;
+	const uint64 *p2=v2;
+	pid_info_t *a1 = (pid_info_t *)*p1;
+	pid_info_t *a2 = (pid_info_t *)*p2;
+	int64 diff;
+
+	return (int)(a2->miostats[IOTOT].compl_cnt - a1->miostats[IOTOT].compl_cnt);
+}
+
+int
 pid_sort_by_runqtime(const void *v1, const void *v2)
 {
 	const uint64 *p1=v1;
@@ -2260,6 +2272,30 @@ clpid_sort_by_sleep_cnt(const void *v1, const void *v2)
 	if (schedp1 == NULL) return 1;
 	if (schedp2 == NULL) return -1;
         diff = schedp1->sched_stats.C_sleep_cnt - schedp2->sched_stats.C_sleep_cnt;
+
+        if (diff < 0) {
+                return 1;
+        } else if (diff > 0) {
+                return -1;
+        } else {
+                return 0;
+        }
+}
+
+int
+clpid_sort_by_miops(const void *v1, const void *v2)
+{
+	const uint64 *p1=v1;
+	const uint64 *p2=v2;
+	clpid_info_t *a1 = (clpid_info_t *)*p1;
+	clpid_info_t *a2 = (clpid_info_t *)*p2;
+	pid_info_t *b1 = a1->pidp;
+	pid_info_t *b2 = a2->pidp;
+	server_info_t *g1 = a1->globals;
+	server_info_t *g2 = a2->globals;
+	double diff;
+
+        diff = ((b1->miostats[IOTOT].compl_cnt * 1.0)/ g1->total_secs) - ((b2->miostats[IOTOT].compl_cnt * 1.0) / g2->total_secs);
 
         if (diff < 0) {
                 return 1;

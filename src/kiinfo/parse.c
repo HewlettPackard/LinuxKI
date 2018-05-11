@@ -50,7 +50,8 @@ int pc_xfs_file_aio_read = -1;
 int pc_xfs_file_read_iter = -1;
 int pc_inode_dio_wait = -1;
 int pc_xfs_file_dio_aio_write = -1;
-
+int pc_md_flush_request = -1;
+int pc_blkdev_issue_flush = -1;
 void
 parse_uname(char print_flag)
 {
@@ -531,10 +532,10 @@ parse_cpuinfo()
 			}
 		}
 
-		if (strstr(input_str, "GHz")) {
-			pos = strchr(input_str, '@') + 1;
-			if (pos) {
-				 sscanf (pos, "%f\n", &ghz);
+		if (strstr(input_str, "model name")) { 
+			pos = strrchr(input_str, ' ');
+			if (pos && strstr(pos, "GHz")) {
+				 sscanf (pos+1, "%f\n", &ghz);
 				 globals->clk_mhz = ghz*1000.0;
 			}
 		}
@@ -1046,6 +1047,8 @@ parse_mpath()
 	dev_info_t *devinfop, *mdevinfop = NULL;
 	int nargs = 0, mp_policy=0;
 
+
+	if (debug) fprintf (stderr, "parse mpath");	
 	sprintf(fname,"multipath-l.%s", timestamp);
         if ( (f = fopen(fname,"r")) == NULL) {
                 printf ("Unable to open file %s, errno %d\n", fname, errno);
@@ -1087,7 +1090,9 @@ parse_mpath()
 		}
 			
 
-		if ((strncmp(input_str, "  |- ", 5) == 0) || (strncmp(input_str, "  `- ",5) == 0)) {
+		if ((strncmp(input_str, "  |- ", 5) == 0) || 
+		    (strncmp(input_str, "  `- ", 5) == 0) || 
+		    (strncmp(input_str, "| |- ", 5) == 0)) {
 			sscanf(&input_str[5], "%d:%d:%d:%d %s %d:%d", 
 				&path1, &path2, &path3, &path4, devname, &major, &minor);
 			if (debug) fprintf (stderr, "  %s: %d:%d:%d:%d %s %d:%d\n", mpathname, path1, path2, path3, path4, devname, major, minor);
@@ -1368,16 +1373,19 @@ parse_kallsyms()
 	/* now, make a final pass looking for specifc symbol names and saving the index for quick lookups later */
 	for (i=0; i < globals->nsyms; i++) {
 		if (strcmp(globals->symtable[i].nameptr, "sleep_on_page") == 0)  pc_sleep_on_page = i; 
-		if (strcmp(globals->symtable[i].nameptr, "migration_entry_wait") == 0)  pc_migration_entry_wait = i; 
-		if (strcmp(globals->symtable[i].nameptr, "msleep") == 0)  pc_msleep = i; 
-		if (strcmp(globals->symtable[i].nameptr, "ixgbe_read_i2c_byte_generic") == 0)  pc_ixgbe_read_i2c_byte_generic = i; 
-		if (strcmp(globals->symtable[i].nameptr, "sys_semtimedop") == 0) pc_semtimedop = i;
-		if (strcmp(globals->symtable[i].nameptr, "sys_semctl") == 0) pc_semctl = i;
-		if (strcmp(globals->symtable[i].nameptr, "inode_dio_wait") == 0) pc_inode_dio_wait = i;
-		if (strcmp(globals->symtable[i].nameptr, "xfs_file_dio_aio_write") == 0) pc_xfs_file_dio_aio_write = i;
-		if (strcmp(globals->symtable[i].nameptr, "mutex_lock") == 0) pc_mutex_lock = i;
-		if (strcmp(globals->symtable[i].nameptr, "xfs_file_aio_read") == 0) pc_xfs_file_aio_read = i;
-		if (strcmp(globals->symtable[i].nameptr, "xfs_file_read_iter") == 0) pc_xfs_file_read_iter = i;
+		else if (strcmp(globals->symtable[i].nameptr, "migration_entry_wait") == 0)  pc_migration_entry_wait = i; 
+		else if (strcmp(globals->symtable[i].nameptr, "msleep") == 0)  pc_msleep = i; 
+		else if (strcmp(globals->symtable[i].nameptr, "ixgbe_read_i2c_byte_generic") == 0)  pc_ixgbe_read_i2c_byte_generic = i; 
+		else if (strcmp(globals->symtable[i].nameptr, "sys_semtimedop") == 0) pc_semtimedop = i;
+		else if (strcmp(globals->symtable[i].nameptr, "sys_semctl") == 0) pc_semctl = i;
+		else if (strcmp(globals->symtable[i].nameptr, "inode_dio_wait") == 0) pc_inode_dio_wait = i;
+		else if (strcmp(globals->symtable[i].nameptr, "xfs_file_dio_aio_write") == 0) pc_xfs_file_dio_aio_write = i;
+		else if (strcmp(globals->symtable[i].nameptr, "mutex_lock") == 0) pc_mutex_lock = i;
+		else if (strcmp(globals->symtable[i].nameptr, "xfs_file_aio_read") == 0) pc_xfs_file_aio_read = i;
+		else if (strcmp(globals->symtable[i].nameptr, "xfs_file_read_iter") == 0) pc_xfs_file_read_iter = i;
+		else if (strcmp(globals->symtable[i].nameptr, "sleep_on_page") == 0)  pc_sleep_on_page = i; 
+		else if (strcmp(globals->symtable[i].nameptr, "md_flush_request") == 0)  pc_md_flush_request = i; 
+		else if (strcmp(globals->symtable[i].nameptr, "blkdev_issue_flush") == 0)  pc_blkdev_issue_flush = i; 
 	}
 }
 

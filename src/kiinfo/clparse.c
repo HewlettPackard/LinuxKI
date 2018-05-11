@@ -417,6 +417,7 @@ clparse_print_report(void *v)
 	cl_active_disks();
 	cl_permdev_reports();
 	cl_active_mdevs();
+	cl_perpid_mdev_totals();
 	cl_perpid_dev_totals();
 
 	cl_network_report();			/* Section 5.0 */

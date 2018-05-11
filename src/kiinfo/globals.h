@@ -137,7 +137,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define KIALL_FLAG		0x4000000000ull
 #define FMTTIME_FLAG		0x8000000000ull
 #define CACHE_FLAG		0x10000000000ull
-#define FNF_FLAG		0x20000000000ull
+#define MANGLE_FLAG		0x20000000000ull
 #define INFO_FLAG               0x40000000000ull
 #define KITRACE_FLAG            0x80000000000ull
 #define FILTER_FLAG		0x100000000000ull
@@ -213,7 +213,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define cluster_flag		(ISSET(CLUSTER_FLAG))
 #define cltree			(ISSET(CLTREE_FLAG))
 #define	kiall_flag		(ISSET(KIALL_FLAG))
-#define fnf			(ISSET(FNF_FLAG))
+#define mangle_flag		(ISSET(MANGLE_FLAG))
 #define info_flag		(ISSET(INFO_FLAG))
 #define kitrace_flag		(ISSET(KITRACE_FLAG))
 #define filter_flag		(ISSET(FILTER_FLAG))
@@ -395,6 +395,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define REQ_FLUSH               (1 << 26)
 
 #define REQ_NRBIT	32  /* should be 35, but need to expand the cmd_flags */
+#define GFP_NRBIT	32  
 
 /* special node numbers for sockets */
 #define TCP_NODE	1
@@ -824,7 +825,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 /* macros for managing the Notes and Warnings messages and links.  */
 /* update with warnmsg[] definitions in globals.c */
-#define MAXWARNMSG		18
+#define MAXWARNMSG		21	
 #define MAXNOTEMSG		0
 #define MAXNOTEWARN		MAXWARNMSG+MAXNOTEMSG
 #define WARN_CPU_BOTTLENECK		0		
@@ -845,6 +846,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARN_TASKLET			15
 #define WARN_POWER			16
 #define WARN_MULTIPATH_BUG		17
+#define WARN_SK_BUSY			18
+#define WARN_ADD_RANDOM			19
+#define WARN_MD_FLUSH			20
 #define NOTE_NUM1		MAXWARNMSG+0
 
 /* warn flags passed to "foreach" functions for detection */
@@ -865,8 +869,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARNF_TASKLET			0x4000ull
 #define WARNF_POWER			0x8000ull
 #define WARNF_MULTIPATH_BUG		0x10000ull
+#define WARNF_ADD_RANDOM		0x20000ull
+#define WARNF_MD_FLUSH			0x40000ull
 
-/* warn flags specific to Oracle warnflag */
+/* warn flags specific to Oracle warnflag
 #define WARNF_ORASCHED			0x01ull
 #define WARNF_LGWR			0x02ull
 #define WARNF_DBW			0x04ull
@@ -874,10 +880,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARNF_LGWR_ASYNC		0x10ull
 #define WARNF_DBW_ASYNC			0x20ull
 #define WARNF_SSERVER_ASYNC		0x40ull
-#define WARNF_IOSLAVE			0x04ull
+#define WARNF_IOSLAVE			0x04ull 
+*/
 
 /* warn flags specific to hardclocks warnflag */ 
 #define WARNF_SEMLOCK			0x1ull
+#define WARNF_SK_BUSY			0x2ull
 
 typedef struct warnmsg_entry{
 	char *msg;
@@ -2005,6 +2013,8 @@ typedef struct server_info {
 	int	cmd_flag_shift;
 	uint64 sync_bit;		/* varies based on os_vers, used for Barrier I/O detection */
 	
+	char **gfp_flags;		/* based off os_vers */
+
 	/* for global HT stats */
 	uint64 ht_total_time;
 	uint64 ht_double_idle;
@@ -2201,9 +2211,15 @@ extern char *ioflags_name_3_6[];
 extern char *ioflags_name_4[];
 extern char *ioflags_name_4_8[];
 extern char *ioflags_name_4_10[];
+extern char *ioflags_name_4_15[];
 extern char *req_op_name_2[];
 extern char *req_op_name_4_8[];
 extern char *req_op_name_4_10[];
+extern char *gfp_name_3_0[];
+extern char *gfp_name_4_0[];
+extern char *gfp_name_4_4[];
+extern char *gfp_name_4_10[];
+extern char *gfp_name_4_13[];
 extern char *sotype_name_index[];
 extern char *fstype_name_index[];
 extern char *cpustate_name_index[];

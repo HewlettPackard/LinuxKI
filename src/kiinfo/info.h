@@ -288,6 +288,7 @@ extern int    print_pid_iostats(void *, void *);
 extern int    print_pid_iototals(void *);
 extern int    print_pid_iototals_csv(void *);
 extern int    print_pid_iosum(void *, void *);
+extern int    print_pid_miosum(void *, void *);
 extern int    calc_pid_iototals(void *, void *);
 extern int    print_fd_info(void *, void *);
 extern int    print_clear_histogram(void *, void *);
@@ -489,8 +490,9 @@ extern char     *pregop(uint64);
 extern char     *regop(uint64);
 extern char     *wr_str(uint64);
 extern void	set_ioflags();
+extern void	set_gfpflags();
 
-extern int	check_filter(void *, uint64, uint64);
+extern int	check_filter(void *, uint64);
 
 extern int 	get_fd_str(int, char *, char);
 extern int	get_fd_int(int, char); 
@@ -554,4 +556,5 @@ extern int txt_syms_type(char *);
 extern char *symlookup(void *,  uint64, uint64 *);
 extern char *maplookup(void *,  uint64, uint64 *);
 extern int print_user_sym(uint64, uint64, char);
+extern char *dmangle(char *);
 extern void objdump();

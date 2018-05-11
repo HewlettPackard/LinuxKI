@@ -16,8 +16,8 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <o:LastAuthor>Ray, Mark C (Global Solutions Engineering (GSE))</o:LastAuthor>
   <o:Revision>2</o:Revision>
   <o:TotalTime>17</o:TotalTime>
-  <o:Created>2017-06-01T12:44:00Z</o:Created>
-  <o:LastSaved>2017-06-01T12:44:00Z</o:LastSaved>
+  <o:Created>2018-05-10T13:45:00Z</o:Created>
+  <o:LastSaved>2018-05-10T13:45:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
   <o:Words>1682</o:Words>
   <o:Characters>9588</o:Characters>
@@ -650,21 +650,20 @@ href="BarrierWritesOracleASM_files/colorschememapping.xml">
  @font-face
 	{font-family:"Cambria Math";
 	panose-1:2 4 5 3 5 4 6 3 2 4;
-	mso-font-charset:1;
+	mso-font-charset:0;
 	mso-generic-font-family:roman;
-	mso-font-format:other;
 	mso-font-pitch:variable;
-	mso-font-signature:0 0 0 0 0 0;}
+	mso-font-signature:-536870145 1107305727 0 0 415 0;}
 @font-face
 	{font-family:Calibri;
 	panose-1:2 15 5 2 2 2 4 3 2 4;
 	mso-font-charset:0;
 	mso-generic-font-family:swiss;
 	mso-font-pitch:variable;
-	mso-font-signature:-520092929 1073786111 9 0 415 0;}
+	mso-font-signature:-536859905 -1073732485 9 0 511 0;}
 @font-face
 	{font-family:r_ansi;
-	panose-1:2 11 6 9 2 2 2 2 2 4;
+	mso-font-alt:Consolas;
 	mso-font-charset:0;
 	mso-generic-font-family:modern;
 	mso-font-pitch:fixed;
@@ -689,7 +688,9 @@ href="BarrierWritesOracleASM_files/colorschememapping.xml">
 	mso-hansi-font-family:Calibri;
 	mso-hansi-theme-font:minor-latin;
 	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;}
+	mso-bidi-theme-font:minor-bidi;
+	mso-ansi-language:EN-US;
+	mso-fareast-language:EN-US;}
 span.GramE
 	{mso-style-name:"";
 	mso-gram-e:yes;}
@@ -704,7 +705,9 @@ span.GramE
 	mso-hansi-font-family:Calibri;
 	mso-hansi-theme-font:minor-latin;
 	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;}
+	mso-bidi-theme-font:minor-bidi;
+	mso-ansi-language:EN-US;
+	mso-fareast-language:EN-US;}
 .MsoPapDefault
 	{mso-style-type:export-only;
 	margin-bottom:8.0pt;
@@ -743,7 +746,9 @@ div.WordSection1
 	mso-hansi-font-family:Calibri;
 	mso-hansi-theme-font:minor-latin;
 	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;}
+	mso-bidi-theme-font:minor-bidi;
+	mso-ansi-language:EN-US;
+	mso-fareast-language:EN-US;}
 </style>
 <![endif]--><!--[if gte mso 9]><xml>
  <o:shapedefaults v:ext="edit" spidmax="1026"/>
@@ -753,47 +758,50 @@ div.WordSection1
  </o:shapelayout></xml><![endif]-->
 </head>
 
-<body lang=EN-US style='tab-interval:.5in'>
+<body lang=EN-GB style='tab-interval:.5in'>
 
 <div class=WordSection1>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;mso-line-height-alt:
 11.25pt;vertical-align:top'><b><i style='mso-bidi-font-style:normal'><span
-style='font-size:12.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
+lang=EN-US style='font-size:12.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
 mso-fareast-font-family:"Times New Roman";color:black'>LinuxKI Warning<o:p></o:p></span></i></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></b></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'>Performance impact of
-barrier writes on Oracle DB writers using Oracle ASM</span></b><span
-style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'>Date: 02/27/2013<o:p></o:p></span></p>
-
-<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-class=GramE><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black;mso-bidi-font-weight:
-bold;mso-bidi-font-style:italic'>updated</span></span><span style='font-size:
-10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black;mso-bidi-font-weight:bold;mso-bidi-font-style:italic'>: 11/06/2014</span><span
-style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Problem</span></b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'><o:p>&nbsp;</o:p></span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+color:black'>Performance impact of barrier writes on Oracle DB writers using
+Oracle ASM</span></b><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
 mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
 
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+color:black'>Date: 02/27/2013<o:p></o:p></span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+class=GramE><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+mso-fareast-font-family:"Times New Roman";color:black;mso-bidi-font-weight:
+bold;mso-bidi-font-style:italic'>updated</span></span><span lang=EN-US
+style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
+"Times New Roman";color:black;mso-bidi-font-weight:bold;mso-bidi-font-style:
+italic'>: 11/06/2014</span><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
+
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:
+10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+color:black'>Problem</span></b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+color:black'><o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'>When using Oracle Automatic Storage Management (ASM), Oracle
 accesses the block devices directly, instead of using a file
@@ -807,19 +815,20 @@ Oracle.&nbsp;&nbsp; Barrier writes can also impact the Oracle Redo Logwriter as
 well.&nbsp; <o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'>One of the purposes of this article is to show how the LinuxKI Toolset
 can be used to troubleshoot performance issues on Linux systems.&nbsp; <o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:
+10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+color:black'>Background</span></b><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Background</span></b><span style='font-size:10.0pt;font-family:
-"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
+color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'>The purpose of barrier writes it to ensure the on-disk consistency
 and ordering of critical data.&nbsp;&nbsp;&nbsp; The barrier writes are
@@ -831,7 +840,7 @@ with battery-backed (non-volatile) cache, barrier writes are typically not
 needed.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'>Whether or not the SYNCHRONIZE_CACHE command is issued depends on
 how the storage array advertises itself.&nbsp;&nbsp; If the array advertises as
@@ -845,69 +854,71 @@ to the device.&nbsp;&nbsp; The write cache behavior can typically be seen
 during bootup, for example:<o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:9.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;
 mso-bidi-font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:
 "Times New Roman";color:black'>sd 7:0:5:0: [sdo] Write cache: enabled, read
-cache: enabled, supports DPO and FUA</span><span style='font-size:9.0pt;
-mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
+cache: enabled, supports DPO and FUA</span><span lang=EN-US style='font-size:
+9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
 "Times New Roman";color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'>The LinuxKI Toolset can show the barrier write and the potential
-impact it can have on performance.&nbsp;&nbsp; In the LinuxKI trace
-data,&nbsp;a barrier write sequence looks similar to the following...<o:p></o:p></span></p>
+impact it can have on performance.&nbsp;&nbsp; In the LinuxKI trace data,&nbsp;a
+barrier write sequence looks similar to the following...<o:p></o:p></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span style='font-size:9.0pt;mso-bidi-font-size:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
 10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
 color:black'>0.018948 cpu=1 pid=9999 block_rq_insert dev_t=0x04100030 wr=write
 flags=SYNC|<span style='background:yellow'>FLUSH</span> <span style='background:
 yellow'>sector=0x0</span> <span style='background:yellow'>len=0</span></span><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
+lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
 mso-fareast-font-family:"Times New Roman";color:black'> <o:p></o:p></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span style='font-size:9.0pt;mso-bidi-font-size:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
 10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
 color:black'>0.018949 cpu=1 pid=9999 block_rq_issue dev_t=0x04100030 wr=write
 flags=SYNC|<span style='background:yellow'>FLUSH</span> <span style='background:
 yellow'>sector=0xffffffffffffffff</span> <span style='background:yellow'>len=0</span></span><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
+lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
 mso-fareast-font-family:"Times New Roman";color:black'> <o:p></o:p></span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
+lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
 mso-fareast-font-family:"Times New Roman";color:black'>0.019129 cpu=18
 pid=13147 block_rq_complete dev_t=0x04100030 wr=write flags=SYNC <span
 style='background:yellow'>sector=0x0</span> <span style='background:yellow'>len=0</span>
-qpid=0 spid=0 qtm= 0.000000 svtm= 0.000000</span><span style='font-size:9.0pt;
-mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p></o:p></span></p>
+qpid=0 spid=0 qtm= 0.000000 svtm= 0.000000</span><span lang=EN-US
+style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
+mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'>Note that the block_rq_insert and block_rq_issue records will have
 the FLUSH flag set.&nbsp;&nbsp; The sector will be either 0x0 or
 0xffffffffffffffff, and the length will be 0.&nbsp;&nbsp;&nbsp; For the
 block_rq_complete will be similar, but the FLUSH flag may be
-cleared.&nbsp;&nbsp; Also note that the service time (svtm) will show 0.000000.&nbsp;&nbsp;
-Unfortunately, kiinfo cannot track the queue time (qtm) and service time (svtm)
-since a valid sector and length are not used.&nbsp; But note the different time
-difference between the block_rq_issue and block_rq_insert is the actual service
-time (0.019129 - 0x018949 = 0.000180 seconds).&nbsp;&nbsp; Note the barrier
-write is fast, but it is overhead and it is synchronous.&nbsp;&nbsp; <o:p></o:p></span></p>
+cleared.&nbsp;&nbsp; Also note that the service time (svtm) will show
+0.000000.&nbsp;&nbsp; Unfortunately, kiinfo cannot track the queue time (qtm)
+and service time (svtm) since a valid sector and length are not used.&nbsp; But
+note the different time difference between the block_rq_issue and
+block_rq_insert is the actual service time (0.019129 - 0x018949 = 0.000180
+seconds).&nbsp;&nbsp; Note the barrier write is fast, but it is overhead and it
+is synchronous.&nbsp;&nbsp; <o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:
+10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+color:black'>Investigation</span></b><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Investigation</span></b><span style='font-size:10.0pt;font-family:
-"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
+color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'>So how do the barrier writes impact the Oracle DB writers?&nbsp;
 First, you need to understand how Oracle issues asynchronous I/Os when the
@@ -918,25 +929,25 @@ one or more I/Os in parallel, and then io_getevents() is used later to read the
 asynchronous I/O events from the completion queue and wait if needed.&nbsp; <o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'>On a recent internal Proof-of-Concept testing, a LinuxKI trace
 sample was taken with the &quot;runki -p&quot; command.&nbsp;&nbsp; Analysis of
 one of the Oracle DB writer processes using kiinfo -kipid showed the following:<o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:9.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;
 mso-bidi-font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:
 "Times New Roman";color:black'>PID 11771&nbsp; ora_dbw0_proddb<br>
-&nbsp; PPID 1&nbsp; /sbin/init</span><span style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+&nbsp; PPID 1&nbsp; /sbin/init</span><span lang=EN-US style='font-size:9.0pt;
+mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
+"Times New Roman";color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:9.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;
 mso-bidi-font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:
-"Times New Roman";color:black'>&nbsp;&nbsp;&nbsp; ********* SCHEDULER ACTIVITY REPORT
-********<br>
+"Times New Roman";color:black'>&nbsp;&nbsp;&nbsp; ********* SCHEDULER ACTIVITY
+REPORT ********<br>
 &nbsp;&nbsp;&nbsp; RunTime&nbsp;&nbsp;&nbsp; :&nbsp; 5.438581&nbsp;
 SysTime&nbsp;&nbsp; :&nbsp; 3.748545&nbsp;&nbsp; UserTime&nbsp;&nbsp; :&nbsp;
 1.690036<br>
@@ -946,15 +957,16 @@ SysTime&nbsp;&nbsp; :&nbsp; 3.748545&nbsp;&nbsp; UserTime&nbsp;&nbsp; :&nbsp;
 &nbsp;&nbsp;&nbsp; RunQTime&nbsp;&nbsp; :&nbsp; 9.281119&nbsp; Switch
 Cnt:&nbsp;&nbsp;&nbsp;&nbsp; 39427&nbsp;&nbsp; PreemptCnt
 :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 6202<br>
-&nbsp;&nbsp;&nbsp; Last CPU&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-12&nbsp; CPU Migrs :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8887&nbsp;&nbsp; NODE Migrs
+&nbsp;&nbsp;&nbsp; Last CPU&nbsp;&nbsp;
+:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 12&nbsp; CPU Migrs
+:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8887&nbsp;&nbsp; NODE Migrs
 :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 673<br>
 &nbsp;&nbsp;&nbsp; Policy&nbsp;&nbsp;&nbsp;&nbsp; : SCHED_NORMAL</span><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
+lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
 mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:9.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;
 mso-bidi-font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:
 "Times New Roman";color:black'>&nbsp;&nbsp;&nbsp; ******** SYSTEM CALL REPORT
 ********<br>
@@ -977,7 +989,8 @@ yellow'>Sleep Func&nbsp;&nbsp;&nbsp;&nbsp;
 </span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 RUNQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 7.609908<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CPU&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CPU&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 3.591303<br>
 &nbsp;&nbsp;&nbsp;
 semctl&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -1016,53 +1029,53 @@ RUNQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 0.000105<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CPU&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-0.003676</span><span style='font-size:9.0pt;mso-bidi-font-size:10.0pt;
+0.003676</span><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'>While there is certainly
-CPU pressure as the RunQTime is high, notice that most of the Sleep Time is
-spent in the io_submit() system call in the kernel function
-wait_for_completion(). &nbsp;&nbsp; This is unusual since io_submit() system
-call&nbsp;is supposed to be doing asynchronous I/O.&nbsp;&nbsp; Note the
-average time&nbsp;for each io_submit() call is&nbsp;0.221332 seconds.&nbsp;
-&nbsp;Typically, a process would sleep in io_getevents() if the I/O is not
-completed, but in the above example, io_getevents() always returns without
-sleeping.<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+color:black'>While there is certainly CPU pressure as the RunQTime is high,
+notice that most of the Sleep Time is spent in the io_submit() system call in
+the kernel function wait_for_completion(). &nbsp;&nbsp; This is unusual since
+io_submit() system call&nbsp;is supposed to be doing asynchronous
+I/O.&nbsp;&nbsp; Note the average time&nbsp;for each io_submit() call
+is&nbsp;0.221332 seconds.&nbsp; &nbsp;Typically, a process would sleep in
+io_getevents() if the I/O is not completed, but in the above example,
+io_getevents() always returns without sleeping.<o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'>To understand why the process is sleeping in io_submit(), we can
 examine the individual KI trace records from kiinfo -kitrace:<o:p></o:p></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span style='font-size:9.0pt;mso-bidi-font-size:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
 10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
 color:black'>Command line: kiinfo -kitrace pid=11771,sysenter,sysargs -ts
-1204_0546 </span><span style='font-size:9.0pt;mso-bidi-font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+1204_0546 </span><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
+10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span style='font-size:9.0pt;mso-bidi-font-size:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
 10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>...</span><span style='font-size:9.0pt;mso-bidi-font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+color:black'>...</span><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
+10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'> <o:p></o:p></span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
+lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
 mso-fareast-font-family:"Times New Roman";color:black'>&nbsp;&nbsp;&nbsp;
 0.274873 cpu=17 pid=11771 io_submit [209] entry ctx_id=0x7f32e270c000 nr=531
 **iocbpp=0x7fffa7931c80<br>
 &nbsp;&nbsp;&nbsp; 0.274905 cpu=17 pid=11771 block_rq_insert dev_t=0x00800020
 wr=write flags=ELVPRIV|SYNC|ALLOCED sector=0x565e00 len=8192<br>
-<span style='background:yellow'>&nbsp;&nbsp;&nbsp; 0.274910 cpu=17 pid=11771
-block_rq_issue dev_t=0x00800020 wr=write flags=SORTED|ELVPRIV|SYNC|ALLOCED
-sector=0x565e00 len=8192<br>
+<span style='background:yellow'>&nbsp;&nbsp;&nbsp; 0.274910 cpu=17 pid=11771 block_rq_issue
+dev_t=0x00800020 wr=write flags=SORTED|ELVPRIV|SYNC|ALLOCED sector=0x565e00
+len=8192<br>
 </span>&nbsp;&nbsp;&nbsp; 0.274979 cpu=17 pid=11771 block_rq_insert
 dev_t=0x00800020 wr=write flags=SYNC|ALLOCED|NOIDLE|<span style='background:
 white'>FLUSH </span>sector=0x0 len=0<br>
@@ -1076,33 +1089,33 @@ blkdev_fsync+0x3f vfs_fsync_range+0xa1 generic_write_sync+0x4b
 blkdev_aio_write+0x7e aio_rw_vect_retry+0x84 aio_run_iocb+0x64
 do_io_submit+0x291 sys_io_submit+0x10 tracesys+0xd9<br>
 &nbsp;&nbsp;&nbsp; 0.275198 cpu=12 pid=-1 sched_wakeup target_pid=11771
-prio=120 target_cpu=17 success=1</span><span style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+prio=120 target_cpu=17 success=1</span><span lang=EN-US style='font-size:9.0pt;
+mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
+"Times New Roman";color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'>Note that the processes issued two I/Os, the first for the user
 data, and the second for the barrier write.&nbsp; After issuing the barrier
-write, the process goes to sleep waiting for the barrier write to
-complete.&nbsp; We can examine the trace records for CPU 12 to see what
-occurred just prior to the sched_wakeup listed above:<o:p></o:p></span></p>
+write, the process goes to sleep waiting for the barrier write to complete.&nbsp;
+We can examine the trace records for CPU 12 to see what occurred just prior to
+the sched_wakeup listed above:<o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:9.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;
 mso-bidi-font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:
 "Times New Roman";color:black'>&nbsp;&nbsp;&nbsp; 0.275196 cpu=12 pid=-1
 block_rq_complete dev_t=0x00800020 wr=write
 flags=SOFTBARRIER|SYNC|ALLOCED|NOIDLE sector=0x0 len=0 qpid=0 spid=0 qtm=&nbsp;
 0.000000 svtm=&nbsp;&nbsp; 0.000000<br>
 &nbsp;&nbsp;&nbsp; 0.275198 cpu=12 pid=-1 sched_wakeup target_pid=11771
-prio=120 target_cpu=17 success=1</span><span style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+prio=120 target_cpu=17 success=1</span><span lang=EN-US style='font-size:9.0pt;
+mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
+"Times New Roman";color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'>Note the wakeup occurred just after the completion of the barrier
 write.&nbsp;&nbsp; The DB writer isn't waiting for the user data to be written
@@ -1110,28 +1123,29 @@ to the disk, but it is waiting for the completion of the barrier write, which
 makes the io_submit() take much longer.&nbsp;<o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'>With LinuxKI Toolset 2.0, the SCSI subsystem traces
 scsi_dispatch_cmd_start and scsi_dispatch_cmd_done can be enabled to identify
 the SYNCHRONIZE_CACHE commands.&nbsp;&nbsp; For example:<o:p></o:p></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span style='font-size:9.0pt;mso-bidi-font-size:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
 10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
 color:black'>$ kiinfo -kitrace subsys=scsi -a 1000 -p 1| grep SYNC | more </span><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:r_ansi;mso-fareast-font-family:
-"Times New Roman";mso-bidi-font-family:Arial;color:black'><o:p></o:p></span></p>
+lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:r_ansi;
+mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
+color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span style='font-size:9.0pt;mso-bidi-font-size:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
 10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>...</span><span style='font-size:9.0pt;mso-bidi-font-size:10.0pt;
-font-family:r_ansi;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:
+color:black'>...</span><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
+10.0pt;font-family:r_ansi;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:
 Arial;color:black'> <o:p></o:p></span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
+lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
 mso-fareast-font-family:"Times New Roman";color:black'>&nbsp;&nbsp;&nbsp;
 0.001219 cpu=20 pid=156881 scsi_dispatch_cmd_start path=3:0:5:0 <span
 style='background:yellow'>opcode=SYNCHRONIZE_CACHE</span><span
@@ -1140,19 +1154,19 @@ prot_op=0 cmd=[35 00 00 00 00 00 00 00 00 00]<br>
 &nbsp;&nbsp;&nbsp; 0.001370 cpu=4 pid=-1 scsi_dispatch_cmd_done path=3:0:5:0 <span
 style='background:yellow'>opcode=SYNCHRONIZE_CACHE</span><span
 style='background:white'> </span>cmd_len=10 data_sglen=0, prot_sglen=0
-prot_op=0 cmd=[35 00 00 00 00 00 00 00 00 00] result=0</span><span
+prot_op=0 cmd=[35 00 00 00 00 00 00 00 00 00] result=0</span><span lang=EN-US
 style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:r_ansi;mso-fareast-font-family:
 "Times New Roman";mso-bidi-font-family:Arial;color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Solution / Workaround</span></b><span style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+line-height:11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:
+10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+color:black'>Solution / Workaround</span></b><span lang=EN-US style='font-size:
+10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'>As a result of this investigation, Bugzilla&nbsp;reports 955441
 (RHEL 6) and 1022216 (RHEL 7) were filed.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Starting
@@ -1163,50 +1177,52 @@ changed from &quot;write back&quot; to &quot;write_through&quot; by writing the
 value &quot;temporary write through&quot; to the cache_type file.<o:p></o:p></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span style='font-size:9.0pt;mso-bidi-font-size:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
 10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
 color:black'>$ cat&nbsp;
 /sys/devices/pci0000:00/0000:00:05.0/0000:11:00.0/host3/rport-3:0-5/target3:0:5/3:0:5:0/scsi_disk/3:0:5:0/cache_type</span><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
+lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
 mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span style='font-size:9.0pt;mso-bidi-font-size:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
 10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>write back</span><span style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+color:black'>write back</span><span lang=EN-US style='font-size:9.0pt;
+mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
+"Times New Roman";color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span style='font-size:9.0pt;mso-bidi-font-size:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
 10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>$ echo &quot;temporary write through&quot; &gt; /sys/devices/pci0000:00/0000:00:05.0/0000:11:00.0/host3/rport-3:0-5/target3:0:5/3:0:5:0/scsi_disk/3:0:5:0/cache_type</span><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>$ echo &quot;temporary write through&quot; &gt;
+/sys/devices/pci0000:00/0000:00:05.0/0000:11:00.0/host3/rport-3:0-5/target3:0:5/3:0:5:0/scsi_disk/3:0:5:0/cache_type</span><span
+lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
 mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span style='font-size:9.0pt;mso-bidi-font-size:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
 10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
 color:black'>$ echo 1 &gt;
 /sys/devices/pci0000:00/0000:00:05.0/0000:11:00.0/host3/rport-3:0-5/target3:0:5/3:0:5:0/rescan</span><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
+lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
 mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span style='font-size:9.0pt;mso-bidi-font-size:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
 10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>$ cat&nbsp; /sys/devices/pci0000:00/0000:00:05.0/0000:11:00.0/host3/rport-3:0-5/target3:0:5/3:0:5:0/scsi_disk/3:0:5:0/cache_type</span><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>$ cat&nbsp;
+/sys/devices/pci0000:00/0000:00:05.0/0000:11:00.0/host3/rport-3:0-5/target3:0:5/3:0:5:0/scsi_disk/3:0:5:0/cache_type</span><span
+lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
 mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
+lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
 mso-fareast-font-family:"Times New Roman";color:black'>write through</span><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
+lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
 mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'>Note the device must be rescanned for the change to take affect is
 only in effect until the next reboot.&nbsp;&nbsp;&nbsp;&nbsp;The SCSI block
@@ -1217,97 +1233,109 @@ can reconfigure the devices through the multipathd command as the&nbsp;SCSI
 block devices are opened by the multipath daemon:<o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:9.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;
 mso-bidi-font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:
 "Times New Roman";color:black'>&nbsp;&nbsp;&nbsp; $ echo
-&quot;reconfigure&quot; | multipathd -k&nbsp; </span><span style='font-size:
-9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p></o:p></span></p>
+&quot;reconfigure&quot; | multipathd -k&nbsp; </span><span lang=EN-US
+style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
+mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:red'>CAUTION:&nbsp; Use with care.&nbsp;&nbsp; <span style='background:
-white'>Changing the cache type&nbsp;of a disk device with volatile cache or
-improperly modifying the cache_type can result in data loss, data corruption,
-or performance degradation.&nbsp;&nbsp;&nbsp;Before using in a production
+white'>Changing the cache type&nbsp;of a disk device with volatile cache or improperly
+modifying the cache_type can result in data loss, data corruption, or
+performance degradation.&nbsp;&nbsp;&nbsp;Before using in a production
 environment, be sure to test in a test, benchmark, or POC environment to
 measure the impact and verify the behavior.&nbsp;</span></span><span
-style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black;background:white'>&nbsp; </span><span
-style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Important note on 3PAR storage arrays</span></b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
+"Times New Roman";color:black;background:white'>&nbsp; </span><span lang=EN-US
 style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
 "Times New Roman";color:black'><o:p></o:p></span></p>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+line-height:11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:
+10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+color:black'>Important note on 3PAR storage arrays</span></b><span lang=EN-US
+style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
+"Times New Roman";color:black'><o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
 color:black'>The issue has been common on 3PAR storage arrays that advertise as
 &quot;Write cache: enabled&quot;.&nbsp;&nbsp;&nbsp; However, with 3PAR OS
 version 3.2.1 GA/MU1, the 3PAR storage arrays should now advertise as
 &quot;Write cache: disabled&quot;.&nbsp;&nbsp;&nbsp; The change is documented
-in </span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+in </span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
 mso-fareast-font-family:"Times New Roman"'>the HP 3PAR OS 3.2.1 GA/MU1 Release
 Notes:<o:p></o:p></span></p>
 
 <table class=MsoNormalTable border=0 cellpadding=0 summary="" width="100%"
  style='width:100.0%;mso-cellspacing:1.5pt;mso-yfti-tbllook:1184'>
  <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:11.25pt'>
-  <td width=80 style='width:60.0pt;padding:.75pt .75pt .75pt .75pt;height:11.25pt'>
+  <td width=83 style='width:60.0pt;padding:.75pt .75pt .75pt .75pt;height:11.25pt'>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;font-family:
-  "Arial",sans-serif;mso-fareast-font-family:"Times New Roman";color:black'>&nbsp;Issue
-  ID</span></b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
-  mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
+  11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+  font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+  color:black'>&nbsp;Issue ID</span></b><span lang=EN-US style='font-size:10.0pt;
+  font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></p>
   </td>
-  <td width=320 style='width:240.0pt;padding:.75pt .75pt .75pt .75pt;
+  <td width=322 style='width:240.0pt;padding:.75pt .75pt .75pt .75pt;
   height:11.25pt'>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;font-family:
-  "Arial",sans-serif;mso-fareast-font-family:"Times New Roman";color:black'>Item</span></b><span
-  style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-  "Times New Roman";color:black'><o:p></o:p></span></p>
+  11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+  font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+  color:black'>Item</span></b><span lang=EN-US style='font-size:10.0pt;
+  font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></p>
   </td>
   <td style='padding:.75pt .75pt .75pt .75pt;height:11.25pt'>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;font-family:
-  "Arial",sans-serif;mso-fareast-font-family:"Times New Roman";color:black'>Description</span></b><span
-  style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-  "Times New Roman";color:black'><o:p></o:p></span></p>
+  11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+  font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+  color:black'>Description</span></b><span lang=EN-US style='font-size:10.0pt;
+  font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+  color:black'><o:p></o:p></span></p>
   </td>
  </tr>
  <tr style='mso-yfti-irow:1;mso-yfti-lastrow:yes'>
-  <td width=80 style='width:60.0pt;padding:.75pt .75pt .75pt .75pt'>
+  <td width=83 style='width:60.0pt;padding:.75pt .75pt .75pt .75pt'>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  11.25pt;vertical-align:top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
-  mso-fareast-font-family:"Times New Roman";color:black'>&nbsp;104168<o:p></o:p></span></p>
+  11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+  font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+  color:black'>&nbsp;104168<o:p></o:p></span></p>
   </td>
-  <td width=320 style='width:240.0pt;padding:.75pt .75pt .75pt .75pt'>
+  <td width=322 style='width:240.0pt;padding:.75pt .75pt .75pt .75pt'>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  11.25pt;vertical-align:top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
-  mso-fareast-font-family:"Times New Roman";color:black'>Correct reporting of
-  writeback cache enable bit<o:p></o:p></span></p>
+  11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+  font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+  color:black'>Correct reporting of writeback cache enable bit<o:p></o:p></span></p>
   </td>
   <td style='padding:.75pt .75pt .75pt .75pt'>
   <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-  line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
-  font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+  line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:
+  10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
   color:black'>The WCE bit in the Cache Mode page (08h) is set to zero.&nbsp;
   This enables correct reporting of writeback cache enable bit.<o:p></o:p></span></p>
   </td>
  </tr>
 </table>
 
-<p class=MsoNormal><span style='font-size:12.0pt;line-height:107%;font-family:
-"Times New Roman",serif;mso-fareast-font-family:"Times New Roman"'>&nbsp;After
-the 3PAR OS upgrade, be sure to reboot the Linux server or rescan each of the
-3PAR devices as previously mentioned.&nbsp;</span></p>
+<p class=MsoNormal><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
+12.0pt;line-height:107%;font-family:"Arial",sans-serif;mso-fareast-font-family:
+"Times New Roman"'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
+12.0pt;line-height:107%;font-family:"Arial",sans-serif;mso-fareast-font-family:
+"Times New Roman"'>After the 3PAR OS upgrade, be sure to reboot the Linux
+server or rescan each of the 3</span><span lang=EN-US style='mso-bidi-font-size:
+12.0pt;line-height:107%;font-family:"Arial",sans-serif;mso-fareast-font-family:
+"Times New Roman"'>PAR devices as previously mentioned.&nbsp;</span><span
+lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:11.0pt;line-height:107%;
+font-family:"Arial",sans-serif'><o:p></o:p></span></p>
 
 </div>
 

@@ -1,16 +1,20 @@
-/***************************************************************************
-Copyright 2017 Hewlett Packard Enterprise Development LP.
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or (at
-your option) any later version. This program is distributed in the
-hope that it will be useful, but WITHOUT ANY WARRANTY; without even
-the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-PURPOSE. See the GNU General Public License for more details. You
-should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation,
-Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-***************************************************************************/
+/* (C) Copyright 2015 Hewlett Packard Enterprise Development LP.
+ * (C) Copyright 2000-2014 Hewlett-Packard Development Company, L.P.
+ *
+ * This program is free software; you can redistribute it and/or 
+ * modify it under the terms of the GNU General Public License as 
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version. 
+ *
+ * This program is distributed in the hope that it will be useful, 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+ * GNU General Public License for more details. 
+ *
+ * You should have received a copy of the GNU General Public License 
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301, USA. 
+ */
 
 #include <linux/perf_event.h>
 #ifdef __KERNEL__
@@ -64,7 +68,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define TT_BLOCK_RQ_INSERT		3
 #define TT_BLOCK_RQ_ISSUE		4
 #define TT_BLOCK_RQ_COMPLETE		5
-#define TT_BLOCK_RQ_ABORT		6
+#define TT_BLOCK_RQ_ABORT		6		/* OBSOLETE */
 #define TT_BLOCK_RQ_REQUEUE		7
 #define TT_HARDCLOCK			8
 #define TT_SYSCALL_ENTER		9		
@@ -83,25 +87,27 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define TT_LISTEN_OVERFLOW		22
 #define	TT_WALLTIME			23
 #define	TT_STARTUP			23	/* Enhances and replaces walltime */
-#define	TT_FP_SWITCH			24
-#define	TT_FP_HARDCLOCK			25
+#define	UNUSED1				24
+#define	UNUSED2				25
 #define TT_FILEMAP_FAULT		26
 #define TT_WORKQUEUE_ENQUEUE		27
 #define TT_WORKQUEUE_EXECUTE		28
 #define TT_TASKLET_ENQUEUE		29
 #define TT_CACHE_INSERT			30
 #define TT_CACHE_EVICT			31
+#define TT_MM_PAGE_ALLOC                32
+#define TT_MM_PAGE_FREE			33
 
 /* These aren't real probes. They are used internally to clean up
  * some traced resource related data etc. They should never be 
  * enabled as per a regular trace, and should always be last
  * in the list.
  */
-#define TT_SCHED_PROCESS_EXIT		32
-#define TT_SCHED_PROCESS_FORK		33
+#define TT_SCHED_PROCESS_EXIT		34
+#define TT_SCHED_PROCESS_FORK		35
 
-#define TT_NUM_PROBES			34
-#define TT_NUM_USER_PROBES		32
+#define TT_NUM_PROBES			36
+#define TT_NUM_USER_PROBES		34
 
 
 
@@ -120,19 +126,17 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define	TT_BITMASK_DEFAULT_TRACES \
 				(TT_BIT(TT_SCHED_SWITCH) | TT_BIT(TT_SCHED_WAKEUP) | \
 				 TT_BIT(TT_BLOCK_RQ_INSERT) | TT_BIT(TT_BLOCK_RQ_ISSUE) | \
-				 TT_BIT(TT_BLOCK_RQ_COMPLETE) | TT_BIT(TT_BLOCK_RQ_ABORT) | \
-				 TT_BIT(TT_BLOCK_RQ_REQUEUE) | TT_BIT(TT_HARDCLOCK) | \
+				 TT_BIT(TT_BLOCK_RQ_COMPLETE) | TT_BIT(TT_BLOCK_RQ_REQUEUE) | \
 				 TT_BIT(TT_SYSCALL_ENTER) | TT_BIT(TT_SYSCALL_EXIT) | \
-				 TT_BIT(TT_POWER_FREQ))
-
-#define TT_BITMASK_FP_TRACES 	(TT_BIT(TT_FP_SWITCH) | TT_BIT(TT_FP_HARDCLOCK))
+				 TT_BIT(TT_HARDCLOCK) | TT_BIT(TT_POWER_FREQ) | \
+				 TT_BIT(TT_SOFTIRQ_ENTRY) | TT_BIT(TT_SOFTIRQ_EXIT) | \
+				 TT_BIT(TT_IRQ_HANDLER_ENTRY) | TT_BIT(TT_IRQ_HANDLER_EXIT))
 
 
 /* The listen overflow trace is expensive and can be called VERY 
  * frequently. You're going to have to specifically ask for that one!
  */
 #define TT_BITMASK_ALL_TRACES	(0x0fffffffffffffffULL & ~(TT_BIT(TT_LISTEN_OVERFLOW)) & \
-				 ~(TT_BIT(TT_FP_SWITCH)) & ~ (TT_BIT(TT_FP_HARDCLOCK)) & \
 				 ~(TT_BIT(TT_SCHED_PROCESS_EXIT)) & ~(TT_BIT(TT_SCHED_PROCESS_FORK)))
 
 /* Mode identifiers */
@@ -309,6 +313,7 @@ typedef struct block_rq_complete_trace {
 } block_rq_complete_t;
 
 
+/* this is obsolete, but keeping for now */
 typedef struct block_rq_abort_trace {
 	COMMON_FIELDS;
 	dev_t		dev;
@@ -561,6 +566,28 @@ typedef struct syscall_exit_trace {
 	int		is32bit;
 	long		ret;
 } syscall_exit_t;
+
+/* for KMEM events */
+
+typedef struct mm_page_alloc_trace {
+	COMMON_FIELDS;
+	unsigned long	page;
+	unsigned int	order;
+	unsigned int	flags;
+	unsigned int	migratetype;
+	int		filler;
+	unsigned long	stack_depth;
+	unsigned long	ips[];
+} mm_page_alloc_t;
+
+typedef struct mm_page_free_trace {
+	COMMON_FIELDS;
+	unsigned long	page;
+	unsigned int	order; 
+	int		filler;
+	unsigned long	stack_depth;
+	unsigned long	ips[];
+} mm_page_free_t;
 
 
 /* For socket-related data-moving system calls we place the endpoint 

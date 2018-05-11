@@ -239,14 +239,14 @@ hc_print_pc(void *arg1, void *arg2)
 				pcinfop->count, 
 				(pcinfop->count*100.0) / hcinfop->total, 
 				cpustate_name_index[pcinfop->state],
-				sym ? sym : "UNKNOWN");
+				sym ? dmangle(sym) : "UNKNOWN");
 		if (symfile) printw (" [%s]", symfile);
 	} else {
 		pid_printf ("%s%8d %6.2f%%  %-6s %s", tab, 
 				pcinfop->count, 
 				(pcinfop->count*100.0) / hcinfop->total, 
 				cpustate_name_index[pcinfop->state],
-				sym ? sym : "UNKNOWN");
+				sym ? dmangle(sym) : "UNKNOWN");
 		if (symfile) pid_printf (" [%s]", symfile);
 		pid_printf ("\n");
 	}
@@ -292,15 +292,21 @@ hc_print_pc2(void *arg1, void *arg2)
 	}
 	
 	if (sym && print_pc_args->warnflagp) {
-		if ((pcinfop->count > 100) && (strstr(sym, "jbd2_journal_start") || strstr(sym, "spin_lock"))) {
+		if ((pcinfop->count > 100) && (strstr(sym, "jbd2_journal_start") )) {
 			RED_FONT;
 			(*print_pc_args->warnflagp) |= WARNF_HAS_JOURNAL;
 		}
 
-		if ((((pcinfop->count*100.0) / hcinfop->total) > 10.0) && (strstr(sym, "semtimedop") || strstr(sym, "semctl"))) {
+		if ((((pcinfop->count*100.0) / hcinfop->total) > 2.0) && (strstr(sym, "semtimedop") || strstr(sym, "semctl"))) {
 			RED_FONT;
 			(*print_pc_args->warnflagp) |= WARNF_SEMLOCK;
 		}
+
+		if ((((pcinfop->count*100.0) / hcinfop->total) > 0.5) && (strstr(sym, "sk_busy_loop") )) {
+			RED_FONT;
+			(*print_pc_args->warnflagp) |= WARNF_SK_BUSY;
+		}
+
 	}
 		
 	if (sym == NULL) {
@@ -314,7 +320,7 @@ hc_print_pc2(void *arg1, void *arg2)
 				pcinfop->count, 
 				(pcinfop->count*100.0) / hcinfop->total, 
 				cpustate_name_index[pcinfop->state],
-				sym);
+				dmangle(sym));
 	}
 	BLACK_FONT;
 
@@ -395,14 +401,14 @@ hc_print_stktrc(void *p1, void *p2)
 
 			if (pregp = find_vtext_preg(pidp, key)) {
 				if (sym = symlookup(pregp, key, &offset)) {
-					pid_printf ("  %s", sym);
+					pid_printf ("  %s", dmangle(sym));
 				} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
-					pid_printf ("  %s", sym);
+					pid_printf ("  %s", dmangle(sym));
 				} else {
 					pid_printf ("  0x%llx", key);
 				}
 			} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
-				pid_printf ("  %s", sym);
+				pid_printf ("  %s", dmangle(sym));
 			} else {
 				pid_printf ("  0x%llx", key);
 			}

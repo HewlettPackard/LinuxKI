@@ -446,8 +446,8 @@ char *ioflags_name_4_10[REQ_NRBIT] = {
 	"PREFLUSH",
 	"RAHEAD",
 	"BACKGROUND",
-	"NOUNMAP",  	/* introduced in 4.13 */
-	NULL,
+	"NOUNMAP",  	/* introduced in 4.12 */
+	"NOWAIT",       /* introduced in 4.13 */
 	NULL,
 	NULL,
 	NULL,
@@ -466,6 +466,219 @@ char *ioflags_name_4_10[REQ_NRBIT] = {
 	NULL,
 	NULL
 };
+
+char *ioflags_name_4_15[REQ_NRBIT] = {
+	"FAILFAST_DEV",
+	"FAILFAST_TRANSPORT",
+	"FAILFAST_DRIVER",
+	"SYNC",
+	"META",
+	"PRIO",
+	"NOMERGE",
+	"IDLE",
+	"INTEGRITY",
+	"FUA",
+	"PREFLUSH",
+	"RAHEAD",
+	"BACKGROUND",
+	"NOWAIT",
+	"NOUNMAP",
+	"DRV",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL
+};
+
+char *gfp_name_3_0[GFP_NRBIT] = {
+	NULL,
+	"DMA",
+	"HIGHMEM",
+	"DMA32",
+	"MOVABLE",
+	"WAIT",
+	"HIGH",
+	"IO",
+	"FS",
+	"COLD",
+	"NOWARN",
+	"REPEAT",
+	"NOFAIL",
+	"NORETRY",
+	"MEMALLOC",
+	"COMP",
+	"ZERO",
+	"NOMEMALLOC",
+	"HARDWALL",
+	"THISNODE",
+	"RECLAIMABLE",
+	"KMEMCG",
+	"NOTRACK",
+	"NO_KSWAPD",
+	"OTHER_NODE"
+	"WRITE",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL
+};
+
+char *gfp_name_4_0[GFP_NRBIT] = {
+	NULL,
+	"DMA",
+	"HIGHMEM",
+	"DMA32",
+	"MOVABLE",
+	"WAIT",
+	"HIGH",
+	"IO",
+	"FS",
+	"COLD",
+	"NOWARN",
+	"REPEAT",
+	"NOFAIL",
+	"NORETRY",
+	"MEMALLOC",
+	"COMP",
+	"ZERO",
+	"NOMEMALLOC",
+	"HARDWALL",
+	"THISNODE",
+	"ATOMIC",
+	"NOACCOUNT",
+	"NOTRACK",
+	"NO_KSWAPD",
+	"OTHER_NODE"
+	"WRITE",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL
+};
+
+char *gfp_name_4_4[GFP_NRBIT] = {
+	NULL,
+	"DMA",
+	"HIGHMEM",
+	"DMA32",
+	"MOVABLE",
+	"RECLAIMABLE",
+	"HIGH",
+	"IO",
+	"FS",
+	"COLD",
+	"NOWARN",
+	"REPEAT",
+	"NOFAIL",
+	"NORETRY",
+	"MEMALLOC",
+	"COMP",
+	"ZERO",
+	"NOMEMALLOC",
+	"HARDWALL",
+	"THISNODE",
+	"ATOMIC",
+	"ACCOUNT",
+	"NOTRACK",
+	"DIRECT_RECLAIM",
+	"OTHER_NODE",
+	"WRITE",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL
+};
+
+char *gfp_name_4_10[GFP_NRBIT] = {
+	NULL,
+	"DMA",
+	"HIGHMEM",
+	"DMA32",
+	"MOVABLE",
+	"RECLAIMABLE",
+	"HIGH",
+	"IO",
+	"FS",
+	"COLD",
+	"NOWARN",
+	"REPEAT",
+	"NOFAIL",
+	"NORETRY",
+	"MEMALLOC",
+	"COMP",
+	"ZERO",
+	"NOMEMALLOC",
+	"HARDWALL",
+	"THISNODE",
+	"ATOMIC",
+	"ACCOUNT",
+	"NOTRACK",
+	"DIRECT_RECLAIM",
+	"WRITE",
+	"KSWAPD_RECLAIM",
+	"NOLOCKDEP",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL
+};
+
+char *gfp_name_4_13[GFP_NRBIT] = {
+	NULL,
+	"DMA",
+	"HIGHMEM",
+	"DMA32",
+	"MOVABLE",
+	"RECLAIMABLE",
+	"HIGH",
+	"IO",
+	"FS",
+	"COLD",		/* removed in 4.15 */
+	"NOWARN",
+	"RETRY_MAYFAIL",
+	"NOFAIL",
+	"NORETRY",
+	"MEMALLOC",
+	"COMP",
+	"ZERO",
+	"NOMEMALLOC",
+	"HARDWALL",
+	"THISNODE",
+	"ATOMIC",
+	"ACCOUNT",
+	"GFP_NOTRACK",	/* removed in 4.15 */
+	"DIRECT_RECLAIM",
+	"WRITE",
+	"KSWAPD_RECLAIM",
+	"NOLOCKDEP",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL
+};
+
+
+
 
 
 char *req_op_name_2[36] = {
@@ -555,8 +768,8 @@ char *req_op_name_4_10[36] = {
 	"secure_erase",
 	"zone_reset",
 	"write_same",
-	"write_zero",
-	"ukn-9",
+	"write_zero",	
+	"write_zero",		/* in 4.12, REQ_OP_WRITE_ZEROES was changed from 8 to 9, but 8 is currently unused */
 	"ukn-10",
 	"ukn-11",
 	"ukn-12",
@@ -1124,56 +1337,79 @@ kdtype_attr_t scsi_dispatch_cmd_done_attr[] = {
 kdtype_attr_t workqueue_insertion_attr[] = {
 	{"char thread_comm[", 12, 16, 0},
 	{"thread_pid;", 28, 4, 0},
-	{"work_func_t func", 32, 8, 0}
+	{"work_func_t func", 32, 8, 0},
+	{NULL, 0, 0, 0}
 };
 
 kdtype_attr_t workqueue_execution_attr[] = {
 	{"char thread_comm[", 12, 16, 0},
 	{"thread_pid;", 28, 4, 0},
-	{"work_func_t func", 32, 8, 0}
+	{"work_func_t func", 32, 8, 0},
+	{NULL, 0, 0, 0}
 };
 
 kdtype_attr_t workqueue_enqueue_attr[] = {
 	{" * work;", 8, 8, 0},
 	{" * function;", 16, 8, 0},
 	{" * workqueue;", 24, 8, 0},
-	{" int req_cpu;", 32, 4, 0},
-	{" int cpu;", 36, 4, 0}
+	{"int req_cpu;", 32, 4, 0},
+	{"int cpu;", 36, 4, 0},
+	{NULL, 0, 0, 0},
 };
 
 kdtype_attr_t workqueue_execute_attr[] = {
 	{" * work;", 8, 8, 0},
-	{" * function;", 16, 8, 0}
+	{" * function;", 16, 8, 0},
+	{NULL, 0, 0, 0}
 };
 
 kdtype_attr_t page_fault_attr[] = {
-	{" long address;", 8, 8, 0},
-	{" long ip;", 16, 8, 0},
-	{" long error_code;", 24, 8, 0}
+	{"long address;", 8, 8, 0},
+	{"long ip;", 16, 8, 0},
+	{"long error_code;", 24, 8, 0},
+	{NULL, 0, 0, 0}
 };
 
 kdtype_attr_t anon_fault_attr[] = {
-	{" mm_struct * mm;", 16, 8, 0},
-	{" long address;", 24, 8, 0}
+	{"mm_struct * mm;", 16, 8, 0},
+	{"long address;", 24, 8, 0},
+	{NULL, 0, 0, 0}
 };
 
 kdtype_attr_t filemap_fault_attr[] = {
-	{" mm_struct * mm;", 16, 8, 0},
-	{" long address;", 24, 8, 0},
-	{" int flag;", 32, 4, 0}
+	{"mm_struct * mm;", 16, 8, 0},
+	{"long address;", 24, 8, 0},
+	{"int flag;", 32, 4, 0},
+	{NULL, 0, 0, 0}
 };
 
 kdtype_attr_t kernel_pagefault_attr[] = {
-	{" task_struct * task;", 16, 8, 0},
-	{" long address;", 24, 8, 0},
-	{" pt_regs * regs;", 32, 4, 0}
+	{"task_struct * task;", 16, 8, 0},
+	{"long address;", 24, 8, 0},
+	{"pt_regs * regs;", 32, 4, 0},
+	{NULL, 0, 0, 0}
 };
 
 kdtype_attr_t filemap_pagecache_attr[] = {
-	{" struct page * page;", 8, 8, 0},
-	{" long i_ino;", 16, 8, 0},
- 	{" long index;", 24, 8, 0},
-	{" dev_t s_dev;", 32, 4, 0}
+	{"struct page * page;", 8, 8, 0},
+	{"long i_ino;", 16, 8, 0},
+ 	{"long index;", 24, 8, 0},
+	{"dev_t s_dev;", 32, 4, 0},
+	{NULL, 0, 0, 0}
+};
+
+kdtype_attr_t mm_page_alloc_attr[] = {
+	{" * page;", 8, 8, 0},
+	{"int order;", 16, 4, 0},
+ 	{"gfp_t gfp_flags;", 20, 4, 0},
+	{"int migratetype;", 24, 4, 0},
+	{NULL, 0, 0, 0}
+};
+
+kdtype_attr_t mm_page_free_attr[] = {
+	{" * page;", 8, 8, 0},
+	{"int order;", 16, 4, 0},
+	{NULL, 0, 0, 0}
 };
 
 kdtype_attr_t marker_attr[] = {
@@ -1495,21 +1731,21 @@ ks_action_t ks_actions[KI_MAXSYSCALLS] = {
 	{ 0, 0, 0, ki_nosys},		/*get_cpu*/
 	{ 0, 0, 0, ki_nosys},		/*process_vm_readv*/
 	{ 0, 0, 0, ki_nosys},		/*process_vm_writev*/
-	{ 0, 0, 0, ki_nosys},		/*ukn-312*/
-	{ 0, 0, 0, ki_nosys},		/*ukn-313*/
-	{ 0, 0, 0, ki_nosys},		/*ukn-314*/
-	{ 0, 0, 0, ki_nosys},		/*ukn-315*/
-	{ 0, 0, 0, ki_nosys},		/*ukn-316*/
+	{ 0, 0, 0, ki_nosys},		/*kcmp*/
+	{ 0, 0, 0, ki_nosys},		/*finit_module*/
+	{ 0, 0, 0, ki_nosys},		/*sched_setattr*/
+	{ 0, 0, 0, ki_nosys},		/*sched_getattr*/
+	{ 0, 0, 0, ki_nosys},		/*renameat2*/
 	{ 0, 0, 0, ki_nosys},		/*ukn-317*/
-	{ 0, 0, 0, ki_nosys},		/*ukn-318*/
-	{ 0, 0, 0, ki_nosys},		/*ukn-319*/
-	{ 0, 0, 0, ki_nosys},		/*ukn-320*/
+	{ 0, 0, 0, ki_nosys},		/*get_random*/
+	{ 0, 0, 0, ki_nosys},		/*memfd_create*/
+	{ 0, 0, 0, ki_nosys},		/*kexec_file_load*/
 	{ 0, 0, 0, ki_nosys},		/*ukn-321*/
 	{ 0, 0, 0, ki_nosys},		/*ukn-322*/
-	{ 0, 0, 0, ki_nosys},		/*ukn-323*/
+	{ 0, 0, 0, ki_nosys},		/*userfaultfd*/
 	{ 0, 0, 0, ki_nosys},		/*ukn-324*/
 	{ 0, 0, 0, ki_nosys},		/*ukn-325*/
-	{ 0, 0, 0, ki_nosys},		/*ukn-326*/
+	{ 0, 0, 0, ki_nosys},		/*copy_file_range*/
 	{ 0, 0, 0, ki_nosys},		/*ukn-327*/
 	{ 0, 0, 0, ki_nosys},		/*ukn-328*/
 	{ 0, 0, 0, ki_nosys},		/*ukn-329*/
@@ -2017,21 +2253,21 @@ short syscall_index_x86_64[MAX_SYSCALL_IDX] = {
 	/* get_cpu */			309,
 	/* process_vm_readv */		310,
 	/* process_vm_writev */		311,
+	/* undefined */			312,	
+	/* undefined */			313,	
+	/* undefined */			314,	
+	/* undefined */			315,	
+	/* undefined */			316,	
+	/* undefined */			UKN,	
+	/* undefined */			318,	
+	/* undefined */			319,	
+	/* ukn-320 */   	 	320,	
 	/* undefined */			UKN,	
 	/* undefined */			UKN,	
+	/* undefined */			323,	
 	/* undefined */			UKN,	
 	/* undefined */			UKN,	
-	/* undefined */			UKN,	
-	/* undefined */			UKN,	
-	/* undefined */			UKN,	
-	/* undefined */			UKN,	
-	/* ukn-320 */   	 	UKN,	
-	/* undefined */			UKN,	
-	/* undefined */			UKN,	
-	/* undefined */			UKN,	
-	/* undefined */			UKN,	
-	/* undefined */			UKN,	
-	/* undefined */			UKN,	
+	/* undefined */			326,	
 	/* undefined */			UKN,	
 	/* undefined */			UKN,	
 	/* undefined */			UKN,	
@@ -3128,14 +3364,14 @@ short syscall_index_x86_32[MAX_SYSCALL_IDX] = {
 	/* set_ns */			308,
 	/* process_vm_readv */		310,
 	/* process_vm_writev */		311,
-	/* undefined */			UKN,
-	/* ukn-350 */   	 	UKN,	
+	/* kcmp */			312,
+	/* finit_module */   	 	313,	
+	/* sched_setattr */		314,	
+	/* sched_getattr */		315,	
 	/* undefined */			UKN,	
 	/* undefined */			UKN,	
-	/* undefined */			UKN,	
-	/* undefined */			UKN,	
-	/* undefined */			UKN,	
-	/* undefined */			UKN,	
+	/* getrandom */			318,	
+	/* memfd_create */		319,	
 	/* undefined */			UKN,	
 	/* undefined */			UKN,	
 	/* undefined */			UKN,	
@@ -3153,10 +3389,10 @@ short syscall_index_x86_32[MAX_SYSCALL_IDX] = {
 	/* undefined */			UKN,	
 	/* undefined */			UKN,	
 	/* undefined */			UKN,	
+	/* userfaultfd */		323,	
 	/* undefined */			UKN,	
 	/* undefined */			UKN,	
-	/* undefined */			UKN,	
-	/* undefined */			UKN,	
+	/* copy_file_range */		326,	
 	/* undefined */			UKN,	
 	/* undefined */			UKN,	
 	/* ukn-380 */   	 	UKN,	
@@ -4913,7 +5149,7 @@ syscall_arg_list_t syscall_arg_list[KI_MAXSYSCALLS] = {
 {"lstat", "ret", HEX, "*path", HEX, "*buf", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"poll", "ret", HEX, "*fds", HEX, "nfds", DECIMAL, "timeout", DECIMAL, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"lseek", "ret", HEX, "fd", DECIMAL, "offset", HEX, "whence", WHENCE, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"mmap", "ret", HEX, "*addr", HEX, "length", DECIMAL, "prot", MMAP_PROT, "flags", MMAP_FLAGS, "fd", DECIMAL, "offset", HEX},
+{"mmap", "ret", HEX, "*addr", HEX, "length", HEX, "prot", MMAP_PROT, "flags", MMAP_FLAGS, "fd", DECIMAL, "offset", HEX},
 {"mprotect", "ret", HEX, "*addr", HEX, "len", DECIMAL, "prot", MMAP_PROT, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"munmap", "ret", HEX, "*addr", HEX, "length", DECIMAL, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"brk", "ret", HEX, "*addr", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
@@ -4932,7 +5168,7 @@ syscall_arg_list_t syscall_arg_list[KI_MAXSYSCALLS] = {
 {"mremap", "ret", HEX, "*old_address", HEX, "old_size", HEX, "new_size", HEX, "flags", HEX, NULL, SKIP, NULL, SKIP},
 {"msync", "ret", HEX, "*addr", HEX, "length", DECIMAL, "flags", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"mincore", "ret", HEX, "*addr", HEX, "length", DECIMAL, "*vec", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"madvise", "ret", HEX, "*addr", HEX, "length", DECIMAL, "advise", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP},
+{"madvise", "ret", HEX, "*addr", HEX, "length", HEX, "advise", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"shmget", "ret", HEX, "key", HEX, "size", HEX, "shmflag", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"shmat", "ret", HEX, "shmid", DECIMAL, "*shmaddr", HEX, "shmflag", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"shmctl", "ret", HEX, "shmid", DECIMAL, "command", DECIMAL, "*buf", HEX,  NULL, SKIP, NULL, SKIP, NULL, SKIP},
@@ -5216,21 +5452,21 @@ syscall_arg_list_t syscall_arg_list[KI_MAXSYSCALLS] = {
 {"get_cpu", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"process_vm_readv", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"process_vm_writev", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"ukn-312", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"ukn-313", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"ukn-314", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"ukn-315", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"ukn-316", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
+{"kcmp", "ret", DECIMAL, "pid1", DECIMAL, "pid2", DECIMAL, "type", DECIMAL, "idx1", DECIMAL, "idx2", DECIMAL, NULL, SKIP},
+{"finit_module", "ret", DECIMAL, "fd", DECIMAL, "*param_values", HEX, "flags", DECIMAL, NULL, SKIP, NULL, SKIP, NULL, SKIP},
+{"sched_setattr", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
+{"sched_getattr", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
+{"renameat2", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"ukn-317", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"ukn-318", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"ukn-319", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"ukn-320", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
+{"getrandom", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
+{"memfd_create", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
+{"kexec_file_load", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"ukn-321", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"ukn-322", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"ukn-323", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
+{"userfaultfd", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"ukn-324", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"ukn-325", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"ukn-326", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
+{"copy_file_range", "ret", HEX, "fd_in", DECIMAL, "*off_in", HEX, "fd_out", DECIMAL, "*off_out", HEX, "len", HEX, "flags", DECIMAL},
 {"ukn-327", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"ukn-328", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"ukn-329", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
@@ -5340,7 +5576,7 @@ syscall_arg_list_t syscall_arg_list[KI_MAXSYSCALLS] = {
 {"_newselect", "ret", HEX, "nfds", DECIMAL, "*readfds", HEX, "*writefds", HEX, "*exceptfds", HEX, "*timeout", HEX, NULL, SKIP},
 {"vm86", "ret", HEX, "fn", HEX, "*v86", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"ugetrlimit", "ret", HEX, "resource", DECIMAL, "*rlim", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"mmap2", "ret", HEX, "*addr", HEX, "length", DECIMAL, "prot", HEX, "flags", HEX, "fd", DECIMAL, "pgoffset", HEX},
+{"mmap2", "ret", HEX, "*addr", HEX, "length", HEX, "prot", HEX, "flags", HEX, "fd", DECIMAL, "pgoffset", HEX},
 {"truncate64", "ret", HEX, "*path", HEX, "length", DECIMAL, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP}, 
 {"ftruncate64", "ret", HEX, "fd", DECIMAL, "length", DECIMAL, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP}, 
 {"stat64", "ret", HEX, "*path", HEX, "*buf", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
@@ -5424,5 +5660,8 @@ warnmsg_t warnmsg[MAXNOTEWARN] = {
 	{ "Warning: Suspect XFS Direct I/O with cached pages", _HTTP_XFS_DIOREAD},
 	{ "Warning: Excessive Tasklet SoftIRQs", _HTTP_TASKLET},
 	{ "Warning: System enabled for power savings", _HTTP_POWER},
-	{ "Warning: RHEL 7.3 Multipath bug may impact I/O performance", _HTTP_MULTIPATH_BUG}
+	{ "Warning: RHEL 7.3 and SLES 12 SP2 Multipath bug may impact I/O performance", _HTTP_MULTIPATH_BUG},
+	{ "Warning: Suspect network-latency tuned profile used", _HTTP_SK_BUSY},
+	{ "Warning: High BLOCK SotIRQ times, consider setting add_random to 0 for all /dev/sd* devices", _HTTP_ADD_RANDOM},
+	{ "Warning: High wait time in md_flush(), suspect barrier writes to MD device", _HTTP_MD_FLUSH}
 };

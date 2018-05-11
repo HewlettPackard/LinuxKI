@@ -277,6 +277,7 @@ kparse_print_report(void *v)
 	foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, calc_dev_totals, NULL, 0, (void *)1);
 	foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, calc_dev_totals, NULL, 0, NULL);
 	foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, calc_fc_totals, NULL, 0, NULL);
+        foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, calc_pid_iototals, NULL, 0, NULL);
 
 	update_perpid_sched_stats();
 	calc_global_cpu_stats(globals, NULL);
@@ -363,9 +364,10 @@ kparse_print_report(void *v)
 	kp_active_mapper_devs();			/* Section 4.3.1 */
 	kp_hiserv_mapper_devs();			/* Section 4.3.2 */
 	kp_fc_totals();					/* Section 4.4 */
-	kp_perpid_dev_totals();				/* Section 4.5 */
-        kp_dskblk_read();          		        /* Section 4.6 */
-        kp_dskblk_write();      		        /* Section 4.7 */
+	kp_perpid_mdev_totals();			/* Section 4.5 */
+	kp_perpid_dev_totals();				/* Section 4.6 */
+        kp_dskblk_read();          		        /* Section 4.7 */
+        kp_dskblk_write();      		        /* Section 4.8 */
 
 	kp_network();					/* Section 5.0 */
 	kp_ipip();					/* Section 5.1 */

@@ -212,11 +212,7 @@ likidump()
 	while (fi) {
 		if (fi->fi_item > 0) {
 			fprintf (stderr, "Enabling tracing for PID %d\n", fi->fi_item);
-			if (fnf) {
-				if ((error=liki_enable_tracing_for_task_family(fi->fi_item)) < 0) {
-					FATAL(-error, "Failed to target task_family", "PID:", fi->fi_item);
-				} 
-			} else if ((error=liki_enable_tracing_for_task(fi->fi_item)) < 0) {
+			if ((error=liki_enable_tracing_for_task(fi->fi_item)) < 0) {
 					FATAL(-error, "Failed to target task", "PID:", fi->fi_item);
 			}
 		}

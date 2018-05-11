@@ -526,7 +526,7 @@ print_stktrc_info_live(void *arg1, void *arg2)
 			col=26;
 			lineno++;
 		}
-		mvprintw (lineno, col, "%s", symname);
+		mvprintw (lineno, col, "%s", dmangle(symname));
 		col = col + namelen;	
         }
 	lineno++;
@@ -595,7 +595,7 @@ print_hc_stktrc_live(void *arg1, void *arg2)
 			col=15;
 			lineno++;
 		}
-		mvprintw (lineno, col, "%s", symname);
+		mvprintw (lineno, col, "%s", dmangle(symname));
 		col = col + namelen;	
         }
 	lineno++;
@@ -2176,7 +2176,8 @@ print_select_cpu_window()
 	}
 
 	col=0;
-	if (IS_LIKI && (LINES_AVAIL > 3)) {
+	/* the following only works for live analysis */
+	if (is_alive && (LINES_AVAIL > 3)) {
 		lineno++;
 		mvprintw (lineno++, 0, "----------------------- Top Tasks by Hardclock Count ------------------------");
 		mvprintw (lineno++, 0, "   Count    USER     SYS    INTR    PID  Command");

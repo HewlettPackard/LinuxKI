@@ -134,6 +134,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define FILEMAP_PAGECACHE_IDX		2
 #define FILEMAP_PAGECACHE_DEV		3
 
+#define MM_PAGE_ALLOC_PAGE		0
+#define MM_PAGE_ALLOC_ORDER		1
+#define MM_PAGE_ALLOC_FLAGS		2
+#define MM_PAGE_ALLOC_TYPE		3
+
+#define MM_PAGE_FREE_PAGE		0
+#define MM_PAGE_FREE_ORDER		1
+
 #define MARKER_IP       0
 #define MARKER_BUF      1
 
@@ -1349,6 +1357,43 @@ conv_cache_evict(void *arg1, void *arg2)
 	memcpy (&rec_ptr->dev, (char *)ftrace_rec + filemap_pagecache_attr[FILEMAP_PAGECACHE_DEV].offset, filemap_pagecache_attr[FILEMAP_PAGECACHE_DEV].size);
 	rec_ptr->stack_depth = 0;
 
+	return rec_ptr;
+}
+
+void *
+conv_mm_page_alloc(void *arg1, void *arg2)
+{
+	trace_info_t *trcinfop = (trace_info_t *)arg1;
+	kd_rec_t *ftrace_rec = (kd_rec_t *)trcinfop->cur_rec;
+	mm_page_alloc_t *rec_ptr = (mm_page_alloc_t *)arg2;
+
+	if (IS_LIKI) return rec_ptr = (mm_page_alloc_t *)trcinfop->cur_rec;
+
+	SET_COMMON_FIELDS(trcinfop, rec_ptr, ftrace_rec);
+	rec_ptr->reclen = sizeof(mm_page_alloc_t);
+	
+	memcpy (&rec_ptr->page, (char *)ftrace_rec + mm_page_alloc_attr[MM_PAGE_ALLOC_PAGE].offset, mm_page_alloc_attr[MM_PAGE_ALLOC_PAGE].size);
+	memcpy (&rec_ptr->order, (char *)ftrace_rec + mm_page_alloc_attr[MM_PAGE_ALLOC_ORDER].offset, mm_page_alloc_attr[MM_PAGE_ALLOC_ORDER].size);
+	memcpy (&rec_ptr->flags, (char *)ftrace_rec + mm_page_alloc_attr[MM_PAGE_ALLOC_FLAGS].offset, mm_page_alloc_attr[MM_PAGE_ALLOC_FLAGS].size);
+	memcpy (&rec_ptr->migratetype, (char *)ftrace_rec + mm_page_alloc_attr[MM_PAGE_ALLOC_TYPE].offset, mm_page_alloc_attr[MM_PAGE_ALLOC_TYPE].size);
+	rec_ptr->stack_depth = 0;
+	return rec_ptr;
+}
+
+void *
+conv_mm_page_free(void *arg1, void *arg2)
+{
+	trace_info_t *trcinfop = (trace_info_t *)arg1;
+	kd_rec_t *ftrace_rec = (kd_rec_t *)trcinfop->cur_rec;
+	mm_page_free_t *rec_ptr = (mm_page_free_t *)arg2;
+
+	if (IS_LIKI) return rec_ptr = (mm_page_free_t *)trcinfop->cur_rec;
+
+	SET_COMMON_FIELDS(trcinfop, rec_ptr, ftrace_rec);
+	rec_ptr->reclen = sizeof(mm_page_free_t);
+	memcpy (&rec_ptr->page, (char *)ftrace_rec + mm_page_free_attr[MM_PAGE_FREE_PAGE].offset, mm_page_free_attr[MM_PAGE_FREE_PAGE].size);
+	memcpy (&rec_ptr->order, (char *)ftrace_rec + mm_page_free_attr[MM_PAGE_FREE_ORDER].offset, mm_page_free_attr[MM_PAGE_FREE_ORDER].size);
+	rec_ptr->stack_depth = 0;
 	return rec_ptr;
 }
 

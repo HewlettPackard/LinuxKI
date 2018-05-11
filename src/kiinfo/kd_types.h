@@ -21,7 +21,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define TASK_COMM_LEN 16
 #define PRINT_COMMON_FIELDS(rec_ptr)  {													\
 		if (abstime_flag) {													\
-			printf ("%12.06f", rec_ptr->hrtime / 1000000000.0);								\
+			printf ("%12.09f", rec_ptr->hrtime / 1000000000.0);								\
 		} else if ((fmttime_flag || epoch_flag) && (IS_LIKI_V3_PLUS || is_alive)) {							\
 			struct timespec curtime, delta_ts;										\
 			uint64 delta, dnsecs, dsecs;											\
@@ -139,6 +139,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define TRACE_ANON_FAULT		trace_ids.trace_anon_fault
 #define TRACE_FILEMAP_FAULT		trace_ids.trace_filemap_fault
 #define TRACE_KERNEL_PAGEFAULT		trace_ids.trace_kernel_pagefault
+#define TRACE_MM_PAGE_ALLOC		trace_ids.trace_mm_page_alloc
+#define TRACE_MM_PAGE_FREE		trace_ids.trace_mm_page_free
+#define TRACE_MM_PAGE_FREE_DIRECT	trace_ids.trace_mm_page_free_direct
 
 typedef struct kd_print {
 	kd_rec_t kdrec;
@@ -186,6 +189,8 @@ extern kdtype_attr_t anon_fault_attr[];
 extern kdtype_attr_t filemap_fault_attr[];
 extern kdtype_attr_t kernel_pagefault_attr[];
 extern kdtype_attr_t filemap_pagecache_attr[];
+extern kdtype_attr_t mm_page_alloc_attr[];
+extern kdtype_attr_t mm_page_free_attr[];
 extern kdtype_attr_t listen_overflow[];
 extern kdtype_attr_t walltime[];
 extern kdtype_attr_t marker_attr[];

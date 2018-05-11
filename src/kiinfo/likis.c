@@ -175,12 +175,8 @@ init_liki_tracing()
 	fi = trace_filter.f_P_pid;
 	while (fi) {
 		if (fi->fi_item > 0) {
-			if (fnf) {
-				if ((err=liki_enable_tracing_for_task_family(fi->fi_item)) < 0) {
-					FATAL(-err, "Failed to target task_family", "PID:", fi->fi_item);
-				} 
-			} else if ((err=liki_enable_tracing_for_task(fi->fi_item)) < 0) {
-					FATAL(-err, "Failed to target task", "PID:", fi->fi_item);
+			if ((err=liki_enable_tracing_for_task(fi->fi_item)) < 0) {
+				FATAL(-err, "Failed to target task", "PID:", fi->fi_item);
 			}
 		}
 		fi = fi->fi_next;

@@ -42,6 +42,7 @@
 # version 5.0   04/21/2017   removed checkaccess check since passwd is not needed.
 # version 5.1   06/14/2017   Added Copyright
 # version 5.2   06/20/2017   Moved copyright after shell designation
+# version 5.4   05/10/2018   Added -M option to leave C++ names mangled
 # 
 # DESCRIPTION:
 #  
@@ -70,9 +71,8 @@
 #             all subsequent directories.
 #
 #   -m        Skip MW processing.   
-# 
-#             Note that this option can run on multiple KItrace collections at 
-#             one invocation of kiall.
+#
+#   -M	      Do not demangle C++ function names
 #
 #   -l        lite collection 
 #   -x        Generate the kparse report as a .txt file instead of an .html file
@@ -80,6 +80,7 @@
 #   -V	      Add visualization options (vis,vpct,vdepth) to kiall, kparse, kipid
 #   
 #  -t <timestamp>  Only runs KI reports on a single KItrace collection.
+# 
 #
 # NOTE:  
 #  
@@ -94,10 +95,10 @@ EDIR=$DIR/experimental
 EVDIR=$EDIR/vis
 OS=`uname`
 SAVED_PWD=$PWD
-Password=""
 rflag=0
 cflag=0
 fflag=0
+mangle=""
 domwa=1
 lite=0
 dotxt=0
@@ -105,7 +106,7 @@ dovis=0
 
 help()
 {
-    printf "Usage: %s: [-l] [-m] [-r] [-f] [-c] [-x] [-t timestamp]\n" "$0"
+    printf "Usage: %s: [-l] [-m] [-r] [-f] [-c] [-x] [-M] [-V] [-t timestamp]\n" "$0"
 	printf "            -h               Help\n"
 	printf "            -l               Lite version - bypasses some options\n" 
 	printf "            -m               Do not process collectl or MWA data\n"
@@ -113,6 +114,7 @@ help()
 	printf "            -f               Find KI files in pwd and any directories below\n"
 	printf "            -c               Cluster-wide processing\n"
 	printf "            -x               Generate Kparse text format instead of html format\n"
+	printf "            -M               Leave C++ function names mangled\n"
 	printf "            -V               Use visualization options where possible in reports\n"
 	printf "            -t <timestamp>   Only process KI budle with matching timestamp\n"
 }
@@ -232,47 +234,37 @@ process_mw()
 
 process_ki()
 {
+    oracle=""
     echo $DIR/kiinfo -kitrace -ts $tag 
     ( $DIR/kiinfo -kitrace -ts $tag >ki.$tag & )
     rm -rf PIDS >/dev/null
     mkdir PIDS
-    if [ `grep "ora_" ps-eLf.$tag | wc -l` -gt 0 ]
-    then
-    	if [ $dotxt -eq 0 ] ; then
-	    if [ $dovis -eq 0 ] ; then
-                echo $DIR/kiinfo -kiall csv,oracle -html -ts $tag
-                ( $DIR/kiinfo -kiall csv,oracle -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
-	    else
-		process_V
-	    fi
+    if [ `grep "ora_" ps-eLf.$tag | wc -l` -gt 0 ] ; then
+	oracle=",oracle"
+    fi
+
+    if [ $dotxt -eq 0 ] ; then
+        if [ $dovis -eq 0 ] ; then
+	    echo $DIR/kiinfo -kiall csv$oracle$mangle -html -ts $tag
+            ( $DIR/kiinfo -kiall csv$oracle$mangle -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
 	else
-            echo $DIR/kiinfo -kiall csv,oracle -ts $tag
-            ( $DIR/kiinfo -kiall csv,oracle -ts $tag ; touch -r ki.bin.*$tag kp.$tag.txt)
+	    process_V
 	fi
     else
-    	if [ $dotxt -eq 0 ] ; then
-            if [ $dovis -eq 0 ] ; then
-                echo $DIR/kiinfo -kiall csv -html -ts $tag
-                ( $DIR/kiinfo -kiall csv -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
-            else
-                process_V
-            fi
-	else
-                echo $DIR/kiinfo -kiall csv -ts $tag
-                ( $DIR/kiinfo -kiall csv -ts $tag ; touch -r ki.bin.*$tag kp.$tag.txt)
-	fi
+        echo $DIR/kiinfo -kiall csv$oracle$mangle -ts $tag
+        ( $DIR/kiinfo -kiall csv$oracle$mangle -ts $tag ; touch -r ki.bin.*$tag kp.$tag.txt)
     fi
 }
 
 process_V()
 {
+    oracle=""
     if [ `grep "ora_" ps-eLf.$tag | wc -l` -gt 0 ] ; then
-        echo $DIR/kiinfo -kiall oracle,csv,vis,vpct=1,vdepth=3 -html -ts $tag
-        ( $DIR/kiinfo -kiall oracle,csv,vis,vpct=1,vdepth=3 -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
-    else 
-        echo $DIR/kiinfo -kiall csv,vis,vpct=1,vdepth=3 -html -ts $tag
-        ( $DIR/kiinfo -kiall csv,vis,vpct=1,vdepth=3 -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
+	oracle=",oracle"
     fi
+
+    echo $DIR/kiinfo -kiall csv,vis,vpct=1,vdepth=3$oracle$mangle -html -ts $tag
+    ( $DIR/kiinfo -kiall csv,vis,vpct=1,vdepth=3$oracle$mangle -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
 
     echo Generating symlinks to $EVDIR for visualization charts
 
@@ -467,7 +459,7 @@ process_f()
 
 
 
-while getopts p:t:rcfmxVlh optname
+while getopts t:rcfmxVMlh optname
 do
 	case $optname in
 		h)	help
@@ -479,8 +471,8 @@ do
                 m)      domwa=0;;
 		x)	dotxt=1;;
 		V)	dovis=1;;
+		M)      mangle=",mangle";;
                 l)      lite=1;;
-		p)      Password="$OPTARG";;
 		?)	help
 			exit 2;;
 	esac

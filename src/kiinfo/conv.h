@@ -46,5 +46,7 @@ extern void *	conv_kernel_pagefault(void *, void *);
 extern void *	conv_page_fault(void *, void *);
 extern void *	conv_cache_insert(void *, void *);
 extern void *	conv_cache_evict(void *, void *);
+extern void *	conv_mm_page_alloc(void *, void *);
+extern void *	conv_mm_page_free(void *, void *);
 extern char *   get_marker_buf(void *);
 extern void *   conv_common_rec(void *, void *);

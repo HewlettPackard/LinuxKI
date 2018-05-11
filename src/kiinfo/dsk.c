@@ -379,6 +379,7 @@ calc_pid_iototals(void *arg1, void *arg2)
 	if (pidp == NULL) return 0;
 
 	calc_io_totals(&pidp->iostats[0], NULL);
+	calc_io_totals(&pidp->miostats[0], NULL);
 	return 0;
 }
 
@@ -407,6 +408,43 @@ print_pid_iosum(void *arg1, void *arg2)
 
 	rstatp = &pidp->iostats[IO_READ];
 	wstatp = &pidp->iostats[IO_WRITE];
+
+	SPAN_GREY;
+	printf ("%8d %8.0f %8.0f %9.1f %9.3f ",
+		tstatp->compl_cnt,
+		rstatp->compl_cnt / secs,
+		wstatp->compl_cnt / secs,
+		((rstatp->sect_xfrd + wstatp->sect_xfrd)/2.0) / secs,
+		MSECS(tstatp->cum_ioserv / tstatp->compl_cnt),
+		MSECS(tstatp->cum_ioserv / tstatp->compl_cnt));
+
+	PID_URL_FIELD8_R(pidp->PID);
+	if (pidp->cmd) printf ("  %s", pidp->cmd);
+	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
+	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
+	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+
+	printf ("\n");
+			
+	_SPAN;	
+
+	return 0;
+}
+
+int
+print_pid_miosum(void *arg1, void *arg2)
+{
+	pid_info_t *pidp = (pid_info_t *)arg1;
+	iostats_t *rstatp, *wstatp, *tstatp;
+	docker_info_t *dockerp;
+	
+	if (pidp == NULL) return 0;
+	
+	tstatp = &pidp->miostats[IO_TOTAL];
+	if (tstatp->compl_cnt == 0) return 0;
+
+	rstatp = &pidp->miostats[IO_READ];
+	wstatp = &pidp->miostats[IO_WRITE];
 
 	SPAN_GREY;
 	printf ("%8d %8.0f %8.0f %9.1f %9.3f ",
@@ -942,6 +980,17 @@ dsk_print_report()
 	print_io_histogram(globals->iotimes, NULL);
 
 	if (npid) {
+		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, calc_pid_iototals, NULL, 0, NULL);
+		if (npid==ALL) {
+			printf ("\nAll tasks sorted by physical I/O\n\n");
+		} else {
+			printf ("\nTop %d Tasks sorted by Multipath I/O\n\n", npid);
+		}
+
+	        BOLD ("     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process\n");
+		BOLD ("==============================================================================\n");
+		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_miosum,  pid_sort_by_miocnt, npid, 0);
+
 		if (npid==ALL) {
 			printf ("\nAll tasks sorted by physical I/O\n\n");
 		} else {
@@ -951,8 +1000,7 @@ dsk_print_report()
 	        BOLD ("     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process\n");
 		BOLD ("==============================================================================\n");
 
-		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, calc_pid_iototals, NULL, 0, NULL);
-		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_iosum,  pid_sort_by_iocnt, npid, NULL);
+		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_iosum,  pid_sort_by_iocnt, npid, 0);
 	}
 	printf ("\n");
 	dsk_csvfile = tmp; 

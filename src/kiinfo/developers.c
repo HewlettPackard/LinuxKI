@@ -463,7 +463,9 @@ get_next_event(int count)
                         if (liki_rec->id == TT_STARTUP) {
                                 startup_found = 1;
                         }
-                        if (!startup_found) continue;
+                        if (!startup_found) { 
+				continue;
+			}
                 }
 			
 		if (filter_func) { 

@@ -44,10 +44,16 @@ extern int pc_xfs_file_aio_read;
 extern int pc_xfs_file_read_iter;
 extern int pc_inode_dio_wait;
 extern int pc_xfs_file_dio_aio_write;
+extern int pc_md_flush_request;
+extern int pc_blkdev_issue_flush;
 
 int runq_ftrace_print_func(void *, void *);
 
+#define NETRX_SOFTIRQ 4
+#define BLOCK_SOFTIRQ 4
 #define TASKLET_SOFTIRQ 6
+#define SCHED_SOFTIRQ 7
+#define RCU_SOFTIRQ 9
 
 /*
 ** The initialization function
@@ -1407,6 +1413,7 @@ print_stktrc_info(void *p1, void *p2)
 	int ixgbe_read_warn_cnt = 0;
 	int xfs_dio_align_warn_cnt = 0;
 	int xfs_dioread_warn_cnt = 0;
+	int md_flush_warn_cnt = 0;
 
 	if (print_stktrc_args == NULL) return;
 	if (stktrcp->cnt == 0) return;
@@ -1418,17 +1425,16 @@ print_stktrc_info(void *p1, void *p2)
 			key = stktrcp->stklle.key[i];
 			if (key == STACK_CONTEXT_USER)  break;
 			if ((globals->symtable) && (key < globals->nsyms-1)) {
-				if (stktrcp->cnt > 1000) {
+				if (stktrcp->cnt > 10000) {
+					if ((key == pc_md_flush_request)  || (key == pc_blkdev_issue_flush)) md_flush_warn_cnt++;
+				} else if (stktrcp->cnt > 1000) {
 					if ((key == pc_sleep_on_page)  || (key == pc_migration_entry_wait)) migrate_warn_cnt++;
-				} 
-				if (stktrcp->cnt > 500) {
+				} else if (stktrcp->cnt > 500) {
 					if ((key == pc_mutex_lock) || ((key == pc_xfs_file_aio_read) || (key == pc_xfs_file_read_iter)))
 						xfs_dioread_warn_cnt++;
-				}
-				if (stktrcp->cnt > 100) {
+				} else if (stktrcp->cnt > 100) {
 					if ((key == pc_inode_dio_wait) || (key == pc_xfs_file_dio_aio_write)) xfs_dio_align_warn_cnt++;
-				}	
-				if (stktrcp->cnt > 50) {
+				} else if (stktrcp->cnt > 50) {
 					if ((key == pc_msleep) || (key == pc_ixgbe_read_i2c_byte_generic)) ixgbe_read_warn_cnt++;
 				}
 			}
@@ -1446,6 +1452,9 @@ print_stktrc_info(void *p1, void *p2)
 		} else if (xfs_dioread_warn_cnt >= 2) {
 			RED_FONT;
 			print_stktrc_args->warnflag |= WARNF_XFS_DIOREAD;
+		} else if (md_flush_warn_cnt >= 2) {
+			RED_FONT;
+			print_stktrc_args->warnflag |= WARNF_MD_FLUSH;
 		}
 	}
 
@@ -1479,14 +1488,14 @@ print_stktrc_info(void *p1, void *p2)
 
                         if (pregp = find_vtext_preg(pidp, key)) {
                                 if (sym = symlookup(pregp, key, &offset)) {
-                                	pid_printf ("  %s", sym);
+                                	pid_printf ("  %s", dmangle(sym));
                                 } else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
-                                	pid_printf ("  %s", sym);
+                                	pid_printf ("  %s", dmangle(sym));
 				} else {
                                 	pid_printf ("  0x%llx", sym);
 				}
                         } else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
-                                pid_printf ("  %s", sym);
+                                pid_printf ("  %s", dmangle(sym));
                         } else {
                                 pid_printf ("  0x%llx", key);
                         }
@@ -2525,8 +2534,15 @@ print_softirq_entry(void *arg1, void *arg2)
 	irq_name_t *irqname_entry;
 
 	if (warnflagp) {
-		if ((irq == TASKLET_SOFTIRQ) && (irqentryp->count > 100000) && (SECS(irqentryp->total_time) > 2.0)) {
+		/* if we use more than 1/2 core worth of time for BLOCK interrupts */
+		if ((irq == TASKLET_SOFTIRQ) && (irqentryp->count > 100000) && (SECS(irqentryp->total_time) > (globals->total_secs*0.5))) {
 			(*warnflagp) |= WARNF_TASKLET;
+			RED_FONT;
+		} 
+
+		/* if we use more than 1 core worth of time for BLOCK interrupts */
+		if ((irq == BLOCK_SOFTIRQ) && (irqentryp->count > 10000) && (SECS(irqentryp->total_time) > (globals->total_secs*1.0))) {
+			(*warnflagp) |= WARNF_ADD_RANDOM;
 			RED_FONT;
 		} 
 	}

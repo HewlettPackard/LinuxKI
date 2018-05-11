@@ -34,6 +34,7 @@ extern int break_flag;
 extern int debug;
 extern char *cmd_str;
 extern char terminate;
+extern char *kgdboc_str;
 
 int bufsize_fd = 0;
 int marker_fd = 0;
@@ -193,6 +194,14 @@ liki_action()
 	strcpy(&liki_actions[TT_CACHE_EVICT].subsys[0], "filemap");
 	strcpy(&liki_actions[TT_CACHE_EVICT].event[0], "mm_filemap_delete_from_page_cache");
 
+	liki_actions[TT_MM_PAGE_ALLOC].id = TT_MM_PAGE_ALLOC;
+	strcpy(&liki_actions[TT_MM_PAGE_ALLOC].subsys[0], "kmem");
+	strcpy(&liki_actions[TT_MM_PAGE_ALLOC].event[0], "mm_page_alloc");
+
+	liki_actions[TT_MM_PAGE_FREE].id = TT_MM_PAGE_FREE;
+	strcpy(&liki_actions[TT_MM_PAGE_FREE].subsys[0], "kmem");
+	strcpy(&liki_actions[TT_MM_PAGE_FREE].event[0], "mm_page_free");
+
 	return liki_actions;
 }
 
@@ -290,7 +299,6 @@ get_file_char(char *fname, char ignore_err)
 int
 put_fd_str(int fd, char *str, char ignore_err)
 {
-	char buf[20];
 	int size;
 
 	lseek(fd, 0, SEEK_SET);
@@ -342,8 +350,8 @@ init_trace_ids()
 		else if (strcmp(ki_actions[i].event, "sys_exit") == 0) TRACE_SYS_EXIT = i;
 		else if (strcmp(ki_actions[i].event, "sys_enter") == 0) TRACE_SYS_ENTER = i;
 		else if (strcmp(ki_actions[i].event, "sched_switch") == 0) TRACE_SCHED_SWITCH = i;
-		else if (strcmp(ki_actions[i].event, "sched_wakeup") == 0) TRACE_SCHED_WAKEUP = i;
 		else if (strcmp(ki_actions[i].event, "sched_wakeup_new") == 0) TRACE_SCHED_WAKEUP_NEW = i;
+		else if (strcmp(ki_actions[i].event, "sched_wakeup") == 0) TRACE_SCHED_WAKEUP = i;
 		else if (strcmp(ki_actions[i].event, "sched_migrate_task") == 0) TRACE_SCHED_MIGRATE_TASK = i;
 		else if (strcmp(ki_actions[i].event, "block_rq_issue") == 0) TRACE_BLOCK_RQ_ISSUE = i;
 		else if (strcmp(ki_actions[i].event, "block_rq_insert") == 0) TRACE_BLOCK_RQ_INSERT = i;
@@ -378,6 +386,9 @@ init_trace_ids()
 		else if (strcmp(ki_actions[i].event, "mm_filemap_fault") == 0) TRACE_FILEMAP_FAULT = i;
 		else if (strcmp(ki_actions[i].event, "mm_anon_fault") == 0) TRACE_ANON_FAULT = i;
 		else if (strcmp(ki_actions[i].event, "mm_kernel_pagefault") == 0) TRACE_KERNEL_PAGEFAULT = i;
+		else if (strcmp(ki_actions[i].event, "mm_page_alloc") == 0) TRACE_MM_PAGE_ALLOC = i;
+		else if (strcmp(ki_actions[i].event, "mm_page_free_direct") == 0) TRACE_MM_PAGE_FREE_DIRECT = i;
+		else if (strcmp(ki_actions[i].event, "mm_page_free") == 0) TRACE_MM_PAGE_FREE = i;
 		else if (strcmp(ki_actions[i].event, "walltime") == 0) TRACE_WALLTIME = i;
 	}
 }
@@ -644,6 +655,10 @@ set_events_default()
 	if (TRACE_CPU_FREQ) ki_actions[TRACE_CPU_FREQ].execute = 1;	
 	ki_actions[TRACE_HARDCLOCK].execute = 1;
 	ki_actions[TRACE_WALLTIME].execute = 1;
+	ki_actions[TRACE_IRQ_HANDLER_ENTRY].execute = 1;	
+	ki_actions[TRACE_IRQ_HANDLER_EXIT].execute = 1;	
+	ki_actions[TRACE_SOFTIRQ_ENTRY].execute = 1;	
+	ki_actions[TRACE_SOFTIRQ_EXIT].execute = 1;	
 }
 
 int 
@@ -655,7 +670,7 @@ set_events_options(void *v)
 	int	filter_cnt = 0;
 	int 	i;
 
-	if (debug) printf ("set_events_options()\n");
+	if (debug) fprintf (stderr, "set_events_options()\n");
 	if (fi = f->f_events) {
 		filter_found = TRUE;
 		while (fi) {
@@ -693,6 +708,10 @@ set_events_options(void *v)
 				ki_actions[TRACE_SCSI_DISPATCH_CMD_DONE].execute = 1;	
 				if (TRACE_HARDCLOCK) ki_actions[TRACE_HARDCLOCK].execute = 1;
 				ki_actions[TRACE_WALLTIME].execute = 1;
+				if (TRACE_WORKQUEUE_INSERTION) ki_actions[TRACE_WORKQUEUE_INSERTION].execute = 1;
+				if (TRACE_WORKQUEUE_EXECUTION) ki_actions[TRACE_WORKQUEUE_EXECUTION].execute = 1;
+				if (TRACE_WORKQUEUE_ENQUEUE) ki_actions[TRACE_WORKQUEUE_ENQUEUE].execute = 1;
+				if (TRACE_WORKQUEUE_EXECUTE) ki_actions[TRACE_WORKQUEUE_EXECUTE].execute = 1;
 			} else if (strcmp(fi->fi_item_str, "kidsk") == 0) {
 				filter_cnt++;
 				ki_actions[TRACE_BLOCK_RQ_ISSUE].execute = 1;
@@ -762,6 +781,9 @@ set_events_options(void *v)
 				if (TRACE_KERNEL_PAGEFAULT) ki_actions[TRACE_KERNEL_PAGEFAULT].execute = 1;
 				if (TRACE_PAGE_FAULT_USER) ki_actions[TRACE_PAGE_FAULT_USER].execute = 1;
 				if (TRACE_PAGE_FAULT_KERNEL) ki_actions[TRACE_PAGE_FAULT_KERNEL].execute = 1;
+				if (TRACE_MM_PAGE_ALLOC) ki_actions[TRACE_MM_PAGE_ALLOC].execute = 1;
+				if (TRACE_MM_PAGE_FREE)ki_actions[TRACE_MM_PAGE_FREE].execute = 1;
+				if (TRACE_MM_PAGE_FREE_DIRECT)ki_actions[TRACE_MM_PAGE_FREE_DIRECT].execute = 1;
 			} else { 
 				for (i = 1; i < KI_MAXTRACECALLS; i++) {
 					if (strcmp(fi->fi_item_str, ki_actions[i].event) == 0) {
@@ -834,6 +856,8 @@ fatal(const char *func, const int lineno, const char *file, int err, char *errms
 		restore_all_events();
 		restore_misc_trace_values();
         }
+
+	if (kgdboc_str) reset_kgdboc();
 
 	if (liki_initialized) {
 		fprintf (stderr, "  resetting trace mask...\n");
@@ -985,7 +1009,6 @@ parse_fmt_file(char *fname, kdtype_attr_t *attr_array) {
 		}
                 return;
         }
-	if (debug) printf ("parse_fmt_file() - fname: %s\n", fname);
 	while (1) {
 		rtnptr = fgets((char *)&input_str, 511, f);
 		if (rtnptr == NULL) {
@@ -1104,6 +1127,15 @@ read_fmt_files()
 	parse_fmt_file(fname, filemap_pagecache_attr);
 	sprintf(fname, "%smm_filemap_delete_from_page_cache%s", prefix, postfix);
 	parse_fmt_file(fname, filemap_pagecache_attr);
+
+	sprintf(fname, "%smm_page_alloc%s", prefix, postfix);
+	parse_fmt_file(fname, mm_page_alloc_attr);
+	sprintf(fname, "%smm_page_free%s", prefix, postfix);
+	parse_fmt_file(fname, mm_page_free_attr);
+	/* 2.6 kernels */
+	sprintf(fname, "%smm_page_free_direct%s", prefix, postfix);
+	parse_fmt_file(fname, mm_page_free_attr);
+	
 
         sprintf(fname, "%sprint%s", prefix, postfix);
 	parse_fmt_file(fname, marker_attr);

@@ -112,7 +112,7 @@ cache_evict_func(void *a, void *v)
 	pgcache_t *pgcachep;
 	fdata_info_t *fdatap;
 
-	if (debug) printf ("pid_cache_evict_func\n");
+	if (debug) printf ("cache_evict_func\n");
 
 	rec_ptr = conv_cache_evict(trcinfop, &tt_rec_ptr);
 

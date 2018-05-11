@@ -32,6 +32,7 @@ extern int clpid_sort_by_sleep_cnt(const void *, const void *);
 extern int clpid_sort_by_hc_sys(const void *, const void *);
 extern int clpid_sort_by_hc(const void *, const void *);
 extern int clpid_sort_by_iops(const void *, const void *);
+extern int clpid_sort_by_miops(const void *, const void *);
 extern int clfdata_sort_by_syscalls(const void *, const void *);
 extern int clfdata_sort_by_elptime(const void *, const void *);
 extern int clfdata_sort_by_errs(const void *, const void *);
@@ -53,6 +54,7 @@ extern int dkpid_sort_by_iocnt(const void *, const void *);
 
 extern int pid_sort_by_trace_recs(const void *, const void *);
 extern int pid_sort_by_iocnt(const void *, const void *);
+extern int pid_sort_by_miocnt(const void *, const void *);
 extern int pid_sort_by_runtime(const void *, const void *);
 extern int pid_sort_by_runqtime(const void *, const void *);
 extern int pid_sort_by_systime(const void *, const void *);

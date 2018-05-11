@@ -217,8 +217,8 @@ track_issued_ios(void *a)
 		mioreqp->nr_sector = rec_ptr->nr_sectors;
 		FREE(ioreqp);
 		return mioreqp;
-	} else if (!fnf) {	
-		/* add new entry, but only if fnf is not used */
+	} else {	
+		/* add new entry */
 		ioreqp = GET_IOREQP(&devinfop->ioq_hash, sector);
         	ioreqp->issue_time = rec_ptr->hrtime;
 		ioreqp->issue_pid = rec_ptr->pid;
@@ -227,8 +227,6 @@ track_issued_ios(void *a)
 		ioreqp->sector = sector;
 		ioreqp->nr_sector = rec_ptr->nr_sectors;
 		return ioreqp;
-	} else {
-		return NULL;
 	}
 }
 
@@ -664,10 +662,10 @@ block_rq_insert_func(void *a, void *v)
 	rec_ptr = conv_block_rq_insert(trcinfop, &tt_rec_ptr);
 
         if ((nomapper_flag) && (dev_major(DEV(rec_ptr->dev)) == MAPPER_MAJOR)) return 0;
-        if (!check_filter(f->f_P_tgid, rec_ptr->tgid, fnf) &&
-            !check_filter(f->f_P_pid, (uint64)rec_ptr->pid, fnf) &&
-            !check_filter(f->f_dev, DEV(rec_ptr->dev), 0) &&
-            !check_filter(f->f_P_cpu, (uint64)rec_ptr->cpu, 0))
+        if (!check_filter(f->f_P_tgid, rec_ptr->tgid) &&
+            !check_filter(f->f_P_pid, (uint64)rec_ptr->pid) &&
+            !check_filter(f->f_dev, DEV(rec_ptr->dev)) &&
+            !check_filter(f->f_P_cpu, (uint64)rec_ptr->cpu))
                 return 0;
 
 	if (perpid_stats) pidp = GET_PIDP(&globals->pid_hash, rec_ptr->pid);
@@ -713,10 +711,10 @@ block_rq_issue_func(void *a, void *v)
 		insert_pid = ioreqp->insert_pid;
 		insert_pidp = GET_PIDP(&globals->pid_hash, insert_pid);
 
-                if (!check_filter(f->f_P_tgid, insert_pidp->tgid, fnf) &&
-                    !check_filter(f->f_P_pid, insert_pid, fnf) &&
-                    !check_filter(f->f_dev, DEV(rec_ptr->dev), 0) &&
-                    !check_filter(f->f_P_cpu, (uint64)rec_ptr->cpu, 0)) {
+                if (!check_filter(f->f_P_tgid, insert_pidp->tgid) &&
+                    !check_filter(f->f_P_pid, insert_pid) &&
+                    !check_filter(f->f_dev, DEV(rec_ptr->dev)) &&
+                    !check_filter(f->f_P_cpu, (uint64)rec_ptr->cpu)) {
                         return 0;
                 }
 
@@ -775,10 +773,10 @@ block_rq_complete_func(void *a, void *v)
 		insert_pid = ioreqp->insert_pid;
 		insert_pidp = GET_PIDP(&globals->pid_hash, insert_pid);
 
-                if (!check_filter(f->f_P_tgid, insert_pidp->tgid, fnf) &&
-                    !check_filter(f->f_P_pid, insert_pid, fnf) &&
-                    !check_filter(f->f_dev, DEV(rec_ptr->dev), 0) &&
-                    !check_filter(f->f_P_cpu, (uint64)rec_ptr->cpu, 0)) {
+                if (!check_filter(f->f_P_tgid, insert_pidp->tgid) &&
+                    !check_filter(f->f_P_pid, insert_pid) &&
+                    !check_filter(f->f_dev, DEV(rec_ptr->dev)) &&
+                    !check_filter(f->f_P_cpu, (uint64)rec_ptr->cpu)) {
                         FREE(ioreqp);
                         return 0;
                 }

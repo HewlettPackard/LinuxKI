@@ -76,8 +76,8 @@ The following documentation provides a brief overview for downloading and instal
 ### Download
 Pre-packaged RPM and DEB files are available at the following locations:
 
-* [LinuxKI RPM package](https://github.com/HewlettPackard/LinuxKI/raw/master/rpms/linuxki-5.3-1.noarch.rpm)
-* [LinuxKI DEB package](https://github.com/HewlettPackard/LinuxKI/raw/master/rpms/linuxki_5.3-1_all.deb)
+* [LinuxKI RPM package](https://github.com/HewlettPackard/LinuxKI/raw/master/rpms/linuxki-5.4-1.noarch.rpm)
+* [LinuxKI DEB package](https://github.com/HewlettPackard/LinuxKI/raw/master/rpms/linuxki_5.4-1_all.deb)
 
 
 ### Prerquisites
@@ -114,10 +114,10 @@ You can also use your favorite package manager, such as yum.
 You can verify the version of the LinuxKI toolset using rpm or dpkg as follows:
 
      $ rpm --query linuxki
-     linuxki-5.3-1.noarch
+     linuxki-5.4-1.noarch
 
      $ dpkg --status linuxki | grep Version
-     Version: 5.3-1
+     Version: 5.4-1
 
 ### Removing the LinuxKI toolset
 

@@ -1847,8 +1847,11 @@ find_hc_start(uint64 *stack, uint64 depth)
 		
 		if (symptr)  {
 			if (strncmp(symptr, "apic_timer_interrupt", 20) == 0)  retval=i+1;
-			else if (strncmp(symptr, "ret_from_intr", 18) == 0) retval= i+1;		/* ARM64, l4tm */
-			else if (strncmp(symptr, "__irqentry_text_start", 21) == 0) retval= i+1;		/* ARM64, l4tm */
+			else if (strncmp(symptr, "ret_from_intr", 18) == 0) retval= i+1;
+			else if (strncmp(symptr, "__irqentry_text_start", 21) == 0) retval= i+1;
+			else if (strncmp(symptr, "el1h_64_irq", 11) == 0) retval= i+1;  /* ARM64 */
+			else if (strncmp(symptr, "el1_irq", 7) == 0) retval= i+1;       /* ARM64 */
+			else if (strncmp(symptr, "arch_local_", 11) == 0) retval= i+1;  /* ARM64 */
 			else continue;
 		}
         }

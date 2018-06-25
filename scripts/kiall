@@ -50,6 +50,7 @@ shopt -s extglob
 # version 7.1   06/29/2021   fixed kiall -f to use "find ." in process_f
 # version 7.6   02/22/2023   Made Visulation option hidden again
 # version 7.7   07/28/2023   change egrep to grep -E                
+# version 7.8   11/09/2023   Add -f to the "rm" commands to prevent being prompted in script.
 # 
 # DESCRIPTION:
 #  
@@ -130,7 +131,7 @@ help()
 	printf "       -x               Generate Kparse text format instead of html format\n"
 	printf "       -M               Leave C++ function names mangled\n"
 	printf "       -B               Do not report Disk Block Frequency stats in Kparse output\n"
-	printf "       -t <timestamp>   Only process KI budle with matching timestamp\n"
+	printf "       -t <timestamp>   Only process KI bundle with matching timestamp\n"
 }
 
 getnodename()
@@ -219,11 +220,11 @@ likimerge()
     RETVAL=$?
     if [ $RETVAL -eq 0 ] ; then
 	echo "ki.bin files merged by kiinfo -likimerge"
-	rm ki.bin.*.$tag  >/dev/null 2>&1
+	rm -f ki.bin.*.$tag  >/dev/null 2>&1
 	chmod 644 ki.bin.$tag
     else
 	echo "kiinfo -likimerge cannot merge ki.bin files.  Suspect default tracing (ftrace) used."
-	rm ki.bin.$tag >/dev/null 2>&1
+	rm -f ki.bin.$tag >/dev/null 2>&1
 	if [ $dovis -eq 1 ] ; then
 	    echo "-V visualization option works best with liki DLKM tracing. Only limited visualization charts are available with Ftrace."
 	fi

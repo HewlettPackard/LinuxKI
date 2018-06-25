@@ -180,7 +180,7 @@ kp_sys_summary ()
 		print_mem_info(); NL;
 
 		ANM(_LNK_0_2_0);
-		BOLD("Side-Channel Attack (Spectre/Meltdown) Mitigations:"); NL;
+		BOLD("Security Mitigations:"); NL;
 		parse_scavuln(1);
 
 		if (globals->scavuln == SCA_MITIGATED) {
@@ -3206,6 +3206,7 @@ kp_docker_ps()				/* Section 8.1 */
         _TABLE;
 
 	print_docker_ps();
+	print_pods();
 }
 	
 
@@ -3310,7 +3311,7 @@ kp_txt_links()				/* Section 9.1 */
 	TXT_FIELD("kiwait", "Wait/Sleep Analysis Report");
 	TXT_FIELD("kifile", "File Activity Report");
 	TXT_FIELD("kifutex", "Futex Report");
-	if (globals->docker_hash) TXT_FIELD("kisock", "Docker Container Report");
+	if (globals->docker_hash) TXT_FIELD("kidock", "Container Report");
 }
 
 void

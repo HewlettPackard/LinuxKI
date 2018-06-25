@@ -266,6 +266,7 @@ kiall_init_func(void *v)
 		parse_mpsched();
 		parse_lscpu();
 		parse_docker_ps();
+		parse_pods();
        		parse_proc_cgroup();
         	parse_lsof();
         	parse_pself();

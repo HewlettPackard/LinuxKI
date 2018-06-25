@@ -228,6 +228,7 @@ pid_init_func(void *v)
 	parse_kallsyms();
 	parse_devices();
 	parse_docker_ps();
+	parse_pods();
         parse_ll_R();
 
 	if (is_alive) {

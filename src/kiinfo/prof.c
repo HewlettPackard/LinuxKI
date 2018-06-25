@@ -551,6 +551,7 @@ hc_print_stktrc(void *p1, void *p2)
 	wpct = ((float)stktrcp->cnt *100.0)/(hcinfop->total);
         pid_printf (pidfile, "%s%8d %6.2f%%",tab, stktrcp->cnt, wpct);
         for (i=0;i<stktrcp->stklen; i++) {
+		sym = NULL;
                 key = stktrcp->stklle.key[i];
 
 		if (IS_WINKI) {

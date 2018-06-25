@@ -94,7 +94,7 @@ help()
 	printf "            -x               Generate Kparse text format instead of html format\n"
 	printf "            -V               Use visualization options where possible in reports\n"
 	printf "            -p <password>    specify password needed for kiinfo \n"
-	printf "            -t <timestamp>   Only process KI budle with matching timestamp\n"
+	printf "            -t <timestamp>   Only process KI bundle with matching timestamp\n"
 }
 
 verify_passwd()

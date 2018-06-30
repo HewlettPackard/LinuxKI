@@ -45,7 +45,7 @@ cp /opt/linuxki/man/man7/*.gz /usr/share/man/man7
 # 
 # add /opt/linuxki to the PATH variable
 # 
-echo "PATH=$PATH:/opt/linuxki" > /etc/profile.d/linuxki.sh
+echo 'export PATH=$PATH:/opt/linuxki' > /etc/profile.d/linuxki.sh
 
 #
 # If this install is on a cluster head node with pdsh installed then set

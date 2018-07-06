@@ -23,11 +23,6 @@ modprobe -r -q likit
 rm -f /lib/modules/*/misc/likit.ko 2> /dev/null
 
 #
-# remove /opt/linuxki from the PATH variable
-#
-rm /etc/profile.d/linuxki.sh
-
-#
 # remove the LinuxKI Manpages
 #
 rm /usr/share/man/man1/kiinfo* /usr/share/man/man1/kiall* /usr/share/man/man1/runki* /usr/share/man/man1/kiclean* /usr/share/man/man7/linuxki*

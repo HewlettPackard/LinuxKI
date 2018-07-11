@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# Builds the linuxki Docker image which is used by kivis-start and kivis-stop.
+
+cd /opt/linuxki
+sudo docker build \
+        --tag linuxki \
+        --build-arg http_proxy=$http_proxy \
+        --build-arg https_proxy=$https_proxy \
+        --build-arg HTTP_PROXY=$HTTP_PROXY \
+        --build-arg HTTPS_PROXY=$HTTPS_PROXY \
+        .

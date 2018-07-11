@@ -1,0 +1,22 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kivis-build 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kivis-build - Build the LinuxKI visualization Docker container
+
+.SH SYNOPSIS
+.B kivis-build
+
+.SH DESCRIPTION
+
+\fBkivis-build\fR builds the Docker container \fBlinuxki\fR which is used by the LinuxKI visulization tools \fBkivis-start\fR and \fBkivis-stop\fR. Must be run by a user with sudo privileges. If the proxy environment variables (e.g., \fBhttp_proxy\fR) are set, they will be used when building the container.
+
+.SH AUTHOR
+Christopher Voltz <christopher@voltz.ws>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1) kivis-build(1) kivis-start(1) kivis-stop(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

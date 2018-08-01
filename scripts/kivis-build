@@ -1,6 +1,12 @@
 #!/bin/bash
 #
 # Builds the linuxki Docker image which is used by kivis-start and kivis-stop.
+# We pass along the proxy environment variables during the build. This makes
+# the image less portable then it otherwise would be but is required to support
+# building the image with versions of Docker before 17.07.  For Docker versions
+# 17.07 and later, users are recommended to configure the Docker client to pass
+# the variables to containers automatically, as documented at
+# https://docs.docker.com/network/proxy/.
 
 cd /opt/linuxki
 docker build \

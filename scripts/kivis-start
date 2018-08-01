@@ -38,7 +38,7 @@ if ! docker image inspect linuxki &> /dev/null; then
         /opt/linuxki/kivis-build
 fi
 
-kivis-stop
+/opt/linuxki/kivis-stop
 
 docker run \
         --detach \

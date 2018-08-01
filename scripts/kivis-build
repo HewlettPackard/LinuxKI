@@ -3,7 +3,7 @@
 # Builds the linuxki Docker image which is used by kivis-start and kivis-stop.
 
 cd /opt/linuxki
-sudo docker build \
+docker build \
         --tag linuxki \
         --build-arg http_proxy=$http_proxy \
         --build-arg https_proxy=$https_proxy \

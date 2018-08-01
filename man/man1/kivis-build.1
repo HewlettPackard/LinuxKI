@@ -19,7 +19,11 @@ which is used by the LinuxKI visualization tools
 and
 .BR kivis-stop .
 
-Must be run by a user with sudo privileges. If the proxy environment variables (e.g.,
+Must be run using
+.B sudo
+or by a user in the
+.B docker
+group. If the proxy environment variables (e.g.,
 .BR http_proxy )
 are set, they will be used when building the image.
 

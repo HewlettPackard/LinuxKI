@@ -6,7 +6,8 @@
 # Note that the container is named linuxki so kivis-stop knows which container
 # to stop but this means that only one container can be run at a time so if a
 # container is already running, it will automatically be stopped before the new
-# one is started.
+# one is started. Additionally, the Docker image will
+# be built, it it hasn't already been.
 
 #
 # Debian has a package called docker which provides a docker command which has
@@ -27,6 +28,14 @@ Make sure to follow the instructions in the "Optional Linux post-installation
 steps".
 EOF
         exit 1
+fi
+
+#
+# Build the Docker image if it doesn't exist already.
+#
+
+if ! docker image inspect linuxki &> /dev/null; then
+        /opt/linuxki/kivis-build
 fi
 
 kivis-stop

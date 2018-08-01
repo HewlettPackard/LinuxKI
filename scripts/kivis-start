@@ -8,6 +8,27 @@
 # container is already running, it will automatically be stopped before the new
 # one is started.
 
+#
+# Debian has a package called docker which provides a docker command which has
+# nothing to do with Docker containers. Debian provides the docker.io package
+# to provide Docker container support but it is outdated so tell users to
+# install Docker by following the documentation on the docker.com website.
+#
+
+if ! docker --help |& grep container &> /dev/null; then
+        cat <<EOF
+Wrong docker package installed. See the Docker website for information on how
+to install Docker for container support:
+  CentOS/RHEL: https://docs.docker.com/install/linux/docker-ce/centos/
+  Fedora:      https://docs.docker.com/install/linux/docker-ce/fedora/
+  Debian:      https://docs.docker.com/install/linux/docker-ce/debian/
+  Ubuntu:      https://docs.docker.com/install/linux/docker-ce/ubuntu/
+Make sure to follow the instructions in the "Optional Linux post-installation
+steps".
+EOF
+        exit 1
+fi
+
 kivis-stop
 
 docker run \

@@ -13,8 +13,10 @@ kivis-start \- Starts the LinuxKI visualization Docker container
 
 .B kivis-start
 runs the Docker container
-.B linuxki
-and shows the hosted files in the default web browser. The container starts the Apache web server (with PHP extensions) which hosts the files in the current directory. After the container is started, the default browser is opened to show either the
+.IB $USER -linuxki
+(where
+.I $USER
+is replaced with the current username) and shows the hosted files in the default web browser. The container starts the Apache web server (with PHP extensions) which hosts the files in the current directory. After the container is started, the default browser is opened to show either the
 .B kp.*.html
 page (if there is only one in the current directory or subdirectories) or the files in the current directory.
 
@@ -31,7 +33,7 @@ When finished viewing the reports, run
 to stop the container.
 
 If the
-.B linuxki
+.IB $USER -linuxki
 container is already running, it will be stopped and a new container will be started.
 
 .SH USAGE

@@ -3,10 +3,10 @@
 # Starts a linuxki Docker container, which hosts the files in the current
 # directory, and then opens the default browser to the the kp*.html file if
 # there is one or to the directory if there is more than one kp*.html file.
-# Note that the container is named linuxki so kivis-stop knows which container
-# to stop but this means that only one container can be run at a time so if a
-# container is already running, it will automatically be stopped before the new
-# one is started. Additionally, the Docker image will
+# Note that the container is named $USER-linuxki so kivis-stop knows which
+# container to stop but this means that only one container can be run at a
+# time, per user, so if a container is already running, it will automatically
+# be stopped before the new one is started. Additionally, the Docker image will
 # be built, it it hasn't already been.
 
 #
@@ -42,7 +42,7 @@ kivis-stop
 
 docker run \
         --detach \
-        --name linuxki \
+        --name $USER-linuxki \
         --publish-all \
         --rm \
         --volume $PWD:/var/www/html/linuxki \
@@ -50,7 +50,7 @@ docker run \
 
 port=$(docker inspect \
         --format='{{(index (index .NetworkSettings.Ports "80/tcp") 0).HostPort}}' \
-        linuxki)
+        $USER-linuxki)
 echo Server running on port $port
 
 html_file=$(find . -iname 'kp.*.html')

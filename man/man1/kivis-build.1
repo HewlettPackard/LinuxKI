@@ -4,19 +4,52 @@
 .ad l
 .TH kivis-build 1 "5.4 - April 18, 2018" version "5.4"
 .SH NAME
-kivis-build - Build the LinuxKI visualization Docker container
+kivis-build \- Build the LinuxKI visualization Docker image
 
 .SH SYNOPSIS
 .B kivis-build
 
 .SH DESCRIPTION
 
-\fBkivis-build\fR builds the Docker container \fBlinuxki\fR which is used by the LinuxKI visulization tools \fBkivis-start\fR and \fBkivis-stop\fR. Must be run by a user with sudo privileges. If the proxy environment variables (e.g., \fBhttp_proxy\fR) are set, they will be used when building the container.
+.B kivis-build
+builds the Docker image
+.B linuxki
+which is used by the LinuxKI visualization tools
+.B kivis-start
+and
+.BR kivis-stop .
+
+Must be run by a user with sudo privileges. If the proxy environment variables (e.g.,
+.BR http_proxy )
+are set, they will be used when building the image.
 
 .SH AUTHOR
 Christopher Voltz <christopher@voltz.ws>
 
 .SH SEE ALSO
-LinuxKI(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1) kivis-build(1) kivis-start(1) kivis-stop(1)
+.BR LinuxKI (1),
+.BR kiinfo-dump (1),
+.BR kiinfo-likidump (1),
+.BR kiinfo-likimerge (1),
+.BR kiinfo-live (1),
+.BR kiinfo-kparse (1),
+.BR kiinfo-kitrace (1),
+.BR kiinfo-kipid (1),
+.BR kiinfo-kiprof (1),
+.BR kiinfo-kidsk (1),
+.BR kiinfo-kirunq (1),
+.BR kiinfo-kiwait (1),
+.BR kiinfo-kifile (1),
+.BR kiinfo-kisock (1),
+.BR kiinfo-kifutex (1),
+.BR kiinfo-kidock (1),
+.BR kiinfo-kiall (1),
+.BR kiinfo-clparse (1),
+.BR runki (1),
+.BR kiall (1),
+.BR kiclean (1),
+.BR kivis-start (1),
+.BR kivis-stop (1)
 
-https://github.com/HewlettPackard/LinuxKI/wiki
+.UR https://github.com/HewlettPackard/LinuxKI/wiki
+.UE

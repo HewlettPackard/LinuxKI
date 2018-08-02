@@ -4,39 +4,82 @@
 .ad l
 .TH kivis-start 1 "5.4 - April 18, 2018" version "5.4"
 .SH NAME
-kivis-start - Starts the LinuxKI visualization Docker container
+kivis-start \- Starts the LinuxKI visualization Docker container
 
 .SH SYNOPSIS
 .B kivis-start
 
 .SH DESCRIPTION
 
-\fBkivis-start\fR runs the Docker container \fBlinuxki\fR and shows the hosted files in the default web browser. The container starts the Apache web server (with PHP extensions) which hosts the files in the current directory. After the container is started, the default browser is opened to show either the \fBkp.*.html\fR page (if there is only one in the current directory or subdirectories) or the files in the current directory.
+.B kivis-start
+runs the Docker container
+.B linuxki
+and shows the hosted files in the default web browser. The container starts the Apache web server (with PHP extensions) which hosts the files in the current directory. After the container is started, the default browser is opened to show either the
+.B kp.*.html
+page (if there is only one in the current directory or subdirectories) or the files in the current directory.
 
-The command must be run from the directory containing the output of the \fBkiall\fR command. If the \fB-V\fR option is used when \fBkiall\fR is run, then the visualizations will be shown as well.
+The command must be run from the directory containing the output of the
+.B kiall
+command. If the
+.B -V
+option is used when
+.B kiall
+is run, then the visualizations will be shown as well.
 
-When finished viewing the reports, run \fBkivis-stop\fR to stop the container.
+When finished viewing the reports, run
+.B kivis-stop
+to stop the container.
 
-If the \fBlinuxki\fR container is already running, it will be stopped and a new container will be started.
+If the
+.B linuxki
+container is already running, it will be stopped and a new container will be started.
 
 .SH USAGE
 
 Generate the report, with visualizations:
-
+.RS
 .B $ kiall -r -V
+.RE
 
 Start the container:
-
+.RS
 .B $ kivis-start
+.RE
 
-Browser opens to show the report. When finished viewing the reports:
+Browser opens to show the report.
 
+When finished viewing the reports:
+.RS
 .B $ kivis-stop
+.RE
 
 .SH AUTHOR
 Christopher Voltz <christopher@voltz.ws>
 
 .SH SEE ALSO
-LinuxKI(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1) kivis-build(1) kivis-start(1) kivis-stop(1)
+.BR LinuxKI (1),
+.BR kiinfo-dump (1),
+.BR kiinfo-likidump (1),
+.BR kiinfo-likimerge (1),
+.BR kiinfo-live (1),
+.BR kiinfo-kparse (1),
+.BR kiinfo-kitrace (1),
+.BR kiinfo-kipid (1),
+.BR kiinfo-kiprof (1),
+.BR kiinfo-kidsk (1),
+.BR kiinfo-kirunq (1),
+.BR kiinfo-kiwait (1),
+.BR kiinfo-kifile (1),
+.BR kiinfo-kisock (1),
+.BR kiinfo-kifutex (1),
+.BR kiinfo-kidock (1),
+.BR kiinfo-kiall (1),
+.BR kiinfo-clparse (1),
+.BR runki (1),
+.BR kiall (1),
+.BR kiclean (1),
+.BR kivis-build (1),
+.BR kivis-stop (1)
 
-https://github.com/HewlettPackard/LinuxKI/wiki
+.UR https://github.com/HewlettPackard/LinuxKI/wiki
+.UE

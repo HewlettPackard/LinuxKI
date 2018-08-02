@@ -23,9 +23,31 @@ Must be run using
 .B sudo
 or by a user in the
 .B docker
-group. If the proxy environment variables (e.g.,
-.BR http_proxy )
-are set, they will be used when building the image.
+group.
+
+.SH ENVIRONMENT
+
+.B kivis-build
+supports proxies for HTTP and HTTPS when building the image. The
+.B yum
+commands used when building the container will use the following proxy environment variables:
+
+.RS
+.B http_proxy, https_proxy
+.RS
+If set, the
+.B http_proxy
+and
+.B https_proxy
+variables should contain the URL of the proxy for the HTTP and HTTPS connection respectively. For example:
+.B http://proxy.fqdn:8080
+.RE
+
+.B no_proxy
+.RS
+If set, this variable should contain a comma-separated list of domain extensions the proxy should not be used for. For example:
+.B localhost,127.0.0.1,.dev.net
+.RE
 
 .SH AUTHOR
 Christopher Voltz <christopher@voltz.ws>

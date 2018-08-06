@@ -154,11 +154,6 @@ Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100)
 Do not print syscall entry records when using kitrace flag 
 .RE
 
-.B symlookup
-.RS
-For live tracing, performs USER hardclock symbol table lookups
-.RE
-
 .B sysignore=<ignore_filee>
 .RS
 Do not trace system calls listed in the <ignore_file>. This can reduce trace data by eliminating frequently called system calls, such as getrusage(),gettimeofday(), time(), etc...

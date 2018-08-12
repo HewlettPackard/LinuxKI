@@ -43,13 +43,6 @@ cp /opt/linuxki/man/man1/*.gz /usr/share/man/man1
 cp /opt/linuxki/man/man7/*.gz /usr/share/man/man7
 
 #
-# If Docker is installed, build the Docker container.
-#
-if which docker &> /dev/null; then
-        /opt/linuxki/kivis-build
-fi
-
-#
 # If this install is on a cluster head node with pdsh installed then set
 # up for cluster installation
 #

@@ -152,6 +152,7 @@ clparse_process_func(void *a, void *arg)
         return 0;
 }
 
+int
 clparse_bufmiss_func(void *v, void *a)
 {
         trace_info_t *trcinfop = v;
@@ -357,6 +358,7 @@ build_clsdata_hash(void *arg1, void *arg2)
 		NULL, 0, NULL);
 }
 
+int
 cp_parse_cstate(void *arg1, void *arg2)
 {
 	parse_cstates();

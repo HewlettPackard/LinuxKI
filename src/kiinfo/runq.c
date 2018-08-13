@@ -100,6 +100,10 @@ runq_init_func(void *v)
                 	ki_actions[TRACE_SCHED_WAKEUP_NEW].execute = 1;
                 	ki_actions[TRACE_SCHED_WAKEUP].execute = 1;
 			ki_actions[TRACE_POWER_FREQ].execute = 1;
+			ki_actions[TRACE_IRQ_HANDLER_ENTRY].execute = 1;
+			ki_actions[TRACE_IRQ_HANDLER_EXIT].execute = 1;
+			ki_actions[TRACE_SOFTIRQ_ENTRY].execute = 1;
+			ki_actions[TRACE_SOFTIRQ_EXIT].execute = 1;
 		}
 	} else if (IS_LIKI) {
                 ki_actions[TRACE_SYS_EXIT].execute = 1;
@@ -156,6 +160,7 @@ print_perldom_stats(uint64 *warnflagp)
             BOLD("%snode  ncpu          Total          sys         user         idle", tab);
 	    if (gstatp->T_irq_time) BOLD ("  hardirq_sys hardirq_user hardirq_idle  softirq_sys softirq_user softirq_idle");
 	    if (msr_flag) BOLD ("  LLC_hit%%    CPI   Avg_MHz  SMI_cnt");
+	    /* if (msr_flag) BOLD ("        MIPS"); */
 	    printf("\n");
 
             for (i=0;i<MAXLDOMS;i++) {
@@ -180,12 +185,17 @@ print_perldom_stats(uint64 *warnflagp)
 
 			if (msr_flag) {
 				msrptr = &statp->msr_total[0];
-        			printf ("   %6.2f%%  %5.2f   %7.2f       %4lld",
+        			printf ("   %6.2f%%  %5.2f   %7.2f     %4lld",
 						(msrptr[LLC_REF]-msrptr[LLC_MISSES])*100.0 / msrptr[LLC_REF],
                         			msrptr[CYC_NOHALT_CORE] * 1.0 / msrptr[RET_INSTR],
                				        msrptr[REF_CLK_FREQ] ? globals->clk_mhz * (msrptr[ACT_CLK_FREQ]*1.0 / msrptr[REF_CLK_FREQ]) : 0.0,
                      				statp->msr_last[SMI_CNT]);
 			}
+			/*
+			if (msr_flag) {
+				printf ("   %9.2f",  (msrptr[RET_INSTR]/1000000)/globals->total_secs);
+			}
+			*/ 
                         printf ("\n");
                 }
             }
@@ -211,6 +221,11 @@ print_perldom_stats(uint64 *warnflagp)
 				msrptr[REF_CLK_FREQ] ? globals->clk_mhz * (msrptr[ACT_CLK_FREQ]*1.0 / msrptr[REF_CLK_FREQ]) : 0.0,
                      		gstatp->msr_last[SMI_CNT]);
 	    }
+	/*
+	    if (msr_flag) {
+		printf ("   %9.2f",  (msrptr[RET_INSTR]/1000000)/globals->total_secs);
+	    }
+	*/
 
 	    printf("\n\n");
 	}
@@ -218,6 +233,7 @@ print_perldom_stats(uint64 *warnflagp)
 	BOLD ("node  ncpu     Total Busy          sys          usr         idle");
 	if (gstatp->T_irq_time) BOLD ("  hardirq_sys hardirq_user hardirq idle  softirq_sys softirq_user softirq_idle");
 	if (msr_flag) BOLD ("  LLC_hit%%    CPI   Avg_MHz  SMI_cnt");
+	/* if (msr_flag) BOLD ("        MIPS"); */
 	printf("\n");
 
         for (i=0;i<MAXLDOMS;i++) {
@@ -254,7 +270,12 @@ print_perldom_stats(uint64 *warnflagp)
                        			msrptr[CYC_NOHALT_CORE] * 1.0 / msrptr[RET_INSTR],
                				msrptr[REF_CLK_FREQ] ? globals->clk_mhz * (msrptr[ACT_CLK_FREQ]*1.0 / msrptr[REF_CLK_FREQ]) : 0.0,
                      			statp->msr_last[SMI_CNT]);
-			}
+			}			
+			/*
+	    		if (msr_flag) {
+				printf ("   %9.2f",  (msrptr[RET_INSTR]/1000000)/globals->total_secs);
+	   		}
+			*/
                         printf ("\n");
                 }
         }
@@ -284,6 +305,13 @@ print_perldom_stats(uint64 *warnflagp)
 				msrptr[REF_CLK_FREQ] ? globals->clk_mhz * (msrptr[ACT_CLK_FREQ]*1.0 / msrptr[REF_CLK_FREQ]) : 0.0,
                			gstatp->msr_last[SMI_CNT]);
 	}
+
+	/*
+	if (msr_flag) {
+		printf ("   %9.2f",  (msrptr[RET_INSTR]/1000000)/globals->total_secs);
+	}
+	*/
+
 	printf("\n");
         return;
 }
@@ -311,7 +339,7 @@ print_percpu_runq_histogram()
 	}
 }
 
-void 
+int 
 print_runq_stats(void *arg1, void *arg2)
 {
 	runq_info_t *rqinfop = (runq_info_t *)arg1;
@@ -327,9 +355,6 @@ print_runq_stats(void *arg1, void *arg2)
                 rqinfop->ldom_migrations_in,
                 rqinfop->ldom_migrations_out);
 }
-
-	
-	
 
 void
 print_percpu_runq_stats()
@@ -506,7 +531,7 @@ print_global_cpu_stats(void *arg1, void *arg2)
 	int red_font = 0;
 
 	gschedp = GET_ADD_SCHEDP(&serverp->schedp);
-	if (gschedp == NULL) return;
+	if (gschedp == NULL) return 0;
 
 	gstatp = &gschedp->sched_stats;
   	total_time = gstatp->T_total_time;
@@ -549,7 +574,12 @@ print_global_cpu_stats(void *arg1, void *arg2)
                			msrptr[CYC_NOHALT_CORE] * 1.0 / msrptr[RET_INSTR],
 				msrptr[REF_CLK_FREQ] ? globals->clk_mhz * (msrptr[ACT_CLK_FREQ]*1.0 / msrptr[REF_CLK_FREQ]) : 0.0,
                			gstatp->msr_last[SMI_CNT]);
-			}
+	}
+	/*
+ 	if (msr_flag) {
+		printf ("   %9.2f",  (msrptr[RET_INSTR]/1000000)/globals->total_secs);
+	}
+	*/
 
 	BLACK_FONT;
 	printf("\n");
@@ -577,6 +607,7 @@ print_percpu_stats(uint64 *warnflagp)
 	    if (gstatp->T_irq_time) BOLD ("  hardirq_sys hardirq_user hardirq_idle  softirq_sys softirq_user softirq_idle");
 	    if (STEAL_ON) BOLD ("    stealbusy    stealidle");
 	    if (msr_flag) BOLD ("  LLC_hit%%    CPI   Avg_MHz  SMI_cnt");
+		/* if (msr_flag) BOLD ("        MIPS"); */
 	    printf("\n");
 
             for (i=0;i<MAXCPUS;i++) {
@@ -613,6 +644,11 @@ print_percpu_stats(uint64 *warnflagp)
                					msrptr[REF_CLK_FREQ] ? globals->clk_mhz * (msrptr[ACT_CLK_FREQ]*1.0 / msrptr[REF_CLK_FREQ]) : 0.0,
                      				statp->msr_last[SMI_CNT]);
 			}
+			/*
+			if (msr_flag) {
+				printf ("   %9.2f",  (msrptr[RET_INSTR]/1000000)/globals->total_secs);
+			}
+			*/
 
 			printf ("\n");
                 }
@@ -641,6 +677,11 @@ print_percpu_stats(uint64 *warnflagp)
 						msrptr[REF_CLK_FREQ] ? globals->clk_mhz * (msrptr[ACT_CLK_FREQ]*1.0 / msrptr[REF_CLK_FREQ]) : 0.0,
                      				gstatp->msr_last[SMI_CNT]);
 	    }
+	/*
+	    if (msr_flag) {
+		printf ("   %9.2f",  (msrptr[RET_INSTR]/1000000)/globals->total_secs);
+	    }
+	*/
 
 	    printf ("\n\n");
 	    TEXT("\n");
@@ -650,6 +691,7 @@ print_percpu_stats(uint64 *warnflagp)
 	if (gstatp->T_irq_time) BOLD ("  hardirq_sys hardirq_user hardirq idle  softirq_sys softirq_user softirq_idle");
 	if (STEAL_ON) BOLD ("    stealbusy    stealidle");
 	if (msr_flag) BOLD ("  LLC_hit%%    CPI   Avg_MHz  SMI_cnt");
+	/* if (msr_flag) BOLD ("        MIPS"); */
 	printf("\n");
 	
         for (i=0;i<MAXCPUS;i++) {
@@ -695,6 +737,11 @@ print_percpu_stats(uint64 *warnflagp)
                					msrptr[REF_CLK_FREQ] ? globals->clk_mhz * (msrptr[ACT_CLK_FREQ]*1.0 / msrptr[REF_CLK_FREQ]) : 0.0,
                      				statp->msr_last[SMI_CNT]);
 	    		}
+			/* 
+			if (msr_flag) {
+				printf ("   %9.2f",  (msrptr[RET_INSTR]/1000000)/globals->total_secs);
+			} 
+			*/
 
 			BLACK_FONT;
 			printf ("\n");
@@ -726,6 +773,11 @@ print_percpu_stats(uint64 *warnflagp)
                			msrptr[REF_CLK_FREQ] ? globals->clk_mhz * (msrptr[ACT_CLK_FREQ]*1.0 / msrptr[REF_CLK_FREQ]) : 0.0,
                			gstatp->msr_last[SMI_CNT]);
 	}
+	/*
+	if (msr_flag) {
+		printf ("   %9.2f",  (msrptr[RET_INSTR]/1000000)/globals->total_secs);
+	}
+	*/
 
 	printf("\n");
 	TEXT("\n");
@@ -1377,7 +1429,7 @@ print_slp_info_csv(void *arg1, void *arg2)
 	sched_stats_t *statsp = &schedp->sched_stats;
 	uint64 idx;
 
-	if (slpinfop->count == 0) return;
+	if (slpinfop->count == 0) return 0;
 
 	idx = slpinfop->lle.key;
 	if (idx > globals->nsyms-1) idx = UNKNOWN_SYMIDX;
@@ -1398,6 +1450,7 @@ print_slp_info_csv(void *arg1, void *arg2)
 	return 0;
 }
 
+int
 print_stktrc_info(void *p1, void *p2)
 {
 	stktrc_info_t *stktrcp = (stktrc_info_t *)p1;
@@ -1415,8 +1468,8 @@ print_stktrc_info(void *p1, void *p2)
 	int xfs_dioread_warn_cnt = 0;
 	int md_flush_warn_cnt = 0;
 
-	if (print_stktrc_args == NULL) return;
-	if (stktrcp->cnt == 0) return;
+	if (print_stktrc_args == NULL) return 0;
+	if (stktrcp->cnt == 0) return 0;
 	schedp = print_stktrc_args->schedp;
 
 	/* make a first pass and check for warnings */
@@ -2274,7 +2327,7 @@ sched_report(void *arg1, void *v)
                 if (pid_jsonfile)
                   fclose(pid_jsonfile);
 		  pid_jsonfile = NULL;
-		return;
+		return 0;
 	}
         bzero(&coopinfo,sizeof(coop_info_t));
 	coopinfo.rep_pidp =  pidp;
@@ -2492,12 +2545,13 @@ print_cstate_stats(uint64 *warnflagp)
 				BLACK_FONT;
 
 
+#if 0
 				if (debug) {
 					for (j=0;j<=NCSTATES ;j++) {
 						printf (" %10d", powerp->cstate_times[j]);
 					}
 				}
-				
+#endif
 				printf ("\n");
 			}
 		}
@@ -2522,7 +2576,8 @@ print_hardirq_entry(void *arg1, void *arg2)
 	} else {
 		printf ("%3d %-16s", irq, " ");
 	}
-	printf (" %8d %12.6f\n", irqentryp->count, SECS(irqentryp->total_time));
+	printf (" %8d %12.6f %12.6f\n", irqentryp->count, SECS(irqentryp->total_time), 
+					(SECS(irqentryp->total_time) / irqentryp->count)*1000000.0);
 }
 
 int 
@@ -2547,9 +2602,10 @@ print_softirq_entry(void *arg1, void *arg2)
 		} 
 	}
 
-	printf ("%3d %-16s %8d %12.6f\n", irq, softirq_name[irq], 
+	printf ("%3d %-16s %8d %12.6f %12.3f\n", irq, softirq_name[irq], 
 					irqentryp->count,
-					SECS(irqentryp->total_time));
+					SECS(irqentryp->total_time),
+					(SECS(irqentryp->total_time) / irqentryp->count)*1000000.0);
 
 	BLACK_FONT;
 
@@ -2572,7 +2628,7 @@ print_percpu_irq_stats(int irqtype)
 				CAPTION_GREY;
 				BOLD ("CPU %3d      Events: %8d  ElpTime: %9.6f\n", i, irqinfop->count, SECS(irqinfop->total_time));
 				_CAPTION;
-				BOLD ("IRQ Name                Count      ElpTime\n");
+				BOLD ("IRQ Name                Count      ElpTime    Avg(usec)\n");
 				foreach_hash_entry((void **)irqinfop->irq_entry_hash, IRQ_HSIZE,
 							irqtype == HARDIRQ ? print_hardirq_entry : print_softirq_entry,
 				 			irq_sort_by_time, 0, NULL);
@@ -2590,7 +2646,7 @@ print_global_hardirq_stats(void *arg1)
 
 	if (irqinfop == NULL) return;
 
-	BOLD ("IRQ Name                Count      ElpTime\n");
+	BOLD ("IRQ Name                Count      ElpTime    Avg(usec)\n");
 	foreach_hash_entry((void **)irqinfop->irq_entry_hash, IRQ_HSIZE,
 					print_hardirq_entry, irq_sort_by_time, 0, NULL);
 	printf ("    Total:           %8d %12.6f\n", irqinfop->count, SECS(irqinfop->total_time));
@@ -2605,7 +2661,7 @@ print_global_softirq_stats(void *arg1)
 
 	if (irqinfop == NULL) return;
 
-	BOLD ("IRQ Name                Count      ElpTime\n");
+	BOLD ("IRQ Name                Count      ElpTime    Avg(usec)\n");
 	foreach_hash_entry((void **)irqinfop->irq_entry_hash, IRQ_HSIZE,
 					print_softirq_entry, irq_sort_by_time, 0, warnflagp);
 	printf ("    Total:           %8d %12.6f\n", irqinfop->count, SECS(irqinfop->total_time));

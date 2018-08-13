@@ -34,6 +34,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "developers.h"
 #include "info.h"
 
+extern int liki_enable_msr_data();
+
 struct	trace_stream {
 	int		rb_file;
 	int		fs_file;

@@ -61,10 +61,10 @@ fi
 #
 echo -e "\\tUnable to find compatible module - attempting to build from source ..."
 TMP_SRC_DIR=`mktemp -d -p /tmp`
-cp $DIR/src/* $TMP_SRC_DIR
+cp $DIR/src/liki/* $TMP_SRC_DIR
 cd $TMP_SRC_DIR
 make
-insmod likit.ko 2> /dev/null
+insmod likit.ko 
 if [ $? -eq 0 ]; then
 	echo -e "\\tCompiled compatible LiKI module successfully"
 	#rm -f $DIR/likit.ko

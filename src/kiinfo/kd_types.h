@@ -42,7 +42,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 				timebuf[19] = 0;											\
 				printf ("%s.%06lld", timebuf, curtime.tv_nsec / 1000);							\
 			} else {													\
-				printf ("%lld.%06lld", curtime.tv_sec, curtime.tv_nsec / 1000);						\
+				printf ("%lld.%09lld", curtime.tv_sec, curtime.tv_nsec / 1000);						\
 			}														\
 		} else {														\
 			printf ("%12.06f", (rec_ptr->hrtime - start_time) / 1000000000.0);						\

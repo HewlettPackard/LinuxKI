@@ -54,8 +54,9 @@ workqueue_insertion_func(void *a, void *v)
 
 	if (debug) printf ("trace_workqueue_insertion_func()\n");
 	rec_ptr = conv_workqueue_insertion(trcinfop, &tt_rec_ptr);
-
 	print_workqueue_insertion_rec(rec_ptr);	
+
+        return 0;
 }
 
 static inline int
@@ -81,7 +82,6 @@ workqueue_execution_func(void *a, void *v)
 	workqueue_execute_t *rec_ptr;
 
 	if (debug) printf ("trace_workqueue_execution_func()\n");
-
 	rec_ptr = conv_workqueue_execution(trcinfop, &tt_rec_ptr);
 	print_workqueue_execution_rec(rec_ptr);	
 }
@@ -131,6 +131,7 @@ print_workqueue_execute_rec(void *a)
 	return 0;
 }	
 
+int
 workqueue_execute_func(void *a, void *v)
 {
 	trace_info_t *trcinfop = (trace_info_t *)a;
@@ -142,4 +143,6 @@ workqueue_execute_func(void *a, void *v)
 
 	rec_ptr = conv_workqueue_execute(trcinfop, &tt_rec_ptr);
 	print_workqueue_execute_rec(rec_ptr);
+
+	return 0;
 }

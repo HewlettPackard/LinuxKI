@@ -273,9 +273,9 @@ wtree_build_tree_src_tgt(void *arg0, void *arg1)
 	rpid_schedp = rpidp->schedp;
 
         if (unwanted_pid(tgt_pidp))
-                return;
+                return 0;
         if ((!tgt_schedp->sched_stats.T_sleep_time) || (MSECS(tgt_setrqp->sleep_time)/MSECS(tgt_schedp->sched_stats.T_sleep_time) < vpct*0.01))  {
-                return;
+                return 0;
         }
         src_treep = GET_WTREEP(&rpid_schedp->wtree_hash, cpidp->PID);
         tgt_treep = GET_WTREEP(&rpid_schedp->wtree_hash, tgt_setrqp->lle.key);
@@ -311,7 +311,7 @@ wtree_build_tree_src_tgt(void *arg0, void *arg1)
                         tgt_setrqp->PID);
 		if ((src_treep->Ddepth == 0) || (tgt_treep->Ddepth == 0))
 			fprintf(stderr,"Depth = 0 in path 1 src=%d tgt=%d wtp_depth=%d\n",src_treep->Ddepth, tgt_treep->Ddepth, wtp->depth);
-                return;
+                return 0;
 
         } else if (tgt_treep->Ddepth == wtp->depth) {
                 link_depth = tgt_treep->Ddepth;
@@ -327,7 +327,7 @@ wtree_build_tree_src_tgt(void *arg0, void *arg1)
         }
 	if ((src_treep->Ddepth == 0) || (tgt_treep->Ddepth == 0))
                         fprintf(stderr,"Depth = 0 in path 2 src=%d tgt=%d wtp_depth=%d\n",src_treep->Ddepth, tgt_treep->Ddepth, wtp->depth);
-        return;
+        return 0;
 }
 
 	
@@ -354,9 +354,9 @@ wtree_build_tree_src(void *arg0, void *arg1)
 	cpid_schedp = cpidp->schedp;
 
 	if (unwanted_pid(src_pidp))
-		return;
+		return 0;
         if ((!cpid_schedp->sched_stats.T_sleep_time) || (src_setrqp->sleep_time/(cpid_schedp->sched_stats.T_sleep_time*1.0) < vpct*0.01))
-                return;
+                return 0;
 	tgt_treep = GET_WTREEP(&rpid_schedp->wtree_hash, cpidp->PID);
         src_treep = GET_WTREEP(&rpid_schedp->wtree_hash, src_setrqp->lle.key);
 
@@ -375,9 +375,9 @@ wtree_build_tree_src(void *arg0, void *arg1)
                 wtp->curr_pidp = cpidp;
 		if ((src_treep->Ddepth == 0) || (tgt_treep->Ddepth == 0))
                         fprintf(stderr,"Depth = 0 in path 3 src=%d tgt=%d wtp_depth=%d\n",src_treep->Ddepth, tgt_treep->Ddepth, wtp->depth);
-                return;
+                return 0;
 	    } else if (src_treep->Ddepth == wtp->depth)
-		return;
+		return 0;
         }
 
         if (src_treep->Ddepth == 0) {
@@ -402,7 +402,7 @@ wtree_build_tree_src(void *arg0, void *arg1)
                         cpidp->PID);
 		if ((src_treep->Ddepth == 0) || (tgt_treep->Ddepth == 0))
                         fprintf(stderr,"Depth = 0 in path 4 src=%d tgt=%d wtp_depth=%d\n",src_treep->Ddepth, tgt_treep->Ddepth, wtp->depth);
-                return;
+                return 0;
 	}
 
 	/*
@@ -433,7 +433,7 @@ wtree_build_tree_src(void *arg0, void *arg1)
                         cpidp->PID);
 		if ((src_treep->Ddepth == 0) || (tgt_treep->Ddepth == 0))
                         fprintf(stderr,"Depth = 0 in path 5 src=%d tgt=%d wtp_depth=%d\n",src_treep->Ddepth, tgt_treep->Ddepth, wtp->depth);
-                return;
+                return 0;
         }
 
         /*
@@ -453,7 +453,7 @@ wtree_build_tree_src(void *arg0, void *arg1)
         wtp->curr_pidp = cpidp;
 	if ((src_treep->Ddepth == 0) || (tgt_treep->Ddepth == 0))
                         fprintf(stderr,"Depth = 0 in path 6 src=%d tgt=%d wtp_depth=%d\n",src_treep->Ddepth, tgt_treep->Ddepth, wtp->depth);
-        return;
+        return 0;
 }
 
 
@@ -478,9 +478,9 @@ wtree_build_tree_tgt_src(void *arg0, void *arg1)
         rpid_schedp = rpidp->schedp;
 
 	if (unwanted_pid(src_pidp))
-                return;
+                return 0;
         if ((!src_schedp->sched_stats.T_sleep_time) || (MSECS(src_setrqp->sleep_time)/MSECS(src_schedp->sched_stats.T_sleep_time) < vpct*0.01))  {
-                return;
+                return 0;
         }
         tgt_treep = GET_WTREEP(&rpid_schedp->wtree_hash, cpidp->PID);
         src_treep = GET_WTREEP(&rpid_schedp->wtree_hash, src_setrqp->lle.key);
@@ -516,7 +516,7 @@ wtree_build_tree_tgt_src(void *arg0, void *arg1)
                         cpidp->PID);
 		if ((src_treep->Ddepth == 0) || (tgt_treep->Ddepth == 0))
                         fprintf(stderr,"Depth = 0 in path 7 src=%d tgt=%d wtp_depth=%d\n",src_treep->Ddepth, tgt_treep->Ddepth, wtp->depth);
-                return;
+                return 0;
 
         } else if (src_treep->Ddepth == wtp->depth) {
                 link_depth = src_treep->Ddepth;
@@ -532,7 +532,7 @@ wtree_build_tree_tgt_src(void *arg0, void *arg1)
         }
 	if ((src_treep->Ddepth == 0) || (tgt_treep->Ddepth == 0))
                         fprintf(stderr,"Depth = 0 in path 8 src=%d tgt=%d wtp_depth=%d\n",src_treep->Ddepth, tgt_treep->Ddepth, wtp->depth);
-	return;
+	return 0;
 }
 
 
@@ -556,9 +556,9 @@ wtree_build_tree_tgt(void *arg0, void *arg1)
         rpid_schedp = rpidp->schedp; 
 
 	if (unwanted_pid(tgt_pidp))
-                return;
+                return 0;
 	if ((!tgt_schedp->sched_stats.T_sleep_time) || (MSECS(tgt_setrqp->sleep_time)/MSECS(tgt_schedp->sched_stats.T_sleep_time) < vpct*0.01))  {
-		return;
+		return 0;
 	}
 	src_treep = GET_WTREEP(&rpid_schedp->wtree_hash, cpidp->PID);
         tgt_treep = GET_WTREEP(&rpid_schedp->wtree_hash, tgt_setrqp->lle.key);
@@ -579,9 +579,9 @@ wtree_build_tree_tgt(void *arg0, void *arg1)
                 wtp->curr_pidp = cpidp;
 		if ((src_treep->Ddepth == 0) || (tgt_treep->Ddepth == 0))
                         fprintf(stderr,"Depth = 0 in path 9 src=%d tgt=%d wtp_depth=%d\n",src_treep->Ddepth, tgt_treep->Ddepth, wtp->depth);
-                return;
+                return 0;
 	    } else if (tgt_treep->Ddepth == wtp->depth)
-		return;
+		return 0;
         }
 
 	/*
@@ -619,7 +619,7 @@ wtree_build_tree_tgt(void *arg0, void *arg1)
                 	tgt_setrqp->PID);
 		if ((src_treep->Ddepth == 0) || (tgt_treep->Ddepth == 0))
                         fprintf(stderr,"Depth = 0 in path 10 src=%d tgt=%d wtp_depth=%d\n",src_treep->Ddepth, tgt_treep->Ddepth, wtp->depth);
-		return;
+		return 0;
 	}
 
 	/*
@@ -650,7 +650,7 @@ wtree_build_tree_tgt(void *arg0, void *arg1)
                         tgt_setrqp->PID);
 		if ((src_treep->Ddepth == 0) || (tgt_treep->Ddepth == 0))
                         fprintf(stderr,"Depth = 0 in path 11 src=%d tgt=%d wtp_depth=%d\n",src_treep->Ddepth, tgt_treep->Ddepth, wtp->depth);
-                return;
+                return 0;
 	}
 
 	/*
@@ -670,7 +670,7 @@ wtree_build_tree_tgt(void *arg0, void *arg1)
 	wtp->curr_pidp = cpidp;
 	if ((src_treep->Ddepth == 0) || (tgt_treep->Ddepth == 0))
                         fprintf(stderr,"Depth = 0 in path 12 src=%d tgt=%d wtp_depth=%d\n",src_treep->Ddepth, tgt_treep->Ddepth, wtp->depth);
-	return;
+	return 0;
 } 
 
 
@@ -682,7 +682,7 @@ wtree_build_nodelist(void *arg0, void *arg1)
 	char *shortnamep;
         if (!wtnp->name) {
                 fprintf(stderr,"Empty wtnp entry pid=%d\n", wtnp->lle.key);
-		return;
+		return 0;
 	}
 	sched_stats_t *statsp = (sched_stats_t *)wtnp->infop;
 	shortnamep = wtnp->name;
@@ -700,7 +700,7 @@ wtree_build_nodelist(void *arg0, void *arg1)
                 MSECS(statsp->T_total_waited4_time),
 		wtnp->Ddepth,
 		wtnp->lle.key);
-	return;
+	return 0;
 }
 
 void
@@ -768,6 +768,8 @@ wtree_build(pid_info_t *pidp)
 	fprintf(pid_wtree_jsonfile,"]\n}");
 	return;
 }
+
+int print_vis_task_interval_data();
 
 void
 vis_interval_processing(uint64 hrtime)

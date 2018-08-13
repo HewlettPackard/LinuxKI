@@ -85,11 +85,25 @@ kparse_init_func(void *v)
 	ki_actions[TRACE_SOFTIRQ_ENTRY].func = softirq_entry_func;
 	ki_actions[TRACE_SOFTIRQ_EXIT].func = softirq_exit_func;
 	ki_actions[TRACE_SOFTIRQ_RAISE].func = kparse_generic_func;
-	ki_actions[TRACE_SCSI_DISPATCH_CMD_START].func = kparse_generic_func;
-	ki_actions[TRACE_SCSI_DISPATCH_CMD_DONE].func = kparse_generic_func;
-        ki_actions[TRACE_CACHE_INSERT].func = cache_insert_func;
-        ki_actions[TRACE_CACHE_EVICT].func = cache_evict_func;
-	ki_actions[TRACE_LISTEN_OVERFLOW].func = kparse_generic_func;
+	SET_KIACTION_FUNCTION(TRACE_SCSI_DISPATCH_CMD_START, kiall_generic_func);
+	SET_KIACTION_FUNCTION(TRACE_SCSI_DISPATCH_CMD_DONE, kiall_generic_func);
+	SET_KIACTION_FUNCTION(TRACE_WORKQUEUE_INSERTION, kiall_generic_func);
+	SET_KIACTION_FUNCTION(TRACE_WORKQUEUE_EXECUTION, kiall_generic_func);
+	SET_KIACTION_FUNCTION(TRACE_WORKQUEUE_ENQUEUE, kiall_generic_func);
+	SET_KIACTION_FUNCTION(TRACE_WORKQUEUE_EXECUTE, kiall_generic_func);
+	SET_KIACTION_FUNCTION(TRACE_TASKLET_ENQUEUE, kiall_generic_func);
+	SET_KIACTION_FUNCTION(TRACE_PAGE_FAULT_USER, kiall_generic_func);
+	SET_KIACTION_FUNCTION(TRACE_PAGE_FAULT_KERNEL, kiall_generic_func);
+	SET_KIACTION_FUNCTION(TRACE_ANON_FAULT, kiall_generic_func);
+	SET_KIACTION_FUNCTION(TRACE_FILEMAP_FAULT, kiall_generic_func);
+	SET_KIACTION_FUNCTION(TRACE_KERNEL_PAGEFAULT, kiall_generic_func);
+	SET_KIACTION_FUNCTION(TRACE_MM_PAGE_ALLOC, kiall_generic_func);
+	SET_KIACTION_FUNCTION(TRACE_MM_PAGE_FREE, kiall_generic_func);
+	SET_KIACTION_FUNCTION(TRACE_MM_PAGE_FREE_DIRECT, kiall_generic_func);
+	SET_KIACTION_FUNCTION(TRACE_LISTEN_OVERFLOW, kiall_generic_func);
+	SET_KIACTION_FUNCTION(TRACE_CACHE_INSERT, cache_insert_func);
+	SET_KIACTION_FUNCTION(TRACE_CACHE_EVICT, cache_evict_func);
+	SET_KIACTION_FUNCTION(TRACE_WALLTIME, trace_walltime_func);
         if (IS_LIKI_V4_PLUS)
                 ki_actions[TRACE_WALLTIME].func = trace_startup_func;
         else
@@ -140,6 +154,7 @@ kparse_process_func(void *a, void *arg)
         return 0;
 }
 
+int
 kparse_bufmiss_func(void *v, void *a)
 {
         trace_info_t *trcinfop = v;
@@ -221,11 +236,24 @@ int kparse_ftrace_print_func(void *a, void *arg)
 		ki_actions[TRACE_SOFTIRQ_RAISE].execute = 1;
 		ki_actions[TRACE_SOFTIRQ_ENTRY].execute = 1;
 		ki_actions[TRACE_SOFTIRQ_EXIT].execute = 1;
-		ki_actions[TRACE_SCSI_DISPATCH_CMD_START].execute = 1;
-		ki_actions[TRACE_SCSI_DISPATCH_CMD_DONE].execute = 1;
-		ki_actions[TRACE_LISTEN_OVERFLOW].execute = 1;
-        	ki_actions[TRACE_CACHE_INSERT].execute = 1;
-        	ki_actions[TRACE_CACHE_EVICT].execute = 1;
+                SET_KIACTION_EXECUTE(TRACE_SCSI_DISPATCH_CMD_START, 1);
+                SET_KIACTION_EXECUTE(TRACE_SCSI_DISPATCH_CMD_DONE, 1);
+                SET_KIACTION_EXECUTE(TRACE_WORKQUEUE_INSERTION, 1);
+                SET_KIACTION_EXECUTE(TRACE_WORKQUEUE_EXECUTION, 1);
+                SET_KIACTION_EXECUTE(TRACE_WORKQUEUE_ENQUEUE, 1);
+                SET_KIACTION_EXECUTE(TRACE_WORKQUEUE_EXECUTE, 1);
+                SET_KIACTION_EXECUTE(TRACE_TASKLET_ENQUEUE, 1);
+                SET_KIACTION_EXECUTE(TRACE_PAGE_FAULT_USER, 1);
+                SET_KIACTION_EXECUTE(TRACE_PAGE_FAULT_KERNEL, 1);
+                SET_KIACTION_EXECUTE(TRACE_ANON_FAULT, 1);
+                SET_KIACTION_EXECUTE(TRACE_FILEMAP_FAULT, 1);
+                SET_KIACTION_EXECUTE(TRACE_KERNEL_PAGEFAULT, 1);
+                SET_KIACTION_EXECUTE(TRACE_MM_PAGE_ALLOC, 1);
+                SET_KIACTION_EXECUTE(TRACE_MM_PAGE_FREE, 1);
+                SET_KIACTION_EXECUTE(TRACE_MM_PAGE_FREE_DIRECT, 1);
+                SET_KIACTION_EXECUTE(TRACE_LISTEN_OVERFLOW, 1);
+                SET_KIACTION_EXECUTE(TRACE_CACHE_INSERT, 1);
+                SET_KIACTION_EXECUTE(TRACE_CACHE_EVICT, 1);
                 start_time = KD_CUR_TIME;
 		/* bufmiss_func = kparse_bufmiss_func; */
         }
@@ -251,10 +279,25 @@ int kparse_ftrace_print_func(void *a, void *arg)
 		ki_actions[TRACE_SOFTIRQ_RAISE].execute = 0;
 		ki_actions[TRACE_SOFTIRQ_ENTRY].execute = 0;
 		ki_actions[TRACE_SOFTIRQ_EXIT].execute = 0;
-		ki_actions[TRACE_SCSI_DISPATCH_CMD_START].execute = 0;
-		ki_actions[TRACE_SCSI_DISPATCH_CMD_DONE].execute = 0;
-		ki_actions[TRACE_LISTEN_OVERFLOW].execute = 0;
-                ki_actions[TRACE_PRINT].execute = 0;
+                SET_KIACTION_EXECUTE(TRACE_SCSI_DISPATCH_CMD_START, 0);
+                SET_KIACTION_EXECUTE(TRACE_SCSI_DISPATCH_CMD_DONE, 0);
+                SET_KIACTION_EXECUTE(TRACE_WORKQUEUE_INSERTION, 0);
+                SET_KIACTION_EXECUTE(TRACE_WORKQUEUE_EXECUTION, 0);
+                SET_KIACTION_EXECUTE(TRACE_WORKQUEUE_ENQUEUE, 0);
+                SET_KIACTION_EXECUTE(TRACE_WORKQUEUE_EXECUTE, 0);
+                SET_KIACTION_EXECUTE(TRACE_TASKLET_ENQUEUE, 0);
+                SET_KIACTION_EXECUTE(TRACE_PAGE_FAULT_USER, 0);
+                SET_KIACTION_EXECUTE(TRACE_PAGE_FAULT_KERNEL, 0);
+                SET_KIACTION_EXECUTE(TRACE_ANON_FAULT, 0);
+                SET_KIACTION_EXECUTE(TRACE_FILEMAP_FAULT, 0);
+                SET_KIACTION_EXECUTE(TRACE_KERNEL_PAGEFAULT, 0);
+                SET_KIACTION_EXECUTE(TRACE_MM_PAGE_ALLOC, 0);
+                SET_KIACTION_EXECUTE(TRACE_MM_PAGE_FREE, 0);
+                SET_KIACTION_EXECUTE(TRACE_MM_PAGE_FREE_DIRECT, 0);
+                SET_KIACTION_EXECUTE(TRACE_LISTEN_OVERFLOW, 0);
+                SET_KIACTION_EXECUTE(TRACE_CACHE_INSERT, 0);
+                SET_KIACTION_EXECUTE(TRACE_CACHE_EVICT, 0);
+                SET_KIACTION_EXECUTE(TRACE_PRINT, 0);
                 end_time = KD_CUR_TIME;
                 bufmiss_func =  NULL;
         }

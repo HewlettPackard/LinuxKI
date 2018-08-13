@@ -202,6 +202,44 @@ live_ftrace_print_func(void *a, void *arg)
 	}
 }
 		
+void
+print_top_line()
+{	
+	struct timeval tod;
+
+	lineno=0; col=0;
+	clear();
+
+	if (is_alive) {
+		gettimeofday(&tod, NULL);
+		mvprintw (lineno,0, "%s", ctime(&tod.tv_sec));	
+	} else if (kistep) {
+		mvprintw (lineno,0, "%7.6f - %7.6f", (start_filter/1000000000.0), (end_filter/1000000000.0)) ;
+	} else {
+		mvprintw (lineno,0, "%s", timestamp);
+	}
+	mvprintw (lineno,30, "Sample Time: %3.6f secs", secs);
+	save_and_clear_server_stats(0);
+	mvprintw (lineno++,60, "Events: %d/%d", globals->missed_events, globals->total_events);
+}
+
+
+int
+print_global_header()
+{
+	print_top_line();
+	lineno++;
+
+	mvprintw (lineno++,0, "Server           Linux Version                         CPUs   HT Nodes    Memory");
+	mvprintw (lineno++,0, "%-16s %-36s %5d %4s %5d %8dM", 
+		globals->hostname,
+		globals->os_vers,
+		globals->nlcpu,
+		globals->HT_enabled ? "Y" : "N",
+		globals->nldom > 0 ? globals->nldom : 1,
+		globals->memkb / 1024);
+}
+
 
 /*
  ** The initialization function
@@ -391,6 +429,31 @@ int live_alarm_func(void *v)
 }
 
 int
+live_print_window()
+{
+	if (input_pending == FALSE) {
+		/* if (curwin != prevwin) clear(); */
+		clear();
+		win_actions[curwin].func();
+		move(LINES-1, 0); clrtoeol();
+		mvprintw(LINES-1, 0, "Command: ");
+		refresh();
+	}
+ 
+	return 0;
+}
+
+int
+refresh_screen()
+{
+	/* this option will refresh the screen with intermediate data */
+	input_pending = FALSE;
+	live_print_window();
+	input_pending = TRUE;
+	return 0;
+}
+
+int
 live_report_func(void *v)
 {
 	docker_info_t *dockerp;
@@ -477,7 +540,7 @@ print_stktrc_info_live(void *arg1, void *arg2)
 	float avg, wpct;
 	int i, namelen;
 	uint64 key, offset;
-	char *sym;
+	char *sym, *dsym;
 	char symname[256];
 	
 	wpct = ((float)stktrcp->slptime *100.0)/(schedp->sched_stats.T_sleep_time);
@@ -489,15 +552,15 @@ print_stktrc_info_live(void *arg1, void *arg2)
                 key = stktrcp->stklle.key[i];
 		
 		if (key == STACK_CONTEXT_USER) {
-                        sprintf (symname, "  |");
+                        sprintf (symname, "|");
                 } else if ((globals->symtable) && (key < globals->nsyms-1)) {
                         if (globals->symtable[key].nameptr) {
-                                sprintf (symname, "  %s", globals->symtable[key].nameptr);
+                                sprintf (symname, "%s", globals->symtable[key].nameptr);
                         } else {
-                                sprintf (symname, "  %p", globals->symtable[key].addr);
+                                sprintf (symname, "%p", globals->symtable[key].addr);
                         }
                 } else if (key == UNKNOWN_SYMIDX) {
-                        sprintf (symname, "  unknown");
+                        sprintf (symname, "unknown");
                 } else if (stktrcp->pidp) {
                         pidp = stktrcp->pidp;
                         if (pidp->PID != pidp->tgid) {
@@ -506,27 +569,28 @@ print_stktrc_info_live(void *arg1, void *arg2)
 
                         if (pregp = find_vtext_preg(pidp, key)) {
                                 if (sym = symlookup(pregp, key, &offset)) {
-                                	sprintf (symname, "  %s", sym);
+                                	sprintf (symname, "%s", sym);
 				} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
-					sprintf (symname, " %s", sym);
+					sprintf (symname, "%s", sym);
                         	} else {
-                                	sprintf (symname, "  0x%llx", key);
+                                	sprintf (symname, "0x%llx", key);
 				}
 			} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
-				sprintf (symname, " %s", sym);
+				sprintf (symname, "%s", sym);
                         } else {
-                                sprintf (symname, "  0x%llx", key);
+                                sprintf (symname, "0x%llx", key);
                         }
                 } else {
-                        sprintf (symname, "  0x%llx", key);
+                        sprintf (symname, "0x%llx", key);
                 }
 
-		namelen = strlen(symname);
+		dsym = dmangle(symname);
+		namelen = strlen(dsym)+2;
 		if (col+namelen > COLS)  { 
 			col=26;
 			lineno++;
 		}
-		mvprintw (lineno, col, "%s", dmangle(symname));
+		mvprintw (lineno, col, "  %s", dsym);
 		col = col + namelen;	
         }
 	lineno++;
@@ -544,7 +608,7 @@ print_hc_stktrc_live(void *arg1, void *arg2)
 	float wpct;
 	int i, namelen;
 	uint64 key, offset;
-	char *sym;
+	char *sym, *dsym;
 	char symname[256];
 	
 	if (stktrcp->cnt == 0) return 0;
@@ -558,15 +622,15 @@ print_hc_stktrc_live(void *arg1, void *arg2)
                 key = stktrcp->stklle.key[i];
 		
 		if (key == STACK_CONTEXT_USER) {
-                        sprintf (symname, "  |");
+                        sprintf (symname, "|");
                 } else if ((globals->symtable) && (key < globals->nsyms-1)) {
                         if (globals->symtable[key].nameptr) {
-                                sprintf (symname, "  %s", globals->symtable[key].nameptr);
+                                sprintf (symname, "%s", globals->symtable[key].nameptr);
                         } else {
-                                sprintf (symname, "  %p", globals->symtable[key].addr);
+                                sprintf (symname, "%p", globals->symtable[key].addr);
                         }
                 } else if (key == UNKNOWN_SYMIDX) {
-                        sprintf (symname, "  unknown");
+                        sprintf (symname, "unknown");
                 } else if (stktrcp->pidp) {
                         pidp = stktrcp->pidp;
                         if (pidp->PID != pidp->tgid) {
@@ -575,27 +639,28 @@ print_hc_stktrc_live(void *arg1, void *arg2)
 
                         if (pregp = find_vtext_preg(pidp, key)) {
                                 if (sym = symlookup(pregp, key, &offset)) {
-                                	sprintf (symname, "  %s", sym);
+                                	sprintf (symname, "%s", sym);
 				} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
-					sprintf (symname, " %s", sym);
+					sprintf (symname, "%s", sym);
                         	} else {
-                                	sprintf (symname, "  0x%llx", key);
+                                	sprintf (symname, "0x%llx", key);
                         	}
 			} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
-				sprintf (symname, " %s", sym);
+				sprintf (symname, "%s", sym);
                         } else {
-                                sprintf (symname, "  0x%llx", key);
+                                sprintf (symname, "0x%llx", key);
                         }
                 } else {
-                        sprintf (symname, "  0x%llx", key);
+                        sprintf (symname, "0x%llx", key);
                 }
 
-		namelen = strlen(symname);
+		dsym = dmangle(symname);
+		namelen = strlen(dsym)+2;
 		if (col+namelen > COLS)  { 
 			col=15;
 			lineno++;
 		}
-		mvprintw (lineno, col, "%s", dmangle(symname));
+		mvprintw (lineno, col, "  %s", dsym);
 		col = col + namelen;	
         }
 	lineno++;
@@ -675,6 +740,37 @@ print_iostats_summary_live (void *arg1, void *arg2)
         }
 }
 
+
+/* this is used to print an I/O summary on one line.  It does not include a nl character */
+int
+print_iostats_totals_live(struct iostats *iostats)
+{
+	struct iostats *iostatsp;
+	int i = IOTOT;
+	int j = 0;
+	uint64 aviosz;
+	double avserv, avinflt;
+
+	while (i >= IORD) {
+		iostatsp = &iostats[i];
+        	avserv = iostatsp->cum_ioserv/MAX(iostatsp->compl_cnt,1) / 1000000.0;
+		avinflt = (iostatsp->cum_async_inflight + iostatsp->cum_sync_inflight) / (MAX(iostatsp->issue_cnt,1) * 1.0);
+
+		mvprintw (lineno, col+(j*50), "%7.0f %7.0f %7d %7.2f %8.2f %8.2f",
+                        iostatsp->compl_cnt/secs,
+                        (iostatsp->sect_xfrd/2048)/secs,
+                        (iostatsp->sect_xfrd/2)/MAX(iostatsp->compl_cnt,1),
+			avinflt,
+                        (iostatsp->cum_iowait/MAX(iostatsp->compl_cnt,1) / 1000000.0),
+			avserv);
+
+                i--; j++;
+
+		/* only print totals if we have a wide screen */
+		if (COLS < 159) break;
+        }
+}
+
 int
 print_iostats_dev_live(void *arg1, void *arg2)
 {
@@ -717,7 +813,6 @@ print_iostats_dev_live(void *arg1, void *arg2)
 	lineno++;
 }
 
-
 int
 print_iostats_fcdev_live(void *arg1, void *arg2)
 {
@@ -727,36 +822,6 @@ print_iostats_fcdev_live(void *arg1, void *arg2)
 	print_iostats_dev_live(devinfop, NULL);
 }
 
-
-/* this is used to print an I/O summary on one line.  It does not include a nl character */
-int
-print_iostats_totals_live(struct iostats *iostats)
-{
-	struct iostats *iostatsp;
-	int i = IOTOT;
-	int j = 0;
-	uint64 aviosz;
-	double avserv, avinflt;
-
-	while (i >= IORD) {
-		iostatsp = &iostats[i];
-        	avserv = iostatsp->cum_ioserv/MAX(iostatsp->compl_cnt,1) / 1000000.0;
-		avinflt = (iostatsp->cum_async_inflight + iostatsp->cum_sync_inflight) / (MAX(iostatsp->issue_cnt,1) * 1.0);
-
-		mvprintw (lineno, col+(j*50), "%7.0f %7.0f %7d %7.2f %8.2f %8.2f",
-                        iostatsp->compl_cnt/secs,
-                        (iostatsp->sect_xfrd/2048)/secs,
-                        (iostatsp->sect_xfrd/2)/MAX(iostatsp->compl_cnt,1),
-			avinflt,
-                        (iostatsp->cum_iowait/MAX(iostatsp->compl_cnt,1) / 1000000.0),
-			avserv);
-
-                i--; j++;
-
-		/* only print totals if we have a wide screen */
-		if (COLS < 159) break;
-        }
-}
 
 int
 print_iostats_fc_live(void *arg1, void *arg2)
@@ -1115,43 +1180,6 @@ print_sdata_live(void *arg1, void *arg2)
         key2 = sdatap->lle.key2;
 	print_socket_detail_live(statsp, sdatap->laddr, sdatap->raddr, sdatap->syscallp);
 	lineno++;
-}
-
-void
-print_top_line()
-{	
-	struct timeval tod;
-
-	lineno=0; col=0;
-	clear();
-
-	if (is_alive) {
-		gettimeofday(&tod, NULL);
-		mvprintw (lineno,0, "%s", ctime(&tod.tv_sec));	
-	} else if (kistep) {
-		mvprintw (lineno,0, "%7.6f - %7.6f", (start_filter/1000000000.0), (end_filter/1000000000.0)) ;
-	} else {
-		mvprintw (lineno,0, "%s", timestamp);
-	}
-	mvprintw (lineno,30, "Sample Time: %3.6f secs", secs);
-	save_and_clear_server_stats(0);
-	mvprintw (lineno++,60, "Events: %d/%d", globals->missed_events, globals->total_events);
-}
-
-int
-print_global_header()
-{
-	print_top_line();
-	lineno++;
-
-	mvprintw (lineno++,0, "Server           Linux Version                         CPUs   HT Nodes    Memory");
-	mvprintw (lineno++,0, "%-16s %-36s %5d %4s %5d %8dM", 
-		globals->hostname,
-		globals->os_vers,
-		globals->nlcpu,
-		globals->HT_enabled ? "Y" : "N",
-		globals->nldom > 0 ? globals->nldom : 1,
-		globals->memkb / 1024);
 }
 
 int 
@@ -1721,7 +1749,7 @@ print_select_hba_window()
 	fc_info_t *fcinfop;
 	char hba_str[16];
 
-	if (curhba == NO_HBA) return;
+	if (curhba == NO_HBA) return 0;
 	if (is_alive) { 
 		calc_io_totals(&globals->iostats[0], NULL);
                 foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, get_devinfo, NULL, 0, NULL);
@@ -2390,33 +2418,6 @@ print_select_docker_window()
 	return 0;
 }
 
-
-
-int
-print_select_futex_window()
-{
-	uint64 key;
-	gbl_futex_info_t *gfp;
-
-	print_global_header();
-	lineno++;
-
-	key = FUTEX_KEY(curtgid, curfaddr);
-	mvprintw(lineno++, 0, "-------------------- Futex 0x%llx ", curfaddr);
-	if (curtgid) printw("  TGID: %d", curtgid);
-	printw (" --------------------");
-	if (gfp = FIND_GFUTEXP((void **)globals->futex_hash, key)) {
-		mvprintw(lineno++, 0, "Operation                       Count  EAGAIN  ETIMEDOUT  AvRetVal     ElpTime");
-		if (COLS > 102) {
-			printw ("         Avg         Max");
-		}
-		gbl_futex_print_detail_live(gfp, NULL);
-	} else {
-		mvprintw(lineno, col, "*** No Activity Found for Futex 0x%llx ***", curfaddr);
-	}
-	
-}
-
 int
 print_cpu_window()
 {
@@ -2801,6 +2802,31 @@ gbl_futex_print_live(void *arg1, void *arg2)
 			SECS(gfp->total_time)/gfp->cnt,
 			SECS(gfp->max_time));
 	}
+}
+
+int
+print_select_futex_window()
+{
+	uint64 key;
+	gbl_futex_info_t *gfp;
+
+	print_global_header();
+	lineno++;
+
+	key = FUTEX_KEY(curtgid, curfaddr);
+	mvprintw(lineno++, 0, "-------------------- Futex 0x%llx ", curfaddr);
+	if (curtgid) printw("  TGID: %d", curtgid);
+	printw (" --------------------");
+	if (gfp = FIND_GFUTEXP((void **)globals->futex_hash, key)) {
+		mvprintw(lineno++, 0, "Operation                       Count  EAGAIN  ETIMEDOUT  AvRetVal     ElpTime");
+		if (COLS > 102) {
+			printw ("         Avg         Max");
+		}
+		gbl_futex_print_detail_live(gfp, NULL);
+	} else {
+		mvprintw(lineno, col, "*** No Activity Found for Futex 0x%llx ***", curfaddr);
+	}
+	
 }
 
 int
@@ -3195,21 +3221,6 @@ print_help_window()
 		mvprintw (lineno++, col, "j - Step Time");
 		mvprintw (lineno++, col, "J - Jump to Time");
 	}
-}
-
-int
-live_print_window()
-{
-	if (input_pending == FALSE) {
-		/* if (curwin != prevwin) clear(); */
-		clear();
-		win_actions[curwin].func();
-		move(LINES-1, 0); clrtoeol();
-		mvprintw(LINES-1, 0, "Command: ");
-		refresh();
-	}
- 
-	return 0;
 }
 
 static inline int
@@ -3845,16 +3856,6 @@ select_global_window(int win)
 {
 	input_pending = FALSE;
 	change_window(win, 0, -1, -1, 0x0, 0x0ull, -1, NO_HBA, -1, -1, NO_DOCKID);
-	live_print_window();
-	input_pending = TRUE;
-	return 0;
-}
-
-int 
-refresh_screen()
-{
-	/* this option will refresh the screen with intermediate data */
-	input_pending = FALSE;
 	live_print_window();
 	input_pending = TRUE;
 	return 0;

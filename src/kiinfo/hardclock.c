@@ -299,5 +299,5 @@ hardclock_func(void *a, void *v)
 	if (perpid_stats) hc_bypid_hardclock(rec_ptr, pidp);
 
 	if (kitrace_flag) print_hardclock_rec(rec_ptr);
-	return ;
+	return 0 ;
 }

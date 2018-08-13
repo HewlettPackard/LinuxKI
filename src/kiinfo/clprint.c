@@ -240,6 +240,36 @@ cl_network_csv()
 }
 
 int
+cl_warning (warn_t *warning, int indx, char *sect)
+{
+        int msg_idx = warning[indx].idx;
+
+        ANM(SPF(line, "%s%d", _LNK_WARN, indx));
+        if (warning[indx].type == WARN) {
+                RED_FONT;
+                T(warnmsg[msg_idx].msg);
+                T(" ");
+                if (warnmsg[msg_idx].url) {
+                        AERx(warnmsg[msg_idx].url, T("[INFO]"));
+                }
+                ARFx(SPF(line,"%s%d", _LNK_WARN, indx+1), _MSG_NEXT_NOTE);
+                BLACK_FONT;
+        } else {
+                BOLD(warnmsg[msg_idx].msg);
+                T(" ");
+                if (sect) {
+                        ARFx(sect, "[Sect]");
+                }
+                if (warnmsg[msg_idx].url) {
+                        AERx(warnmsg[msg_idx].url, T("[INFO]"));
+                }
+                ARFx(SPF(line,"%s%d", _LNK_WARN, indx+1), _MSG_NEXT_NOTE);
+        }
+
+        return 0;
+}
+
+int
 cl_perserver_info (void *arg1, void *arg2)
 {
 	server_info_t *serverp = (server_info_t *)arg1;
@@ -467,6 +497,7 @@ cl_global_cpu()				/* Section 1.2 */
         _TABLE;
 }
 
+void
 cl_global_cpu_by_runtime()				/* Section 1.2.1 */
 {
 	uint64 warnflag = 0;
@@ -506,6 +537,7 @@ cl_global_cpu_by_runtime()				/* Section 1.2.1 */
 	}
 }
 
+void
 cl_global_cpu_by_systime()				/* Section 1.2.2 */
 {
 	uint64 warnflag = 0;
@@ -1399,36 +1431,6 @@ cl_perpid_dev_totals()                  /* Section 4.4.0 */
 	foreach_hash_entry((void **)clpid_hash, CLPID_HASHSZ, clpid_print_iostats, clpid_sort_by_iops, top, NULL);
 }
  
-int
-cl_warning (warn_t *warning, int indx, char *sect)
-{
-        int msg_idx = warning[indx].idx;
-
-        ANM(SPF(line, "%s%d", _LNK_WARN, indx));
-        if (warning[indx].type == WARN) {
-                RED_FONT;
-                T(warnmsg[msg_idx].msg);
-                T(" ");
-                if (warnmsg[msg_idx].url) {
-                        AERx(warnmsg[msg_idx].url, T("[INFO]"));
-                }
-                ARFx(SPF(line,"%s%d", _LNK_WARN, indx+1), _MSG_NEXT_NOTE);
-                BLACK_FONT;
-        } else {
-                BOLD(warnmsg[msg_idx].msg);
-                T(" ");
-                if (sect) {
-                        ARFx(sect, "[Sect]");
-                }
-                if (warnmsg[msg_idx].url) {
-                        AERx(warnmsg[msg_idx].url, T("[INFO]"));
-                }
-                ARFx(SPF(line,"%s%d", _LNK_WARN, indx+1), _MSG_NEXT_NOTE);
-        }
-
-        return 0;
-}
-
 void
 cl_network_report()                      /* Section 5.0 */
 {

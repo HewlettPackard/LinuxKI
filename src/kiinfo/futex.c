@@ -443,7 +443,7 @@ futex_print_func(void *v)
 	if ((print_flag) && (is_alive)) {
 		gettimeofday(&tod, NULL);
 		printf ("\n%s\n", ctime(&tod.tv_sec));
-		futex_print_report(v);
+		futex_print_report();
 		print_flag=0;
 	}
 	return 0;
@@ -452,9 +452,9 @@ futex_print_func(void *v)
 int
 futex_report_func(void *v)
 {
-	if (debug) print ("futex_report_func %d\n", is_alive);
+	if (debug) printf ("futex_report_func %d\n", is_alive);
 	if (passes !=0) {
-		futex_print_report(v);
+		futex_print_report();
 	}
 
 	return 0;

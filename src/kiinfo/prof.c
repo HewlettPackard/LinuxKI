@@ -33,6 +33,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "conv.h"
 #include "hash.h"
 #include "msgcat.h"
+#include "kprint.h"
+#include <ncurses.h>
+#include <curses.h>
 
 
 int prof_dummy_func(void *, void *);
@@ -102,6 +105,7 @@ prof_process_func(void *a, void *arg)
         return 0;
 }
 
+int
 prof_bufmiss_func(void *v, void *a)
 {
         trace_info_t *trcinfop = v;

@@ -480,6 +480,7 @@ print_mm_page_alloc_rec(void *a)
 	return 0;
 }
 
+int
 trace_mm_page_alloc_func(void *a, void *v)
 {	
 	trace_info_t *trcinfop = (trace_info_t *)a;
@@ -516,6 +517,7 @@ print_mm_page_free_rec(void *a)
 	return 0;
 }
 
+int
 trace_mm_page_free_func(void *a, void *v)
 {	
 	trace_info_t *trcinfop = (trace_info_t *)a;
@@ -708,7 +710,7 @@ print_walltime_rec (void *a)
 		PRINT_COMMON_FIELDS(rec_ptr);
 		PRINT_EVENT(rec_ptr->id);
 	}
-	printf ("%s", ctime(&rec_ptr->walltime.tv_sec));
+	if (!kilive) printf ("%s", ctime(&rec_ptr->walltime.tv_sec));
 
 	return 0;
 }
@@ -730,7 +732,7 @@ print_startup_rec(void *a)
 {
 	startup_t *rec_ptr = (startup_t *)a;
 
-	printf ("%s", ctime(&rec_ptr->walltime.tv_sec));
+	if (!kilive) printf ("%s", ctime(&rec_ptr->walltime.tv_sec));
 	start_time = rec_ptr->hrtime;
 	begin_time = rec_ptr->walltime;
 	interval_start = interval_end = FILTER_START_TIME;  /* for VIS */

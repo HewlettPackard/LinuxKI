@@ -269,11 +269,11 @@ char *strtab_lookup32(char *elfp, uint64 idx)
 	Elf32_Sym *symtab;
 
 	symtab_shdr = find_elf32_section(elfp, ".symtab");
-	if (symtab_shdr == NULL) return;
+	if (symtab_shdr == NULL) return NULL;
 	symtab = (Elf32_Sym *)(elfp + symtab_shdr->sh_offset);
 
 	strtab_shdr = find_elf32_section(elfp, ".strtab");
-	if (strtab_shdr == NULL) return;
+	if (strtab_shdr == NULL) return NULL;
 	strtab = elfp + strtab_shdr->sh_offset;
 
 	return &strtab[symtab[idx].st_name];
@@ -326,11 +326,11 @@ char *strtab_lookup64(char *elfp, uint64 idx)
 	Elf64_Sym *symtab;
 
 	symtab_shdr = find_elf64_section(elfp, ".symtab");
-	if (symtab_shdr == NULL) return;
+	if (symtab_shdr == NULL) return NULL;
 	symtab = (Elf64_Sym *)(elfp + symtab_shdr->sh_offset);
 
 	strtab_shdr = find_elf64_section(elfp, ".strtab");
-	if (strtab_shdr == NULL) return;
+	if (strtab_shdr == NULL) return NULL;
 	strtab = elfp + strtab_shdr->sh_offset;
 
 	return &strtab[symtab[idx].st_name];

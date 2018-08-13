@@ -42,9 +42,9 @@ incr_insert_iostats (block_rq_insert_t *rec_ptr, iostats_t *statp, int *rndio_fl
 
 	if (BARRIER_IO(rec_ptr)) {
 		statp->barrier_cnt++;
-		return;
+		return 0;
 	} else if (INVALID_SECTOR(rec_ptr->sector)) {
-		return;
+		return 0;
 	}
 
 	statp->insert_cnt++;
@@ -194,7 +194,7 @@ track_issued_ios(void *a)
 	if (debug) printf ("track_issued_ios()\n");
 
         /* don't track these special sectors */
-        if (INVALID_SECTOR(sector)) return;
+        if (INVALID_SECTOR(sector)) return NULL;
 
 	/* fprintf (stderr, "track_issued_ios() - dev 0x%x, sector %d, nr_sectors %d\n", dev, sector, rec_ptr->nr_sectors); */
         devinfop = GET_DEVP(DEVHASHP(globals,dev),dev);
@@ -655,7 +655,7 @@ block_rq_insert_func(void *a, void *v)
 	filter_t *f = v;
 	block_rq_insert_t tt_rec_ptr;
         block_rq_insert_t *rec_ptr;
-	pid_info_t *pidp;
+	pid_info_t *pidp = NULL;
 	char barrier_io=FALSE;
 	char *scsi_cmd_addr = NULL;
 

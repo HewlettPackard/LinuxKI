@@ -116,7 +116,7 @@ run_reader_thread(void * vcpuno)
 
     close(trc_cntl[cpu].srcfd);
     close(trc_cntl[cpu].destfd);
-    return;
+    return NULL;
 }
 
 

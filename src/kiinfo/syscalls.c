@@ -1047,11 +1047,13 @@ print_varargs_exit(syscall_exit_t *rec_ptr)
 	short sock_type = 0;
 
 	switch (rec_ptr->syscallno) {
+#ifdef __NR_sendmmsg
 		case __NR_recvmmsg :
 		case __NR_sendmmsg :	
 			printf ("%cbytes=%lld", fsep, *(unsigned long *)varptr);
 			varptr += sizeof(unsigned long);
 			/* fall through to print socket addresses */
+#endif
 		case __NR_recvfrom:
 		case __NR_sendto:
 		case __NR_recvmsg:
@@ -1367,11 +1369,13 @@ socket_update_fdinfo(void *arg1, void *arg2)
 
 	varptr = (char *)rec_ptr + sizeof(syscall_exit_t);
 	switch (rec_ptr->syscallno) {
+#ifdef __NR_sendmmsg
                 case __NR_recvmmsg :
                 case __NR_sendmmsg :
                         bytes = *(unsigned long *)varptr;
                         varptr += sizeof(unsigned long);
                         /* fall through to print socket addresses */
+#endif
                 case __NR_recvfrom:
                 case __NR_sendto:
                 case __NR_recvmsg:
@@ -1584,9 +1588,11 @@ pid_update_fdinfo(void *arg1, void *arg2)
 
 	varptr = (char *)rec_ptr + sizeof(syscall_exit_t);
 	switch (rec_ptr->syscallno) {
+#ifdef __NR_sendmmsg
 		case __NR_recvmmsg :
 		case __NR_sendmmsg :
 			varptr += sizeof(unsigned long);
+#endif
 		case __NR_recvfrom:
                 case __NR_sendto:
                 case __NR_recvmsg:
@@ -1793,6 +1799,7 @@ sys_exit_func2(void *a)
 				cp_sockaddr (&sdatap->raddr, rsock);
 				incr_socket_stats(&sdatap->stats, rec_ptr, syscallbegtm, pidp->elf, ks_action->logio);
 				syscallp = GET_SYSCALLP(&sdatap->syscallp, SYSCALL_KEY(pidp->elf, 0ul, syscallno));
+				update_sched_state(&syscallp->sched_stats, old_state, new_state, delta);
 				incr_syscall_stats(&syscallp->stats, rec_ptr->ret, syscallbegtm, ks_action->logio);
 				incr_socket_stats(&globals->netstats, rec_ptr, syscallbegtm, pidp->elf, ks_action->logio);
 				socket_global_syscall_stats(rec_ptr, sdatap, pidp, ks_action, syscallbegtm);
@@ -1805,6 +1812,7 @@ sys_exit_func2(void *a)
 				/* logical I/Os here */
 	
 				syscallp = GET_SYSCALLP(&fdatap->syscallp, SYSCALL_KEY(pidp->elf, 0ul, syscallno));
+				update_sched_state(&syscallp->sched_stats, old_state, new_state, delta);
 				incr_syscall_stats(&syscallp->stats, rec_ptr->ret, syscallbegtm, ks_action->logio);
 			}
 		}

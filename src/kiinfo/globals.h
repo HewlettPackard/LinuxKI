@@ -51,6 +51,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 	}							\
 }
 
+#define SET_KIACTION_EXECUTE(index, value)				\
+	if (index) ki_actions[index].execute = value;
+
+#define SET_KIACTION_FUNCTION(index, value)				\
+	if (index) ki_actions[index].func = value;
+
 #ifdef MALLOC_DEBUG
 #define FREE(ptr) 						\
 	if (ptr) {						\

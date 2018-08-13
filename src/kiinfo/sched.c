@@ -415,11 +415,13 @@ update_stktrc_info(uint64 last_stktrc[], uint64 stack_depth, void ***arg2, uint6
 	stktrcp->stklen = i;
 }
 
+void
 incr_setrq_stats (setrq_info_t ***setrq_hashp, uint64 pid) 
 {
 	setrq_info_t *setrq_infop;
 	setrq_infop = GET_SETRQP(setrq_hashp, pid);
 	setrq_infop->cnt++;
+	return;
 }
 
 /*
@@ -1179,12 +1181,12 @@ sched_HT_switch(void *a)
 }
 
 static inline int		
-update_cpu_last_pid(cpu, pid)
+update_cpu_last_pid(int cpu, int pid)
 {
 	cpu_info_t *cpuinfop;
 	cpuinfop = GET_CPUP(&globals->cpu_hash, cpu);
 	cpuinfop->pid = pid;
-	return;
+	return 0;
 }
 
 static inline int

@@ -23,6 +23,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <ctype.h>
 #include <linux/kdev_t.h>
 #include <sys/socket.h>
 #include <linux/in.h>
@@ -1494,14 +1495,14 @@ load_perpid_mapfile(void *arg1, void *arg2)
         }
 
 	/* return if map info is already initialized */
-	if (pidp->mapinfop) return;
+	if (pidp->mapinfop) return 0;
 
 	sprintf (fname, "%d.map", pidp->PID);
 
 	/* first pass to count the number of symbols */
         if ( (f = fopen(fname,"r")) == NULL) {
 		/* silently return */
-                return;
+                return 0;
         }
 
 	rtnptr = fgets((char *)&input_str, 511, f);
@@ -1516,27 +1517,27 @@ load_perpid_mapfile(void *arg1, void *arg2)
 	/* 2nd pass, build maptable, also open file for mmap access for later */
         if ( (f = fopen(fname,"r")) == NULL) {
 		/* silently return */
-                return;
+                return 0;
         }
 
 	if ((fd = open(fname, O_RDONLY)) < 0) {
-		return;
+		return 0;
 	}
 
 	if ((ret = fstat(fd, &statbuf)) < 0) {
 		close(fd);
-		return;
+		return 0;
 	}
 
 	if ((size = statbuf.st_size) == 0) {
 		close(fd);
-		return;
+		return 0;
 	}
 
 	mmapptr = mmap(NULL, statbuf.st_size, PROT_READ , MAP_SHARED, fd, 0);
 	if (mmapptr == MAP_FAILED) {
 		close(fd);
-		return;
+		return 0;
 	}
 
 	/* we can close the file here now that its mmaped */
@@ -1545,14 +1546,14 @@ load_perpid_mapfile(void *arg1, void *arg2)
 	mapinfop = find_add_info((void **)&pidp->mapinfop, sizeof(vtxt_preg_t));
 	if (mapinfop == NULL) {
 		munmap(mmapptr, size);
-		return;
+		return 0;
 	}
 
 	maptab = find_add_info((void **)&mapinfop->symbols, nsyms * sizeof(map_entry_t));
 	if (maptab == NULL) {
 		FREE(mapinfop);
 		munmap(mmapptr, size);
-		return;
+		return 0;
 	}
 
 	rtnptr = fgets((char *)&input_str, 4096, f);
@@ -1582,7 +1583,7 @@ load_perpid_mapfile(void *arg1, void *arg2)
 	mapinfop->elfp = mmapptr;
 	mapinfop->p_type = MAPCLASS;
 
-	return;
+	return 0;
 }
 
 void
@@ -1695,11 +1696,12 @@ parse_docker_ps()
 	uint64 id;
         char name[64];
 	docker_info_t *dockerp;
+	int ret;
 
 
 	/* if (debug) fprintf (stderr, "parse_docker_ps\n"); */
 	if (is_alive) {
-		system("docker ps >/tmp/.docker_ps  2>/dev/null");
+		ret = system("docker ps >/tmp/.docker_ps  2>/dev/null");
 		sprintf (fname, "/tmp/.docker_ps");
 	} else {
 		sprintf (fname, "docker_ps.%s", timestamp);

@@ -24,9 +24,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "ki_tool.h"
 #include "liki.h"
 #include "developers.h"
-
 #include "kd_types.h"
 #include "globals.h"
+#include "info.h"
 #include "hash.h"
 #include "conv.h"
 
@@ -98,6 +98,8 @@ cache_insert_func(void *a, void *v)
 		globals->cache_insert_cnt++;
 	}
 
+	if (pertrc_stats) incr_trc_stats(rec_ptr, pidp);
+
 	if (kitrace_flag) print_cache_insert_rec(rec_ptr);
 }
 	
@@ -132,6 +134,8 @@ cache_evict_func(void *a, void *v)
 
 		globals->cache_evict_cnt++;
 	}
+
+	if (pertrc_stats) incr_trc_stats(rec_ptr, pidp);
 
 	if (kitrace_flag) print_cache_evict_rec(rec_ptr);
 }

@@ -101,6 +101,7 @@ wait_process_func(void *a, void *arg)
         return 0;
 }
 
+int
 wait_bufmiss_func(void *v, void *a)
 {
         trace_info_t *trcinfop = v;
@@ -355,8 +356,7 @@ wait_print_report(void *v)
 {
 	sched_info_t *schedp = globals->schedp;
 
-
-	if (schedp==NULL) return;
+	if (schedp==NULL) return 0;
 	calc_global_cpu_stats(globals, NULL);
 	print_global_sleeps();
 	printf ("\n********* GLOBAL SWITCH REPORT ********\n\n"); 

@@ -74,11 +74,7 @@ The following documentation provides a brief overview for downloading and instal
 [LinuxKI MasterClass](https://github.com/HewlettPackard/LinuxKI/raw/master/documentation/LinuxKI_MasterClass.pdf)
 
 ### Download
-Pre-packaged RPM and DEB files are available at the following locations:
-
-* [LinuxKI RPM package](https://github.com/HewlettPackard/LinuxKI/raw/master/rpms/linuxki-5.4-2.noarch.rpm)
-* [LinuxKI DEB package](https://github.com/HewlettPackard/LinuxKI/raw/master/rpms/linuxki_5.4-2_all.deb)
-
+Pre-packaged RPM and DEB files are available on the [Releases Page](https://github.com/HewlettPackard/LinuxKI/releases).
 
 ### Prerquisites
 

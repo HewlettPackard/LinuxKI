@@ -128,7 +128,7 @@ get_rec_from_event(event_t *eventp)
 	return (char *)eventp + event_header_length;
 }
 	
-
+int
 process_buffer(trace_info_t *trcinfop)
 {
 	common_t tt_rec_ptr;

@@ -26,6 +26,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "developers.h"
 #include "globals.h"
 #include "kd_types.h"
+#include "info.h"
 
 int oracle_pid_stats(void *arg1, void *arg2)
 {
@@ -34,7 +35,7 @@ int oracle_pid_stats(void *arg1, void *arg2)
         pid_info_t *pidp = sidpidp->pidinfop;
 	sched_info_t *schedp;
 
-	if (pidp == NULL) return;
+	if (pidp == NULL) return 0;
 	schedp = (sched_info_t *)pidp->schedp;
 
         orastatsp->pid_cnt++;

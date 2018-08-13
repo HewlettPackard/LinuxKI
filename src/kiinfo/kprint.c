@@ -26,6 +26,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "kd_types.h"
 #include "globals.h"
 #include "info.h"
+#include "kprint.h"
 #include "sort.h"
 #include "html.h"
 #include "kpmsgcat.h"
@@ -37,6 +38,36 @@ typedef struct kp_trc_type_args {
         uint64          warnflag;
         int             total_recs;
 } kp_trc_type_args_t;
+
+int
+kp_warning(warn_t *warning, int indx, char *top)
+{
+        int msg_idx = warning[indx].idx;
+
+        ANM(SPF(line, "%s%d", _LNK_WARN, indx));
+        if (warning[indx].type == WARN) {
+                RED_FONT;
+                T(warnmsg[msg_idx].msg);
+                T(" ");
+                if (warnmsg[msg_idx].url) {
+                        AERx(warnmsg[msg_idx].url, T("[INFO]"));
+                }
+                ARFx(SPF(line,"%s%d", _LNK_WARN, indx+1), _MSG_NEXT_NOTE);
+                BLACK_FONT;
+        } else {
+                BOLD(warnmsg[msg_idx].msg);
+                T(" ");
+                if (top) {
+                        ARFx(top, "[Sect]");
+                }
+                if (warnmsg[msg_idx].url) {
+                        AERx(warnmsg[msg_idx].url, T("[INFO]"));
+                }
+                ARFx(SPF(line,"%s%d", _LNK_WARN, indx+1), _MSG_NEXT_NOTE);
+        }
+
+        return 0;
+}
 
 void
 print_cmdline()
@@ -115,7 +146,6 @@ print_mem_info()
 
 	fclose (f);
 }
-
 
 void 
 kp_sys_summary ()
@@ -297,36 +327,6 @@ void kp_toc()
 
           LI; ARF(_LNK_10_0, _MSG_10_0); NLt;
 	_UL;
-}
-
-int
-kp_warning (warn_t *warning, int indx, char *top)
-{
-        int msg_idx = warning[indx].idx;
-
-        ANM(SPF(line, "%s%d", _LNK_WARN, indx));
-        if (warning[indx].type == WARN) {
-                RED_FONT;
-                T(warnmsg[msg_idx].msg);
-                T(" ");
-                if (warnmsg[msg_idx].url) {
-                        AERx(warnmsg[msg_idx].url, T("[INFO]"));
-                }
-                ARFx(SPF(line,"%s%d", _LNK_WARN, indx+1), _MSG_NEXT_NOTE);
-                BLACK_FONT;
-        } else {
-                BOLD(warnmsg[msg_idx].msg);
-                T(" ");
-                if (top) {
-                        ARFx(top, "[Sect]");
-                }
-                if (warnmsg[msg_idx].url) {
-                        AERx(warnmsg[msg_idx].url, T("[INFO]"));
-                }
-                ARFx(SPF(line,"%s%d", _LNK_WARN, indx+1), _MSG_NEXT_NOTE);
-        }
-
-        return 0;
 }
 
 void
@@ -1095,7 +1095,7 @@ kp_hardirqs()				/* Section 1.6.1 */
         _TABLE;
         TEXT("\n");
 
-	print_global_hardirq_stats();
+	print_global_hardirq_stats(NULL);
 }
 
 void 
@@ -1575,6 +1575,7 @@ kp_file_errs()				/* Section 3.3 */
 
 }
 
+int
 kp_fdata_syscalls(void *arg1, void *arg2)
 {
         fdata_info_t *fdatap = (fdata_info_t *)arg1;
@@ -2298,6 +2299,7 @@ kp_ipip()
 	CSV_FIELD("kisock", "[CSV]");
 }
 
+void
 kp_remoteip()
 {
 	int scallflag=1;
@@ -2325,6 +2327,7 @@ kp_remoteip()
 	CSV_FIELD("kisock", "[CSV]");
 }
 
+void
 kp_remoteport()
 {
 	int scallflag=1;
@@ -2352,6 +2355,7 @@ kp_remoteport()
 	CSV_FIELD("kisock", "[CSV]");
 }
 
+void
 kp_localip()
 {
 	int scallflag=1;
@@ -2379,6 +2383,7 @@ kp_localip()
 	CSV_FIELD("kisock", "[CSV]");
 }
 
+void
 kp_localport()
 {
 	int scallflag=1;
@@ -2407,6 +2412,7 @@ kp_localport()
 	CSV_FIELD("kisock", "[CSV]");
 }
 
+void
 kp_socket()
 {
         GREEN_TABLE;

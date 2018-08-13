@@ -43,6 +43,7 @@ update_perirq_stats(irq_info_t *irqinfop, int irq, uint64 delta, int irqtype)
 	return;
 }
 
+int
 update_softirq_times(irq_info_t *irqinfop, int irq, uint64 delta, int irqtype)
 {
 	irq_entry_t *irqentryp;
@@ -50,7 +51,7 @@ update_softirq_times(irq_info_t *irqinfop, int irq, uint64 delta, int irqtype)
 	irqinfop->total_time += delta;
 	irqentryp = GET_IRQENTRYP(&irqinfop->irq_entry_hash, irq);
 	irqentryp->total_time += delta;
-	return;
+	return 0;
 }
 
 static inline void

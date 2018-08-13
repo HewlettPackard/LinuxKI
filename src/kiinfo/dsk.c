@@ -667,7 +667,7 @@ print_dev_iostats_total(void *arg1, void *arg2)
         double  avwait, avserv, avqlen, avinflt;
 	
 	if (statp[IOTOT].compl_cnt == 0)  {
-		return;
+		return 0;
 	}
 
 	dev = devinfop->lle.key;

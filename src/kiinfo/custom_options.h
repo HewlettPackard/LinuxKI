@@ -397,7 +397,7 @@ Kipid(init_t *init, arg_t *arg)
                 } else if (strcmp("kitrace", prop->p_name) == 0) {
                         SET(KITRACE_FLAG);
 		} else if (strncmp("nosysenter", prop->p_name, 10) == 0) {
-			clear(SYSENTER_FLAG);
+			CLEAR(SYSENTER_FLAG);
 		} else if (strcmp("abstime", prop->p_name) == 0) {
 			SET(ABSTIME_FLAG);
 		} else if (strcmp("fmttime", prop->p_name) == 0) {
@@ -765,7 +765,7 @@ Kifile(init_t *init, arg_t *arg)
                 } else if (strcmp("kitrace", prop->p_name) == 0) {
                         SET(KITRACE_FLAG);
 		} else if (strncmp("nosysenter", prop->p_name, 10) == 0) {
-			clear(SYSENTER_FLAG);
+			CLEAR(SYSENTER_FLAG);
 		} else if (strcmp("abstime", prop->p_name) == 0) {
 			SET(ABSTIME_FLAG);
 		} else if (strcmp("fmttime", prop->p_name) == 0) {
@@ -810,7 +810,7 @@ Kisock(init_t *init, arg_t *arg)
                 } else if (strcmp("kitrace", prop->p_name) == 0) {
                         SET(KITRACE_FLAG);
 		} else if (strncmp("nosysenter", prop->p_name, 10) == 0) {
-			clear(SYSENTER_FLAG);
+			CLEAR(SYSENTER_FLAG);
 		} else if (strcmp("abstime", prop->p_name) == 0) {
 			SET(ABSTIME_FLAG);
 		} else if (strcmp("fmttime", prop->p_name) == 0) {
@@ -855,7 +855,7 @@ Kifutex(init_t *init, arg_t *arg)
                 } else if (strcmp("kitrace", prop->p_name) == 0) {
                         SET(KITRACE_FLAG);
 		} else if (strncmp("nosysenter", prop->p_name, 10) == 0) {
-			clear(SYSENTER_FLAG);
+			CLEAR(SYSENTER_FLAG);
 		} else if (strcmp("abstime", prop->p_name) == 0) {
 			SET(ABSTIME_FLAG);
 		} else if (strcmp("fmttime", prop->p_name) == 0) {

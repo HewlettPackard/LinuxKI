@@ -123,6 +123,8 @@ typedef struct trace_ids_struct {
 	int trace_mm_page_alloc;
 	int trace_mm_page_free;
 	int trace_mm_page_free_direct;
+	int trace_napi_poll;
+	int trace_consume_skb;
 } trace_ids_t;
 
 typedef struct ki_action {
@@ -215,10 +217,35 @@ extern int hpux_1131();
 extern void fatal(const char *, const int, const char *, int, char *, char *, int);
 extern void debug_trace(const char *, const int, const char *);
 extern void check_HARDCLOCK_traces();
+extern void developers_init();
 extern void developers_report();
 extern void developers_call();
 extern void get_new_buffer(trace_info_t *, int);
 extern uint64 get_event_time(trace_info_t *, int);
+extern uint32 get_event_len(event_t *);
 extern char *get_rec_from_event(event_t *);
 extern int check_missed_events(char *);
+extern int process_buffer(trace_info_t *);
+extern void init_trace_ids();
+extern int open_trace_files();
+extern int reset_trace_files(int nfiles);
+extern void read_fmt_files();
+extern void save_and_clear_server_stats(int);
+
+
+extern int  setup_percpu_readers();
+extern void read_liki_traces();
+extern int  load_liki_module();
+extern int  unload_liki_module();
+extern void init_liki_tracing();
+extern int  likidump();
+extern void  kitracedump();
+extern int  merge();
+extern void reset_kgdboc();
+extern void clear_kgdboc();
+
+
+
+
+
 ki_action_t * liki_action();

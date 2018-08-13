@@ -386,6 +386,14 @@ struct tp_struct tp_table[];
 #endif
 
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,0)
+#define GETNAME(sock, addr, len, peer) (sock->ops->getname(sock, addr, peer))
+#else
+#define GETNAME(sock, addr, len, peer) (sock->ops->getname(sock, addr, len, peer))
+#endif
+
+
+
 /* Here we have a few helper macros that save typing in the trace
  * collection code below.
  */
@@ -446,7 +454,11 @@ struct tp_struct tp_table[];
 
 #ifdef CONFIG_X86_64
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(4,0,0)
+#if (defined SLES15)
+#define STACK_TRACE(DATA, REGS)						\
+	save_stack_trace_regs_fp(NULL, DATA);
+
+#elif LINUX_VERSION_CODE > KERNEL_VERSION(4,0,0)
 #define STACK_TRACE(DATA, REGS)						\
 	save_stack_trace_regs_fp(REGS, DATA);
 
@@ -4113,7 +4125,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 
 		sock_type = sock->type;
 
-		if (sock->ops->getname(sock, (struct sockaddr *)&local, &loclen, 0)) {
+		if (GETNAME(sock, (struct sockaddr *)&local, &loclen, 0)) {
 			fput_light(sock->file, fput_needed);
 			goto scexit_skip_vldata;
 		}
@@ -4125,7 +4137,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		if (args_tmp[4] == 0 || args_tmp[5] == 0) {
 
 			/* Get remote socket addresses */
-			if (sock->ops->getname(sock, (struct sockaddr *)&remote, &remlen, 1)) {
+			if (GETNAME(sock, (struct sockaddr *)&remote, &remlen, 1)) {
 				fput_light(sock->file, fput_needed);
 				goto scexit_skip_vldata;
 			}
@@ -4220,12 +4232,12 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 			memset(&local, 0, sizeof(struct sockaddr_storage));
 			sock_type = sock->type;
 
-			if (sock->ops->getname(sock, (struct sockaddr *)&remote, &remlen, 1)) {
+			if (GETNAME(sock, (struct sockaddr *)&remote, &remlen, 1)) {
 				fput_light(sock->file, fput_needed);
 				goto scexit_skip_vldata;
 			}
 
-			if (sock->ops->getname(sock, (struct sockaddr *)&local, &loclen, 0)) {
+			if (GETNAME(sock, (struct sockaddr *)&local, &loclen, 0)) {
 				fput_light(sock->file, fput_needed);
 				goto scexit_skip_vldata;
 			}
@@ -4346,12 +4358,12 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		if ((sock = sockfd_lookup_light_fp(fd, &err, &fput_needed)) == NULL) 
 			goto mmsgexit_skip_addresses;
 
-		if (sock->ops->getname(sock, (struct sockaddr *)&remote, &remlen, 1)) {
+		if (GETNAME(sock, (struct sockaddr *)&remote, &remlen, 1)) {
 			fput_light(sock->file, fput_needed);
 			goto scexit_skip_vldata;
 		}
 
-		if (sock->ops->getname(sock, (struct sockaddr *)&local, &loclen, 0)) {
+		if (GETNAME(sock, (struct sockaddr *)&local, &loclen, 0)) {
 			fput_light(sock->file, fput_needed);
 			goto scexit_skip_vldata;
 		}
@@ -4416,12 +4428,12 @@ mmsgexit_skip_addresses:
 		if ((sock = sockfd_lookup_light_fp(out_fd, &err, &fput_needed)) == NULL) 
 			goto scexit_skip_vldata;
 
-		if (sock->ops->getname(sock, (struct sockaddr *)&remote, &remlen, 1)) {
+		if (GETNAME(sock, (struct sockaddr *)&remote, &remlen, 1)) {
 			fput_light(sock->file, fput_needed);
 			goto scexit_skip_vldata;
 		}
 
-		if (sock->ops->getname(sock, (struct sockaddr *)&local, &loclen, 0)) {
+		if (GETNAME(sock, (struct sockaddr *)&local, &loclen, 0)) {
 			fput_light(sock->file, fput_needed);
 			goto scexit_skip_vldata;
 		}
@@ -6813,7 +6825,7 @@ liki_initialize(void)
 	int	i;
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,4)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,7)
 	printk(KERN_INFO "LiKI: unsupported kernel version\n");
 	return(-EINVAL);
 #else

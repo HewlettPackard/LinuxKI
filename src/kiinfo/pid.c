@@ -382,7 +382,7 @@ print_futex_info(void *arg1, void *arg2)
                         SECS(pfutexp->max_time));
 
         foreach_hash_entry((void **)pfutexp->ops_hash, FUTEXOP_HSIZE, futex_print_ops_detail, futexops_sort_by_op, 0, pidp);
-        return;
+        return 0;
 }
 
 void
@@ -893,8 +893,8 @@ pid_report(void *arg1, void *v)
 	if (msr_flag && pidp->schedp) 	{
 		schedp = pidp->schedp;
 		msrptr = &schedp->sched_stats.msr_total[0];
-	                csv_printf (pid_csvfile, "%lld,%lld,%3.2f%%,%lld,%lld,%3.2f,%3.2f,%lld",
-				msrptr[LLC_REF], msrptr[LLC_MISSES],
+	                csv_printf (pid_csvfile, ",%lld,%lld,%3.2f%%,%lld,%lld,%3.2f,%3.2f,%lld",
+				msrptr[LLC_REF], msrptr[LLC_REF] - msrptr[LLC_MISSES],
                                 (1.0 - (msrptr[LLC_MISSES]*1.0 / msrptr[LLC_REF])) * 100.0,
 				msrptr[RET_INSTR], msrptr[CYC_NOHALT_CORE],
                                 msrptr[CYC_NOHALT_CORE] * 1.0 / msrptr[RET_INSTR],

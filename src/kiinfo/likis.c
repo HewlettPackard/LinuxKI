@@ -21,6 +21,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <fcntl.h>
 #include <pthread.h>
 #include <sys/stat.h>
@@ -36,6 +37,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "info.h"
 
 extern int      liki_open_live_stream();
+extern int 	liki_enable_msr_data();
 extern void	ignore_syscalls(char *);
 extern struct utsname  utsname;
 extern int	done;

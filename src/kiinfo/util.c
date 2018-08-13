@@ -34,6 +34,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <execinfo.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <ctype.h>
 #include "ki_tool.h"
 #include "liki.h"
 #include "globals.h"
@@ -275,7 +276,7 @@ get_command(void *arg1, void *arg2)
 
 	sprintf(fname, "/proc/%ld/cmdline", pidp->tgid);
         if ((fd = open(fname, O_RDONLY)) <= 0) {
-		return;
+		return 0;
         }	
 
 	if (get_fd_str(fd, cmdstr, 1) > 0 ) {
@@ -285,7 +286,7 @@ get_command(void *arg1, void *arg2)
 		close(fd);
 		sprintf(fname, "/proc/%ld/stat", pidp->tgid);
         	if ((fd = open(fname, O_RDONLY)) <= 0) {
-			return;
+			return 0;
         	}	
 		
 		if (get_fd_str(fd, cmdstr, 1) > 0 ) {
@@ -391,7 +392,7 @@ get_devname(void *arg1, void *arg2)
 	dev = devinfop->lle.key;
 	sprintf(fname, "/sys/dev/block/%lld:%lld/uevent", dev_major(dev), lun(dev));
         if ((fd = open(fname, O_RDONLY)) <= 0) {
-		return;
+		return 0;
         }	
 		
 	if (get_fd_str(fd, cmdstr, 1) > 0 ) {
@@ -409,7 +410,7 @@ get_devname(void *arg1, void *arg2)
 				close(fd);		
 				sprintf(fname, "/sys/block/%s/dm/name", devinfop->devname);
         			if ((fd = open(fname, O_RDONLY)) <= 0) {
-					return;
+					return 0;
         			}	
 
 				if (get_fd_str(fd, cmdstr, 1) > 0 ) {
@@ -434,7 +435,7 @@ get_devnum(char *devname)
 	if (!is_alive)  return 0;
 	sprintf(fname, "/sys/block/%s/uevent", devname);
         if ((f = fopen(fname, "r")) == NULL) {
-		return;
+		return 0;
         }	
 
 	rtnptr = fgets((char *)&input_str, 127, f);
@@ -832,7 +833,9 @@ mmap_flags_str(unsigned int f)
 	if (f & MAP_FILE) strcat (str, "FILE|");
 	if (f & MAP_FIXED) strcat (str, "FIXED|");
 	if (f & MAP_GROWSDOWN) strcat (str, "GROWSDOWN|");
+#ifdef MAP_HUGETLB
 	if (f & MAP_HUGETLB) strcat (str, "HUGETLB|");
+#endif
 	if (f & MAP_LOCKED) strcat (str, "LOCKED|");
 	if (f & MAP_NONBLOCK) strcat (str, "NONBLOCK|");
 	if (f & MAP_NORESERVE) strcat (str, "NORESERVE|");
@@ -1492,7 +1495,7 @@ dmangle(char *sym)
 		/* doesn't need to be demangled */
 		return sym;
 	}
-	
+
 	/* we need to find the first number after _Z and the first character after 
 	 * the number.
 	 */
@@ -1720,7 +1723,7 @@ find_switch_start(uint64 *stack, uint64 depth)
 			else if (strncmp(symptr, "sched_switch_trace", 18) == 0) retval= i+1;
 			else if (strncmp(symptr, "pick_next_task_fair", 19) == 0) retval= i+1;
 			else if (strncmp(symptr, "__sched_text_start", 18) == 0) retval= i+1;		/* ARM64, l4tm */
-			else break;
+			else continue;
 		}
         }
         return retval;

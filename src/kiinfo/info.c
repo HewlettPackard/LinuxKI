@@ -17,6 +17,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <time.h>
 #include <string.h>
 #include <sys/errno.h>
+#include <sys/time.h>
 #include "ki_tool.h"
 #include "liki.h"
 #include "liki_v1.h"

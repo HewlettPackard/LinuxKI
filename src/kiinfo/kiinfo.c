@@ -27,6 +27,7 @@
 #include "liki.h"
 #include "globals.h"
 #include "developers.h"
+#include "info.h"
 #include "hash.h"
 #include "vers.h"
 #include "html.h"

@@ -1,0 +1,81 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kivis-build 1 "5.4 - April 18, 2018" version "5.4"
+.SH NAME
+kivis-build \- Build the LinuxKI visualization Docker image
+
+.SH SYNOPSIS
+.B kivis-build
+
+.SH DESCRIPTION
+
+.B kivis-build
+builds the Docker image
+.B linuxki
+which is used by the LinuxKI visualization tools
+.B kivis-start
+and
+.BR kivis-stop .
+
+Must be run using
+.B sudo
+or by a user in the
+.B docker
+group.
+
+.SH ENVIRONMENT
+
+.B kivis-build
+supports proxies for HTTP and HTTPS when building the image. The
+.B yum
+commands used when building the container will use the following proxy environment variables:
+
+.RS
+.B http_proxy, https_proxy
+.RS
+If set, the
+.B http_proxy
+and
+.B https_proxy
+variables should contain the URL of the proxy for the HTTP and HTTPS connection respectively. For example:
+.B http://proxy.fqdn:8080
+.RE
+
+.B no_proxy
+.RS
+If set, this variable should contain a comma-separated list of domain extensions the proxy should not be used for. For example:
+.B localhost,127.0.0.1,.dev.net
+.RE
+
+.SH AUTHOR
+Christopher Voltz <christopher@voltz.ws>
+
+.SH SEE ALSO
+.BR LinuxKI (1),
+.BR kiinfo-dump (1),
+.BR kiinfo-likidump (1),
+.BR kiinfo-likimerge (1),
+.BR kiinfo-live (1),
+.BR kiinfo-kparse (1),
+.BR kiinfo-kitrace (1),
+.BR kiinfo-kipid (1),
+.BR kiinfo-kiprof (1),
+.BR kiinfo-kidsk (1),
+.BR kiinfo-kirunq (1),
+.BR kiinfo-kiwait (1),
+.BR kiinfo-kifile (1),
+.BR kiinfo-kisock (1),
+.BR kiinfo-kifutex (1),
+.BR kiinfo-kidock (1),
+.BR kiinfo-kiall (1),
+.BR kiinfo-clparse (1),
+.BR runki (1),
+.BR kiall (1),
+.BR kiclean (1),
+.BR kivis-start (1),
+.BR kivis-stop (1)
+
+.UR https://github.com/HewlettPackard/LinuxKI/wiki
+.UE

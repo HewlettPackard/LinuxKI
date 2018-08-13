@@ -1,0 +1,76 @@
+#!/bin/bash
+#
+# Starts a linuxki Docker container, which hosts the files in the current
+# directory, and then opens the default browser to the kp*.html file if
+# there is one or to the directory if there is more than one kp*.html file.
+# Note that the container is named $USER-linuxki so kivis-stop knows which
+# container to stop but this means that only one container can be run at a
+# time, per user, so if a container is already running, it will automatically
+# be stopped before the new one is started. Additionally, the Docker image will
+# be built, it it hasn't already been.
+
+#
+# Debian has a package called docker which provides a docker command which has
+# nothing to do with Docker containers. Debian provides the docker.io package
+# to provide Docker container support but it is outdated so tell users to
+# install Docker by following the documentation on the docker.com website.
+#
+
+if ! docker --help |& grep container &> /dev/null; then
+        cat <<EOF
+Wrong docker package installed. See the Docker website for information on how
+to install Docker for container support:
+  CentOS/RHEL: https://docs.docker.com/install/linux/docker-ce/centos/
+  Fedora:      https://docs.docker.com/install/linux/docker-ce/fedora/
+  Debian:      https://docs.docker.com/install/linux/docker-ce/debian/
+  Ubuntu:      https://docs.docker.com/install/linux/docker-ce/ubuntu/
+Make sure to follow the instructions in the "Optional Linux post-installation
+steps".
+EOF
+        exit 1
+fi
+
+#
+# Build the Docker image if it doesn't exist already.
+#
+
+if ! docker image inspect linuxki &> /dev/null; then
+        /opt/linuxki/kivis-build
+fi
+
+#
+# Stop the container if it is already running.
+#
+
+/opt/linuxki/kivis-stop
+
+#
+# Start the linuxki container $USER-linuxki.
+#
+
+docker run \
+        --detach \
+        --name $USER-linuxki \
+        --publish-all \
+        --rm \
+        --volume $PWD:/var/www/html/linuxki \
+        linuxki
+
+#
+# Display the port the container is running the web server on.
+#
+
+port=$(docker inspect \
+        --format='{{(index (index .NetworkSettings.Ports "80/tcp") 0).HostPort}}' \
+        $USER-linuxki)
+echo Server running on port $port
+
+#
+# Open the default web browser to the LinuxKI report if a single one exists in
+# the current directory or subdirectory othewise to the list of files in the
+# current directory.
+#
+
+html_file=$(find . -iname 'kp.*.html')
+[[ $(echo $html_file | wc --words) -ne 1 ]] && unset html_file
+xdg-open http://localhost:$port/linuxki/$html_file

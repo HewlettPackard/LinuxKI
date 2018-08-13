@@ -1,0 +1,9 @@
+#!/bin/bash
+#
+# Stops the user's linuxki Docker container, if it is running.
+
+container="$USER-linuxki"
+
+if docker ps -f name=$container | grep -q $container; then
+        docker stop $container
+fi

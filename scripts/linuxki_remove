@@ -16,6 +16,20 @@
 . /opt/linuxki/config
 
 #
+# Stop the container if it is already running.
+#
+
+/opt/linuxki/kivis-stop
+
+#
+# Remove the Docker image if it exists.
+#
+
+if docker image inspect linuxki &> /dev/null; then
+	docker rmi --force linuxki
+fi
+
+#
 # Remove module(s)
 #
 echo -e \\tRemoving LiKI kernel module\(s\) ...

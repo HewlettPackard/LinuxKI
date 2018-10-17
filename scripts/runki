@@ -1136,7 +1136,7 @@ debugfs_mount_point=$(grep debugfs /proc/mounts | head -1 | awk '{print $2}')
 #
 # Check to see if the flightrecorder installed and/or running...
 #
-service trace-cmd status  >/dev=null 2&>/dev/null
+service trace-cmd status  >/dev/null 2&>/dev/null
 RETVAL=$?
 if [ $RETVAL -eq 0 ]; then
 	echo "!!! WARNING flightrecorder is installed and active" | tee -a ki.err.$tag

@@ -174,6 +174,33 @@ calc_dev_totals(void *arg1, void *arg2)
 	return 0;
 }
 
+static inline int
+sum_io_stats(iostats_t *devstatp, iostats_t *statp) {
+
+	statp->sect_xfrd += devstatp->sect_xfrd;
+	statp->max_ioserv = MAX(statp->max_ioserv, devstatp->max_ioserv);
+	statp->max_iowait = MAX(statp->max_iowait, devstatp->max_iowait);
+	statp->cum_ioserv += devstatp->cum_ioserv;
+	statp->cum_iowait += devstatp->cum_iowait;
+	statp->qlen += devstatp->qlen;
+	statp->qops += statp->qops;
+	statp->insert_cnt += devstatp->insert_cnt;
+	statp->issue_cnt += devstatp->issue_cnt;
+	statp->requeue_cnt += devstatp->requeue_cnt;
+	statp->abort_cnt += devstatp->abort_cnt;
+	statp->barrier_cnt += devstatp->barrier_cnt;
+	statp->cum_qlen += devstatp->cum_qlen;
+	statp->max_qlen = MAX(statp->max_qlen, devstatp->max_qlen);
+	statp->cum_async_inflight += devstatp->cum_async_inflight;
+	statp->cum_sync_inflight += devstatp->cum_sync_inflight;
+	statp->random_ios += devstatp->random_ios;
+	statp->seq_ios += devstatp->seq_ios;
+	statp->compl_cnt += devstatp->compl_cnt;
+	statp->error_cnt += devstatp->error_cnt;
+}
+
+	
+
 int
 calc_fc_totals(void *arg1, void *arg2)
 {
@@ -181,7 +208,9 @@ calc_fc_totals(void *arg1, void *arg2)
 	dev_info_t *mdevinfop ;
 	fc_info_t *fcinfop;
 	fc_dev_t *fcdevp;
-	iostats_t *devstatp, *fcstatp;
+	wwn_info_t *wwninfop;
+	wwn_dev_t *wwndevp;
+	iostats_t *devstatp, *statp;
 	int i;
 
 	if (devinfop == NULL) return 0;
@@ -191,31 +220,18 @@ calc_fc_totals(void *arg1, void *arg2)
 	fcdevp->devinfop = devinfop;
 
 	for (i = IO_READ; i <= IO_TOTAL; i++) {
-		devstatp = &devinfop->iostats[i];
-		fcstatp = &fcinfop->iostats[i];
-
-		fcstatp->sect_xfrd += devstatp->sect_xfrd;
-		fcstatp->max_ioserv = MAX(fcstatp->max_ioserv, devstatp->max_ioserv);
-		fcstatp->max_iowait = MAX(fcstatp->max_iowait, devstatp->max_iowait);
-		fcstatp->cum_ioserv += devstatp->cum_ioserv;
-		fcstatp->cum_iowait += devstatp->cum_iowait;
-		fcstatp->qlen += devstatp->qlen;
-		fcstatp->qops += fcstatp->qops;
-		fcstatp->insert_cnt += devstatp->insert_cnt;
-		fcstatp->issue_cnt += devstatp->issue_cnt;
-		fcstatp->requeue_cnt += devstatp->requeue_cnt;
-		fcstatp->abort_cnt += devstatp->abort_cnt;
-		fcstatp->barrier_cnt += devstatp->barrier_cnt;
-		fcstatp->cum_qlen += devstatp->cum_qlen;
-		fcstatp->max_qlen = MAX(fcstatp->max_qlen, devstatp->max_qlen);
-		fcstatp->cum_async_inflight += devstatp->cum_async_inflight;
-		fcstatp->cum_sync_inflight += devstatp->cum_sync_inflight;
-		fcstatp->random_ios += devstatp->random_ios;
-		fcstatp->seq_ios += devstatp->seq_ios;
-		fcstatp->compl_cnt += devstatp->compl_cnt;
-		fcstatp->error_cnt += devstatp->error_cnt;
+		sum_io_stats(&devinfop->iostats[i], &fcinfop->iostats[i]);
 	}
-	
+
+	if (devinfop->wwn) {
+		wwninfop = GET_WWNINFOP(&globals->wwnhash, devinfop->wwn);
+		wwndevp = GET_WWNDEVP(&wwninfop->wwndevhash, devinfop->lle.key);
+		wwndevp->devinfop = devinfop;
+		for (i = IO_READ; i <= IO_TOTAL; i++) {
+			sum_io_stats(&devinfop->iostats[i], &wwninfop->iostats[i]);
+		}
+	}
+
 	return 0;
 }
 
@@ -242,19 +258,35 @@ clear_fc_iostats(void *arg1, void *arg2)
 }
 
 int
-print_dev_iostats(void *arg1, char *devstr, char *devname, char *devpath, char *mapname) 
+clear_wwn_iostats(void *arg1, void *arg2)
+{
+	wwn_info_t *wwninfop = (wwn_info_t *)arg1;
+
+	bzero(&wwninfop->iostats[0], sizeof(iostats_t)*3);
+	return 0;
+}
+
+int
+print_dev_iostats(void *arg1, char *devstr, char *devname, char *devpath, char *mapname, uint64 wwn) 
 {
 	iostats_t *statp = (iostats_t *)arg1;
 
 	uint64 aviosz;
 	double avwait, avserv, avqlen, avinflt;
 	int rw;
+	char *p;
+	char target[20];
 	
 	for (rw = IO_READ; rw <= IO_TOTAL; rw++) {
 		pid_printf ("%s  %10s", tab, devstr);
 		csv_printf(dsk_csvfile,"%-10s,%10s", devname, devstr ? devstr : " ");
 		csv_printf(dsk_csvfile,",%-16s", devpath ? devpath : " ");
-		csv_printf(dsk_csvfile,",%-16s", mapname ? mapname : " ");
+		csv_printf(dsk_csvfile,",%-33s", mapname ? mapname : " ");
+		if (wwn) {
+			csv_printf(dsk_csvfile,",0x%016llx", wwn);
+		} else {
+			csv_printf(dsk_csvfile,",%-18s", " ");
+		}
 	
 		aviosz = 0;
 		avwait = avserv = avqlen = avinflt = avqlen = 0.0;
@@ -367,7 +399,7 @@ print_mpath_iostats(void *arg1, void *arg2)
 	if (statp[IOTOT].compl_cnt == 0) return 0;
 
 	sprintf (devstr, "cpu%lld  \0", cpu);
-	print_dev_iostats(statp, devstr, NULL, NULL, NULL);
+	print_dev_iostats(statp, devstr, NULL, NULL, NULL, 0);
 	return 0;
 }
 
@@ -608,21 +640,24 @@ dsk_print_dev_iostats(void *arg1, void *arg2)
 	if (gdevinfop->devpath != NO_HBA) {
 		devpath = gdevinfop->devpath;
 		sprintf (devpath_str, "%d:%d:%d:%d", FCPATH1(devpath), FCPATH2(devpath), FCPATH3(devpath), FCPATH4(devpath));
-	} else {
-		sprintf (devpath_str, "unknown");
+		pid_printf ("  (HW path: %s)", devpath_str);
 	}
-	pid_printf ("  (HW path: %s)", devpath_str);
-		
+
 	mdevinfop = gdevinfop->mdevinfop;
 	if (mdevinfop && mdevinfop->devname) {
 		pid_printf ("   (mpath device: /dev/mapper/%s)", mdevinfop->mapname);
 	} else {
 		devpath_str[0] = 0;
 	}
+
+	if (gdevinfop->pathname) {
+		pid_printf ("  (pathname: %s)", gdevinfop->pathname);
+	}
+		
 	pid_printf ("\n");
 
 	sprintf(devstr, "0x%08x", dev);
-	print_dev_iostats(statp, devstr, devname, &devpath_str[0], mdevinfop ? mdevinfop->mapname : NULL);
+	print_dev_iostats(statp, devstr, devname, &devpath_str[0], mdevinfop ? mdevinfop->mapname : NULL, gdevinfop->wwn);
 
 	if (dsk_mpath_flag) {
 		foreach_hash_entry((void **)devinfop->mpath_hash, MPATH_HSIZE, calc_mpath_iototals, NULL, 0, NULL);
@@ -652,7 +687,32 @@ dsk_print_fc_iostats(void *arg1, void *arg2)
 
 	printf ("%s%-8s\n", tab, devpath_str);
 
-	print_dev_iostats(statp, devpath_str, NULL, NULL, NULL);
+	print_dev_iostats(statp, devpath_str, NULL, NULL, NULL, 0);
+
+	return 0;
+}
+
+int
+dsk_print_wwn_iostats(void *arg1, void *arg2)
+{
+	wwn_info_t *wwninfop = (wwn_info_t *)arg1;
+	iostats_t *statp;
+	uint64 wwn;
+	char wwnpath_str[16];
+
+	if (wwninfop->iostats[IOTOT].compl_cnt == 0) return 0;
+
+	wwn = wwninfop->lle.key;
+	statp = &wwninfop->iostats[0];
+	if (wwn != 0) {
+		sprintf (wwnpath_str, "0x%016llx", wwn);
+	} else {
+		sprintf (wwnpath_str, "unkn");
+	}
+
+	printf ("%s%-188s\n", tab, wwnpath_str);
+
+	print_dev_iostats(statp, wwnpath_str, NULL, NULL, NULL, 0);
 
 	return 0;
 }
@@ -886,12 +946,12 @@ dsk_init_func(void *v)
 
 	parse_devices();
 	parse_docker_ps();
+	parse_ll_R();
 
 	if (timestamp) {
 		parse_proc_cgroup();
 		parse_pself();
 		parse_edus();
-		parse_ll_R();
 		parse_mpath();
 		parse_jstack();
 
@@ -929,7 +989,7 @@ dsk_print_report()
 	FILE *tmp;
 
 	tab=tab0;
-	csv_printf(dsk_csvfile,"devname   ,device    ,h/w path        ,Mapper Device   ,rwt  ,  avque,avinflt,  io/s,  KB/s, avsz,   avwait,   avserv,   tot,   seq,   rnd, reque, abort, flush, maxwait, maxserv\n");
+	csv_printf(dsk_csvfile,"devname   ,device    ,h/w path        ,Mapper Device                    ,Target Path       ,  rwt,  avque,avinflt,  io/s,  KB/s, avsz,   avwait,   avserv,   tot,   seq,   rnd, reque, abort, flush, maxwait, maxserv\n");
 
 	if (is_alive) {
 		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, get_command, NULL, 0, NULL);
@@ -963,6 +1023,13 @@ dsk_print_report()
 		foreach_hash_entry((void **)globals->fchash, FC_HSIZE, dsk_print_fc_iostats, fc_sort_by_path, 0, NULL); 
 	}
 	
+	if (globals->wwnhash) {
+		printf ("\nTarget WWN Statistics\n");
+		printf ("\n%s       FC Target WWN     rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+		
+		foreach_hash_entry((void **)globals->wwnhash, WWN_HSIZE, dsk_print_wwn_iostats, wwn_sort_by_wwn, 0, NULL); 
+	}
+	
 	if (percpu_stats) {
             printf ("\nPer-CPU Statistics (for possible per-HBA statistics\n");
 	    printf ("\n%s      device rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
@@ -970,7 +1037,7 @@ dsk_print_report()
                 if (cpuinfop = FIND_CPUP(globals->cpu_hash, i)) {
                         sprintf(cpustr, "cpu=%d", i);
                         calc_io_totals(&cpuinfop->iostats[0], NULL);
-                        print_dev_iostats(&cpuinfop->iostats[0], cpustr, NULL, NULL, NULL);
+                        print_dev_iostats(&cpuinfop->iostats[0], cpustr, NULL, NULL, NULL, 0);
                         bzero(&cpuinfop->iostats[0], sizeof(iostats_t)*3);
                 }
             }

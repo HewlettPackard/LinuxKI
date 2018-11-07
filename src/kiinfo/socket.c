@@ -184,11 +184,13 @@ socket_print_detail(sd_stats_t *statsp, void **syscallp, struct sockaddr_in6 *ls
 
         CAPTION_GREY;
 	BOLD ("   Syscalls: %d", statsp->syscall_cnt);
+	BOLD ("   Last PID: %d", statsp->last_pid);
 	if (cluster_flag) {
 		printf ("  [");
 		SERVER_URL_FIELD_SECTION(globals, _LNK_3_0);
 		printf ("]");
 	}
+
         _CAPTION;
 
         if (scallflagp && *scallflagp) {

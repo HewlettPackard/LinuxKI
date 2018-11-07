@@ -1694,10 +1694,10 @@ ks_action_t ks_actions[KI_MAXSYSCALLS] = {
 	{ 0, 0, 0, ki_nosys},		/*unshare*/
 	{ 0, 0, 0, ki_nosys},		/*set_robust_list*/
 	{ 0, 0, 0, ki_nosys},		/*get_robust_list*/
-	{ 0, 0, 0, ki_nosys},		/*splice*/
+	{ 1, 1, 1, ki_splice},		/*splice*/
 	{ 0, 0, 1, ki_nosys},		/*tee*/
 	{ 0, 0, 1, ki_nosys},		/*sync_file_range*/
-	{ 0, 0, 1, ki_nosys},		/*vmsplice*/
+	{ 1, 1, 1, ki_write},		/*vmsplice*/
 	{ 0, 0, 0, ki_nosys},		/*move_pages*/
 	{ 0, 0, 1, ki_nosys},		/*utimensat*/
 	{ 0, 0, 0, ki_nosys},		/*epoll_pwait*/

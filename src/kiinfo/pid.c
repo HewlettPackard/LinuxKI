@@ -153,6 +153,7 @@ pid_init_func(void *v)
 	parse_kallsyms();
 	parse_devices();
 	parse_docker_ps();
+        parse_ll_R();
 
 	if (is_alive) {
 		load_objfile_and_shlibs();
@@ -164,7 +165,6 @@ pid_init_func(void *v)
 	parse_edus();
 	parse_lsof();
 	parse_maps();
-        parse_ll_R();
         parse_mpath();
 	parse_jstack();
 	if (objfile) load_elf(objfile, &objfile_preg);

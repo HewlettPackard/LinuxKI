@@ -18,7 +18,7 @@
  *
  * likit.c	LInux Kernel Instrumentation
  *
- *		v5.4
+ *		v5.6
  *		colin.honess@gmail.com
  *		mark.ray@hpe.com
  *		pokilfoyle@gmail.com
@@ -3289,6 +3289,9 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
 #endif
 #ifdef __NR_creat
 	case	__NR_creat:
+#endif
+#ifdef __NR_access
+	case	__NR_access:
 #endif
 #ifdef __NR_stat
 	case	__NR_stat:
@@ -6825,7 +6828,7 @@ liki_initialize(void)
 	int	i;
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,7)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(4,19,0)
 	printk(KERN_INFO "LiKI: unsupported kernel version\n");
 	return(-EINVAL);
 #else

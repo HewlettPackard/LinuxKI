@@ -477,6 +477,7 @@ clear_all_stats()
 	free_hash_table((lle_t ***)&globals->lsock_hash, SOCK_HASHSZ);
 
         foreach_hash_entry((void **)globals->fchash, FC_HSIZE, clear_fc_iostats, NULL, 0, NULL);
+        foreach_hash_entry((void **)globals->wwnhash, FC_HSIZE, clear_wwn_iostats, NULL, 0, NULL);
 
 	foreach_hash_entry((void **)globals->docker_hash, DOCKER_HASHSZ, clear_docker_info, NULL, 0, NULL);
 

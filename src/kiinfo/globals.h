@@ -243,8 +243,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define idle_stats		(ISSET_STAT(IDLE_STATS))
 
 #define MAX_SERVERS 1024
-#define MAXCPUS 1024
-#define MAXLDOMS 16
+#define MAXCPUS 2048
+#define MAXLDOMS 128
 #define MAXARGS 6
 #define MAX_SAVE_STACK_DEPTH 16
 
@@ -272,6 +272,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define NODEV_MAJOR	0xffull
 #define NO_DEV		(dev_t)-13
 #define NO_HBA		((uint64)-1)
+#define NO_WWN		((uint64)0)
 #define NO_DOCKID	((uint64)-1)
 
 #define MP_ROUND_ROBIN	1
@@ -436,6 +437,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define GET_DEVP(hashp, key)  (dev_info_t *)find_add_hash_entry((lle_t ***)hashp, DEV_HSIZE, key, DEV_HASH(key), sizeof(dev_info_t))
 #define GET_FCINFOP(hashp, key)  (fc_info_t *)find_add_hash_entry((lle_t ***)hashp, FC_HSIZE, key, FC_HASH(key), sizeof(fc_info_t))
 #define GET_FCDEVP(hashp, key)  (fc_dev_t *)find_add_hash_entry((lle_t ***)hashp, DEV_HSIZE, key, DEV_HASH(key), sizeof(fc_dev_t))
+#define GET_WWNINFOP(hashp, key)  (wwn_info_t *)find_add_hash_entry((lle_t ***)hashp, WWN_HSIZE, key, WWN_HASH(key), sizeof(wwn_info_t))
+#define GET_WWNDEVP(hashp, key)  (wwn_dev_t *)find_add_hash_entry((lle_t ***)hashp, DEV_HSIZE, key, DEV_HASH(key), sizeof(wwn_dev_t))
 #define GET_FDINFOP(hashp, key)  (fd_info_t *)find_add_hash_entry((lle_t ***)hashp, FD_HSIZE, key, FD_HASH(key), sizeof(fd_info_t))
 #define GET_SYSCALLP(hashp, key)  (syscall_info_t *)find_add_hash_entry((lle_t ***)hashp, SYSCALL_HASHSZ, key, SYSCALL_HASH(key), sizeof(syscall_info_t))
 #define GET_SCDWINFOP(hashp, key)  (scd_waker_info_t *)find_add_hash_entry((lle_t ***)hashp, WPID_HSIZE, key, WPID_HASH(key), sizeof(scd_waker_info_t))
@@ -496,6 +499,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define FIND_LDOMP(hash, key)  (ldom_info_t *)find_entry((lle_t **)hash, key, LDOM_HASH(key))
 #define FIND_DEVP(hash, key)  (dev_info_t *)find_entry((lle_t **)hash, key, DEV_HASH(key))
 #define FIND_FCINFOP(hash, key)  (fc_info_t *)find_entry((lle_t **)hash, key, FC_HASH(key))
+#define FIND_WWNINFOP(hash, key)  (wwn_info_t *)find_entry((lle_t **)hash, key, WWN_HASH(key))
 #define FIND_IOREQP(hash, key)  (io_req_t *)find_entry((lle_t **)hash, key, IOQ_HASH(key))
 #define FIND_CTX(hashp, key) (ctx_info_t *)find_entry((lle_t **)hashp, key, CTX_HASH(key))
 #define FIND_IOCB(hashp, key) (iocb_info_t *)find_entry((lle_t **)hashp, key, IOCB_HASH(key))
@@ -634,6 +638,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define DEVPATH_TO_FCPATH(path) (path != NO_HBA ? path & 0xffffffffffff0000ull : path)
 #define FC_HASH(key)  (FCPATH1(key) % MPATH_HSIZE)
 
+#define WWN_HSIZE 0x40
+#define WWN_HASH(key)	((((key >> 48) & 0xffff) + ((key >> 32) & 0xffff) + ((key >> 16) & 0xffff) + (key & 0xffff)) % WWN_HSIZE)
+
 #define PC_HSIZE 0x40
 #define PC_HASH(key)  (((key >> 9) + (key & 0x3f)) % PC_HSIZE)
 
@@ -657,7 +664,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define CLPID_PID(key) (key & 0x7fffffff)
 #define CLPID_SERVER(key) (key >> 32)
 
-#define CPU_HASHSZ 0x80
+#define CPU_HASHSZ 0x200
 #define CPU_HASH(cpu) ((cpu) % CPU_HASHSZ)
 
 #define LDOM_HASHSZ 0x10
@@ -1757,6 +1764,8 @@ typedef struct dev_info {
 	char 		*devname;
 	/* for devices in a mapper device */
 	uint64		devpath;	/* x:x:x:x path of device from multipath -l or scsi events */
+	uint64		wwn;		/* WWN of path from ll -R */
+	char		*pathname;      /* target path from ll -R */
 	void		*mdevinfop;	/* pointer to mapper device */
 	void		*siblingp;	/* points to sibling device */
 	void		*fcinfop;	/* points to FC HBA info */
@@ -1792,6 +1801,16 @@ typedef struct fc_info {
 	struct iostats	iostats[3];
 } fc_info_t;
 
+typedef struct wwn_dev {
+	lle_t		lle;
+	void		*devinfop;
+} wwn_dev_t;
+
+typedef struct wwn_info {
+	lle_t		lle;
+	struct wwn_dev **wwndevhash;	/* key is the dev, used to find devinfop quickly */
+	struct iostats iostats[3];
+} wwn_info_t;
 
 typedef struct iov_stats {
 	uint64		rd_time;
@@ -2001,6 +2020,7 @@ typedef struct server_info {
 	struct sd_stats netstats;	/* network stats */
 	void **mdevhash;		/* struct dev_info */
 	void **fchash;
+	void **wwnhash;			/* struct dev_info */
 	void **ctx_hash;		/* struct ctx_info_t */
 	short *syscall_index_32;
 	short *syscall_index_64;

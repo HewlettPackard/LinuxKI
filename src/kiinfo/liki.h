@@ -52,7 +52,7 @@
 #define TASK_COMM_LEN		16
 #define IRQ_NAME_LEN		16
 #define N_SYSCALL_ARGS		6
-#define MAXCPUS 		1024
+#define MAXCPUS 		2048
 #define	MAX_FNAME_LEN		256
 
 #define STACK_CONTEXT_USER	((unsigned long)(-512))

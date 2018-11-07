@@ -12,7 +12,7 @@ with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 ***************************************************************************/
 
-#define MAXCPUS 1024
+#define MAXCPUS 2048
 #define TS_SHIFT	27
 #define GETNEWBUF  0xffffffffffffffffull
 #define TIME_INVAL 0x8000000000000000ull

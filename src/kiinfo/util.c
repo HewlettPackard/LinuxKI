@@ -1182,9 +1182,10 @@ sock_dom_str(unsigned int f)
 #define SOCK_MAX 16
 char *sock_types[SOCK_MAX] = {
 	"ukn-0",
-	"DGRAM",
 	"STREAM",
+	"DGRAM",
 	"RAW",
+	"RDM",
 	"SEQPACKET",
 	"DCCP",
 	"ukn-7",

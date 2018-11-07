@@ -105,4 +105,10 @@ fi
 # Remove the config files
 #
 rm -f /opt/linuxki/.configured /opt/linuxki/.cmode
+
+#
+# Remove the kiinfo binary, which is not included in the RPM but was linked at install time to the x86 or arm binary
+#
+rm -f /opt/linuxki/kiinfo 
+
 exit 0

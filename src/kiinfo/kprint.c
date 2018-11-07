@@ -1925,7 +1925,8 @@ kp_requeue_disks()			/* Section 4.2.5 */
 
         tab=tab0;
         lineno=1;
-        BOLD("    device  avque avinflt    r/s    w/s     KB/s  avsz  avwait  avserv \n");
+	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
         foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, kp_dev_requeue_entries, dev_sort_by_requeue, 0, &warnflag);
         if (warnflag & WARNF_REQUEUES) {
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_REQUEUES, _LNK_4_2_5);
@@ -2035,7 +2036,6 @@ kp_hiserv_mapper_devs()			/* Section 4.3.2 */
 	CSV_FIELD("kidsk", "[CSV]");
 }
 
-
 int
 kp_fc_entries(void *arg1, void *arg2)
 {
@@ -2095,8 +2095,43 @@ kp_fc_totals()				/* Section 4.4 */
 }
 
 
+int
+kp_wwn_entries(void *arg1, void *arg2)
+{
+	wwn_info_t *wwninfop = (wwn_info_t *)arg1;
+	struct iostats *statsp = &wwninfop->iostats[0];
+	uint64 wwn = wwninfop->lle.key;
+	char wwn_str[20];
+
+	if (wwn) {
+		sprintf (wwn_str, "0x%016llx", wwn);
+	} else {
+		sprintf (wwn_str, "%18s", "none");
+	}
+	printf ("%-18s", wwn_str);
+	DSPACE;
+	print_iostats_totals(globals, &wwninfop->iostats[0], arg2);
+
+	if (statsp[IOTOT].barrier_cnt) {
+               	printf (" barriers: ");
+               	RED_FONT;
+               	printf ("%d", statsp[IOTOT].barrier_cnt);
+               	BLACK_FONT;
+	}
+
+	if (statsp[IOTOT].requeue_cnt) {
+                pid_printf (" requeue: ");
+                RED_FONT;
+                printf ("%d", statsp[IOTOT].requeue_cnt);
+                BLACK_FONT;
+        }
+
+	printf ("\n");
+
+}
+
 void
-kp_perpid_mdev_totals()			/* Section 4.5 */
+kp_wwn_totals()				/* Section 4.5 */
 {
         GREEN_TABLE;
         TEXT("\n");
@@ -2111,6 +2146,30 @@ kp_perpid_mdev_totals()			/* Section 4.5 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
+        tab=tab0;
+        lineno=1;
+	BOLD("                    --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
+	BOLD("Target WWN             IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+        foreach_hash_entry((void **)globals->wwnhash, WWN_HSIZE, kp_wwn_entries, wwn_sort_by_wwn, 0, NULL);
+}
+
+
+void
+kp_perpid_mdev_totals()			/* Section 4.6 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_4_6);
+        HEAD3(_MSG_4_6);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_6,"[Prev Subsection]");
+        ARFx(_LNK_4_7,"[Next Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
         BOLD ("     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process\n");
         BOLD ("==============================================================================\n");
 
@@ -2119,16 +2178,16 @@ kp_perpid_mdev_totals()			/* Section 4.5 */
 }
 
 void
-kp_perpid_dev_totals()			/* Section 4.6 */
+kp_perpid_dev_totals()			/* Section 4.7 */
 {
         GREEN_TABLE;
         TEXT("\n");
-        ANM(_LNK_4_6);
-        HEAD3(_MSG_4_6);
+        ANM(_LNK_4_7);
+        HEAD3(_MSG_4_7);
 
         FONT_SIZE(-1);
-        ARFx(_LNK_4_5,"[Prev Subsection]");
-        ARFx(_LNK_4_7,"[Next Subsection]");
+        ARFx(_LNK_4_6,"[Prev Subsection]");
+        ARFx(_LNK_4_8,"[Next Subsection]");
         ARFx(_LNK_4_0,"---[Prev Section]");
         ARFx(_LNK_5_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
@@ -2181,17 +2240,17 @@ kp_dskblk_read()			/* Section 4.7 */
 
         GREEN_TABLE;
         TEXT("\n");
-        ANM(_LNK_4_7);
-        HEAD3(_MSG_4_7);
+        ANM(_LNK_4_8);
+        HEAD3(_MSG_4_8);
 
         FONT_SIZE(-1);
-        ARFx(_LNK_4_6,"[Prev Subsection]");
-        ARFx(_LNK_4_8,"[Next Subsection]");
+        ARFx(_LNK_4_7,"[Prev Subsection]");
+        ARFx(_LNK_4_9,"[Next Subsection]");
         ARFx(_LNK_4_0,"---[Prev Section]");
         ARFx(_LNK_5_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
-        T(_MSG_4_7_INFO);
+        T(_MSG_4_8_INFO);
         TEXTx("\n");
 
         BOLD("Freq    Dev             Block\n");
@@ -2237,11 +2296,11 @@ kp_dskblk_write()			/* Section 4.8 */
 {
         GREEN_TABLE;
         TEXT("\n");
-        ANM(_LNK_4_8);
-        HEAD3(_MSG_4_8);
+        ANM(_LNK_4_9);
+        HEAD3(_MSG_4_9);
 
         FONT_SIZE(-1);
-        ARFx(_LNK_4_7,"[Prev Subsection]");
+        ARFx(_LNK_4_8,"[Prev Subsection]");
         ARFx(_LNK_4_0,"---[Prev Section]");
         ARFx(_LNK_5_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");

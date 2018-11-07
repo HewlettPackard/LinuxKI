@@ -78,6 +78,7 @@ extern void  kp_mapper_report();
 extern void  kp_active_mapper_devs();
 extern void  kp_hiserv_mapper_devs();
 extern void  kp_fc_totals();
+extern void  kp_wwn_totals();
 extern void  kp_perpid_mdev_totals();
 extern void  kp_memory();
 extern void  kp_rss();

@@ -128,6 +128,7 @@ clparse_init_func(void *v)
 	parse_cpuinfo();
 	parse_kallsyms();
 	parse_devices();
+        parse_ll_R();
 
 	if (timestamp) {
 		parse_docker_ps();
@@ -136,7 +137,6 @@ clparse_init_func(void *v)
         	parse_pself();
         	parse_edus();
         	parse_jstack();
-        	parse_ll_R();
         	parse_mpath();
 		parse_mem_info();
 		parse_uname(cluster_flag);

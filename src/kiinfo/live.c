@@ -53,13 +53,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 extern struct utsname  utsname;
 
 #define LINES_AVAIL ((LINES-1)-lineno) 
-#define PRINT_IODETAIL_HDR	\
-        if (COLS > 158) {																							\
-		mvprintw (lineno++, 0, "------------------------ Total I/O ------------------------- ------------------- Write I/O ------------------- -------------------- Read I/O -------------------");     \
-                mvprintw (lineno++, 0, "Device        IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv");	\
-        } else {																								\
-		mvprintw (lineno++, 0, "------------------------ Total I/O -------------------------");														\
-                mvprintw (lineno++, 0, "Device        IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv");														\
+#define PRINT_IODETAIL_HDR(str)													\
+        if (COLS > (152+strlen(str))) {												\
+		mvprintw (lineno++, strlen(str)+2, "------------------- Total I/O -------------------- ------------------- Write I/O ------------------- -------------------- Read I/O -------------------");     \
+		mvprintw (lineno, 0, "%s", str);										\
+                mvprintw (lineno++, strlen(str)+2, "    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv");	\
+        } else {														\
+		mvprintw (lineno++, strlen(str)+2, "------------------- Total I/O --------------------");		\
+		mvprintw (lineno, 0, "%s", str);										\
+                mvprintw (lineno++, strlen(str)+2, "    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv");		\
         }
 
 static int 	next_step = FALSE;
@@ -85,8 +87,10 @@ static int	curhirq = -1;
 static int	lasthirq = -1;
 static int	cursirq = -1;
 static int	lastsirq = -1;
-static uint64	curhba = (uint64)-1;
-static uint64	lasthba = (uint64)-1;
+static uint64	curhba = NO_HBA;
+static uint64	lasthba = NO_HBA;
+static uint64	curwwn = NO_WWN;
+static uint64	lastwwn = NO_WWN;
 static uint64	curdockid = NO_DOCKID;
 static uint64	lastdockid = NO_DOCKID;
 
@@ -123,6 +127,8 @@ int print_select_hba_window();
 int print_select_irq_window();
 int print_docker_window();
 int print_select_docker_window();
+int print_wwn_window();
+int print_select_wwn_window();
 void *live_termio_thread();
 
 win_action_t win_actions[MAX_WIN] = {
@@ -158,7 +164,9 @@ win_action_t win_actions[MAX_WIN] = {
 	{ print_select_hba_window, WINHBA_FLAGS, WINHBA_STATS, WINHBA_TRACEMASK},
 	{ print_select_irq_window, WINIRQ_FLAGS, WINIRQ_STATS, WINIRQ_TRACEMASK },
 	{ print_docker_window, WINMAIN_FLAGS, WINMAIN_STATS, WINMAIN_TRACEMASK },
-	{ print_select_docker_window, WINMAIN_FLAGS, WINMAIN_STATS, WINMAIN_TRACEMASK }
+	{ print_select_docker_window, WINMAIN_FLAGS, WINMAIN_STATS, WINMAIN_TRACEMASK },
+	{ print_wwn_window, WINWWN_FLAGS, WINWWN_STATS, WINWWN_TRACEMASK},
+	{ print_select_wwn_window, WINWWN_FLAGS, WINWWN_STATS, WINWWN_TRACEMASK}
 };
 
 static char * iolabels[3] = {
@@ -337,6 +345,7 @@ live_init_func(void *v)
 	parse_kallsyms();
 	parse_devices();
 	parse_docker_ps();
+        parse_ll_R();
 
 	if (is_alive) {
 		parse_edus();
@@ -360,7 +369,6 @@ live_init_func(void *v)
 		parse_jstack();
         	parse_lsof();
         	parse_maps();
-        	parse_ll_R();
         	parse_mpath();
 		if (IS_LIKI) foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, load_perpid_mapfile, NULL, 0, NULL);
 	}
@@ -767,7 +775,7 @@ print_iostats_totals_live(struct iostats *iostats)
                 i--; j++;
 
 		/* only print totals if we have a wide screen */
-		if (COLS < 159) break;
+		if (COLS < col+150) break;
         }
 }
 
@@ -795,18 +803,15 @@ print_iostats_dev_live(void *arg1, void *arg2)
 		}
 	}
 
-	col=11;
         print_iostats_totals_live(&devinfop->iostats[0]);
 
-	if (COLS > 200) {
-		col=162;
+	if (COLS > col+191) {
         	if (statsp[IOTOT].requeue_cnt) {
-                	mvprintw (lineno, col, "requeue: %d", statsp[IOTOT].requeue_cnt);
+                	mvprintw (lineno, col+151, "requeue: %d", statsp[IOTOT].requeue_cnt);
         	}
 
         	if (statsp[IOTOT].barrier_cnt) {
-			col+=20;
-                	mvprintw (lineno, col, "barriers: %d", statsp[IOTOT].barrier_cnt);
+                	mvprintw (lineno, col+171, "barriers: %d", statsp[IOTOT].barrier_cnt);
         	}
 	}
 
@@ -840,18 +845,58 @@ print_iostats_fc_live(void *arg1, void *arg2)
 		mvprintw (lineno, 0, "ukn");
 	}
 
-	col=11;
         print_iostats_totals_live(statsp);
 
-	if (COLS > 200) {
-		col=162;
+	if (COLS > 191) {
         	if (statsp[IOTOT].requeue_cnt) {
-                	mvprintw (lineno, col, "requeue: %d", statsp[IOTOT].requeue_cnt);
+                	mvprintw (lineno, col+151, "requeue: %d", statsp[IOTOT].requeue_cnt);
         	}
 
         	if (statsp[IOTOT].barrier_cnt) {
-			col+=20;
-                	mvprintw (lineno, col, "barriers: %d", statsp[IOTOT].barrier_cnt);
+			col=171;
+                	mvprintw (lineno, col+171, "barriers: %d", statsp[IOTOT].barrier_cnt);
+        	}
+	}
+
+	lineno++;
+}
+
+int
+print_iostats_wwndev_live(void *arg1, void *arg2)
+{
+	wwn_dev_t *wwndevp = (wwn_dev_t *)arg1;
+	dev_info_t *devinfop = wwndevp->devinfop;
+
+	print_iostats_dev_live(devinfop, NULL);
+}
+
+int
+print_iostats_wwn_live(void *arg1, void *arg2)
+{
+	wwn_info_t *wwninfop = (wwn_info_t *)arg1;
+	struct iostats *statsp = &wwninfop->iostats[0];
+	uint64 wwn;
+
+        if (statsp[IOTOT].compl_cnt == 0) return 0;
+
+        wwn = wwninfop->lle.key;
+
+	if (wwn != 0) {
+		mvprintw (lineno, 0, "0x%016llx", wwn);
+	} else {
+		mvprintw (lineno, 0, "none");
+	}
+
+	col=21;
+        print_iostats_totals_live(statsp);
+
+	if (COLS > col+191) {
+        	if (statsp[IOTOT].requeue_cnt) {
+                	mvprintw (lineno, col+151, "requeue: %d", statsp[IOTOT].requeue_cnt);
+        	}
+
+        	if (statsp[IOTOT].barrier_cnt) {
+                	mvprintw (lineno, col+171, "barriers: %d", statsp[IOTOT].barrier_cnt);
         	}
 	}
 
@@ -1246,14 +1291,14 @@ print_pidmpath_window()
 	print_pid_header(pidp);
 
 	lineno++;
-	PRINT_IODETAIL_HDR;
+	PRINT_IODETAIL_HDR("device    ");
 	mvprintw (lineno, 0, "All       ");
-	col=11;
+	col=13;
 	print_iostats_totals_live(&pidp->iostats[0]);
 	lineno++;
 
 	lineno+=2;
-	col=0;
+	col=13;
 	if ((LINES_AVAIL>1) && pidp->mdevhash) {
 		foreach_hash_entry((void **)pidp->mdevhash, DEV_HSIZE, calc_dev_totals, NULL, 0, (void *)1);
 		mvprintw (lineno++, 0, "Multipath Devices");
@@ -1282,18 +1327,19 @@ print_piddsk_window(pid_info_t *pidp)
 	print_pid_header(pidp);
 
 	lineno++;
-	PRINT_IODETAIL_HDR;
+	PRINT_IODETAIL_HDR("device    ");
 	mvprintw (lineno, 0, "All       ");
-	col=11;
+	col=13;
 	print_iostats_totals_live(&pidp->iostats[0]);
 	lineno++;
 
-	col=0;
+	col=13;
 	if ((LINES_AVAIL>1) && pidp->devhash) {
 		foreach_hash_entry((void **)pidp->devhash, DEV_HSIZE, calc_dev_totals, NULL, 0, (void *)1);
 		foreach_hash_entry((void **)pidp->devhash, DEV_HSIZE, print_iostats_dev_live, dev_sort_by_count, LINES_AVAIL, NULL);
 	}
 
+	col=13;
 	if ((LINES_AVAIL>2) && pidp->mdevhash) {
 		lineno++;
 		mvprintw (lineno++, 0, "Multipath Devices");
@@ -1617,9 +1663,9 @@ print_pid_window()
 
 	if (pidp->iostats[IOTOT].compl_cnt && (LINES_AVAIL > 3)) {
 		lineno++;
-		PRINT_IODETAIL_HDR;
+		PRINT_IODETAIL_HDR("device    ");
 		mvprintw (lineno, 0, "All       ");
-		col=11;
+		col=13;
 		print_iostats_totals_live(&pidp->iostats[0]);
 		lineno++;
 		(LINES_AVAIL > 13) ? (nlines=5) : (nlines=1);
@@ -1691,9 +1737,9 @@ print_dsk_window()
 	mvprintw (lineno++, 0, "*** Global I/O by Device ***");
 	lineno++;
 
-	PRINT_IODETAIL_HDR;
+	PRINT_IODETAIL_HDR("device    ");
 	mvprintw (lineno, 0, "All       ");
-	col=11;
+	col=13;
 	print_iostats_totals_live(&globals->iostats[0]);
 	lineno++;
 
@@ -1722,6 +1768,7 @@ print_hba_window()
 		foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, calc_dev_totals, NULL, 0, (void *)1);
 		foreach_hash_entry((void **)globals->fchash, FC_HSIZE, clear_fc_iostats, NULL, 0, NULL);
 		foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, calc_fc_totals, NULL, 0, NULL);
+		foreach_hash_entry((void **)globals->wwnhash, WWN_HSIZE, clear_wwn_iostats, NULL, 0, NULL);
 	}
 
 	print_global_header();	
@@ -1730,9 +1777,9 @@ print_hba_window()
 	mvprintw(lineno++, 0, "*** Global I/O by HBA ***");
 	lineno++;
 
-	PRINT_IODETAIL_HDR;
+	PRINT_IODETAIL_HDR("device    ");
 	mvprintw (lineno, 0, "All       ");
-	col=11;
+	col=13;
 	print_iostats_totals_live(&globals->iostats[0]);
 	lineno++;
 
@@ -1757,6 +1804,7 @@ print_select_hba_window()
 		foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, calc_dev_totals, NULL, 0, (void *)1);
 		foreach_hash_entry((void **)globals->fchash, FC_HSIZE, clear_fc_iostats, NULL, 0, NULL);
 		foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, calc_fc_totals, NULL, 0, NULL);
+		foreach_hash_entry((void **)globals->wwnhash, WWN_HSIZE, clear_wwn_iostats, NULL, 0, NULL);
 	}
 
 	print_global_header();	
@@ -1771,14 +1819,88 @@ print_select_hba_window()
 	mvprintw(lineno++, 0, "*** I/O for HBA %d:%d:%d ***", FCPATH1(curhba), FCPATH2(curhba), FCPATH3(curhba));
 	lineno++;
 
-	PRINT_IODETAIL_HDR;
+	PRINT_IODETAIL_HDR("device    ");
 	mvprintw (lineno, 0, "%d:%d:%d", FCPATH1(curhba), FCPATH2(curhba), FCPATH3(curhba));
-	col=11;
+	col=13;
 	print_iostats_totals_live(&fcinfop->iostats[0]);
 	lineno++;
 
 	if ((LINES_AVAIL>1) && fcinfop->fcdevhash) {
 		foreach_hash_entry((void **)fcinfop->fcdevhash, DEV_HSIZE, print_iostats_fcdev_live, NULL, LINES_AVAIL, NULL);
+	}
+
+	return 0;
+}
+
+int
+print_wwn_window()
+{
+	if (is_alive) { 
+		calc_io_totals(&globals->iostats[0], NULL);
+                foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, get_devinfo, NULL, 0, NULL);
+                foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, get_devinfo, NULL, 0, NULL);
+		foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, calc_dev_totals, NULL, 0, (void *)1);
+		foreach_hash_entry((void **)globals->fchash, FC_HSIZE, clear_fc_iostats, NULL, 0, NULL);
+		foreach_hash_entry((void **)globals->wwnhash, WWN_HSIZE, clear_wwn_iostats, NULL, 0, NULL);
+		foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, calc_fc_totals, NULL, 0, NULL);
+	}
+
+	print_global_header();	
+	lineno++;
+
+	mvprintw(lineno++, 0, "*** Global I/O by Target Path WWN ***");
+	lineno++;
+
+	PRINT_IODETAIL_HDR("device            ");
+	mvprintw (lineno, 0, "All");
+	col=21;
+	print_iostats_totals_live(&globals->iostats[0]);
+	lineno++;
+
+	if ((LINES_AVAIL>1) && globals->devhash) {
+		foreach_hash_entry((void **)globals->wwnhash, WWN_HSIZE, print_iostats_wwn_live, wwn_sort_by_wwn, LINES_AVAIL, NULL);
+	}
+
+	return 0;
+}
+
+int
+print_select_wwn_window()
+{
+	wwn_info_t *wwninfop;
+
+	if (curwwn == NO_WWN) return 0;
+	if (is_alive) { 
+		calc_io_totals(&globals->iostats[0], NULL);
+                foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, get_devinfo, NULL, 0, NULL);
+                foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, get_devinfo, NULL, 0, NULL);
+		foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, calc_dev_totals, NULL, 0, (void *)1);
+		foreach_hash_entry((void **)globals->fchash, FC_HSIZE, clear_fc_iostats, NULL, 0, NULL);
+		foreach_hash_entry((void **)globals->wwnhash, WWN_HSIZE, clear_wwn_iostats, NULL, 0, NULL);
+		foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, calc_fc_totals, NULL, 0, NULL);
+	}
+
+	print_global_header();	
+	lineno++;
+
+	wwninfop = FIND_WWNINFOP(globals->wwnhash, curwwn);
+	if (wwninfop == NULL) {
+		mvprintw(lineno++, 0, "*** No I/O for Target Path 0x%016llx ***", curwwn);
+		return 0;
+	}
+
+	mvprintw(lineno++, 0, "*** I/O for Target Path 0x%016llx ***", curwwn);
+	lineno++;
+
+	PRINT_IODETAIL_HDR("device            ");
+	mvprintw (lineno, 0, "0x%016llx", curwwn);
+	col=21;
+	print_iostats_totals_live(&wwninfop->iostats[0]);
+	lineno++;
+
+	col=21;
+	if ((LINES_AVAIL>1) && wwninfop->wwndevhash) {
+		foreach_hash_entry((void **)wwninfop->wwndevhash, DEV_HSIZE, print_iostats_wwndev_live, NULL, LINES_AVAIL, NULL);
 	}
 
 	return 0;
@@ -1797,16 +1919,17 @@ print_mpath_window()
 	mvprintw (lineno++, 0, "*** Global I/O by Mpath Device ***");
 	lineno++;
 	
-	PRINT_IODETAIL_HDR;
+	PRINT_IODETAIL_HDR("device    ");
 	mvprintw (lineno, 0, "All");
-	col=11;	
+	col=13;	
 	print_iostats_totals_live(&globals->iostats[0]);
-	col=0;
 	lineno++;
 
 	if (globals->mdevhash == NULL) {
 		mvprintw(lineno++, 0, "*** No Multipath Device Activity Detected ***");
 	}
+
+	col=13;	
 	if ((LINES_AVAIL>1) && globals->mdevhash) {
 		foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, calc_dev_totals, NULL, 0, (void *)1);
 		foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, print_iostats_dev_live, dev_sort_by_count, LINES_AVAIL, NULL);
@@ -1891,9 +2014,9 @@ print_iotop_window()
 	print_global_header();	
 	lineno++;
 
-	PRINT_IODETAIL_HDR;
+	PRINT_IODETAIL_HDR("device    ");
 	mvprintw (lineno, 0, "All       ");
-	col=11;
+	col=13;
 	print_iostats_totals_live(&globals->iostats[0]);
 	lineno++;
 
@@ -2324,8 +2447,11 @@ print_select_dsk_window()
 
 	print_top_line();
 	lineno++;
+	mvprintw(lineno++, 0, "*** I/O for device 0x%08x ***", curdev);
+	lineno++;
 
-	PRINT_IODETAIL_HDR;
+	PRINT_IODETAIL_HDR("device    ");
+	col=13;
 	if (devinfop = FIND_DEVP(DEVHASH(globals, curdev), curdev)) {
 		calc_dev_totals(devinfop, NULL);
 		print_iostats_dev_live(devinfop, NULL);
@@ -3180,6 +3306,7 @@ print_help_window()
 	mvprintw (lineno++, col, "i - Global IRQ Stats");
 	mvprintw (lineno++, col, "d - Global Disk Stats");
 	mvprintw (lineno++, col, "m - Global Mpath Stats");
+	mvprintw (lineno++, col, "y - Global WWN Stats");
 	mvprintw (lineno++, col, "z - Global HBA Stats"); 
 	mvprintw (lineno++, col, "t - Global IO by PID");
 	mvprintw (lineno++, col, "f - Global File Stats"); 
@@ -3224,7 +3351,7 @@ print_help_window()
 }
 
 static inline int
-change_window(int win, int pid, int ldom, int cpu, uint32 dev, uint64 faddr, int tgid, uint64 hba, int hirq, int sirq, uint64 dockid) 
+change_window(int win, int pid, int ldom, int cpu, uint32 dev, uint64 faddr, int tgid, uint64 hba, uint64 wwn, int hirq, int sirq, uint64 dockid) 
 {
 	int err;
 	char msr_flag_save = 0;
@@ -3246,6 +3373,8 @@ change_window(int win, int pid, int ldom, int cpu, uint32 dev, uint64 faddr, int
 	curtgid = tgid;
 	lasthba = curhba;
 	curhba = hba;
+	lastwwn = curwwn;
+	curwwn = wwn;
 	lasthirq = curhirq;
 	curhirq = hirq;
 	lastsirq = cursirq;
@@ -3349,7 +3478,7 @@ select_task_window(int win, int prompt)
 
 	if (valid) {
 		input_pending = FALSE;
-		change_window(win, pid, -1, -1, 0x0, 0x0ull, -1, NO_HBA, -1, -1, NO_DOCKID);
+		change_window(win, pid, -1, -1, 0x0, 0x0ull, -1, NO_HBA, NO_WWN, -1, -1, NO_DOCKID);
 		live_print_window();
 		if (is_alive) {
 			load_symbols();
@@ -3393,7 +3522,7 @@ select_cpu_window(int win, int prompt)
 
 	if (valid) {
 		input_pending = FALSE;
-		change_window(win, 0, -1, cpu, 0x0, 0x0ull, -1, NO_HBA, -1, -1, NO_DOCKID);
+		change_window(win, 0, -1, cpu, 0x0, 0x0ull, -1, NO_HBA, NO_WWN, -1, -1, NO_DOCKID);
 		live_print_window();
 		input_pending = TRUE;
 	} else {
@@ -3434,7 +3563,7 @@ select_dsk_window(int win, int prompt)
 
 	if (valid) {
 		input_pending = FALSE;
-		change_window(win, 0, -1, -1, dev, 0x0ull, -1, NO_HBA, -1, -1, NO_DOCKID);
+		change_window(win, 0, -1, -1, dev, 0x0ull, -1, NO_HBA, NO_WWN, -1, -1, NO_DOCKID);
 		live_print_window();
 		input_pending = TRUE;
 	} else {
@@ -3478,7 +3607,7 @@ select_hba_window(int win, int prompt)
 
 	if (valid) {
 		input_pending = FALSE;
-		change_window(win, 0, -1, -1, 0, 0x0ull, -1, hba, -1, -1, NO_DOCKID);
+		change_window(win, 0, -1, -1, 0, 0x0ull, -1, hba, NO_WWN, -1, -1, NO_DOCKID);
 		live_print_window();
 		input_pending = TRUE;
 	} else {
@@ -3491,6 +3620,48 @@ select_hba_window(int win, int prompt)
 	return 0;
 }
 
+int
+select_wwn_window(int win, int prompt)
+{
+	int valid = FALSE;
+	char str[80];
+	uint32 dev;
+	int ret;
+	uint64 wwn = NO_WWN;
+
+	if ((prompt==0) && (curwwn != NO_WWN)) {
+		wwn=curwwn;
+		valid = TRUE;
+	} else {
+		/* We need to get a valid LDOM */
+		move(LINES-1, 0); clrtoeol();
+		mvprintw(LINES-1, 0, "Target Path WWN: ");
+		echo();
+		ret = mvgetnstr(LINES-1, 20, str, 80);
+		noecho();
+
+		/* need to convert from a str to a HBA path */
+		ret = sscanf(str, "0x%llx", &wwn);
+		if (ret == 1) {
+			valid = TRUE;
+		}
+		
+	}
+
+	if (valid) {
+		input_pending = FALSE;
+		change_window(win, 0, -1, -1, 0, 0x0ull, -1, NO_HBA, wwn, -1, -1, NO_DOCKID);
+		live_print_window();
+		input_pending = TRUE;
+	} else {
+		move(LINES-1, 0); clrtoeol();
+		mvprintw(LINES-1, 0, "Command: ");
+		refresh();
+		input_pending = FALSE;
+	}
+
+	return 0;
+}
 
 int
 select_ldom_window(int win, int prompt)
@@ -3520,7 +3691,7 @@ select_ldom_window(int win, int prompt)
 
 	if (valid) {
 		input_pending = FALSE;
-		change_window(win, 0, ldom, -1, 0x0, 0x0ull, -1, NO_HBA, -1, -1, NO_DOCKID);
+		change_window(win, 0, ldom, -1, 0x0, 0x0ull, -1, NO_HBA, NO_WWN, -1, -1, NO_DOCKID);
 		live_print_window();
 		input_pending = TRUE;
 	} else {
@@ -3562,7 +3733,7 @@ select_docker_window(int win, int prompt)
 
 	if (valid) {
 		input_pending = FALSE;
-		change_window(win, 0, -1, -1, 0x0, 0x0ull, -1, NO_HBA, -1, -1, dockid);
+		change_window(win, 0, -1, -1, 0x0, 0x0ull, -1, NO_HBA, NO_WWN, -1, -1, dockid);
 		live_print_window();
 		input_pending = TRUE;
 	} else {
@@ -3608,9 +3779,9 @@ select_irq_window(int win, int prompt)
 	if (valid) {
 		input_pending = FALSE;
 		if (irqtype == 'h') {
-			change_window(win, 0, -1, -1, 0x0, 0x0ull, -1, NO_HBA, irqnum, -1, NO_DOCKID);
+			change_window(win, 0, -1, -1, 0x0, 0x0ull, -1, NO_HBA, NO_WWN, irqnum, -1, NO_DOCKID);
 		} else {
-			change_window(win, 0, -1, -1, 0x0, 0x0ull, -1, NO_HBA, -1, irqnum, NO_DOCKID);
+			change_window(win, 0, -1, -1, 0x0, 0x0ull, -1, NO_HBA, NO_WWN, -1, irqnum, NO_DOCKID);
 		}
 		live_print_window();
 		input_pending = TRUE;
@@ -3653,7 +3824,7 @@ select_futex_window(int win, int prompt)
 
 	if (valid) {
 		input_pending = FALSE;
-		change_window(win, 0, -1, -1, 0x0, faddr, tgid, NO_HBA, -1, -1, NO_DOCKID);
+		change_window(win, 0, -1, -1, 0x0, faddr, tgid, NO_HBA, NO_WWN, -1, -1, NO_DOCKID);
 		live_print_window();
 		input_pending = TRUE;
 	} else {
@@ -3841,6 +4012,10 @@ select_window(int prompt)
 			select_hba_window(WINHBA_SEL, 1); break;
 		case WINHBA_SEL:
 			select_dsk_window(WINDSK_SEL, 1); break;
+		case WINWWN:
+			select_wwn_window(WINWWN_SEL, 1); break;
+		case WINWWN_SEL:
+			select_dsk_window(WINDSK_SEL, 1); break;
 		case WINIRQ:
 			select_irq_window(WINIRQ_SEL, 1); break;
 		case WINDOCK:
@@ -3855,7 +4030,7 @@ int
 select_global_window(int win)
 {
 	input_pending = FALSE;
-	change_window(win, 0, -1, -1, 0x0, 0x0ull, -1, NO_HBA, -1, -1, NO_DOCKID);
+	change_window(win, 0, -1, -1, 0x0, 0x0ull, -1, NO_HBA, NO_WWN, -1, -1, NO_DOCKID);
 	live_print_window();
 	input_pending = TRUE;
 	return 0;
@@ -3866,7 +4041,7 @@ go_back()
 {
 	/* go back to previous window */
 	input_pending = FALSE;
-	change_window(prevwin, lastpid, lastldom, lastcpu, lastdev, lastfaddr, lasttgid, lasthba, lasthirq, lastsirq, lastdockid);
+	change_window(prevwin, lastpid, lastldom, lastcpu, lastdev, lastfaddr, lasttgid, lasthba, lastwwn, lasthirq, lastsirq, lastdockid);
 	live_print_window();
 	if (is_alive) { 
 		load_symbols();
@@ -3915,6 +4090,7 @@ live_termio_thread()
 			case 'k' : select_global_window(WINDOCK); break;
 			case 'u' : select_global_window(WINFUT); break;
 			case 'n' : select_global_window(WINNET); break;
+			case 'y' : select_global_window(WINWWN); break;
 			case 'z' : select_global_window(WINHBA); break;
 
 			case 'G' : select_task_window(WINPID, 0); break;

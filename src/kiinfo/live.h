@@ -19,22 +19,9 @@ typedef struct win_action {
 	uint64  tracemask;
 } win_action_t;
 
-#define MAX_WIN		33
+#define MAX_WIN		35
 
 #define	WINMAIN		0
-#define WINDOCK		31
-#define WINDOCK_SEL	32
-#define WINMAIN_FLAGS (SORT_FLAG | SCHED_FLAG)
-#define WINMAIN_STATS (GLOBAL_STATS | PERPID_STATS | PERCPU_STATS | PERFD_STATS )
-#define WINMAIN_TRACEMASK \
-                                (TT_BIT(TT_SCHED_SWITCH) | TT_BIT(TT_SCHED_WAKEUP) | \
-                                 TT_BIT(TT_BLOCK_RQ_INSERT) | TT_BIT(TT_BLOCK_RQ_ISSUE) | \
-                                 TT_BIT(TT_SYSCALL_ENTER) | TT_BIT(TT_SYSCALL_EXIT) | \
-                                 TT_BIT(TT_BLOCK_RQ_COMPLETE) | TT_BIT(TT_BLOCK_RQ_ABORT) | \
-                                 TT_BIT(TT_BLOCK_RQ_REQUEUE) | \
-                                 TT_BIT(TT_IRQ_HANDLER_ENTRY) | TT_BIT(TT_IRQ_HANDLER_EXIT) | \
-                                 TT_BIT(TT_SOFTIRQ_ENTRY) | TT_BIT(TT_SOFTIRQ_EXIT))
-
 #define WINPID		1
 #define WINPID_FLAGS  (SORT_FLAG | SCHED_FLAG | SCALL_FLAG )
 #define WINPID_STATS  (PERPID_STATS | SLEEP_STATS | SCALL_STATS )
@@ -237,6 +224,29 @@ typedef struct win_action {
 #define WINHBA_FLAGS  (SORT_FLAG)
 #define WINHBA_STATS (GLOBAL_STATS | PERDSK_STATS)
 #define WINHBA_TRACEMASK \
+                                (TT_BIT(TT_BLOCK_RQ_INSERT) | TT_BIT(TT_BLOCK_RQ_ISSUE) | \
+                                 TT_BIT(TT_BLOCK_RQ_COMPLETE) | TT_BIT(TT_BLOCK_RQ_ABORT) | \
+                                 TT_BIT(TT_BLOCK_RQ_REQUEUE))
+
+#define WINDOCK		31
+#define WINDOCK_SEL	32
+#define WINMAIN_FLAGS (SORT_FLAG | SCHED_FLAG)
+#define WINMAIN_STATS (GLOBAL_STATS | PERPID_STATS | PERCPU_STATS | PERFD_STATS )
+#define WINMAIN_TRACEMASK \
+                                (TT_BIT(TT_SCHED_SWITCH) | TT_BIT(TT_SCHED_WAKEUP) | \
+                                 TT_BIT(TT_BLOCK_RQ_INSERT) | TT_BIT(TT_BLOCK_RQ_ISSUE) | \
+                                 TT_BIT(TT_SYSCALL_ENTER) | TT_BIT(TT_SYSCALL_EXIT) | \
+                                 TT_BIT(TT_BLOCK_RQ_COMPLETE) | TT_BIT(TT_BLOCK_RQ_ABORT) | \
+                                 TT_BIT(TT_BLOCK_RQ_REQUEUE) | \
+                                 TT_BIT(TT_IRQ_HANDLER_ENTRY) | TT_BIT(TT_IRQ_HANDLER_EXIT) | \
+                                 TT_BIT(TT_SOFTIRQ_ENTRY) | TT_BIT(TT_SOFTIRQ_EXIT))
+
+
+#define WINWWN		33
+#define WINWWN_SEL	34
+#define WINWWN_FLAGS  (SORT_FLAG)
+#define WINWWN_STATS (GLOBAL_STATS | PERDSK_STATS)
+#define WINWWN_TRACEMASK \
                                 (TT_BIT(TT_BLOCK_RQ_INSERT) | TT_BIT(TT_BLOCK_RQ_ISSUE) | \
                                  TT_BIT(TT_BLOCK_RQ_COMPLETE) | TT_BIT(TT_BLOCK_RQ_ABORT) | \
                                  TT_BIT(TT_BLOCK_RQ_REQUEUE))

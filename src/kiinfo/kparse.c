@@ -133,6 +133,7 @@ kparse_init_func(void *v)
 	parse_kallsyms();
 	parse_devices();
 	parse_docker_ps();
+        parse_ll_R();
 	if (is_alive) return;	
 
 	if (timestamp) {
@@ -142,7 +143,6 @@ kparse_init_func(void *v)
         	parse_pself();
 		parse_edus();
 		parse_jstack();
-        	parse_ll_R();
         	parse_mpath();
 	}
 }
@@ -407,10 +407,11 @@ kparse_print_report(void *v)
 	kp_active_mapper_devs();			/* Section 4.3.1 */
 	kp_hiserv_mapper_devs();			/* Section 4.3.2 */
 	kp_fc_totals();					/* Section 4.4 */
-	kp_perpid_mdev_totals();			/* Section 4.5 */
-	kp_perpid_dev_totals();				/* Section 4.6 */
-        kp_dskblk_read();          		        /* Section 4.7 */
-        kp_dskblk_write();      		        /* Section 4.8 */
+	kp_wwn_totals();				/* Section 4.5 */
+	kp_perpid_mdev_totals();			/* Section 4.6 */
+	kp_perpid_dev_totals();				/* Section 4.7 */
+        kp_dskblk_read();          		        /* Section 4.8 */
+        kp_dskblk_write();      		        /* Section 4.9 */
 
 	kp_network();					/* Section 5.0 */
 	kp_ipip();					/* Section 5.1 */

@@ -74,6 +74,7 @@ extern int stktrc_sort_by_cnt(const void *, const void *);
 extern int stktrc_sort_by_slptime(const void *, const void *);
 extern int mpath_sort_by_cpu(const void *, const void *);
 extern int fc_sort_by_path(const void *, const void *);
+extern int wwn_sort_by_wwn(const void *, const void *);
 extern int dev_sort_by_count(const void *, const void *);
 extern int dev_sort_by_dev(const void *, const void *);
 extern int dev_sort_by_mdev(const void *, const void *);

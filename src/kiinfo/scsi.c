@@ -31,6 +31,19 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "kd_types.h"
 #include "conv.h"
 
+/* following are needed for ftrace.  The buf is
+   extra space for the command buffer on the conversion
+*/
+typedef struct scsi_dispatch_cmd_start_plus { 
+	scsi_dispatch_cmd_start_t	data;
+	char				buf[32];
+} scsi_dispatch_cmd_start_plus_t;
+
+typedef struct scsi_dispatch_cmd_done_plus { 
+	scsi_dispatch_cmd_start_t	data;
+	char				buf[32];
+} scsi_dispatch_cmd_done_plus_t;
+
 void
 print_scsi_cmd(int cmd_len, char *ptr)
 {
@@ -68,7 +81,7 @@ print_scsi_dispatch_cmd_start_rec(void *a)
 		fsep, rec_ptr->data_sglen,
 		fsep, rec_ptr->prot_sglen);
 
-	if (IS_LIKI) {
+	if (rec_ptr->cmd_len) {
 		printf ("%cprot_op=%d", fsep, rec_ptr->prot_op);
 		print_scsi_cmd (rec_ptr->cmd_len, &rec_ptr->cmnd[0]);
 	}
@@ -83,7 +96,7 @@ scsi_dispatch_cmd_start_func(void *a, void *v)
 {
 	trace_info_t *trcinfop = (trace_info_t *)a;
 	filter_t *f = v;
-	scsi_dispatch_cmd_start_t tt_rec_ptr;
+	scsi_dispatch_cmd_start_plus_t tt_rec_ptr;
 	scsi_dispatch_cmd_start_t *rec_ptr;
 
 	if (debug) printf ("trace_scsi_dispatch_cmd_start_func()\n");
@@ -109,7 +122,7 @@ print_scsi_dispatch_cmd_done_rec(void *a)
 		fsep, rec_ptr->data_sglen,
 		fsep, rec_ptr->prot_sglen);
 
-	if (IS_LIKI) {
+	if (rec_ptr->cmd_len) {
 		printf ("%cprot_op=%d", fsep, rec_ptr->prot_op);
 		print_scsi_cmd (rec_ptr->cmd_len, &rec_ptr->cmnd[0]);
 	}
@@ -124,7 +137,7 @@ scsi_dispatch_cmd_done_func(void *a, void *v)
 {
 	trace_info_t *trcinfop = (trace_info_t *)a;
 	filter_t *f = v;
-	scsi_dispatch_cmd_done_t tt_rec_ptr;
+	scsi_dispatch_cmd_done_plus_t tt_rec_ptr;
 	scsi_dispatch_cmd_done_t *rec_ptr;
 
 	if (debug) printf ("trace_scsi_dispatch_cmd_done_func()\n");

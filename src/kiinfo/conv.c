@@ -1138,6 +1138,7 @@ conv_scsi_dispatch_cmd_start(void *arg1, void *arg2)
 	memcpy (&rec_ptr->cmd_len, (char *)ftrace_rec + scsi_dispatch_cmd_start_attr[SCSI_CMD_CMDLEN].offset, scsi_dispatch_cmd_start_attr[SCSI_CMD_CMDLEN].size);
 	memcpy (&rec_ptr->data_sglen, (char *)ftrace_rec + scsi_dispatch_cmd_start_attr[SCSI_CMD_DATA_SGLEN].offset, scsi_dispatch_cmd_start_attr[SCSI_CMD_DATA_SGLEN].size);
 	memcpy (&rec_ptr->prot_sglen, (char *)ftrace_rec + scsi_dispatch_cmd_start_attr[SCSI_CMD_PROT_SGLEN].offset, scsi_dispatch_cmd_start_attr[SCSI_CMD_PROT_SGLEN].size);
+	memcpy (&rec_ptr->cmnd, (char *)ftrace_rec + scsi_dispatch_cmd_start_attr[SCSI_CMD_CMND].offset, (rec_ptr->cmd_len > 32) ? 32 : rec_ptr->cmd_len);
 	rec_ptr->prot_op = 0;
 
 	/* we will not copy the entire cmnd[] for ftrace since its a variable size */
@@ -1173,6 +1174,7 @@ conv_scsi_dispatch_cmd_done(void *arg1, void *arg2)
 	memcpy (&rec_ptr->cmd_len, (char *)ftrace_rec + scsi_dispatch_cmd_done_attr[SCSI_CMD_CMDLEN].offset, scsi_dispatch_cmd_done_attr[SCSI_CMD_CMDLEN].size);
 	memcpy (&rec_ptr->data_sglen, (char *)ftrace_rec + scsi_dispatch_cmd_done_attr[SCSI_CMD_DATA_SGLEN].offset, scsi_dispatch_cmd_done_attr[SCSI_CMD_DATA_SGLEN].size);
 	memcpy (&rec_ptr->prot_sglen, (char *)ftrace_rec + scsi_dispatch_cmd_done_attr[SCSI_CMD_PROT_SGLEN].offset, scsi_dispatch_cmd_done_attr[SCSI_CMD_PROT_SGLEN].size);
+	memcpy (&rec_ptr->cmnd, (char *)ftrace_rec + scsi_dispatch_cmd_done_attr[SCSI_CMD_CMND].offset, (rec_ptr->cmd_len > 32) ? 32 : rec_ptr->cmd_len);
 
 	/* we will not copy the entire cmnd[] for ftrace since its a variable size */
 

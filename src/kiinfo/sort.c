@@ -554,6 +554,26 @@ fc_sort_by_path(const void *v1, const void *v2)
 }
 
 int
+wwn_sort_by_wwn(const void *v1, const void *v2)
+{
+	const uint64 *p1=v1;
+	const uint64 *p2=v2;
+	wwn_info_t *a1 = (wwn_info_t *)*p1;
+	wwn_info_t *a2 = (wwn_info_t *)*p2;
+	int64 diff;
+
+	diff = a2->lle.key - a1->lle.key;
+
+	if (diff < 0) {
+		return 1;
+	} else if (diff > 0) {
+		return -1;
+	} else {
+		return 0;
+	}
+}
+
+int
 dev_sort_by_dev(const void *v1, const void *v2)
 {
 	const uint64 *p1=v1;

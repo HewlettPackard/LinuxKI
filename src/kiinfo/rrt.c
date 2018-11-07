@@ -35,8 +35,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define BUFFER_SIZE 4096
 #define BUFFER_SET_SIZE trace_segments   /* 1 MB */
 
-#define MAXTHREADS 1024
-#define MAXCPUS 1024
+#define MAXTHREADS 2048
+#define MAXCPUS 2048
 
 cpu_set_t *mask;
 pthread_t tid[MAXTHREADS];

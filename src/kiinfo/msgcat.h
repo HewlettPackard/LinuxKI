@@ -79,6 +79,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define _LNK_4_6	"subsection4.6"
 #define _LNK_4_7	"subsection4.7"
 #define _LNK_4_8	"subsection4.8"
+#define _LNK_4_9	"subsection4.9"
 #define _LNK_5_0	"Section5"
 #define _LNK_5_1	"Section5.1"
 #define _LNK_5_2	"Section5.2"
@@ -135,7 +136,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define _MSG_1_5_INFO \
 	" trace are generated from the kernel function setrq() which\nputs threads on the run queue.  The trace provides the name of the\ncalling function and can provide insight in kernel scheduling.\n\n"
 
-#define _MSG_4_7_INFO \
+#define _MSG_4_8_INFO \
 	"Note:  If the same physical block is read more than 20 during the kitrace sample,\nit could be the result of excessive read ahead or inefficient buffer cache utilization.\n"
 
 #define _MSG_5_2_INFO \

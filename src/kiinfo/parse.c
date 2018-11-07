@@ -978,6 +978,26 @@ parse_jstack()
 	}
 }
 
+dev_info_t *find_devp(char *devname) 
+{
+	int i;
+	dev_info_t *devinfop;
+
+	if (globals->devhash == 0) return NULL;
+	for (i=0; i < DEV_HSIZE; i++) {
+		devinfop = (dev_info_t *)&globals->devhash[i];
+		while (devinfop != NULL) {
+			if (devinfop->devname && (strcmp(devinfop->devname, devname) == 0)) {
+				return devinfop;
+			}
+			devinfop = (dev_info_t *)devinfop->lle.next;
+		}
+	}
+
+	return NULL;
+}
+
+
 /* parse_ll_R */
 /* this must be called BEFORE parse_mpath() */
 void
@@ -985,13 +1005,24 @@ parse_ll_R()
 {
 	FILE *f = NULL;
 	char fname[30];
-	char *rtnptr;
-	char mode[12], user[20], group[20], month[4], day[4], time[8], mapname[30], devname[30], dummy[6];
+	char *rtnptr, *ptr;
+	char mode[12], user[20], group[20], month[4], day[4], time[8], mapname[30], 
+             devname[30], pathname[60], dummy[6];
 	int  nlink, size, major, minor;
+	uint64 wwn;
 	unsigned int dev;
 	dev_info_t *devinfop;
+	int ret;
 
-	sprintf (fname, "ll_R_dev_all.%s", timestamp);
+        if (debug) fprintf (stderr, "parse_ll_R\n"); 
+        if (is_alive) {
+		/* only need the by-path info here */
+                ret = system("ls -lR /dev >/tmp/.ll_R  2>/dev/null");
+                sprintf (fname, "/tmp/.ll_R");
+        } else {
+                sprintf (fname, "ll_R_dev_all.%s", timestamp);
+        }
+
         if ( (f = fopen(fname,"r")) == NULL) {
                 fprintf (stderr,"Unable to open file %s, errno %d\n", fname, errno);
                 fprintf (stderr,"Continuing without device names.\n");
@@ -1025,11 +1056,29 @@ parse_ll_R()
 				}
 				rtnptr = fgets((char *)&input_str, 127, f);
 			}
+		} else if (strncmp(input_str, "/dev/disk/by-path:", 18) == 0) {
+			while (rtnptr != NULL) {
+				if (strlen(input_str) == 1) break;
+				if (input_str[0] == 'l') { 
+					sscanf (input_str, "%s %d %s %s %d %s %s %s %s %s %s", mode, &nlink, user, group, &size, month, day, time, pathname, dummy, devname);
+					if ((ptr = strstr(pathname, "-fc-")) && (devinfop = find_devp(&devname[6]))) {
+						sscanf(&ptr[4], "0x%llx", &devinfop->wwn);
+						add_string(&devinfop->pathname, pathname);
+					}
+				}
+				rtnptr = fgets((char *)&input_str, 127, f);
+			}
+
 		} else {
 			rtnptr = fgets((char *)&input_str, 127, f);
 		}
 	}
 	fclose(f);
+/*
+	if (is_alive) {
+		unlink(fname);	
+	}
+*/
 }
 
 /* parse_mpath */

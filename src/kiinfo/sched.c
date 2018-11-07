@@ -189,6 +189,10 @@ update_sched_time(void *arg, uint64 curtime)
 	uint64 delta;
 
 	/* fprintf (stderr, "update_sched_time() statp: %p  curtime: %lld  last_cur_time: %lld\n", statp, curtime, statp->last_cur_time);  */
+
+	/* if the process is DEAD, then skip it */
+	if (statp->state & (EXIT_ZOMBIE | EXIT_DEAD | TASK_DEAD)) return 0;
+
 	if (statp->last_cur_time) {
 		delta = curtime - statp->last_cur_time;
 	} else {

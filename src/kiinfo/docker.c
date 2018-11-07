@@ -150,6 +150,7 @@ docker_init_func(void *v)
 	parse_kallsyms();
 	parse_devices();
 	parse_docker_ps();
+        parse_ll_R();
 
 	if (objfile) {
 		load_elf(objfile, &objfile_preg);
@@ -165,7 +166,6 @@ docker_init_func(void *v)
 	parse_edus();
 	parse_lsof();
 	parse_maps();
-        parse_ll_R();
         parse_mpath();
 	parse_jstack();
 

@@ -190,8 +190,7 @@ update_sched_time(void *arg, uint64 curtime)
 
 	/* fprintf (stderr, "update_sched_time() statp: %p  curtime: %lld  last_cur_time: %lld\n", statp, curtime, statp->last_cur_time);  */
 
-	/* if the process is DEAD, then skip it */
-	if (statp->state & (EXIT_ZOMBIE | EXIT_DEAD | TASK_DEAD)) return 0;
+	if (statp->state & ZOMBIE) return 0;
 
 	if (statp->last_cur_time) {
 		delta = curtime - statp->last_cur_time;
@@ -1642,6 +1641,11 @@ sched_switch_func(void *a, void *v)
 				}
 			}
 		}
+		/* special case for zombie processes, this is done AFTER update_sched_time() */
+		if (rec_ptr->prev_state & (EXIT_ZOMBIE | EXIT_DEAD | TASK_DEAD)) {
+			statp->state = ZOMBIE;
+		} 
+
 	} else {
 		/* CPU was idle */
 	}

@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
 <meta name=Generator content="Microsoft Word 15 (filtered)">
 <style>
 <!--
@@ -271,24 +271,24 @@ Errs&nbsp;&nbsp;&nbsp; AvSz&nbsp;&nbsp;&nbsp;&nbsp; KB/s<br>
 readv&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 10485&nbsp;&nbsp;&nbsp; 524.2&nbsp; 910.428597&nbsp;&nbsp; 0.086832&nbsp;&nbsp;
 0.393425&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp; 37954&nbsp; 19431.0<br>
-   SLEEP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Â Â  SLEEP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 41089&nbsp;&nbsp; 2054.4&nbsp; 902.106968&nbsp;&nbsp; 0.021955<br>
-&nbsp;&nbsp;    <span style='background:yellow'>Sleep
+&nbsp;&nbsp;Â Â Â  <span style='background:yellow'>Sleep
 Func&nbsp;&nbsp;&nbsp;&nbsp;
 10237&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 875.541484&nbsp;&nbsp; 0.085527&nbsp;&nbsp; 0.387676&nbsp;
 __mutex_lock_slowpath</span></span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:9.0pt;font-family:"Courier New";color:black'>      Sleep
+lang=EN-US style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â Â  Sleep
 Func&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 9844&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 9.275561&nbsp;&nbsp; 0.000942&nbsp;&nbsp; 0.013671&nbsp; rwsem_down_read_failed<br>
-      Sleep Func&nbsp;&nbsp;&nbsp;&nbsp;
+Â Â Â Â Â  Sleep Func&nbsp;&nbsp;&nbsp;&nbsp;
 10475&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 8.958206&nbsp;&nbsp; 0.000855&nbsp;&nbsp; 0.015064&nbsp;
 rwsem_down_write_failed<br>
-      Sleep Func&nbsp;&nbsp;&nbsp;&nbsp;
+Â Â Â Â Â  Sleep Func&nbsp;&nbsp;&nbsp;&nbsp;
 10485&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 8.331718&nbsp;&nbsp; 0.000795&nbsp;&nbsp; 0.011906&nbsp; do_blockdev_direct_IO<br>
 &nbsp; &nbsp;RUNQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -412,7 +412,7 @@ lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>N
 in the stack traces above, the mutex_lock() function is called from
 xfs_file_aio_read().&nbsp;&nbsp;&nbsp; The nice thing about Linux is that the
 source code is readily available.&nbsp;&nbsp; While viewing the source code can
-be intimidating, it’s not always super difficult to understand what is going
+be intimidating, itâ€™s not always super difficult to understand what is going
 on.&nbsp;&nbsp; Below is the RHEL 7.1 source code for xfs_file_aio_read() where
 locking is performed:</span></p>
 

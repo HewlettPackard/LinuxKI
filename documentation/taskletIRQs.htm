@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
 <meta name=Generator content="Microsoft Word 15 (filtered)">
 <style>
 <!--
@@ -263,7 +263,7 @@ For more information, please review the following RedHat document:</span></p>
 
 <p class=MsoListParagraph style='text-indent:-.25in;line-height:11.25pt;
 vertical-align:top'><span lang=EN-US style='font-size:10.0pt;font-family:Symbol;
-color:black'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+color:black'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><u><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
 color:#003366'><a href="https://access.redhat.com/solutions/1409393"><span
 style='color:#003366'>RHEL 7.1-ksoftirqd thread reports high CPU utilization
@@ -284,7 +284,7 @@ resolve the issue, please upgrade the RHEL version to one of the following:</spa
 </ul>
 
 <p class=MsoListParagraph style='text-indent:-.25in'><span lang=EN-US
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span lang=EN-US style='font-size:10.0pt;line-height:107%;
 font-family:"Arial",sans-serif;color:black'>Red Hat Enterprise Linux 7.2 :
 Upgrade to kernel-3.10.0-327.el7 from RHSA-2015-2152</span></p>
@@ -294,48 +294,48 @@ Upgrade to kernel-3.10.0-327.el7 from RHSA-2015-2152</span></p>
 
 <p class=MsoNormal><span lang=EN-US style='font-size:10.0pt;line-height:107%;
 font-family:"Arial",sans-serif'>TASKLET IRQs may be triggered by other drivers
-other than ioatdma as well.   </span></p>
+other than ioatdma as well.Â Â  </span></p>
 
 <p class=MsoNormal><span lang=EN-US style='font-size:10.0pt;line-height:107%;
 font-family:"Arial",sans-serif'>The Mellanox drivers have been identified as
 scheduling TASKLET IRQs rather than NET_RX IRQs to complete the interrupt
-processing.   Below is an example where the TASKLET IRQ is occurring after each
+processing.Â Â  Below is an example where the TASKLET IRQ is occurring after each
 Mellanox hard IRQ:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>   
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>Â Â Â 
 0.020819 cpu=17 pid=0 tgid=0 irq_handler_entry irq=119 name=mlx4-comp-0@pci:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>   
-0.020820 cpu=17 pid=0 tgid=0 irq_handler_exit irq=119 ret=handled irqtm=  
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>Â Â Â 
+0.020820 cpu=17 pid=0 tgid=0 irq_handler_exit irq=119 ret=handled irqtm=Â Â 
 0.000001</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>   
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>Â Â Â 
 0.020820 cpu=17 pid=0 tgid=0 softirq_entry vec=6 action=TASKLET</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>   
-0.020821 cpu=17 pid=0 tgid=0 softirq_exit vec=6 action=TASKLET irqtm=  
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>Â Â Â 
+0.020821 cpu=17 pid=0 tgid=0 softirq_exit vec=6 action=TASKLET irqtm=Â Â 
 0.000001</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>   
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>Â Â Â 
 0.020848 cpu=17 pid=0 tgid=0 irq_handler_entry irq=119 name=mlx4-comp-0@pci:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>   
-0.020849 cpu=17 pid=0 tgid=0 irq_handler_exit irq=119 ret=handled irqtm=  
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>Â Â Â 
+0.020849 cpu=17 pid=0 tgid=0 irq_handler_exit irq=119 ret=handled irqtm=Â Â 
 0.000001</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>   
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>Â Â Â 
 0.020849 cpu=17 pid=0 tgid=0 softirq_entry vec=6 action=TASKLET</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>   
-0.020851 cpu=17 pid=0 tgid=0 softirq_exit vec=6 action=TASKLET irqtm=  
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>Â Â Â 
+0.020851 cpu=17 pid=0 tgid=0 softirq_exit vec=6 action=TASKLET irqtm=Â Â 
 0.000002</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span

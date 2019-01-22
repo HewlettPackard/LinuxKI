@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
 <meta name=Generator content="Microsoft Word 15 (filtered)">
 <style>
 <!--
@@ -69,7 +69,7 @@ the SFP capabilities of the NIC.&nbsp; Other symptoms will include elevated
 Load Averages and processes in an uninterruptible sleep state. The utilities
 that attempt to identify the SFP features will wait for multiple 100ms timeouts
 if no SFP is connected.&nbsp; The waiting task is holding a transport-wide
-‘rtnl_lock’ used to control access to routing and device tables in exclusive
+â€˜rtnl_lockâ€™ used to control access to routing and device tables in exclusive
 mode causing many other unrelated network activities to block for this
 lock.&nbsp; Common network tasks and services such as the snmpd daemon
 frequently query the NIC while holding the rtnl_lock.&nbsp;</span></p>
@@ -111,8 +111,8 @@ rtnl_lock&nbsp; dev_ioctl&nbsp; sock_ioctl&nbsp; vfs_ioctl&nbsp;
 do_vfs_ioctl&nbsp; sys_ioctl&nbsp; tracesys&nbsp;</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>The&nbsp;“COOPERATING/COMPETING
-TASKS REPORT”&nbsp;section for this task will&nbsp;show the other tasks that
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>The&nbsp;â€œCOOPERATING/COMPETING
+TASKS REPORTâ€&nbsp;section for this task will&nbsp;show the other tasks that
 wake&nbsp;it from these mutex lock sleeps:</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
@@ -307,7 +307,7 @@ Cause</span></b></p>
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Source
 code review shows that the rtnl_lock is acquired in <span style='background:
 #00FF40'>dev_ioctl( )</span> and held for the duration of the subsequent calls
-in the stack.&nbsp; The attempt to read the SFP ‘type’ via the call to </span><span
+in the stack.&nbsp; The attempt to read the SFP â€˜typeâ€™ via the call to </span><span
 lang=EN-US style='font-size:10.0pt;font-family:"Courier New";color:black'>ixgbe_read_i2c_byte_generic()
 </span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
 color:black'>will sleep for 10 iterations each with a 100ms timeout, thus
@@ -325,7 +325,7 @@ fix for the SFP data retrieval algorithm is available in driver versions
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>The
-latest “HP Service Pack for Proliant”, version 2015.04.0, contains the
+latest â€œHP Service Pack for Proliantâ€, version 2015.04.0, contains the
 3.23.0.79-1 version of the ixgbe driver.&nbsp; This Service Pack is available
 at </span><u><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
 color:#003366'><a

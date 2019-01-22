@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
 <meta name=Generator content="Microsoft Word 15 (filtered)">
 <style>
 <!--
@@ -180,8 +180,8 @@ for the majority of system CPU consumption:</span></p>
 </table>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>  
-Count     Pct  Function </span></b></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â 
+CountÂ Â Â Â  PctÂ  Function </span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -389,9 +389,9 @@ white'>1600 </span><span style='background:#FFFF80'>2048</span></span></p>
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Due
 to variations in the Linux kernels, you may not see sys_semtimedop() or
-sys_semctl() in the direct CPU hardclock profiles.   Instead, you may find the
-function queued_spin_lock_slowpath.   You will need to look at the kernel stack
-traces to confirm that the spinlock contention is coming from semtimedop() and semctl().  
+sys_semctl() in the direct CPU hardclock profiles.Â Â  Instead, you may find the
+function queued_spin_lock_slowpath.Â Â  You will need to look at the kernel stack
+traces to confirm that the spinlock contention is coming from semtimedop() and semctl().Â Â 
 For example, below are the hot kernel function:</span></p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
@@ -409,40 +409,40 @@ For example, below are the hot kernel function:</span></p>
 </table>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>  
-Count     Pct  Function </span></b></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â 
+CountÂ Â Â Â  PctÂ  Function </span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
-background:#EEEEEE'>  <span style='background:yellow'>138867  90.30%  SYS    queued_spin_lock_slowpath</span></span></p>
+background:#EEEEEE'>Â  <span style='background:yellow'>138867Â  90.30%Â  SYSÂ Â Â  queued_spin_lock_slowpath</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
-6892   4.48%  USER   0xffffffffffffffff</span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
-background:#EEEEEE'>    2285   1.49%  SYS    __schedule</span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>    
-773   0.50%  SYS    sys_semtimedop</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
+6892Â Â  4.48%Â  USERÂ Â  0xffffffffffffffff</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
-background:#EEEEEE'>     361   0.23%  SYS    do_smart_update</span></p>
+background:#EEEEEE'>Â Â Â  2285Â Â  1.49%Â  SYSÂ Â Â  __schedule</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>    
-222   0.14%  SYS    generic_make_request</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â 
+773Â Â  0.50%Â  SYSÂ Â Â  sys_semtimedop</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
-background:#EEEEEE'>     213   0.14%  INTR   walk_tg_tree_from</span></p>
+background:#EEEEEE'>Â Â Â Â  361Â Â  0.23%Â  SYSÂ Â Â  do_smart_update</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>    
-162   0.11%  SYS    SYSC_semtimedop</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â 
+222Â Â  0.14%Â  SYSÂ Â Â  generic_make_request</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:#EEEEEE'>Â Â Â Â  213Â Â  0.14%Â  INTRÂ Â  walk_tg_tree_from</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â 
+162Â Â  0.11%Â  SYSÂ Â Â  SYSC_semtimedop</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:10.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
@@ -451,7 +451,7 @@ normal'><span style='font-size:10.0pt;font-family:"Courier New";color:black'>&nb
 normal'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
 color:black'>The queued_spin_lock_slowpath() function can be called by many
 other kernel functions, so you will need to look at the kernel stack traces to
-confirm the problem is related to semtimedop() and semctl() calls.   </span></p>
+confirm the problem is related to semtimedop() and semctl() calls.Â Â  </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:10.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
@@ -480,56 +480,56 @@ normal'><span style='font-size:10.0pt;font-family:"Courier New";color:black'>&nb
 </table>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>  
-Count     Pct  Stack trace</span></b></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â 
+CountÂ Â Â Â  PctÂ  Stack trace</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'> 
-138618  90.14%  <span style='background:yellow'>queued_spin_lock_slowpath</span> 
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â 
+138618Â  90.14%Â  <span style='background:yellow'>queued_spin_lock_slowpath</span>Â 
 <span style='background:yellow'>_raw_spin_lock</span></span><span
-style='font-size:9.0pt;font-family:"Courier New";color:#CC0000;background:yellow'> 
-</span><span style='font-size:9.0pt;font-family:"Courier New";background:yellow'>SYSC_semtimedop 
-sys_semtimedop</span><span style='font-size:9.0pt;font-family:"Courier New"'>  <span
+style='font-size:9.0pt;font-family:"Courier New";color:#CC0000;background:yellow'>Â 
+</span><span style='font-size:9.0pt;font-family:"Courier New";background:yellow'>SYSC_semtimedopÂ 
+sys_semtimedop</span><span style='font-size:9.0pt;font-family:"Courier New"'>Â  <span
 style='color:black'>tracesys</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
-1890   1.23%  __schedule  schedule  schedule_timeout  SYSC_semtimedop 
-sys_semtimedop  tracesys</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
+1890Â Â  1.23%Â  __scheduleÂ  scheduleÂ  schedule_timeoutÂ  SYSC_semtimedopÂ 
+sys_semtimedopÂ  tracesys</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>    
-773   0.50%  sys_semtimedop  tracesys</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â 
+773Â Â  0.50%Â  sys_semtimedopÂ  tracesys</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>    
-361   0.23%  do_smart_update  sys_semctl  tracesys</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â 
+361Â Â  0.23%Â  do_smart_updateÂ  sys_semctlÂ  tracesys</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>    
-210   0.14%  generic_make_request  submit_bio  asm_submit_io 
-asm_submit_io_native  asm_do_io  asmfs_svc_io64  asmfs_file_read  vfs_read 
-sys_read  tracesys</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â 
+210Â Â  0.14%Â  generic_make_requestÂ  submit_bioÂ  asm_submit_ioÂ 
+asm_submit_io_nativeÂ  asm_do_ioÂ  asmfs_svc_io64Â  asmfs_file_readÂ  vfs_readÂ 
+sys_readÂ  tracesys</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>    
-191   0.12%  walk_tg_tree_from  load_balance  rebalance_domains 
-run_rebalance_domains  __do_softirq  call_softirq  do_softirq  irq_exit 
-smp_apic_timer_interrupt  apic_timer_interrupt  cpuidle_idle_call 
-arch_cpu_idle  cpu_startup_entry  start_secondary</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â 
+191Â Â  0.12%Â  walk_tg_tree_fromÂ  load_balanceÂ  rebalance_domainsÂ 
+run_rebalance_domainsÂ  __do_softirqÂ  call_softirqÂ  do_softirqÂ  irq_exitÂ 
+smp_apic_timer_interruptÂ  apic_timer_interruptÂ  cpuidle_idle_callÂ 
+arch_cpu_idleÂ  cpu_startup_entryÂ  start_secondary</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>    
-161   0.10%  SYSC_semtimedop  sys_semtimedop  tracesys</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â 
+161Â Â  0.10%Â  SYSC_semtimedopÂ  sys_semtimedopÂ  tracesys</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>    
-139   0.09%  <span style='background:yellow'>queued_spin_lock_slowpath  _raw_spin_lock 
-sys_semctl</span>  tracesys</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â 
+139Â Â  0.09%Â  <span style='background:yellow'>queued_spin_lock_slowpathÂ  _raw_spin_lockÂ 
+sys_semctl</span>Â  tracesys</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>    
-135   0.09%  syscall_trace_leave  int_check_syscall_exit_work</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â 
+135Â Â  0.09%Â  syscall_trace_leaveÂ  int_check_syscall_exit_work</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>LinuxKI

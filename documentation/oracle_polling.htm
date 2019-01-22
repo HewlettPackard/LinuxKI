@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
 <meta name=Generator content="Microsoft Word 15 (filtered)">
 <style>
 <!--
@@ -101,8 +101,8 @@ style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;color:black'>&#8203;&#8203;&#8203;&#8203;Excessive
-poll() calls by Oracle </span></b></p>
+font-family:"Arial",sans-serif;color:black'>â€‹â€‹â€‹â€‹Excessive poll() calls by
+Oracle </span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
@@ -152,7 +152,7 @@ color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
-color:black'>These&nbsp;poll() calls are typically very fast, so it doesn’t
+color:black'>These&nbsp;poll() calls are typically very fast, so it doesnâ€™t
 usually cause any major issues, only a slight performance impact.</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -170,7 +170,7 @@ normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 "Arial",sans-serif;color:black'>LinuxKI analysis will show an Oracle process
-making lots of calls to poll() which return very quickly.   For example:</span></p>
+making lots of calls to poll() which return very quickly.Â Â  For example:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
@@ -178,73 +178,73 @@ normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>PID
-103552  oracleTPCC</span></p>
+103552Â  oracleTPCC</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'> 
-PPID 1  /usr/lib/systemd/systemd</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â 
+PPID 1Â  /usr/lib/systemd/systemd</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
 ********* SCHEDULER ACTIVITY REPORT ********</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
-RunTime    : 15.033237  SysTime   :  0.341156   UserTime   : 14.210855</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
+RunTimeÂ Â Â  : 15.033237Â  SysTimeÂ Â  :Â  0.341156Â Â  UserTimeÂ Â  : 14.210855</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
-SleepTime  :  3.933331  Sleep Cnt :     12284   Wakeup Cnt :       775</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
+SleepTimeÂ  :Â  3.933331Â  Sleep Cnt :Â Â Â Â  12284Â Â  Wakeup Cnt :Â Â Â Â Â Â  775</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
-RunQTime   :  1.033595  Switch Cnt:     12813   PreemptCnt :       529</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
+RunQTimeÂ Â  :Â  1.033595Â  Switch Cnt:Â Â Â Â  12813Â Â  PreemptCnt :Â Â Â Â Â Â  529</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
-HardIRQ    :  0.020170  HardIRQ-S :  0.000375    HardIRQ-U :  0.019795</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
+HardIRQÂ Â Â  :Â  0.020170Â  HardIRQ-S :Â  0.000375Â Â Â  HardIRQ-U :Â  0.019795</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
-SoftIRQ    :  0.461056  SoftIRQ-S :  0.008035    SoftIRQ-U :  0.453021</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
+SoftIRQÂ Â Â  :Â  0.461056Â  SoftIRQ-S :Â  0.008035Â Â Â  SoftIRQ-U :Â  0.453021</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
-Last CPU   :        34  CPU Migrs :        22   NODE Migrs :         0</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
+Last CPUÂ Â  :Â Â Â Â Â Â Â  34Â  CPU Migrs :Â Â Â Â Â Â Â  22Â Â  NODE Migrs :Â Â Â Â Â Â Â Â  0</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
-Policy     : SCHED_NORMAL     vss :  157301054          rss :      7679</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
+PolicyÂ Â Â Â  : SCHED_NORMALÂ Â Â Â  vss :Â  157301054Â Â Â Â Â Â Â Â Â  rss :Â Â Â Â Â  7679</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
-busy    :     75.17%</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
+busyÂ Â Â  :Â Â Â Â  75.17%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>     
-sys   :      1.71%</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â Â 
+sysÂ Â  :Â Â Â Â Â  1.71%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>     
-user  :     71.05%</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â Â 
+userÂ  :Â Â Â Â  71.05%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>     
-irq   :      2.41%</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â Â 
+irqÂ Â  :Â Â Â Â Â  2.41%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
-runQ    :      5.17%</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
+runQÂ Â Â  :Â Â Â Â Â  5.17%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
-sleep   :     19.67%</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
+sleepÂ Â  :Â Â Â Â  19.67%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
@@ -256,42 +256,42 @@ normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>...<
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
 ******** SYSTEM CALL REPORT ********</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
-System Call Name    Count    Rate    ElpTime        Avg        Max  Errs 
-AvSz    KB/s</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
+System Call Name Â Â Â CountÂ Â Â  RateÂ Â Â  ElpTimeÂ Â Â Â Â Â Â  AvgÂ Â Â Â Â Â Â  MaxÂ  ErrsÂ 
+AvSzÂ Â Â  KB/s</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
-read                11345   567.2   3.043106   0.000268   0.004910     0   
-73    40.8</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
+readÂ Â Â Â Â Â Â Â Â Â Â Â  Â Â Â 11345Â Â  567.2Â Â  3.043106Â Â  0.000268Â Â  0.004910Â  Â Â Â 0Â Â Â 
+73Â Â Â  40.8</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>      
-SLEEP            11274   563.7   2.088460   0.000185</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â Â Â 
+SLEEPÂ Â Â Â Â Â Â Â  Â Â Â 11274Â Â  563.7Â Â  2.088460Â Â  0.000185</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>         
-Sleep Func    11274           2.088460   0.000185   0.003362  sk_wait_data</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â Â Â Â Â Â 
+Sleep Func Â Â Â 11274Â Â Â Â Â Â Â Â Â Â  2.088460Â Â  0.000185Â Â  0.003362Â  sk_wait_data</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>...</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
-background:yellow'>    poll                57860  2892.9   0.040999  
-0.000001   0.000244     0</span></p>
+background:yellow'>Â Â Â  pollÂ Â Â Â Â Â Â Â Â Â Â Â Â Â  Â 57860Â  2892.9Â Â  0.040999Â Â 
+0.000001Â Â  0.000244Â Â Â Â  0</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
-background:yellow'>       RUNQ                             0.004763</span></p>
+background:yellow'>Â Â Â Â Â Â  RUNQÂ Â Â Â Â Â Â Â Â Â Â  Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â 0.004763</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
-background:yellow'>       CPU                              0.036236</span></p>
+background:yellow'>Â Â Â Â Â Â  CPUÂ Â Â Â Â Â Â Â Â Â Â Â  Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â 0.036236</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:10.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
@@ -299,10 +299,10 @@ normal'><span style='font-size:10.0pt;font-family:"Courier New";color:black'>&nb
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 "Arial",sans-serif;color:black'>Note that in the 20 second trace sample, the
-process called poll() 57860 times, nearly 2900 times/sec.   Overall, the
+process called poll() 57860 times, nearly 2900 times/sec.Â Â  Overall, the
 overhead for the process is pretty small (~0.2%), but it is unnecessary to call
-poll() that often.     Note that the poll() call never sleeps, and we didn’t
-capture any in-band breaks.   Looking at the KI ASCII trace data for the
+poll() that often.Â Â Â Â  Note that the poll() call never sleeps, and we didnâ€™t
+capture any in-band breaks.Â Â  Looking at the KI ASCII trace data for the
 process we can see that the poll() call always returns 0, so there were no
 in-band breaks occurring:</span></p>
 
@@ -312,7 +312,7 @@ normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>$ grep &quot;pid=103552&quot; ki.1* |  grep
+"Courier New";color:black'>$ grep &quot;pid=103552&quot; ki.1* |Â  grep
 syscallbeg= | grep -v getrusage | more</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -321,44 +321,44 @@ normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    0.015849 cpu=50 pid=103552 tgid=103552 read [0]
-ret=0x34 syscallbeg=    0.000259 fd=21 *buf=0x7ffff7f59e5e count=8208
+"Courier New";color:black'>Â Â Â  0.015849 cpu=50 pid=103552 tgid=103552 read [0]
+ret=0x34 syscallbeg=Â Â Â  0.000259 fd=21 *buf=0x7ffff7f59e5e count=8208
 family=INET6 type=TCP L=10.85.232.2:1521 R=10.85.232.101:63727</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    0.015927 cpu=50 pid=103552 tgid=103552 <span
-style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=    0.000001
+"Courier New";color:black'>Â Â Â  0.015927 cpu=50 pid=103552 tgid=103552 <span
+style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=Â Â Â  0.000001
 *fds=0x7fffffff2728 nfds=1 timeout=0 pollfd[0]={21 0x41 0x0}</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    0.016114 cpu=50 pid=103552 tgid=103552 <span
-style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=    0.000001
+"Courier New";color:black'>Â Â Â  0.016114 cpu=50 pid=103552 tgid=103552 <span
+style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=Â Â Â  0.000001
 *fds=0x7fffffff1948 nfds=1 timeout=0 pollfd[0]={21 0x41 0x0}</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    0.016144 cpu=50 pid=103552 tgid=103552 <span
-style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=    0.000000 *fds=0x7fffffff1948
+"Courier New";color:black'>Â Â Â  0.016144 cpu=50 pid=103552 tgid=103552 <span
+style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=Â Â Â  0.000000 *fds=0x7fffffff1948
 nfds=1 timeout=0 pollfd[0]={21 0x41 0x0}</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    0.016216 cpu=50 pid=103552 tgid=103552 <span
-style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=    0.000000
+"Courier New";color:black'>Â Â Â  0.016216 cpu=50 pid=103552 tgid=103552 <span
+style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=Â Â Â  0.000000
 *fds=0x7fffffff1a18 nfds=1 timeout=0 pollfd[0]={21 0x41 0x0}</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    0.016472 cpu=50 pid=103552 tgid=103552 <span
-style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=    0.000001
+"Courier New";color:black'>Â Â Â  0.016472 cpu=50 pid=103552 tgid=103552 <span
+style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=Â Â Â  0.000001
 *fds=0x7fffffff1a18 nfds=1 timeout=0 pollfd[0]={21 0x41 0x0}</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    0.016540 cpu=50 pid=103552 tgid=103552 <span
-style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=    0.000000
+"Courier New";color:black'>Â Â Â  0.016540 cpu=50 pid=103552 tgid=103552 <span
+style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=Â Â Â  0.000000
 *fds=0x7fffffff1948 nfds=1 timeout=0 pollfd[0]={21 0x41 0x0}</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -373,7 +373,7 @@ normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 "Arial",sans-serif;color:black'>While the system calls are quite fast, it is a
 break in the normal code execution to repeatedly check the socket descriptor of
-the client, and can have a small impact on performance.    </span></p>
+the client, and can have a small impact on performance.Â Â Â  </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
@@ -415,44 +415,44 @@ Section][Next Section][Table of Contents]</span></u></p>
 </table>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Freq    
-Percent  Trace_type            64bit    ElapsedT       Max       Ave    Errors</span></b></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>FreqÂ Â Â Â 
+PercentÂ  Trace_typeÂ Â Â Â Â Â Â Â Â Â Â  64bitÂ Â Â  ElapsedTÂ Â Â Â Â Â  MaxÂ Â Â Â Â Â  AveÂ Â Â  Errors</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
-background:#EEEEEE'>85837     45.84% 
-sys_enter                                                                </span></p>
+background:#EEEEEE'>85837Â Â Â Â  45.84%Â 
+sys_enterÂ Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â  </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:#CC0000'>57860    
-30.90%  poll                      1       0.041    0.0002  0.000001         0</span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
-background:#EEEEEE'>12813      6.84% 
-sched_switch                                                               </span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>11345     
-6.06%  read                      1       3.043    0.0049  0.000268         0</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:#CC0000'>57860Â Â Â Â 
+30.90%Â  pollÂ Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â  1Â Â Â Â Â Â  0.041Â Â Â  0.0002Â  0.000001Â Â Â Â Â Â Â Â  0</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
-background:#EEEEEE'>11278      6.02%  write                     1      
-0.132    0.0027  0.000012         0</span></p>
+background:#EEEEEE'>12813Â Â Â Â Â  6.84%Â 
+sched_switchÂ Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â  </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>3602      
-1.92%  mmap                      1       0.014    0.0003  0.000004         0</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>11345Â Â Â Â Â 
+6.06%Â  readÂ Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â  1Â Â Â Â Â Â  3.043Â Â Â  0.0049Â  0.000268Â Â Â Â Â Â Â Â  0</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
-background:#EEEEEE'>1655       0.88% 
-hardclock                                                                    </span></p>
+background:#EEEEEE'>11278Â Â Â Â Â  6.02%Â  writeÂ Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â  1Â Â Â Â Â Â 
+0.132Â Â Â  0.0027Â  0.000012Â Â Â Â Â Â Â Â  0</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>775       
-0.41%  sched_wakeup        </span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>3602Â Â Â Â Â Â 
+1.92%Â  mmapÂ Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â  1Â Â Â Â Â Â  0.014Â Â Â  0.0003Â  0.000004Â Â Â Â Â Â Â Â  0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:#EEEEEE'>1655Â Â Â Â Â Â  0.88%Â 
+hardclockÂ Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â  Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>775Â Â Â Â Â Â Â 
+0.41%Â  sched_wakeupÂ Â Â Â Â Â Â  </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>...</span></p>
@@ -466,16 +466,16 @@ font-family:"Courier New";color:blue'>[INFO][Next]</span></u></p>
 normal'><span style='font-size:10.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:10.0pt;font-family:"Courier New";color:black'>                                                        
+normal'><span style='font-size:10.0pt;font-family:"Courier New";color:black'>Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â 
 </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><b><i><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;color:black'>NOTE:</span></i></b><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>  
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Â Â 
 <i>Do not confuse these fast poll() calls with poll() calls that may sleep and
 have a higher Average (Ave) time, which typically indicates that the Oracle
-server process is on a RAC wait.   </i></span></p>
+server process is on a RAC wait.Â Â  </i></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
@@ -492,10 +492,10 @@ color:black'>&nbsp;</span></b></p>
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;color:black'>For the most part, the overhead of
-the excessive poll() calls is quite small and can often be ignored.  However,
+the excessive poll() calls is quite small and can often be ignored.Â  However,
 if you are trying to maximize throughput for a benchmark or other reads, the
 poll() overhead can be drastically reduced by tuning the BREAK_POLL_SKIP
-parameter in the sqlnet.ora file on both the clients and servers.   </span></p>
+parameter in the sqlnet.ora file on both the clients and servers.Â Â  </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
@@ -549,7 +549,7 @@ overhead used. &nbsp;&nbsp;</span></p>
 margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
 style='font-size:10.0pt;font-family:Courier;color:black'>The default for this
 parameter is 4.</span><span style='font-size:10.0pt;font-family:"Cambria Math",serif;
-color:black'>&#8203;</span></p>
+color:black'>â€‹</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
@@ -558,7 +558,7 @@ font-family:"Arial",sans-serif'>&nbsp;</span></p>
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif'>A good value for BREAK_POLL_SKIP to reduce the
-amount of polling but still allow in-band breaks is 10000.   </span></p>
+amount of polling but still allow in-band breaks is 10000.Â Â  </span></p>
 
 </div>
 

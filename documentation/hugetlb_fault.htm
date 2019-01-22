@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
 <meta name=Generator content="Microsoft Word 15 (filtered)">
 <style>
 <!--
@@ -98,8 +98,8 @@ style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;color:black'>&#8203;&#8203;&#8203;&#8203;Lock
-contention using large Oracle SGA and huge pages on large multi-core systems </span></b></p>
+font-family:"Arial",sans-serif;color:black'>â€‹â€‹â€‹â€‹Lock contention using large
+Oracle SGA and huge pages on large multi-core systems </span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
@@ -121,7 +121,7 @@ color:black'>&nbsp;</span></p>
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 "Arial",sans-serif;color:black'>Recently, a customer with a large multi-core
 server (32-sockets, 896 cores), experienced higher than expected System CPU
-time after Oracle was started.     Customer was using Oracle 12c with an Oracle
+time after Oracle was started.Â Â Â Â  Customer was using Oracle 12c with an Oracle
 SGA over 5 TB in size.</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -131,7 +131,7 @@ normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 "Arial",sans-serif;color:black'>SLES 12 SP3 was installed on the HPE Superdome
-Flex server.   </span></p>
+Flex server.Â Â  </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
@@ -185,11 +185,11 @@ normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>  Count   USER%    SYS%   INTR%   IDLE%</span></p>
+"Courier New";color:black'>Â  CountÂ Â  USER%Â Â Â  SYS%Â Â  INTR%Â Â  IDLE%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'> 626986  28.01%  13.86%   1.11%  57.02%</span></p>
+"Courier New";color:black'>Â 626986Â  28.01%Â  13.86%Â Â  1.11%Â  57.02%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -205,7 +205,7 @@ normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>   Count     Pct  State  Function</span></p>
+"Courier New";color:black'>Â Â  CountÂ Â Â Â  PctÂ  StateÂ  Function</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -213,48 +213,48 @@ normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>  179377  28.61%  USER   UNKNOWN</span></p>
+"Courier New";color:black'>Â  179377Â  28.61%Â  USERÂ Â  UNKNOWN</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>   <span style='background:yellow'>32925   5.25% 
-SYS    rwsem_down_write_failed</span></span></p>
+"Courier New";color:black'>Â Â  <span style='background:yellow'>32925Â Â  5.25%Â 
+SYSÂ Â Â  rwsem_down_write_failed</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>   21562   3.44%  SYS    queued_spin_lock_slowpath</span></p>
+"Courier New";color:black'>Â Â  21562Â Â  3.44%Â  SYSÂ Â Â  queued_spin_lock_slowpath</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    4077   0.65%  SYS    try_to_wake_up</span></p>
+"Courier New";color:black'>Â Â Â  4077Â Â  0.65%Â  SYSÂ Â Â  try_to_wake_up</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    2742   0.44%  INTR   sock_def_readable</span></p>
+"Courier New";color:black'>Â Â Â  2742Â Â  0.44%Â  INTRÂ Â  sock_def_readable</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    2247   0.36%  SYS    thread_return</span></p>
+"Courier New";color:black'>Â Â Â  2247Â Â  0.36%Â  SYSÂ Â Â  thread_return</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    1270   0.20%  SYS    ktime_get_ts64</span></p>
+"Courier New";color:black'>Â Â Â  1270Â Â  0.20%Â  SYSÂ Â Â  ktime_get_ts64</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>     889   0.14%  SYS    handle_pte_fault</span></p>
+"Courier New";color:black'>Â Â Â Â  889Â Â  0.14%Â  SYSÂ Â Â  handle_pte_fault</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>     852   0.14%  SYS    syscall_trace_enter_phase2</span></p>
+"Courier New";color:black'>Â Â Â Â  852Â Â  0.14%Â  SYSÂ Â Â  syscall_trace_enter_phase2</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>     812   0.13%  SYS    generic_make_request</span></p>
+"Courier New";color:black'>Â Â Â Â  812Â Â  0.13%Â  SYSÂ Â Â  generic_make_request</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>     751   0.12%  SYS    do_smart_update</span></p>
+"Courier New";color:black'>Â Â Â Â  751Â Â  0.12%Â  SYSÂ Â Â  do_smart_update</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -270,7 +270,7 @@ color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>   Count     Pct  Stack trace</span></p>
+"Courier New";color:black'>Â Â  CountÂ Â Â Â  PctÂ  Stack trace</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -278,60 +278,60 @@ normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    9666   1.54%  queued_spin_lock_slowpath 
-sys_semctl  tracesys_phase2  unknown</span></p>
+"Courier New";color:black'>Â Â Â  9666Â Â  1.54%Â  queued_spin_lock_slowpathÂ 
+sys_semctlÂ  tracesys_phase2Â  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    5235   0.83%  <span style='background:yellow'>rwsem_down_write_failed</span> 
-wake_up_q  rwsem_wake  call_rwsem_down_write_failed  down_write  <span
-style='background:yellow'>huge_pmd_share  huge_pte_alloc  hugetlb_fault</span> 
-<span style='background:yellow'>handle_mm_fault  __do_page_fault  do_page_fault</span> 
-syscall_return_slowpath  <span style='background:yellow'>page_fault</span> 
-page_fault  unknown</span></p>
+"Courier New";color:black'>Â Â Â  5235Â Â  0.83%Â  <span style='background:yellow'>rwsem_down_write_failed</span>Â 
+wake_up_qÂ  rwsem_wakeÂ  call_rwsem_down_write_failedÂ  down_writeÂ  <span
+style='background:yellow'>huge_pmd_shareÂ  huge_pte_allocÂ  hugetlb_fault</span>Â 
+<span style='background:yellow'>handle_mm_faultÂ  __do_page_faultÂ  do_page_fault</span>Â 
+syscall_return_slowpathÂ  <span style='background:yellow'>page_fault</span>Â 
+page_faultÂ  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    4908   0.78%  <span style='background:yellow'>rwsem_down_write_failed</span> 
-apparmor_inode_getattr  vfs_getattr_nosec  uv_read_rtc  ktime_get 
-call_rwsem_down_write_failed  down_write  <span style='background:yellow'>huge_pmd_share 
-huge_pte_alloc  hugetlb_fault</span>  audit_filter_rules.isra.9  <span
-style='background:yellow'>handle_mm_fault  __do_page_fault  do_page_fault</span> 
-syscall_return_slowpath  <span style='background:yellow'>page_fault</span></span></p>
+"Courier New";color:black'>Â Â Â  4908Â Â  0.78%Â  <span style='background:yellow'>rwsem_down_write_failed</span>Â 
+apparmor_inode_getattrÂ  vfs_getattr_nosecÂ  uv_read_rtcÂ  ktime_getÂ 
+call_rwsem_down_write_failedÂ  down_writeÂ  <span style='background:yellow'>huge_pmd_shareÂ 
+huge_pte_allocÂ  hugetlb_fault</span>Â  audit_filter_rules.isra.9Â  <span
+style='background:yellow'>handle_mm_faultÂ  __do_page_faultÂ  do_page_fault</span>Â 
+syscall_return_slowpathÂ  <span style='background:yellow'>page_fault</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    4158   0.66%  <span style='background:yellow'>rwsem_down_write_failed</span> 
-sock_def_readable  uv_read_rtc  ktime_get  call_rwsem_down_write_failed  down_<span
-style='background:yellow'>write  huge_pmd_share  huge_pte_alloc  hugetlb_fault</span> 
-task_cputime_adjusted  audit_filter_rules.isra.9  <span style='background:yellow'>handle_mm_fault 
-__do_page_fault</span>   syscall_return_slowpath  <span style='background:yellow'>page_fault</span></span></p>
+"Courier New";color:black'>Â Â Â  4158Â Â  0.66%Â  <span style='background:yellow'>rwsem_down_write_failed</span>Â 
+sock_def_readableÂ  uv_read_rtcÂ  ktime_getÂ  call_rwsem_down_write_failedÂ  down_<span
+style='background:yellow'>writeÂ  huge_pmd_shareÂ  huge_pte_allocÂ  hugetlb_fault</span>Â 
+task_cputime_adjustedÂ  audit_filter_rules.isra.9Â  <span style='background:yellow'>handle_mm_faultÂ 
+__do_page_fault</span>Â Â  syscall_return_slowpathÂ  <span style='background:yellow'>page_fault</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    3929   0.63%  unknown</span></p>
+"Courier New";color:black'>Â Â Â  3929Â Â  0.63%Â  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    3244   0.52%  queued_spin_lock_slowpath  SYSC_semtimedop 
-ktime_get  enqueue_entity  enqueue_task_fair  audit_filter_rules.isra.9 
-uv_read_rtc  ktime_get  __audit_syscall_entry  tracesys_phase2  unknown</span></p>
+"Courier New";color:black'>Â Â Â  3244Â Â  0.52%Â  queued_spin_lock_slowpathÂ  SYSC_semtimedopÂ 
+ktime_getÂ  enqueue_entityÂ  enqueue_task_fairÂ  audit_filter_rules.isra.9Â 
+uv_read_rtcÂ  ktime_getÂ  __audit_syscall_entryÂ  tracesys_phase2Â  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    1850   0.30%  try_to_wake_up  wake_up_q 
-rwsem_wake  call_rwsem_wake  up_write  <span style='background:yellow'>huge_pmd_share 
-huge_pte_alloc  hugetlb_fault</span>  <span style='background:yellow'>handle_mm_fault 
-__do_page_fault</span>   syscall_return_slowpath  <span style='background:yellow'>page_fault</span>  
+"Courier New";color:black'>Â Â Â  1850Â Â  0.30%Â  try_to_wake_upÂ  wake_up_qÂ 
+rwsem_wakeÂ  call_rwsem_wakeÂ  up_writeÂ  <span style='background:yellow'>huge_pmd_shareÂ 
+huge_pte_allocÂ  hugetlb_fault</span>Â  <span style='background:yellow'>handle_mm_faultÂ 
+__do_page_fault</span>Â Â  syscall_return_slowpathÂ  <span style='background:yellow'>page_fault</span>Â Â 
 unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    1697   0.27%  <span style='background:yellow'>rwsem_down_write_failed</span> 
-udp_recvmsg  uv_read_rtc  ktime_get  call_rwsem_down_write_failed  down_write  <span
-style='background:yellow'>huge_pmd_share  huge_pte_alloc  hugetlb_fault</span> 
-audit_filter_rules.isra.9  <span style='background:yellow'>handle_mm_fault 
-__do_page_fault</span>   syscall_return_slowpath  <span style='background:yellow'>page_fault</span>
+"Courier New";color:black'>Â Â Â  1697Â Â  0.27%Â  <span style='background:yellow'>rwsem_down_write_failed</span>Â 
+udp_recvmsgÂ  uv_read_rtcÂ  ktime_getÂ  call_rwsem_down_write_failedÂ  down_writeÂ  <span
+style='background:yellow'>huge_pmd_shareÂ  huge_pte_allocÂ  hugetlb_fault</span>Â 
+audit_filter_rules.isra.9Â  <span style='background:yellow'>handle_mm_faultÂ 
+__do_page_fault</span>Â Â  syscall_return_slowpathÂ  <span style='background:yellow'>page_fault</span>
 </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -339,10 +339,10 @@ normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
 color:black'><br>
 </span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
 color:black'>Note that the top System profile hits occured in the context of
-the rwsem_down_write_failed() function.&nbsp;  This function can be called from
-many other functions, so it’s important to view the stack traces to see where it’s
-called.     With LinuxKI, the stack traces with SLES is “inexact”, meaning that
-stale functions can be seen in the stack traces.   But notice there are
+the rwsem_down_write_failed() function.&nbsp;Â  This function can be called from
+many other functions, so itâ€™s important to view the stack traces to see where itâ€™s
+called.Â Â Â Â  With LinuxKI, the stack traces with SLES is â€œinexactâ€, meaning that
+stale functions can be seen in the stack traces.Â Â  But notice there are
 consistent functions highlighted in yellow which show the rwsem_down_write_failed
 function being called in the context of a page fault, specifically a hugepage
 fault (hugetlb_fault).</span></p>
@@ -372,28 +372,28 @@ normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>key        shmid      owner      perms  
-bytes         nattch     status</span></p>
+"Courier New";color:black'>keyÂ Â Â Â Â Â Â  shmidÂ Â Â Â Â  ownerÂ Â Â Â Â  permsÂ Â 
+bytesÂ Â Â Â Â Â Â Â  nattchÂ Â Â Â  status</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>0x00000000 422281243  oracle     640    
-8388608       2805</span></p>
+"Courier New";color:black'>0x00000000 422281243Â  oracleÂ Â Â Â  640Â Â Â Â 
+8388608Â Â Â Â Â Â  2805</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black;background:yellow'>0x00000000 422314012  oracle    
-640     4946191712256 2805</span></p>
+"Courier New";color:black;background:yellow'>0x00000000 422314012Â  oracleÂ Â Â Â 
+640Â Â Â Â  4946191712256 2805</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>0x00000000 422346781  oracle     640    
-1604321280    2805</span></p>
+"Courier New";color:black'>0x00000000 422346781Â  oracleÂ Â Â Â  640Â Â Â Â 
+1604321280Â Â Â  2805</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>0x4fecd804 422379550  oracle     640    
-667648        2805</span></p>
+"Courier New";color:black'>0x4fecd804 422379550Â  oracleÂ Â Â Â  640Â Â Â Â 
+667648Â Â Â Â Â Â Â  2805</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
@@ -402,7 +402,7 @@ normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 "Arial",sans-serif;color:black'>Here, note that one of the shared memory
-segments is nearly 5TB is size.   </span></p>
+segments is nearly 5TB is size.Â Â  </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
@@ -411,9 +411,9 @@ normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 "Arial",sans-serif;color:black'>By default, Oracle will allocate the memory
-pages as they are first accessed using page faults.   When using hugepages, you
-will see the hugetlb_fault() function in the trace records.     Of course, the
-shared memory’s address space must be locked to add the memory pages to the
+pages as they are first accessed using page faults.Â Â  When using hugepages, you
+will see the hugetlb_fault() function in the trace records.Â Â Â Â  Of course, the
+shared memoryâ€™s address space must be locked to add the memory pages to the
 object, and with lots of Oracle processes and 896 cores, this can increase the
 lock contention.</span></p>
 
@@ -441,7 +441,7 @@ font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 <p class=MsoListParagraphCxSpFirst style='margin-top:0in;margin-right:0in;
 margin-bottom:0in;margin-left:.25in;margin-bottom:.0001pt;text-indent:-.25in;
 line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:Symbol;color:black'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+font-family:Symbol;color:black'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
 color:black'>On Oracle 11g, set _enable_NUMA_spport to TRUE</span></p>
 
@@ -455,8 +455,8 @@ margin-bottom:0in;margin-left:.25in;margin-bottom:.0001pt;line-height:11.25pt;
 vertical-align:top'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
 color:black'>Prior to Oracle 12c, when _enable_NUMA_support was set to TRUE,
 Oracle would setup divide the large memory object into 1 shared memory segment
-per NUMA node.  Having one shared memory segment per node would distribute the
-lock contention over more memory objects to relieve the contention.   </span></p>
+per NUMA node.Â  Having one shared memory segment per node would distribute the
+lock contention over more memory objects to relieve the contention.Â Â  </span></p>
 
 <p class=MsoListParagraphCxSpMiddle style='margin-top:0in;margin-right:0in;
 margin-bottom:0in;margin-left:.25in;margin-bottom:.0001pt;line-height:11.25pt;
@@ -468,7 +468,7 @@ margin-bottom:0in;margin-left:.25in;margin-bottom:.0001pt;line-height:11.25pt;
 vertical-align:top'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
 color:black'>However, with Oracle 12c, Oracle would revert back to one shared
 memory segment for the large memory object and divide the shared memory segment
-internally into memory regions or areas.   So this method cannot be used to
+internally into memory regions or areas.Â Â  So this method cannot be used to
 reduce the lock contention with Oracle 12c.</span></p>
 
 <p class=MsoListParagraphCxSpMiddle style='margin-top:0in;margin-right:0in;
@@ -479,14 +479,14 @@ color:black'>&nbsp;</span></p>
 <p class=MsoListParagraphCxSpLast style='margin-top:0in;margin-right:0in;
 margin-bottom:0in;margin-left:.25in;margin-bottom:.0001pt;text-indent:-.25in;
 line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+font-family:Symbol'>Â·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
 color:black'>Set shmmax so that Oracle must divide the large shared memory
-object into multiple shared memory segments.   If shmmax is not large enough
+object into multiple shared memory segments.Â Â  If shmmax is not large enough
 for the Oracle SGA, then Oracle will allocate as many shared memory segments as
-needed.    For example, setting shmmax to 512 GB (549,755,813,888 bytes), would
+needed.Â Â Â  For example, setting shmmax to 512 GB (549,755,813,888 bytes), would
 result in 9 shared memory segments so the spinlock contention would now be
-across 9 memory objects instead of 1.   </span></p>
+across 9 memory objects instead of 1.Â Â  </span></p>
 
 </div>
 

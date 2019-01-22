@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
 <meta name=Generator content="Microsoft Word 15 (filtered)">
 <style>
 <!--
@@ -101,8 +101,8 @@ style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;color:black'>&#8203;&#8203;&#8203;&#8203;Excessive
-CPU time in pcc_cpufreq driver</span></b></p>
+font-family:"Arial",sans-serif;color:black'>â€‹â€‹â€‹â€‹Excessive CPU time in
+pcc_cpufreq driver</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
@@ -123,9 +123,9 @@ color:black'>&nbsp;</span></p>
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 "Arial",sans-serif;color:black'>Customer noticed higher than expected System
-CPU time after implementing a new DL380 Gen10 server using Oracle UEK kernel (4.1.12-124.16.4.el6uek.x86_64).  
+CPU time after implementing a new DL380 Gen10 server using Oracle UEK kernel (4.1.12-124.16.4.el6uek.x86_64).Â Â 
 The 2-socket server had 36 CPU cores with 72 threads (hyperthreading
-enabled).   </span></p>
+enabled).Â Â  </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
@@ -184,26 +184,26 @@ normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 </table>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>node 
-ncpu     Total Busy          sys          usr         idle  hardirq_sys
-hardirq_user hardirq idle  softirq_sys softirq_user softirq_idle</span></b></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>nodeÂ 
+ncpuÂ Â Â Â  Total BusyÂ Â Â Â Â Â Â Â Â  sysÂ Â Â Â Â Â Â Â Â  usrÂ Â Â Â Â Â Â Â  idleÂ  hardirq_sys
+hardirq_user hardirq idleÂ  softirq_sys softirq_user softirq_idle</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>  
-0 [ 36] :       61.75%       <span style='background:yellow'>22.75%</span>      
-33.51%       35.33%        0.12%        0.19%        0.16%        2.76%       
-2.42%        2.75%</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â 
+0 [ 36] :Â Â Â Â Â Â  61.75%Â Â Â Â Â Â  <span style='background:yellow'>22.75%</span>Â Â Â Â Â Â 
+33.51%Â Â Â Â Â Â  35.33%Â Â Â Â Â Â Â  0.12%Â Â Â Â Â Â Â  0.19%Â Â Â Â Â Â Â  0.16%Â Â Â Â Â Â Â  2.76%Â Â Â Â Â Â Â 
+2.42%Â Â Â Â Â Â Â  2.75%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>  
-1 [ 36] :       49.43%       <span style='background:yellow'>18.78%</span>      
-30.06%       50.28%        0.01%        0.01%        0.03%        0.42%       
-0.15%        0.26%</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â 
+1 [ 36] :Â Â Â Â Â Â  49.43%Â Â Â Â Â Â  <span style='background:yellow'>18.78%</span>Â Â Â Â Â Â 
+30.06%Â Â Â Â Â Â  50.28%Â Â Â Â Â Â Â  0.01%Â Â Â Â Â Â Â  0.01%Â Â Â Â Â Â Â  0.03%Â Â Â Â Â Â Â  0.42%Â Â Â Â Â Â Â 
+0.15%Â Â Â Â Â Â Â  0.26%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Total             
-55.59%       <span style='background:yellow'>20.77%</span>       31.78%      
-42.81%        0.07%        0.10%        0.10%        1.59%        1.29%       
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>TotalÂ Â Â Â Â Â Â Â Â Â Â Â Â 
+55.59%Â Â Â Â Â Â  <span style='background:yellow'>20.77%</span>Â Â Â Â Â Â  31.78%Â Â Â Â Â Â 
+42.81%Â Â Â Â Â Â Â  0.07%Â Â Â Â Â Â Â  0.10%Â Â Â Â Â Â Â  0.10%Â Â Â Â Â Â Â  1.59%Â Â Â Â Â Â Â  1.29%Â Â Â Â Â Â Â 
 1.51%</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -240,44 +240,44 @@ normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 </table>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>  
-Count     Pct  Function </span></b></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â 
+CountÂ Â Â Â  PctÂ  Function </span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
-background:#EEEEEE'>   51609  50.15%  USER   0xffffffffffffffff</span></p>
+background:#EEEEEE'>Â Â  51609Â  50.15%Â  USERÂ Â  0xffffffffffffffff</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
-7021   6.82%  INTR   __schedule</span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
-background:#EEEEEE'>    5931   5.76%  SYS    <span style='background:yellow'>pcc_cpufreq_target</span></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
-1621   1.58%  SYS    <span style='background:yellow'>acpi_hw_write_port</span></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
+7021Â Â  6.82%Â  INTRÂ Â  __schedule</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
-background:#EEEEEE'>    1189   1.16%  SYS    syscall_trace_leave</span></p>
+background:#EEEEEE'>Â Â Â  5931Â Â  5.76%Â  SYSÂ Â Â  <span style='background:yellow'>pcc_cpufreq_target</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>    
-958   0.93%  SYS    syscall_trace_enter_phase2</span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
-background:#EEEEEE'>     744   0.72%  INTR   rds_recv_local.isra.7</span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>    
-696   0.68%  INTR   irq_exit</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â 
+1621Â Â  1.58%Â  SYSÂ Â Â  <span style='background:yellow'>acpi_hw_write_port</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
-background:#EEEEEE'>     518   0.50%  SYS    tracesys_phase2</span></p>
+background:#EEEEEE'>Â Â Â  1189Â Â  1.16%Â  SYSÂ Â Â  syscall_trace_leave</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â 
+958Â Â  0.93%Â  SYSÂ Â Â  syscall_trace_enter_phase2</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:#EEEEEE'>Â Â Â Â  744Â Â  0.72%Â  INTRÂ Â  rds_recv_local.isra.7</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Â Â Â Â 
+696Â Â  0.68%Â  INTRÂ Â  irq_exit</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:#EEEEEE'>Â Â Â Â  518Â Â  0.50%Â  SYSÂ Â Â  tracesys_phase2</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
@@ -307,67 +307,67 @@ normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 </table>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><b><span style='font-size:9.0pt;font-family:"Courier New"'>   Count    
-Pct  Stack trace</span></b></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New"'>Â Â  CountÂ Â Â Â 
+PctÂ  Stack trace</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New"'>    5353  
-5.20%  <span style='background:yellow'>pcc_cpufreq_target</span> 
-__cpufreq_driver_target  od_check_cpu  dbs_check_cpu  od_dbs_timer 
-process_one_work  worker_thread  kthread  ret_from_fork  unknown</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>Â Â Â  5353Â Â 
+5.20%Â  <span style='background:yellow'>pcc_cpufreq_target</span>Â 
+__cpufreq_driver_targetÂ  od_check_cpuÂ  dbs_check_cpuÂ  od_dbs_timerÂ 
+process_one_workÂ  worker_threadÂ  kthreadÂ  ret_from_forkÂ  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New"'>    1572  
-1.53%  unknown</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>Â Â Â  1572Â Â 
+1.53%Â  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New"'>    1488  
-1.45%  <span style='background:yellow'>acpi_hw_write_port</span>  acpi_write  <span
-style='background:yellow'>pcc_cpufreq_target</span>  __cpufreq_driver_target 
-od_check_cpu  dbs_check_cpu  od_dbs_timer  process_one_work  worker_thread 
-kthread  ret_from_fork  unknown</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>Â Â Â  1488Â Â 
+1.45%Â  <span style='background:yellow'>acpi_hw_write_port</span>Â  acpi_writeÂ  <span
+style='background:yellow'>pcc_cpufreq_target</span>Â  __cpufreq_driver_targetÂ 
+od_check_cpuÂ  dbs_check_cpuÂ  od_dbs_timerÂ  process_one_workÂ  worker_threadÂ 
+kthreadÂ  ret_from_forkÂ  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New"'>    1460  
-1.42%  __schedule   schedule_hrtimeout_range_clock.part.26  schedule_hrtimeout_range_clock 
-schedule_hrtimeout_range  poll_schedule_timeout  do_sys_poll  sys_poll 
-tracesys_phase2  unknown</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>Â Â Â  1460Â Â 
+1.42%Â  __scheduleÂ Â  schedule_hrtimeout_range_clock.part.26Â  schedule_hrtimeout_range_clockÂ 
+schedule_hrtimeout_rangeÂ  poll_schedule_timeoutÂ  do_sys_pollÂ  sys_pollÂ 
+tracesys_phase2Â  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New"'>    1347  
-1.31%  __schedule   schedule_user  retint_careful  unknown</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>Â Â Â  1347Â Â 
+1.31%Â  __scheduleÂ Â  schedule_userÂ  retint_carefulÂ  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New"'>    1189  
-1.16%  syscall_trace_leave  int_very_careful  unknown</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>Â Â Â  1189Â Â 
+1.16%Â  syscall_trace_leaveÂ  int_very_carefulÂ  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New"'>     958  
-0.93%  syscall_trace_enter_phase2  tracesys_phase2  unknown</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>Â Â Â Â  958Â Â 
+0.93%Â  syscall_trace_enter_phase2Â  tracesys_phase2Â  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New"'>     820  
-0.80%  __schedule   worker_thread  kthread  ret_from_fork  unknown</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>Â Â Â Â  820Â Â 
+0.80%Â  __scheduleÂ Â  worker_threadÂ  kthreadÂ  ret_from_forkÂ  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New"'>     586  
-0.57%  __schedule  schedule  schedule_timeout  sk_wait_data  tcp_recvmsg 
-inet_recvmsg  sock_recvmsg  sock_read_iter  __vfs_read  vfs_read  sys_read 
-tracesys_phase2  unknown</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>Â Â Â Â  586Â Â 
+0.57%Â  __scheduleÂ  scheduleÂ  schedule_timeoutÂ  sk_wait_dataÂ  tcp_recvmsgÂ 
+inet_recvmsgÂ  sock_recvmsgÂ  sock_read_iterÂ  __vfs_readÂ  vfs_readÂ  sys_readÂ 
+tracesys_phase2Â  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New"'>     578  
-0.56%  <span style='background:yellow'>pcc_cpufreq_target</span> 
-__cpufreq_driver_target  dbs_freq_increase  od_check_cpu  dbs_check_cpu 
-od_dbs_timer  process_one_work  worker_thread  kthread  ret_from_fork  unknown</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>Â Â Â Â  578Â Â 
+0.56%Â  <span style='background:yellow'>pcc_cpufreq_target</span>Â 
+__cpufreq_driver_targetÂ  dbs_freq_increaseÂ  od_check_cpuÂ  dbs_check_cpuÂ 
+od_dbs_timerÂ  process_one_workÂ  worker_threadÂ  kthreadÂ  ret_from_forkÂ  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New"'>     518  
-0.50%  tracesys_phase2  unknown</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>Â Â Â Â  518Â Â 
+0.50%Â  tracesys_phase2Â  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New"'>     497  
-0.48%  __schedule  schedule  schedule_user  int_careful  unknown</span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>Â Â Â Â  497Â Â 
+0.48%Â  __scheduleÂ  scheduleÂ  schedule_userÂ  int_carefulÂ  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
@@ -377,7 +377,7 @@ normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 "Arial",sans-serif;color:black'>Source code analysis of the pcc_cpufreq driver
 shows that there is a single system-wide pcc_lock spinlock to control access
-for the ACPI writes, and with multiple core’s trying to adjust the CPU
+for the ACPI writes, and with multiple coreâ€™s trying to adjust the CPU
 frequencies, the spinlock contention can increase.</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -391,11 +391,11 @@ normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>                           unsigned int target_freq,</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â  Â Â Â Â Â  unsigned int target_freq,</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>                           unsigned int relation)</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â  Â Â Â Â Â  unsigned int relation)</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -403,23 +403,23 @@ normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       struct pcc_cpu *pcc_cpu_data;</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  struct pcc_cpu *pcc_cpu_data;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       struct cpufreq_freqs freqs;</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  struct cpufreq_freqs freqs;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       u16 status;</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  u16 status;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       u32 input_buffer;</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  u32 input_buffer;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       int cpu;</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  int cpu;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -427,11 +427,11 @@ normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       cpu = policy-&gt;cpu;</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  cpu = policy-&gt;cpu;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       pcc_cpu_data = per_cpu_ptr(pcc_cpu_info,
+"Courier New";color:black'>Â Â Â Â Â Â  pcc_cpu_data = per_cpu_ptr(pcc_cpu_info,
 cpu);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -440,21 +440,21 @@ normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       pr_debug(&quot;target: CPU %d should go to
+"Courier New";color:black'>Â Â Â Â Â Â  pr_debug(&quot;target: CPU %d should go to
 target freq: %d &quot;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>              &quot;(virtual) input_offset is
+"Courier New";color:black'>Â Â Â Â Â Â Â Â Â Â Â Â Â  &quot;(virtual) input_offset is
 0x%p\n&quot;,</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>              cpu, target_freq,</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â Â Â Â Â Â Â Â  cpu, target_freq,</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>              (pcch_virt_addr +
+"Courier New";color:black'>Â Â Â Â Â Â Â Â Â Â Â Â Â  (pcch_virt_addr +
 pcc_cpu_data-&gt;input_offset));</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -463,20 +463,20 @@ normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       freqs.old = policy-&gt;cur;</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  freqs.old = policy-&gt;cur;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       freqs.new = target_freq;</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  freqs.new = target_freq;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       cpufreq_freq_transition_begin(policy,
+"Courier New";color:black'>Â Â Â Â Â Â  cpufreq_freq_transition_begin(policy,
 &amp;freqs);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       <span style='background:yellow'>spin_lock(&amp;pcc_lock);</span></span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  <span style='background:yellow'>spin_lock(&amp;pcc_lock);</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -484,25 +484,25 @@ normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       input_buffer = 0x1 | (((target_freq * 100)</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  input_buffer = 0x1 | (((target_freq * 100)</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>                            /
+"Courier New";color:black'>Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â  Â Â Â Â Â Â  /
 (ioread32(&amp;pcch_hdr-&gt;nominal) * 1000)) &lt;&lt; 8);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       iowrite32(input_buffer,</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  iowrite32(input_buffer,</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>                     (pcch_virt_addr +
+"Courier New";color:black'>Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â  (pcch_virt_addr +
 pcc_cpu_data-&gt;input_offset));</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       iowrite16(CMD_SET_FREQ,
+"Courier New";color:black'>Â Â Â Â Â Â  iowrite16(CMD_SET_FREQ,
 &amp;pcch_hdr-&gt;command);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -511,7 +511,7 @@ normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       pcc_cmd();</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  pcc_cmd();</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -519,12 +519,12 @@ normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       /* Clear the input buffer - we are done with
+"Courier New";color:black'>Â Â Â Â Â Â  /* Clear the input buffer - we are done with
 the current command */</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       memset_io((pcch_virt_addr +
+"Courier New";color:black'>Â Â Â Â Â Â  memset_io((pcch_virt_addr +
 pcc_cpu_data-&gt;input_offset), 0, BUF_SZ);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -533,11 +533,11 @@ normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       status = ioread16(&amp;pcch_hdr-&gt;status);</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  status = ioread16(&amp;pcch_hdr-&gt;status);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       iowrite16(0, &amp;pcch_hdr-&gt;status);</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  iowrite16(0, &amp;pcch_hdr-&gt;status);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -545,12 +545,12 @@ normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       cpufreq_freq_transition_end(policy,
+"Courier New";color:black'>Â Â Â Â Â Â  cpufreq_freq_transition_end(policy,
 &amp;freqs, status != CMD_COMPLETE);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       <span style='background:yellow'>spin_unlock(&amp;pcc_lock);</span></span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  <span style='background:yellow'>spin_unlock(&amp;pcc_lock);</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -558,24 +558,24 @@ normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       if (status != CMD_COMPLETE) {</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  if (status != CMD_COMPLETE) {</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>              pr_debug(&quot;target: FAILED for cpu
+"Courier New";color:black'>Â Â Â Â Â Â Â Â Â Â Â Â Â  pr_debug(&quot;target: FAILED for cpu
 %d, with status: 0x%x\n&quot;,</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>                     cpu, status);</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â  cpu, status);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>              return -EINVAL;</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â Â Â Â Â Â Â Â  return -EINVAL;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       }</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  }</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -583,7 +583,7 @@ normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       pr_debug(&quot;target: was SUCCESSFUL for cpu
+"Courier New";color:black'>Â Â Â Â Â Â  pr_debug(&quot;target: was SUCCESSFUL for cpu
 %d\n&quot;, cpu);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -592,7 +592,7 @@ normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>       return 0;</span></p>
+"Courier New";color:black'>Â Â Â Â Â Â  return 0;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -607,7 +607,7 @@ normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 "Arial",sans-serif;color:black'>Another side effect of the of the pcc_cpufreq
 driver is that it can drop the CPU Frequency to run at lower speeds quickly,
 but takes too long to increase the CPU frequency as CPUs become busy, thus
-artificially keeping the CPU frequency low even during busy periods.    The Kparse
+artificially keeping the CPU frequency low even during busy periods.Â Â  Â The Kparse
 Report will show the high and low frequencies of each CPU core in the Power
 Savings Report section:</span></p>
 
@@ -631,31 +631,31 @@ normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>cpu
-node    Events   Cstate1   Cstate2   Cstate3   Cstate4  freq_changes   
-freq_hi   freq_low</span></b></p>
+nodeÂ Â Â  EventsÂ Â  Cstate1Â Â  Cstate2Â Â  Cstate3Â Â  Cstate4Â  freq_changesÂ Â Â 
+freq_hiÂ Â  freq_low</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>0  
-[ 0]         0    27.46%</span><span style='font-size:9.0pt;font-family:"Courier New";
-color:#CC0000'>    51.16%    20.66%     0.72%         1480    2300000   
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>0Â Â 
+[ 0]Â Â Â Â Â Â Â Â  0Â Â Â  27.46%</span><span style='font-size:9.0pt;font-family:"Courier New";
+color:#CC0000'>Â Â Â  51.16%Â Â Â  20.66%Â Â Â Â  0.72%Â Â Â Â Â Â Â Â  1480Â Â Â  2300000Â Â Â 
 1629000</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>1  
-[ 0]         0    26.98%</span><span style='font-size:9.0pt;font-family:"Courier New";
-color:#CC0000'>    40.01%    32.40%     0.61%         1614    2300000   
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>1Â Â 
+[ 0]Â Â Â Â Â Â Â Â  0Â Â Â  26.98%</span><span style='font-size:9.0pt;font-family:"Courier New";
+color:#CC0000'>Â Â Â  40.01%Â Â Â  32.40%Â Â Â Â  0.61%Â Â Â Â Â Â Â Â  1614Â Â Â  2300000Â Â Â 
 1332000</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>2  
-[ 0]         0     1.01%</span><span style='font-size:9.0pt;font-family:"Courier New";
-color:#CC0000'>     8.47%    85.66%     4.86%         1797    2300000   
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>2Â Â 
+[ 0]Â Â Â Â Â Â Â Â  0Â Â Â Â  1.01%</span><span style='font-size:9.0pt;font-family:"Courier New";
+color:#CC0000'>Â Â Â Â  8.47%Â Â Â  85.66%Â Â Â Â  4.86%Â Â Â Â Â Â Â Â  1797Â Â Â  2300000Â Â Â 
 1299000</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>3  
-[ 0]         0     1.65%</span><span style='font-size:9.0pt;font-family:"Courier New";
-color:#CC0000'>    10.64%    82.21%     5.51%         1470    2300000   
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>3Â Â 
+[ 0]Â Â Â Â Â Â Â Â  0Â Â Â Â  1.65%</span><span style='font-size:9.0pt;font-family:"Courier New";
+color:#CC0000'>Â Â Â  10.64%Â Â Â  82.21%Â Â Â Â  5.51%Â Â Â Â Â Â Â Â  1470Â Â Â  2300000Â Â Â 
 1211000</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -674,7 +674,7 @@ normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
 "Arial",sans-serif;color:black'>Reducing the CPU frequency can help promote Turboboost
-in busy CPU cores, however, the pcc_cpufreq driver isn’t efficient in
+in busy CPU cores, however, the pcc_cpufreq driver isnâ€™t efficient in
 increasing the CPU frequency when the CPU core becomes busy.</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -692,7 +692,7 @@ color:black'>&nbsp;</span></b></p>
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;color:black'>The best solution is to disable the
-pcc_cpufreq driver.   This can be done in a variety of ways:</span></p>
+pcc_cpufreq driver.Â Â  This can be done in a variety of ways:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
@@ -700,14 +700,14 @@ font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoListParagraphCxSpFirst style='margin-bottom:0in;margin-bottom:.0001pt;
 text-indent:-.25in;line-height:11.25pt;vertical-align:top'><span lang=EN-US
-style='font-size:10.0pt;font-family:Symbol;color:black'>·<span
+style='font-size:10.0pt;font-family:Symbol;color:black'>Â·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
 color:black'>Change the CPU governor from ondemand to performance</span></p>
 
 <p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
 .0001pt;text-indent:-.25in;line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:Symbol;color:black'>·<span
+lang=EN-US style='font-size:10.0pt;font-family:Symbol;color:black'>Â·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
 color:black'>Use tuned-adm to change profile from throughput-performance to
@@ -715,14 +715,14 @@ latency-performance (or similar)</span></p>
 
 <p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
 .0001pt;text-indent:-.25in;line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:Symbol;color:black'>·<span
+lang=EN-US style='font-size:10.0pt;font-family:Symbol;color:black'>Â·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
 color:black'>Disable Collaborative Power Control in the system BIOS</span></p>
 
 <p class=MsoListParagraphCxSpLast style='margin-bottom:0in;margin-bottom:.0001pt;
 text-indent:-.25in;line-height:11.25pt;vertical-align:top'><span lang=EN-US
-style='font-size:10.0pt;font-family:Symbol;color:black'>·<span
+style='font-size:10.0pt;font-family:Symbol;color:black'>Â·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
 color:black'>blacklist the pcc_cpufreq driver so it does not load at boot</span></p>
@@ -735,7 +735,7 @@ font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;color:black'>Keep in mind that some of the
 solutions above may also limit c-states to 1, which would increase power
-usage.   </span></p>
+usage.Â Â  </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;

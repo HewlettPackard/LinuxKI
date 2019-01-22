@@ -308,6 +308,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define HC_INTR		3
 #define HC_STATES	4
 
+#define SCA_UNKNOWN	0
+#define SCA_MITIGATED	1
+#define SCA_VULNERABLE	2
+
 #define STACK_CONTEXT(pc)   ((pc == STACK_CONTEXT_USER) || (pc == STACK_CONTEXT_KERNEL))
 
 #define END_STACK 0xffffffffffffffffull
@@ -838,7 +842,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 /* macros for managing the Notes and Warnings messages and links.  */
 /* update with warnmsg[] definitions in globals.c */
-#define MAXWARNMSG		21	
+#define MAXWARNMSG		26	
 #define MAXNOTEMSG		0
 #define MAXNOTEWARN		MAXWARNMSG+MAXNOTEMSG
 #define WARN_CPU_BOTTLENECK		0		
@@ -862,6 +866,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARN_SK_BUSY			18
 #define WARN_ADD_RANDOM			19
 #define WARN_MD_FLUSH			20
+#define WARN_HUGETLB_FAULT		21
+#define WARN_KSTAT_IRQS			22
+#define WARN_ORACLE_POLL		23
+#define WARN_PCC_CPUFREQ		24
+#define WARN_SCA_VULN			25
 #define NOTE_NUM1		MAXWARNMSG+0
 
 /* warn flags passed to "foreach" functions for detection */
@@ -884,6 +893,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARNF_MULTIPATH_BUG		0x10000ull
 #define WARNF_ADD_RANDOM		0x20000ull
 #define WARNF_MD_FLUSH			0x40000ull
+#define WARNF_ORACLE_POLL		0x80000ull
 
 /* warn flags specific to Oracle warnflag
 #define WARNF_ORASCHED			0x01ull
@@ -899,6 +909,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 /* warn flags specific to hardclocks warnflag */ 
 #define WARNF_SEMLOCK			0x1ull
 #define WARNF_SK_BUSY			0x2ull
+#define WARNF_HUGETLB_FAULT		0x4ull
+#define WARNF_KSTAT_IRQS		0x8ull
+#define WARNF_PCC_CPUFREQ		0x10ull
 
 typedef struct warnmsg_entry{
 	char *msg;
@@ -1742,6 +1755,7 @@ typedef struct fd_info {
 	int		ftype;
 	int 		rndio_flag;
 	int		multiple_fnames;
+	int 		closed;
 	struct fd_stats	stats;
 } fd_info_t;
 
@@ -2070,9 +2084,13 @@ typedef struct server_info {
 	uint32 cache_insert_cnt;
 	uint32 cache_evict_cnt;
 	char HT_enabled;
+	char SNC_enabled;
 	char VM_guest;
 	char MSR_enabled;
 	float clk_mhz;
+
+	/* Kernel Side Channel Attacks (Spectre/Meltdown) fixes */
+	int scavuln;
 } server_info_t;
 
 /* hash of pids belonging to same docker container */

@@ -147,6 +147,7 @@ docker_init_func(void *v)
 	}
 
 	parse_cpuinfo();
+	if (is_alive) parse_cpumaps();
 	parse_kallsyms();
 	parse_devices();
 	parse_docker_ps();
@@ -161,6 +162,7 @@ docker_init_func(void *v)
 	pid_csvfile = open_csv_file("kipid", 1);
 
 	if (is_alive) return;
+	parse_mpsched();
 	parse_proc_cgroup();
 	parse_pself();
 	parse_edus();

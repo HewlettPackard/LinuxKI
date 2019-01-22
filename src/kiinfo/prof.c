@@ -37,6 +37,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <ncurses.h>
 #include <curses.h>
 
+extern int pc_hugetlb_fault;
+extern int pc_huge_pmd_share;
+extern int pc_queued_spin_lock_slowpath;
+extern int pc_SYSC_semtimedop;
+extern int pc_semtimedop;
+extern int pc_semctl;
+extern int pc_rwsem_down_write_failed;
+extern int pc_kstat_irqs_usr;
+extern int pc_pcc_cpufreq_target;
+
 
 int prof_dummy_func(void *, void *);
 int prof_ftrace_print_func(void *, void *);
@@ -83,6 +93,7 @@ prof_init_func(void *v)
 	}
 	
 	parse_cpuinfo();
+	parse_mpsched();
 	parse_kallsyms();
 	if (is_alive) load_objfile_and_shlibs();
 
@@ -373,7 +384,8 @@ int
 hc_print_stktrc(void *p1, void *p2)
 {
 	stktrc_info_t *stktrcp = (stktrc_info_t *)p1;
-	hc_info_t *hcinfop = (hc_info_t *)p2;
+	print_pc_args_t *print_pc_args = (print_pc_args_t *)p2;
+	hc_info_t *hcinfop = print_pc_args->hcinfop;
 	pid_info_t *pidp;
 	vtxt_preg_t *pregp;
         float avg, wpct;
@@ -381,6 +393,12 @@ hc_print_stktrc(void *p1, void *p2)
 	char *sym;
 	uint64 offset;
         int i;
+	int hugetlb_fault_warn_cnt = 0;
+	int semlock_warn_cnt = 0;
+	int kstat_irqs_warn_cnt = 0;
+	int queued_spin_lock_slowpath_cnt = 0;
+	int rwsem_down_write_failed_cnt = 0;
+	int cpufreq_warn_cnt = 0;
 
 	if (stktrcp->cnt == 0) return 0;
 
@@ -393,10 +411,41 @@ hc_print_stktrc(void *p1, void *p2)
 			continue;
 		} else if (key == STACK_CONTEXT_USER) {
 			pid_printf ("  |");
-		} else if ((globals->symtable) && (key < globals->nsyms-1)) {
-			pid_printf ("  %s", globals->symtable[key].nameptr);
 		} else if (key == UNKNOWN_SYMIDX) {
 			pid_printf ("  unknown");
+		} else if ((globals->symtable) && (key < globals->nsyms-1)) {
+			if (kparse_flag && print_pc_args->warnflagp) {
+				if (stktrcp->cnt >= 250) { 
+					/* cannot use the pc key as there can be more than one queued_spin_lock_slowpath function in kallsyms */
+				 	if (strcmp(globals->symtable[key].nameptr, "queued_spin_lock_slowpath") == 0) queued_spin_lock_slowpath_cnt++;
+				 	if (key == pc_rwsem_down_write_failed) rwsem_down_write_failed_cnt++;
+					if (rwsem_down_write_failed_cnt && ((key == pc_hugetlb_fault) || (key == pc_huge_pmd_share))) 
+						hugetlb_fault_warn_cnt=2;
+					else if (queued_spin_lock_slowpath_cnt && ((key == pc_semctl) || (key == pc_SYSC_semtimedop) || (key == pc_semtimedop)))
+						semlock_warn_cnt=2;
+					else if (key == pc_kstat_irqs_usr) kstat_irqs_warn_cnt=2;
+					else if (key == pc_pcc_cpufreq_target) cpufreq_warn_cnt=2;
+				}
+
+				if (hugetlb_fault_warn_cnt >= 2) {
+					RED_FONT;
+					*print_pc_args->warnflagp |= WARNF_HUGETLB_FAULT;
+					hugetlb_fault_warn_cnt = 1;
+				} else if (semlock_warn_cnt >= 2) {
+					RED_FONT;
+					*print_pc_args->warnflagp |= WARNF_SEMLOCK;
+					semlock_warn_cnt = 1;
+				} else if (kstat_irqs_warn_cnt >= 2) {
+					RED_FONT;
+					*print_pc_args->warnflagp |= WARNF_KSTAT_IRQS;
+					kstat_irqs_warn_cnt = 0;
+				} else if (cpufreq_warn_cnt >= 2) {
+					RED_FONT;
+					*print_pc_args->warnflagp |= WARNF_PCC_CPUFREQ;
+				}
+			}
+			pid_printf ("  %s", globals->symtable[key].nameptr);
+			BLACK_FONT;
 		} else if (stktrcp->pidp) {
 			pidp = stktrcp->pidp;
 			if (pidp->PID != pidp->tgid) {
@@ -473,6 +522,7 @@ prof_print_percpu_symbols(uint32 count)
         cpu_info_t *cpuinfop;
         hc_info_t *ghcinfop, *hcinfop;
         uint64  total;
+	print_pc_args_t print_pc_args;
 
         ghcinfop = (hc_info_t *)globals->hcinfop;
         if (ghcinfop->total == 0) return 0;
@@ -484,6 +534,9 @@ prof_print_percpu_symbols(uint32 count)
 		hcinfop = cpuinfop->hcinfop;
                 if ((hcinfop->cpustate[HC_SYS] == 0) && (hcinfop->cpustate[HC_INTR] == 0)) continue;
                 if (hcinfop->pc_hash == NULL) continue;
+
+		print_pc_args.hcinfop = hcinfop;
+		print_pc_args.warnflagp = NULL;
 
                 printf("\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
                 printf("Kernel Functions for CPU  %d \n",i);
@@ -498,7 +551,7 @@ prof_print_percpu_symbols(uint32 count)
                 printf("\nnon-idle CPU %d  HARDCLOCK STACK TRACES (sort by count):\n\n",i);
                 printf("   Count     Pct  Stack trace\n");
                 printf("============================================================\n");
-                foreach_hash_entry((void **)hcinfop->hc_stktrc_hash, STKTRC_HSIZE, hc_print_stktrc, stktrc_sort_by_cnt, nsym, (void *)hcinfop);
+                foreach_hash_entry((void **)hcinfop->hc_stktrc_hash, STKTRC_HSIZE, hc_print_stktrc, stktrc_sort_by_cnt, nsym, (void *)&print_pc_args);
             }
         }
 
@@ -609,10 +662,15 @@ int
 prof_print_report(int ptype)
 {
 	hc_info_t *hcinfop = (hc_info_t *)globals->hcinfop;
+	print_pc_args_t print_pc_args;
+
 	if (hcinfop == NULL || hcinfop->total == 0) {
 		printf ("%sNo HARDCLOCK entries found\n", tab);
 		return 0;
 	}
+
+	print_pc_args.hcinfop = hcinfop;
+	print_pc_args.warnflagp = NULL;
 
 	tab=tab0;
 	lineno = 1;
@@ -634,7 +692,7 @@ prof_print_report(int ptype)
         printf("\nnon-idle GLOBAL HARDCLOCK STACK TRACES (sort by count):\n\n");
         printf("   Count     Pct  Stack trace\n");
         printf("============================================================\n");
-        foreach_hash_entry((void **)hcinfop->hc_stktrc_hash, STKTRC_HSIZE, hc_print_stktrc, stktrc_sort_by_cnt, nsym, (void *)hcinfop);
+        foreach_hash_entry((void **)hcinfop->hc_stktrc_hash, STKTRC_HSIZE, hc_print_stktrc, stktrc_sort_by_cnt, nsym, (void *)&print_pc_args);
 
 
 	printf ("\n******** PERCPU HARDCLOCK REPORT ********\n");

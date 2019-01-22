@@ -21,6 +21,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/sem.h>
+#include <sys/sysmacros.h>
 /*
 #include <linux/in.h>
 #include <linux/in6.h>
@@ -1052,6 +1053,30 @@ ioflags(uint64 f)
 
 	return(str);
 }
+
+int
+flush_flag(uint64 f) 
+{
+	int i;
+	uint64 cmd_flags;
+
+	cmd_flags = (f & globals->cmd_flag_mask) >> globals->cmd_flag_shift;
+
+	for (i = 0; i < REQ_NRBIT; i++) {   	
+		if (globals->io_flags[i] == NULL) continue;
+		if ((cmd_flags & (1 << i)) && 
+		    ((strcmp(globals->io_flags[i],"FLUSH") == 0) ||
+		    (strcmp(globals->io_flags[i],"SYNC") == 0))) {
+			 return 1;
+		}
+	}
+
+	return 0;
+}
+
+
+
+
 
 void
 set_gfpflags()

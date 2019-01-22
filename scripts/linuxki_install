@@ -19,10 +19,15 @@ echo -e \\tFinishing installation of the Linux KI Toolset ...
 # Configure/install kiinfo binary
 #
 ARCH=`uname -m`
-if ([ "$ARCH" = "x86_64" ] || [ "$ARCH" = "amd64" ]); then
+if ([ "$ARCH" == "x86_64" ] || [ "$ARCH" == "amd64" ]); then
 	rm /opt/linuxki/kiinfo >/dev/null 2>&1
-	ln /opt/linuxki/kiinfo.x86_64 /opt/linuxki/kiinfo
-elif [ "$ARCH" = "aarch64" ]; then
+	grep "SUSE Linux Enterprise Server 15" /etc/os-release >/dev/null 2>&1
+	if [ $? == 0 ]; then
+		ln /opt/linuxki/kiinfo.sles15 /opt/linuxki/kiinfo
+	else
+		ln /opt/linuxki/kiinfo.x86_64 /opt/linuxki/kiinfo
+	fi
+elif [ "$ARCH" == "aarch64" ]; then
 	rm /opt/linuxki/kiinfo >/dev/null 2>&1
 	ln /opt/linuxki/kiinfo.aarch64 /opt/linuxki/kiinfo
 else

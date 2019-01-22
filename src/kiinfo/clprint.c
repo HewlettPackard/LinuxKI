@@ -273,15 +273,27 @@ int
 cl_perserver_info (void *arg1, void *arg2)
 {
 	server_info_t *serverp = (server_info_t *)arg1;
+	char scavuln;
+
 	if (debug) printf ("cl_perserver_info\n");
 
+	switch (serverp->scavuln) {
+		case SCA_MITIGATED:  scavuln = 'Y'; break; 
+		case SCA_VULNERABLE:  scavuln = 'N'; break; 
+		default:  scavuln = '?'; 
+	}
+
+	if (serverp->scavuln == SCA_UNKNOWN) scavuln = '?';
+	
+
 	SERVER_URL_FIELD16(serverp);
-	printf (" %-30s %5d %4s %5d   %8dM %9.2f  %s",
+	printf (" %-30s %5d %4s %5d   %8dM   %6c   %7.2f   %s",
 		serverp->os_vers,
 		serverp->nlcpu,
 		serverp->HT_enabled ? "Y" : "N",
 	        serverp->nldom > 0 ? serverp->nldom : 1,
 		serverp->memkb / 1024,
+		scavuln,
 		serverp->total_secs,
 		serverp->subdir);
 
@@ -294,7 +306,7 @@ cl_sys_summary()
 	if (debug) printf ("cl_sys_summary\n");
 	
 	ITALIC_U("basic system info"); printf("\n");
-	BOLD("Server           Linux Version                   CPUs   HT Nodes      Memory   TotTime  Subdir\n");
+	BOLD("Server           Linux Version                   CPUs   HT Nodes      Memory   SCAfix   TotTime  Subdir\n");
 	foreach_server(cl_perserver_info, NULL, 0, NULL);
 	CSV_FIELD("kiall", "[CSV]");
 }

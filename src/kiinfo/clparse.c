@@ -126,6 +126,7 @@ clparse_init_func(void *v)
         dsk_io_sizes[8]= 1000;
 
 	parse_cpuinfo();
+	parse_mpsched();
 	parse_kallsyms();
 	parse_devices();
         parse_ll_R();
@@ -139,6 +140,7 @@ clparse_init_func(void *v)
         	parse_jstack();
         	parse_mpath();
 		parse_mem_info();
+		parse_scavuln(0);
 		parse_uname(cluster_flag);
 
 		if (vis) vis_clparse_init();

@@ -15,6 +15,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define _LNK_TOC	"TOC"
 #define _LNK_WARN	"warncheck"
 #define _LNK_0_1_0	"cmdline"
+#define _LNK_0_2_0	"sca_vuln"
 #define _LNK_1_0	"Section1"
 #define _LNK_1_1	"subsection1.1"
 #define _LNK_1_1_1	"subsection1.1.1"
@@ -122,6 +123,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define _HTTP_SK_BUSY "sk_busy_loop.htm"
 #define _HTTP_ADD_RANDOM "add_random.htm"
 #define _HTTP_MD_FLUSH "md_flush.htm"
+#define _HTTP_HUGETLB_FAULT "hugetlb_fault.htm"
+#define _HTTP_KSTAT_IRQS "kstat_irqs.htm"
+#define _HTTP_ORACLE_POLL "oracle_polling.htm"
+#define _HTTP_PCC_CPUFREQ "pcc_cpufreq.htm"
+#define _HTTP_SSA_VULN "sca_vuln.htm"
 #define _HTTP_4_5 "#subsection4.5"
 
 #define _MSG_LINK_INFO \

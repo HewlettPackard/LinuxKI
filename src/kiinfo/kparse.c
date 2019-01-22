@@ -134,9 +134,13 @@ kparse_init_func(void *v)
 	parse_devices();
 	parse_docker_ps();
         parse_ll_R();
-	if (is_alive) return;	
+	if (is_alive) {
+		parse_cpumaps();
+		return;	
+	}
 
 	if (timestamp) {
+		parse_mpsched();
 		parse_proc_cgroup();
 		parse_uname(0);
         	parse_lsof();

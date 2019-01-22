@@ -25,7 +25,7 @@
 # Remove the Docker image if it exists.
 #
 
-if docker image inspect linuxki &> /dev/null; then
+if docker image inspect linuxki 2> /dev/null; then
 	docker rmi --force linuxki
 fi
 

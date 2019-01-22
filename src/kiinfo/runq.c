@@ -126,6 +126,8 @@ runq_init_func(void *v)
 	}
 
 	parse_cpuinfo();
+	parse_scavuln(0);
+	if (is_alive) parse_cpumaps();
 
 	/* clear the system call specific actions as they aren't needed with kirunq */
 	/* may need to revist for fork/clone/exec calls */
@@ -134,6 +136,7 @@ runq_init_func(void *v)
 	}
 
 	if (timestamp) {
+		parse_mpsched();
 		parse_pself();
 		parse_edus();
 		parse_jstack();
@@ -841,6 +844,7 @@ print_HT_report()
             }
 	}
 
+	TEXT("\n");
         BOLD("%s     PCPU     double idle   lcpu1 busy   lcpu2 busy  double busy\n", tab);
         for (i = 0; i < MAXCPUS; i++) {
                 pcpuinfop = FIND_PCPUP(globals->pcpu_hash, i);
@@ -1467,6 +1471,7 @@ print_stktrc_info(void *p1, void *p2)
 	int xfs_dio_align_warn_cnt = 0;
 	int xfs_dioread_warn_cnt = 0;
 	int md_flush_warn_cnt = 0;
+	int kstat_irqs_warn_cnt = 0;
 
 	if (print_stktrc_args == NULL) return 0;
 	if (stktrcp->cnt == 0) return 0;
@@ -1481,7 +1486,7 @@ print_stktrc_info(void *p1, void *p2)
 				if (stktrcp->cnt > 10000) {
 					if ((key == pc_md_flush_request)  || (key == pc_blkdev_issue_flush)) md_flush_warn_cnt++;
 				} else if (stktrcp->cnt > 1000) {
-					if ((key == pc_sleep_on_page)  || (key == pc_migration_entry_wait)) migrate_warn_cnt++;
+					if ((key == pc_sleep_on_page)  || (key == pc_migration_entry_wait)) migrate_warn_cnt++; 
 				} else if (stktrcp->cnt > 500) {
 					if ((key == pc_mutex_lock) || ((key == pc_xfs_file_aio_read) || (key == pc_xfs_file_read_iter)))
 						xfs_dioread_warn_cnt++;

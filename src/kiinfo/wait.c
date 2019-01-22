@@ -80,10 +80,12 @@ wait_init_func(void *v)
 	}
 	
 	parse_cpuinfo(); 
+	if (is_alive) parse_cpumaps();
 	parse_kallsyms();
 	parse_docker_ps();
 
 	if (timestamp) {
+		parse_mpsched(); 
 		parse_proc_cgroup();
 		parse_pself();
 		parse_edus();

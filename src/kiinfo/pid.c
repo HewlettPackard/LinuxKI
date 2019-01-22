@@ -156,10 +156,12 @@ pid_init_func(void *v)
         parse_ll_R();
 
 	if (is_alive) {
+		parse_cpumaps();
 		load_objfile_and_shlibs();
 		return;
 	}
 
+	parse_mpsched();
 	parse_proc_cgroup();
 	parse_pself();
 	parse_edus();
@@ -312,6 +314,7 @@ void
 cpu_report(pid_info_t *pidp, void *v)
 {
 	hc_info_t *hcinfop;
+	print_pc_args_t print_pc_args;
 	uint64 runtime;
 	
 	if (pidp->hcinfop == NULL) { 
@@ -320,6 +323,9 @@ cpu_report(pid_info_t *pidp, void *v)
 	} 
 
 	hcinfop = pidp->hcinfop;
+        print_pc_args.hcinfop = hcinfop;
+        print_pc_args.warnflagp = NULL;
+
 	runtime = sched_get_runtime(pidp);
 
 	csv_printf (pid_csvfile, ",%d,%d,%d,%d", hcinfop->total, 
@@ -361,7 +367,7 @@ cpu_report(pid_info_t *pidp, void *v)
 
         pid_printf("\n       Count     Pct  HARDCLOCK Stack trace\n", tab);
         pid_printf("       ============================================================\n", tab);
-        foreach_hash_entry((void **)hcinfop->hc_stktrc_hash, STKTRC_HSIZE, hc_print_stktrc, stktrc_sort_by_cnt, nsym, (void *)hcinfop);
+        foreach_hash_entry((void **)hcinfop->hc_stktrc_hash, STKTRC_HSIZE, hc_print_stktrc, stktrc_sort_by_cnt, nsym, (void *)&print_pc_args);
 	
 }
 

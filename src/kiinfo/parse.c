@@ -34,6 +34,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "developers.h"
 #include "globals.h"
 #include "info.h"
+#include "html.h"
 #include "oracle.h"
 #include "hash.h"
 #include <sys/utsname.h>
@@ -53,6 +54,16 @@ int pc_inode_dio_wait = -1;
 int pc_xfs_file_dio_aio_write = -1;
 int pc_md_flush_request = -1;
 int pc_blkdev_issue_flush = -1;
+int pc_hugetlb_fault = -1;
+int pc_huge_pmd_share = -1;
+int pc_SYSC_semtimedop = -1;
+int pc_queued_spin_lock_slowpath = -1;
+int pc_rwsem_down_write_failed = -1;
+int pc_mutex_lock_slowpath = -1;
+int pc_kstat_irqs_usr = -1;
+int pc_pcc_cpufreq_target = -1;
+
+
 void
 parse_uname(char print_flag)
 {
@@ -585,7 +596,72 @@ parse_cpuinfo()
 }
 	
 
+/* parse_cpumaps */
+void
+parse_cpumaps()
+{
+	FILE *f = NULL;
+	char fname[64];
+	char *rtnptr, *pos;
+	int i, n, lcpu, ldom, nldom, nlcpu, nitems;
+	unsigned int cpumask;
+	cpu_info_t *cpuinfop;
+	int item[64];
+
+	if (!is_alive) {
+		return;
+	}
+	
+	if (debug) printf ("parse_cpumaps()\n");
+
+	for (ldom=0; ldom < MAXLDOMS; ldom++) {
+		sprintf (fname, "/sys/devices/system/node/node%d/cpumap", ldom);
+        	if ( (f = fopen(fname,"r")) == NULL) {
+                	break;
+        	}
+
+		rtnptr = fgets((char *)&input_str, 511, f);
+		if (rtnptr == NULL) break;
+
+		nitems = sscanf (rtnptr, "%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x,%x", 
+			&item[0], &item[1], &item[2], &item[3], &item[4], &item[5], &item[6], &item[7],
+			&item[8], &item[9], &item[10], &item[11], &item[12], &item[13], &item[14], &item[15],
+			&item[16], &item[17], &item[18], &item[19], &item[20], &item[21], &item[22], &item[23],
+			&item[24], &item[25], &item[26], &item[27], &item[28], &item[29], &item[30], &item[31],
+			&item[32], &item[33], &item[34], &item[35], &item[36], &item[37], &item[38], &item[39],
+			&item[40], &item[41], &item[42], &item[43], &item[44], &item[45], &item[46], &item[47],
+			&item[48], &item[49], &item[50], &item[51], &item[52], &item[53], &item[54], &item[55],
+			&item[56], &item[57], &item[58], &item[59], &item[60], &item[61], &item[62], &item[63]);
+			
+		lcpu=0;
+		for (n = nitems-1; n >= 0; n--) {
+			cpumask=item[n];
+			for (i = 0; i < 32; i++, lcpu++) {
+				if (lcpu >= globals->nlcpu) break;
+				if (cpumask & (1<<i)) {
+					/* CPU is enabled for this node */
+					cpuinfop = GET_CPUP(&globals->cpu_hash, lcpu);
+					cpuinfop->ldom = ldom;
+					cpuinfop->cpu = lcpu;
+				}
+			}
+		}
+
+		
+	}
+
+	if ((ldom > 0) && (ldom != globals->nldom)) {
+		globals->nldom = ldom;
+		globals->SNC_enabled = TRUE;
+	}
+}
+
+
+
+
 /* parse_mpsched */
+/* Normally, we use cpuinfo for ldom assignments, but this is for Sub-Numa Clustering (SNC) */
+/* This should be called after parse_cpuinfo() */
 void
 parse_mpsched()
 {
@@ -594,9 +670,11 @@ parse_mpsched()
 	char *rtnptr;
 	int i, ret;
 	cpu_info_t *cpuinfop;
-	int cpu[32], ldom;
-	short nitems;
+	int cpu[64], ldom, nlcpu;
+	short nitems, nldom;
 	char parse_start = FALSE;
+
+	if (is_alive) return;
 
 	sprintf (fname, "mpsched.%s", timestamp);
         if ( (f = fopen(fname,"r")) == NULL) {
@@ -605,6 +683,8 @@ parse_mpsched()
                 return;
         }
 
+	nldom=0;
+	nlcpu=0;
 	while (1) {
 		rtnptr = fgets((char *)&input_str, 511, f);
 		if (rtnptr == NULL)  {
@@ -625,18 +705,28 @@ parse_mpsched()
 			&cpu[0], &cpu[1], &cpu[2], &cpu[3], &cpu[4], &cpu[5], &cpu[6], &cpu[7],
 			&cpu[8], &cpu[9], &cpu[10], &cpu[11], &cpu[12], &cpu[13], &cpu[14], &cpu[15],
 			&cpu[16], &cpu[17], &cpu[18], &cpu[19], &cpu[20], &cpu[21], &cpu[22], &cpu[23],
-			&cpu[24], &cpu[25], &cpu[26], &cpu[27], &cpu[28], &cpu[29], &cpu[30], &cpu[31]);
+			&cpu[24], &cpu[25], &cpu[26], &cpu[27], &cpu[28], &cpu[29], &cpu[30], &cpu[31],
+			&cpu[32], &cpu[33], &cpu[34], &cpu[35], &cpu[36], &cpu[37], &cpu[38], &cpu[39],
+			&cpu[40], &cpu[41], &cpu[42], &cpu[43], &cpu[44], &cpu[45], &cpu[46], &cpu[47],
+			&cpu[48], &cpu[49], &cpu[50], &cpu[51], &cpu[52], &cpu[53], &cpu[54], &cpu[55],
+			&cpu[56], &cpu[57], &cpu[58], &cpu[59], &cpu[60], &cpu[61], &cpu[62], &cpu[63]);
 
 		if (nitems > 1) {
-			globals->nldom++;
+			nldom++;
 			
 			for (i = 0; i < (nitems - 1); i++) {
 				cpuinfop = GET_CPUP(&globals->cpu_hash, cpu[i]);
 				cpuinfop->ldom = ldom;
 				cpuinfop->cpu = cpu[i];
-				globals->nlcpu++;
+				nlcpu++;
 			}
 		}
+	}
+
+	if ((nldom > 1) && (nldom != globals->nldom)) {
+		globals->nldom = nldom;
+		globals->nlcpu = nlcpu;
+		globals->SNC_enabled = TRUE;
 	}
 	fclose(f);
 }
@@ -1436,6 +1526,14 @@ parse_kallsyms()
 		else if (strcmp(globals->symtable[i].nameptr, "sleep_on_page") == 0)  pc_sleep_on_page = i; 
 		else if (strcmp(globals->symtable[i].nameptr, "md_flush_request") == 0)  pc_md_flush_request = i; 
 		else if (strcmp(globals->symtable[i].nameptr, "blkdev_issue_flush") == 0)  pc_blkdev_issue_flush = i; 
+		else if (strcmp(globals->symtable[i].nameptr, "queued_spin_lock_slowpath") == 0) pc_queued_spin_lock_slowpath = i;
+		else if (strcmp(globals->symtable[i].nameptr, "rwsem_down_write_failed") == 0)  pc_rwsem_down_write_failed = i; 
+		else if (strcmp(globals->symtable[i].nameptr, "hugetlb_fault") == 0)  pc_hugetlb_fault = i; 
+		else if (strcmp(globals->symtable[i].nameptr, "huge_pmd_share") == 0)  pc_huge_pmd_share = i; 
+		else if (strcmp(globals->symtable[i].nameptr, "SYSC_semtimedop") == 0)  pc_SYSC_semtimedop = i; 
+		else if (strcmp(globals->symtable[i].nameptr, "kstat_irqs_usr") == 0)  pc_kstat_irqs_usr = i; 
+		else if (strcmp(globals->symtable[i].nameptr, "__mutex_lock_slowpath") == 0)  pc_mutex_lock_slowpath = i; 
+		else if (strcmp(globals->symtable[i].nameptr, "pcc_cpufreq_target") == 0)  pc_pcc_cpufreq_target = i; 
 	}
 }
 
@@ -1851,3 +1949,44 @@ parse_proc_cgroup()
 
 	fclose(f);
 }
+
+void 
+parse_scavuln(char print_flag)
+{
+	FILE *f = NULL;
+	char fname[30];
+	char *rtnptr;
+	char varname[30];
+
+	globals->scavuln = SCA_UNKNOWN;
+	if (is_alive) {
+		return;
+	} else {
+		sprintf(fname, "scavuln.%s", timestamp);
+	}
+
+	if ( (f = fopen(fname,"r")) == NULL) {
+		/* 
+		printf ("Unable to open file %s, errno %d\n", fname, errno);
+		printf ("Continuing without memory info.\n");
+		*/
+		if (print_flag) printf ("runki from LinuxKI version 5.8 needed to capture Side-Channel Attack Mitigation information\n");
+		return;
+	}
+
+	globals->scavuln = SCA_VULNERABLE;
+	rtnptr = fgets((char *)&input_str, 127, f);
+	if (rtnptr == NULL ) {
+		if (print_flag) printf ("Kernel does not support Side-Channel Attack Mitigations\n");
+	} else {
+	    	while (rtnptr != NULL) {
+			if (print_flag) printf("%s", rtnptr);
+			if (strstr(input_str, "Mitigat")) {
+				globals->scavuln = SCA_MITIGATED;
+			}
+
+			rtnptr = fgets((char *)&input_str, 127, f);
+		}
+	}
+}
+

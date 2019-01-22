@@ -30,11 +30,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "scsi.h"
 
 #define BLOCK_RQ_CMD	5
+#define INVALID_SECTOR(sector)  ((sector == 0) || (sector == 0xffffffffffffffff) || (sector == 0x7ffffffffff) || (sector == 0x7fff00000000))
 /*  The BARRIER_IO macros is bad since the cmd_flags are ever changing, need to revisit */
+/*  This is the bad Barrier IO below 
 #define BARRIER_IO(ptr) (((ptr->sector == 0) || (ptr->sector == 0xffffffffffffffff)) && (ptr->nr_sectors == 0) && 	\
 			((ptr->cmd_flags & globals->sync_bit) || (reqop(ptr->cmd_flags) == IO_WRITE)))
+*/
+#define BARRIER_IO(ptr) (INVALID_SECTOR(ptr->sector) && flush_flag(ptr->cmd_flags))
 
-#define INVALID_SECTOR(sector)  (sector == 0) || (sector == 0xffffffffffffffff) || (sector == 0x7ffffffffff) || (sector == 0x7fff00000000)
+
+
 
 static inline int
 incr_insert_iostats (block_rq_insert_t *rec_ptr, iostats_t *statp, int *rndio_flagp)
@@ -759,7 +764,7 @@ block_rq_complete_func(void *a, void *v)
 		incr_trc_stats(rec_ptr, pidp);
 	}
 
-        if (kitrace_flag && !filter_flag && INVALID_SECTOR(rec_ptr->sector)) { 
+        if ((kitrace_flag && !filter_flag) ||  (INVALID_SECTOR(rec_ptr->sector) && !BARRIER_IO(rec_ptr))) { 
 		if ((rec_ptr->nr_sectors==0) && rec_ptr->bytes && !IS_LIKI) {
                 	scsi_cmd_addr = (char *)trcinfop->cur_rec + block_rq_complete_attr[BLOCK_RQ_CMD].offset;
         	}

@@ -150,6 +150,8 @@ print_mem_info()
 void 
 kp_sys_summary ()
 {
+	int warn_indx;
+
 	if (debug) printf ("kp_sys_summary\n");
 	
 	HR;
@@ -157,14 +159,25 @@ kp_sys_summary ()
 	if (globals->VM_guest) {
 		BOLD("Virtual Machine Guest\n");
 	}
-	BOLD("Number of CPU's   : %d\n", globals->ncpu);
-	if (globals->HT_enabled) BOLD("Number of LCPU's  : %d\n", globals->nlcpu);
-	if (globals->nldom > 0) BOLD("Number of NODE's  : %d\n", globals->nldom);
+	BOLD("Number of CPUs   : %d\n", globals->ncpu);
+	if (globals->HT_enabled)  BOLD("Number of LCPUs  : %d\n", globals->nlcpu);
+	if (globals->nldom > 0)   BOLD("Number of NODEs  : %d\n", globals->nldom);
+	if (globals->SNC_enabled) BOLD("Sub-NUMA Cluster enabled\n");
 
 	T("\n");
 	print_cmdline();
 	T("\n");
 	print_mem_info(); 		
+
+	T("\n");
+	ANM(_LNK_0_2_0);
+	BOLD("Side-Channel Attack (Spectre/Meltdown) Mitigations:\n");
+	parse_scavuln(1);
+
+	if (globals->scavuln == SCA_MITIGATED) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SCA_VULN, _LNK_0_2_0);
+                kp_warning(globals->warnings, warn_indx, _LNK_0_2_0); T("\n");
+        }
 }
 
 void kp_toc()
@@ -657,6 +670,12 @@ kp_trc_type (void *arg1, void *arg2)
 			trctyp_argp->warnflag |= WARNF_SEMGET;
 		}
 
+		if ((trctyp_argp->warnflag == 0) && strstr("poll", syscall_arg_list[syscall_index[syscallno]].name) && 
+		    (syscall_statsp->count > 10000) && ((syscall_statsp->total_time / syscall_statsp->count) < 2000)) {
+			RED_FONT;
+			trctyp_argp->warnflag |= WARNF_ORACLE_POLL;
+		}
+
                 if (ftype) 
                         sprintf (ftypestr, "%s (%s)", syscall_arg_list[syscall_index[syscallno]].name, ftype_name_index[ftype]);
                 else 
@@ -669,8 +688,7 @@ kp_trc_type (void *arg1, void *arg2)
 		mode,
                 SECS(syscall_statsp->total_time),
                 SECS(syscall_statsp->max_time),
-                SECS(syscall_statsp->total_time) / (trcp->count*1.0),
-		syscall_statsp->errors);
+                SECS(syscall_statsp->total_time) / (trcp->count*1.0), syscall_statsp->errors);
 		BLACK_FONT;
         } else {
                 printf("%-8d %6.2f%%  %-77s",
@@ -804,6 +822,9 @@ kp_pid_traces(void *arg1, void *arg2)
         if ((local_trctyp_arg.warnflag & WARNF_SEMGET) && (strstr(pidp->cmd, "dw.") || strstr(pidp->cmd, "work"))) {
 		trctyp_arg->warnflag |= WARNF_SEMGET;
 	}
+        if ((local_trctyp_arg.warnflag & WARNF_ORACLE_POLL) && ((strncmp(pidp->cmd, "oracle", 6) == 0))) {
+		trctyp_arg->warnflag |= WARNF_ORACLE_POLL;
+	}
 
         return 0;
 }
@@ -831,6 +852,12 @@ kp_top_pid_trace_types()		/* Section 1.3.3 */
 	/* Warn if SAP disp+work processes do excessive SEMGET calls */
 	if (trctyp_arg.warnflag & WARNF_SEMGET) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SEMGET, _LNK_1_3_3);
+		kp_warning(globals->warnings, warn_indx, _LNK_1_3_3); T("\n");
+	}
+
+	/* Warn if oracle processes do excessive poll() calls */
+	if (trctyp_arg.warnflag & WARNF_ORACLE_POLL) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_ORACLE_POLL, _LNK_1_3_3);
 		kp_warning(globals->warnings, warn_indx, _LNK_1_3_3); T("\n");
 	}
 
@@ -979,11 +1006,17 @@ kp_hc_kernfuncs()			/* Section 1.4.3 */
 	}
 }
 
+extern int pc_queued_spin_lock_slowpath;
+extern int pc_semctl;
+extern int pc_rwsem_down_write_failed;
+
 void
 kp_hc_stktraces()			/* Section 1.4.4 */
 {
         hc_info_t *hcinfop;
+	print_pc_args_t print_pc_args;
         int warn_indx;
+	uint64 warnflag = 0;
 
         ORANGE_TABLE;
         TEXT("\n");
@@ -999,12 +1032,34 @@ kp_hc_stktraces()			/* Section 1.4.4 */
         TEXT("\n");
 
         hcinfop = globals->hcinfop;
+        print_pc_args.hcinfop = hcinfop;
+        print_pc_args.warnflagp = &warnflag;
 	if (hcinfop && hcinfop->total && hcinfop->pc_hash) {
         	BOLD("   Count     Pct  Stack trace\n");
-        	foreach_hash_entry((void **)hcinfop->hc_stktrc_hash, STKTRC_HSIZE, hc_print_stktrc, stktrc_sort_by_cnt, 40, (void *)hcinfop);
+        	foreach_hash_entry((void **)hcinfop->hc_stktrc_hash, STKTRC_HSIZE, hc_print_stktrc, stktrc_sort_by_cnt, 50, (void *)&print_pc_args);
 	} else {
                 BOLD("No Hardclock Entries Found\n");
         }
+
+	if ((*print_pc_args.warnflagp) & WARNF_SEMLOCK) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SEMLOCK, _LNK_1_4_4);
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); T("\n");
+	}
+
+	if ((*print_pc_args.warnflagp) & WARNF_HUGETLB_FAULT) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_HUGETLB_FAULT, _LNK_1_4_4);
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); T("\n");
+	}
+
+	if ((*print_pc_args.warnflagp) & WARNF_KSTAT_IRQS) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_KSTAT_IRQS, _LNK_1_4_4);
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); T("\n");
+	}
+
+	if ((*print_pc_args.warnflagp) & WARNF_PCC_CPUFREQ) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_PCC_CPUFREQ, _LNK_1_4_4);
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); T("\n");
+	}
 }
 
 void

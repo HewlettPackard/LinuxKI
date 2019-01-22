@@ -348,6 +348,7 @@ live_init_func(void *v)
         parse_ll_R();
 
 	if (is_alive) {
+		parse_cpumaps();
 		parse_edus();
 		print_global_header();	
 		lineno++;
@@ -363,6 +364,7 @@ live_init_func(void *v)
 	}
 
 	if (timestamp) {
+		parse_mpsched();
 		parse_proc_cgroup();
 		parse_pself();
 		parse_edus();

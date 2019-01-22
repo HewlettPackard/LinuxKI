@@ -1718,7 +1718,7 @@ ks_action_t ks_actions[KI_MAXSYSCALLS] = {
 	{ 1, 1, 1, ki_write},		/*pwritev*/
 	{ 0, 0, 0, ki_nosys},		/*rt_tsigqueueinfo*/
 	{ 0, 0, 0, ki_nosys},		/*perf_event_open*/
-	{ 0, 0, 0, ki_nosys},		/*recvmmsg*/
+	{ 0, 1, 1, ki_nosys},		/*recvmmsg*/
 	{ 0, 0, 0, ki_nosys},		/*fanotify_init*/
 	{ 0, 0, 0, ki_nosys},		/*fanotify_mark*/
 	{ 0, 0, 0, ki_nosys},		/*prlimit64*/
@@ -1726,7 +1726,7 @@ ks_action_t ks_actions[KI_MAXSYSCALLS] = {
 	{ 0, 0, 0, ki_nosys},		/*open_by_handle_at*/
 	{ 0, 0, 0, ki_nosys},		/*clock_adj_time*/
 	{ 0, 0, 0, ki_nosys},		/*syncfs*/
-	{ 0, 0, 0, ki_nosys},		/*sendmmsg*/
+	{ 0, 1, 1, ki_nosys},		/*sendmmsg*/
 	{ 0, 0, 0, ki_nosys},		/*set_ns*/
 	{ 0, 0, 0, ki_nosys},		/*get_cpu*/
 	{ 0, 0, 0, ki_nosys},		/*process_vm_readv*/
@@ -5439,7 +5439,7 @@ syscall_arg_list_t syscall_arg_list[KI_MAXSYSCALLS] = {
 {"pwritev", "ret", HEX, "fd", DECIMAL, "*iov", HEX, "iovcnt", DECIMAL, "offset", HEX, NULL, SKIP, NULL, SKIP},
 {"rt_tgsigqueueinfo", "ret", HEX, "arg0", HEX, "arg1", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"perf_event_open", "ret", HEX, "arg0", HEX, "arg1", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"recvmmsg", "ret", HEX, "arg0", HEX, "arg1", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
+{"recvmmsg", "ret", HEX, "sockfd", DECIMAL, "*msgvec", HEX, "vlen", DECIMAL, "flags", HEX, "*timeout", HEX, NULL, SKIP},
 {"fanotify_init", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"fanotify_mark", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"prlimit64", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
@@ -5447,7 +5447,7 @@ syscall_arg_list_t syscall_arg_list[KI_MAXSYSCALLS] = {
 {"open_by_handle_at", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"clock_adj_time", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"syncfs", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"sendmmsg", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
+{"sendmmsg", "ret", HEX, "sockfd", DECIMAL, "*msgvec", HEX, "vlen", DECIMAL, "flags", HEX, NULL, SKIP, NULL, SKIP},
 {"set_ns", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"get_cpu", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"process_vm_readv", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
@@ -5663,5 +5663,11 @@ warnmsg_t warnmsg[MAXNOTEWARN] = {
 	{ "Warning: RHEL 7.3 and SLES 12 SP2 Multipath bug may impact I/O performance", _HTTP_MULTIPATH_BUG},
 	{ "Warning: Suspect network-latency tuned profile used", _HTTP_SK_BUSY},
 	{ "Warning: High BLOCK SotIRQ times, consider setting add_random to 0 for all /dev/sd* devices", _HTTP_ADD_RANDOM},
-	{ "Warning: High wait time in md_flush(), suspect barrier writes to MD device", _HTTP_MD_FLUSH}
+	{ "Warning: High wait time in md_flush(), suspect barrier writes to MD device", _HTTP_MD_FLUSH},
+	{ "Warning: Spinlock contention during hugetlb_fault", _HTTP_HUGETLB_FAULT},
+	{ "Warning: High CPU time or Contention on /proc/stats due to high CPU and IRQ count", _HTTP_KSTAT_IRQS}, 
+	{ "Warning: Excessive poll() calls by Oracle", _HTTP_ORACLE_POLL},
+	{ "Warning: Excessive CPU time in pcc_cpufreq driver", _HTTP_PCC_CPUFREQ},
+	{ "Warning: Side Channel Attack (Spectre/Meltdown) mitigations present", _HTTP_SSA_VULN},
+
 };

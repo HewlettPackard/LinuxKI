@@ -168,10 +168,12 @@ kiall_init_func(void *v)
         dsk_io_sizes[8]= 1000;
 
 	parse_cpuinfo();
+	if (is_alive) parse_cpumaps();
 	parse_kallsyms();
 	parse_devices();
 
 	if (timestamp) {
+		parse_mpsched();
 		parse_docker_ps();
        		parse_proc_cgroup();
         	parse_lsof();

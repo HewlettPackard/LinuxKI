@@ -4,6 +4,6 @@
 
 container="$USER-linuxki"
 
-if docker ps -f name=$container | grep -q $container; then
+if docker ps -f name=$container 2>/dev/null | grep -q $container; then
         docker stop $container
 fi

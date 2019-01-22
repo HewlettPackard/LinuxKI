@@ -19,7 +19,7 @@ TOOLDIR=/opt/linuxki
 
 # need to make sure /usr/sbin and /sbin are in the path 
 PATH=$TOOLDIR:$PATH:/usr/sbin:/sbin
-version="runki for Linux version 5.7"
+version="runki for Linux version 5.8"
 tag=`date +%m%d_%H%M`
 HOSTNAME=`hostname -s`
 KIDIR=`pwd`
@@ -1402,8 +1402,12 @@ if [ $do_liki -eq 0 ]; then
 
 fi
 
-
 #
+# Get Intel Vulnerability data
+#
+touch scavuln.$tag
+for file in `ls /sys/devices/system/cpu/vulnerabilities/* 2>/dev/null` ; do echo $file `cat $file` >>scavuln.$tag 2>/dev/null; done
+
 # unmount debugfs if it was not mounted when we started
 #
 if [ $debugfs_was_mounted -eq 0 ] ; then

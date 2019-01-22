@@ -1,2172 +1,783 @@
-<html xmlns:v="urn:schemas-microsoft-com:vml"
-xmlns:o="urn:schemas-microsoft-com:office:office"
-xmlns:w="urn:schemas-microsoft-com:office:word"
-xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
-xmlns="http://www.w3.org/TR/REC-html40">
+<html>
 
 <head>
 <meta http-equiv=Content-Type content="text/html; charset=windows-1252">
-<meta name=ProgId content=Word.Document>
-<meta name=Generator content="Microsoft Word 15">
-<meta name=Originator content="Microsoft Word 15">
-<link rel=File-List href="pcc_cpufreq_files/filelist.xml">
-<!--[if gte mso 9]><xml>
- <o:DocumentProperties>
-  <o:Author>Ray, Mark C (GSA&amp;E - GSE Team)</o:Author>
-  <o:LastAuthor>Ray, Mark C (Global Solutions Engineering (GSE))</o:LastAuthor>
-  <o:Revision>2</o:Revision>
-  <o:TotalTime>344</o:TotalTime>
-  <o:Created>2019-01-22T17:29:00Z</o:Created>
-  <o:LastSaved>2019-01-22T17:29:00Z</o:LastSaved>
-  <o:Pages>1</o:Pages>
-  <o:Words>1078</o:Words>
-  <o:Characters>6147</o:Characters>
-  <o:Company>Hewlett Packard</o:Company>
-  <o:Lines>51</o:Lines>
-  <o:Paragraphs>14</o:Paragraphs>
-  <o:CharactersWithSpaces>7211</o:CharactersWithSpaces>
-  <o:Version>15.00</o:Version>
- </o:DocumentProperties>
- <o:OfficeDocumentSettings>
-  <o:RelyOnVML/>
-  <o:AllowPNG/>
- </o:OfficeDocumentSettings>
-</xml><![endif]-->
-<link rel=themeData href="pcc_cpufreq_files/themedata.thmx">
-<link rel=colorSchemeMapping href="pcc_cpufreq_files/colorschememapping.xml">
-<!--[if gte mso 9]><xml>
- <w:WordDocument>
-  <w:SpellingState>Clean</w:SpellingState>
-  <w:GrammarState>Clean</w:GrammarState>
-  <w:TrackMoves>false</w:TrackMoves>
-  <w:TrackFormatting/>
-  <w:PunctuationKerning/>
-  <w:ValidateAgainstSchemas/>
-  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
-  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
-  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
-  <w:DoNotPromoteQF/>
-  <w:LidThemeOther>EN-US</w:LidThemeOther>
-  <w:LidThemeAsian>X-NONE</w:LidThemeAsian>
-  <w:LidThemeComplexScript>X-NONE</w:LidThemeComplexScript>
-  <w:Compatibility>
-   <w:BreakWrappedTables/>
-   <w:SnapToGridInCell/>
-   <w:WrapTextWithPunct/>
-   <w:UseAsianBreakRules/>
-   <w:DontGrowAutofit/>
-   <w:SplitPgBreakAndParaMark/>
-   <w:EnableOpenTypeKerning/>
-   <w:DontFlipMirrorIndents/>
-   <w:OverrideTableStyleHps/>
-  </w:Compatibility>
-  <m:mathPr>
-   <m:mathFont m:val="Cambria Math"/>
-   <m:brkBin m:val="before"/>
-   <m:brkBinSub m:val="&#45;-"/>
-   <m:smallFrac m:val="off"/>
-   <m:dispDef/>
-   <m:lMargin m:val="0"/>
-   <m:rMargin m:val="0"/>
-   <m:defJc m:val="centerGroup"/>
-   <m:wrapIndent m:val="1440"/>
-   <m:intLim m:val="subSup"/>
-   <m:naryLim m:val="undOvr"/>
-  </m:mathPr></w:WordDocument>
-</xml><![endif]--><!--[if gte mso 9]><xml>
- <w:LatentStyles DefLockedState="false" DefUnhideWhenUsed="false"
-  DefSemiHidden="false" DefQFormat="false" DefPriority="99"
-  LatentStyleCount="371">
-  <w:LsdException Locked="false" Priority="0" QFormat="true" Name="Normal"/>
-  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 1"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 2"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 3"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 4"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 5"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 6"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 7"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 8"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 9"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 6"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 7"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 8"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 9"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 1"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 2"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 3"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 4"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 5"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 6"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 7"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 8"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 9"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Normal Indent"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="footnote text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="annotation text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="header"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="footer"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index heading"/>
-  <w:LsdException Locked="false" Priority="35" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="caption"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="table of figures"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="envelope address"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="envelope return"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="footnote reference"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="annotation reference"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="line number"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="page number"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="endnote reference"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="endnote text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="table of authorities"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="macro"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="toa heading"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number 5"/>
-  <w:LsdException Locked="false" Priority="10" QFormat="true" Name="Title"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Closing"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Signature"/>
-  <w:LsdException Locked="false" Priority="1" SemiHidden="true"
-   UnhideWhenUsed="true" Name="Default Paragraph Font"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text Indent"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Message Header"/>
-  <w:LsdException Locked="false" Priority="11" QFormat="true" Name="Subtitle"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Salutation"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Date"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text First Indent"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text First Indent 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Note Heading"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text Indent 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text Indent 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Block Text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Hyperlink"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="FollowedHyperlink"/>
-  <w:LsdException Locked="false" Priority="22" QFormat="true" Name="Strong"/>
-  <w:LsdException Locked="false" Priority="20" QFormat="true" Name="Emphasis"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Document Map"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Plain Text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="E-mail Signature"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Top of Form"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Bottom of Form"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Normal (Web)"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Acronym"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Address"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Cite"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Code"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Definition"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Keyboard"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Preformatted"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Sample"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Typewriter"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Variable"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Normal Table"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="annotation subject"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="No List"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Outline List 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Outline List 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Outline List 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Simple 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Simple 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Simple 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Classic 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Classic 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Classic 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Classic 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Colorful 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Colorful 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Colorful 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 6"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 7"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 8"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 6"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 7"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 8"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table 3D effects 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table 3D effects 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table 3D effects 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Contemporary"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Elegant"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Professional"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Subtle 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Subtle 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Web 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Web 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Web 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Balloon Text"/>
-  <w:LsdException Locked="false" Priority="39" Name="Table Grid"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Theme"/>
-  <w:LsdException Locked="false" SemiHidden="true" Name="Placeholder Text"/>
-  <w:LsdException Locked="false" Priority="1" QFormat="true" Name="No Spacing"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 1"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 1"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 1"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 1"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" Name="Revision"/>
-  <w:LsdException Locked="false" Priority="34" QFormat="true"
-   Name="List Paragraph"/>
-  <w:LsdException Locked="false" Priority="29" QFormat="true" Name="Quote"/>
-  <w:LsdException Locked="false" Priority="30" QFormat="true"
-   Name="Intense Quote"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 1"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 1"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 1"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 1"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 1"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 1"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 2"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 2"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 2"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 2"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 2"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 2"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 2"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 2"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 2"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 2"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 2"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 3"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 3"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 3"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 3"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 3"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 3"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 3"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 3"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 3"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 3"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 3"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 4"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 4"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 4"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 4"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 4"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 4"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 4"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 4"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 4"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 4"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 4"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 5"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 5"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 5"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 5"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 5"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 5"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 5"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 5"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 5"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 5"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 5"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 6"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 6"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 6"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 6"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 6"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 6"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 6"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 6"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 6"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 6"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 6"/>
-  <w:LsdException Locked="false" Priority="19" QFormat="true"
-   Name="Subtle Emphasis"/>
-  <w:LsdException Locked="false" Priority="21" QFormat="true"
-   Name="Intense Emphasis"/>
-  <w:LsdException Locked="false" Priority="31" QFormat="true"
-   Name="Subtle Reference"/>
-  <w:LsdException Locked="false" Priority="32" QFormat="true"
-   Name="Intense Reference"/>
-  <w:LsdException Locked="false" Priority="33" QFormat="true" Name="Book Title"/>
-  <w:LsdException Locked="false" Priority="37" SemiHidden="true"
-   UnhideWhenUsed="true" Name="Bibliography"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="TOC Heading"/>
-  <w:LsdException Locked="false" Priority="41" Name="Plain Table 1"/>
-  <w:LsdException Locked="false" Priority="42" Name="Plain Table 2"/>
-  <w:LsdException Locked="false" Priority="43" Name="Plain Table 3"/>
-  <w:LsdException Locked="false" Priority="44" Name="Plain Table 4"/>
-  <w:LsdException Locked="false" Priority="45" Name="Plain Table 5"/>
-  <w:LsdException Locked="false" Priority="40" Name="Grid Table Light"/>
-  <w:LsdException Locked="false" Priority="46" Name="Grid Table 1 Light"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark"/>
-  <w:LsdException Locked="false" Priority="51" Name="Grid Table 6 Colorful"/>
-  <w:LsdException Locked="false" Priority="52" Name="Grid Table 7 Colorful"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 1"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 1"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 1"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 1"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 1"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 1"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 2"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 2"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 2"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 2"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 2"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 2"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 3"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 3"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 3"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 3"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 3"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 3"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 4"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 4"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 4"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 4"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 4"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 4"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 5"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 5"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 5"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 5"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 5"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 5"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 6"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 6"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 6"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 6"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 6"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 6"/>
-  <w:LsdException Locked="false" Priority="46" Name="List Table 1 Light"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark"/>
-  <w:LsdException Locked="false" Priority="51" Name="List Table 6 Colorful"/>
-  <w:LsdException Locked="false" Priority="52" Name="List Table 7 Colorful"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 1"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 1"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 1"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 1"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 1"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 1"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 2"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 2"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 2"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 2"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 2"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 2"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 3"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 3"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 3"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 3"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 3"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 3"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 4"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 4"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 4"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 4"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 4"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 4"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 5"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 5"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 5"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 5"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 5"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 5"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 6"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 6"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 6"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 6"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 6"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 6"/>
- </w:LatentStyles>
-</xml><![endif]-->
+<meta name=Generator content="Microsoft Word 15 (filtered)">
 <style>
 <!--
  /* Font Definitions */
  @font-face
 	{font-family:Courier;
-	panose-1:2 7 4 9 2 2 5 2 4 4;
-	mso-font-charset:0;
-	mso-generic-font-family:modern;
-	mso-font-format:other;
-	mso-font-pitch:fixed;
-	mso-font-signature:3 0 0 0 1 0;}
+	panose-1:2 7 4 9 2 2 5 2 4 4;}
 @font-face
 	{font-family:Wingdings;
-	panose-1:5 0 0 0 0 0 0 0 0 0;
-	mso-font-charset:2;
-	mso-generic-font-family:auto;
-	mso-font-pitch:variable;
-	mso-font-signature:0 268435456 0 0 -2147483648 0;}
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
 @font-face
 	{font-family:"Cambria Math";
-	panose-1:2 4 5 3 5 4 6 3 2 4;
-	mso-font-charset:1;
-	mso-generic-font-family:roman;
-	mso-font-format:other;
-	mso-font-pitch:variable;
-	mso-font-signature:0 0 0 0 0 0;}
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
 @font-face
 	{font-family:Calibri;
-	panose-1:2 15 5 2 2 2 4 3 2 4;
-	mso-font-charset:0;
-	mso-generic-font-family:swiss;
-	mso-font-pitch:variable;
-	mso-font-signature:-536859905 -1073732485 9 0 511 0;}
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
  /* Style Definitions */
  p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{mso-style-unhide:no;
-	mso-style-qformat:yes;
-	mso-style-parent:"";
-	margin-top:0in;
+	{margin-top:0in;
 	margin-right:0in;
 	margin-bottom:8.0pt;
 	margin-left:0in;
 	line-height:107%;
-	mso-pagination:widow-orphan;
 	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-fareast-font-family:Calibri;
-	mso-fareast-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
+	font-family:"Calibri",sans-serif;}
 a:link, span.MsoHyperlink
-	{mso-style-priority:99;
-	color:#0563C1;
-	mso-themecolor:hyperlink;
-	text-decoration:underline;
-	text-underline:single;}
+	{color:#0563C1;
+	text-decoration:underline;}
 a:visited, span.MsoHyperlinkFollowed
-	{mso-style-noshow:yes;
-	mso-style-priority:99;
-	color:#954F72;
-	mso-themecolor:followedhyperlink;
-	text-decoration:underline;
-	text-underline:single;}
+	{color:#954F72;
+	text-decoration:underline;}
 p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
-	{mso-style-priority:34;
-	mso-style-unhide:no;
-	mso-style-qformat:yes;
-	margin-top:0in;
+	{margin-top:0in;
 	margin-right:0in;
 	margin-bottom:8.0pt;
 	margin-left:.5in;
-	mso-add-space:auto;
 	line-height:107%;
-	mso-pagination:widow-orphan;
 	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-fareast-font-family:Calibri;
-	mso-fareast-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
+	font-family:"Calibri",sans-serif;}
 p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
-	{mso-style-priority:34;
-	mso-style-unhide:no;
-	mso-style-qformat:yes;
-	mso-style-type:export-only;
-	margin-top:0in;
+	{margin-top:0in;
 	margin-right:0in;
 	margin-bottom:0in;
 	margin-left:.5in;
 	margin-bottom:.0001pt;
-	mso-add-space:auto;
 	line-height:107%;
-	mso-pagination:widow-orphan;
 	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-fareast-font-family:Calibri;
-	mso-fareast-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
+	font-family:"Calibri",sans-serif;}
 p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
-	{mso-style-priority:34;
-	mso-style-unhide:no;
-	mso-style-qformat:yes;
-	mso-style-type:export-only;
-	margin-top:0in;
+	{margin-top:0in;
 	margin-right:0in;
 	margin-bottom:0in;
 	margin-left:.5in;
 	margin-bottom:.0001pt;
-	mso-add-space:auto;
 	line-height:107%;
-	mso-pagination:widow-orphan;
 	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-fareast-font-family:Calibri;
-	mso-fareast-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
+	font-family:"Calibri",sans-serif;}
 p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
-	{mso-style-priority:34;
-	mso-style-unhide:no;
-	mso-style-qformat:yes;
-	mso-style-type:export-only;
-	margin-top:0in;
+	{margin-top:0in;
 	margin-right:0in;
 	margin-bottom:8.0pt;
 	margin-left:.5in;
-	mso-add-space:auto;
 	line-height:107%;
-	mso-pagination:widow-orphan;
 	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-fareast-font-family:Calibri;
-	mso-fareast-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
+	font-family:"Calibri",sans-serif;}
 .MsoChpDefault
-	{mso-style-type:export-only;
-	mso-default-props:yes;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-fareast-font-family:Calibri;
-	mso-fareast-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
+	{font-family:"Calibri",sans-serif;}
 .MsoPapDefault
-	{mso-style-type:export-only;
-	margin-bottom:8.0pt;
+	{margin-bottom:8.0pt;
 	line-height:107%;}
 @page WordSection1
 	{size:8.5in 11.0in;
-	margin:.5in .5in .5in .5in;
-	mso-header-margin:.5in;
-	mso-footer-margin:.5in;
-	mso-paper-source:0;}
+	margin:.5in .5in .5in .5in;}
 div.WordSection1
 	{page:WordSection1;}
  /* List Definitions */
- @list l0
-	{mso-list-id:1865241629;
-	mso-list-type:hybrid;
-	mso-list-template-ids:1801111700 134807553 134807555 134807557 134807553 134807555 134807557 134807553 134807555 134807557;}
-@list l0:level1
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0B7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:.25in;
-	text-indent:-.25in;
-	font-family:Symbol;}
-@list l0:level2
-	{mso-level-number-format:bullet;
-	mso-level-text:o;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:.75in;
-	text-indent:-.25in;
-	font-family:"Courier New";}
-@list l0:level3
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0A7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:1.25in;
-	text-indent:-.25in;
-	font-family:Wingdings;}
-@list l0:level4
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0B7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:1.75in;
-	text-indent:-.25in;
-	font-family:Symbol;}
-@list l0:level5
-	{mso-level-number-format:bullet;
-	mso-level-text:o;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:2.25in;
-	text-indent:-.25in;
-	font-family:"Courier New";}
-@list l0:level6
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0A7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:2.75in;
-	text-indent:-.25in;
-	font-family:Wingdings;}
-@list l0:level7
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0B7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:3.25in;
-	text-indent:-.25in;
-	font-family:Symbol;}
-@list l0:level8
-	{mso-level-number-format:bullet;
-	mso-level-text:o;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:3.75in;
-	text-indent:-.25in;
-	font-family:"Courier New";}
-@list l0:level9
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0A7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:4.25in;
-	text-indent:-.25in;
-	font-family:Wingdings;}
-@list l1
-	{mso-list-id:1982886024;
-	mso-list-type:hybrid;
-	mso-list-template-ids:-966334920 134807553 134807555 134807557 134807553 134807555 134807557 134807553 134807555 134807557;}
-@list l1:level1
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0B7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:Symbol;}
-@list l1:level2
-	{mso-level-number-format:bullet;
-	mso-level-text:o;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:"Courier New";}
-@list l1:level3
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0A7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:Wingdings;}
-@list l1:level4
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0B7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:Symbol;}
-@list l1:level5
-	{mso-level-number-format:bullet;
-	mso-level-text:o;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:"Courier New";}
-@list l1:level6
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0A7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:Wingdings;}
-@list l1:level7
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0B7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:Symbol;}
-@list l1:level8
-	{mso-level-number-format:bullet;
-	mso-level-text:o;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:"Courier New";}
-@list l1:level9
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0A7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:Wingdings;}
-@list l2
-	{mso-list-id:2057510803;
-	mso-list-type:hybrid;
-	mso-list-template-ids:-316093720 134807553 134807555 134807557 134807553 134807555 134807557 134807553 134807555 134807557;}
-@list l2:level1
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0B7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:Symbol;}
-@list l2:level2
-	{mso-level-number-format:bullet;
-	mso-level-text:o;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:"Courier New";}
-@list l2:level3
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0A7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:Wingdings;}
-@list l2:level4
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0B7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:Symbol;}
-@list l2:level5
-	{mso-level-number-format:bullet;
-	mso-level-text:o;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:"Courier New";}
-@list l2:level6
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0A7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:Wingdings;}
-@list l2:level7
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0B7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:Symbol;}
-@list l2:level8
-	{mso-level-number-format:bullet;
-	mso-level-text:o;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:"Courier New";}
-@list l2:level9
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0A7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:Wingdings;}
-ol
+ ol
 	{margin-bottom:0in;}
 ul
 	{margin-bottom:0in;}
 -->
 </style>
-<!--[if gte mso 10]>
-<style>
- /* Style Definitions */
- table.MsoNormalTable
-	{mso-style-name:"Table Normal";
-	mso-tstyle-rowband-size:0;
-	mso-tstyle-colband-size:0;
-	mso-style-noshow:yes;
-	mso-style-priority:99;
-	mso-style-parent:"";
-	mso-padding-alt:0in 5.4pt 0in 5.4pt;
-	mso-para-margin-top:0in;
-	mso-para-margin-right:0in;
-	mso-para-margin-bottom:8.0pt;
-	mso-para-margin-left:0in;
-	line-height:107%;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
-</style>
-<![endif]--><!--[if gte mso 9]><xml>
- <o:shapedefaults v:ext="edit" spidmax="1026"/>
-</xml><![endif]--><!--[if gte mso 9]><xml>
- <o:shapelayout v:ext="edit">
-  <o:idmap v:ext="edit" data="1"/>
- </o:shapelayout></xml><![endif]-->
+
 </head>
 
-<body lang=EN-GB link="#0563C1" vlink="#954F72" style='tab-interval:.5in'>
+<body lang=EN-GB link="#0563C1" vlink="#954F72">
 
 <div class=WordSection1>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
-justify;mso-line-height-alt:11.25pt;vertical-align:top'><b><i style='mso-bidi-font-style:
-normal'><span lang=EN-US style='font-size:12.0pt;mso-bidi-font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>LinuxKI Warning<o:p></o:p></span></i></b></p>
+justify;vertical-align:top'><b><i><span lang=EN-US style='font-size:12.0pt;
+font-family:"Arial",sans-serif;color:black'>LinuxKI Warning</span></i></b></p>
 
 <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
 text-align:center;line-height:11.25pt;vertical-align:top'><b><span lang=EN-US
-style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></b></p>
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>&#8203;&#8203;&#8203;&#8203;Excessive CPU time in pcc_cpufreq
-driver<o:p></o:p></span></b></p>
+font-family:"Arial",sans-serif;color:black'>&#8203;&#8203;&#8203;&#8203;Excessive
+CPU time in pcc_cpufreq driver</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>11/30/2018<o:p></o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>11/30/2018</span></p>
 
 <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
 text-align:center;line-height:11.25pt;vertical-align:top'><span lang=EN-US
-style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><b><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'>Problem</span></b><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+color:black'>Problem</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Customer noticed higher than expected System CPU time after
-implementing a new DL380 Gen10 server using Oracle UEK kernel (4.1.12-124.16.4.el6uek.x86_64).<span
-style='mso-spacerun:yes'>   </span>The 2-socket server had 36 CPU cores with 72
-threads (hyperthreading enabled).<span style='mso-spacerun:yes'>   </span><o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>Customer noticed higher than expected System
+CPU time after implementing a new DL380 Gen10 server using Oracle UEK kernel (4.1.12-124.16.4.el6uek.x86_64).  
+The 2-socket server had 36 CPU cores with 72 threads (hyperthreading
+enabled).   </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><b><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'>Investigation</span></b><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+color:black'>Investigation</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>LinuxKI data was taken for analysis.&nbsp; &nbsp;For example:<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>LinuxKI data was taken for analysis.&nbsp;
+&nbsp;For example:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>$ cd /dev/mem&nbsp;</span><span lang=EN-US style='font-family:
-"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
+Courier;color:black'>$ cd /dev/mem&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>$ runki&nbsp;</span><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
+Courier;color:black'>$ runki&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>The Kparse Report (kp.*.html) showed the following:<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>The Kparse Report (kp.*.html) showed the
+following:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
- style='width:100.0%;mso-cellspacing:0in;background:#FFD1A4;mso-yfti-tbllook:
- 1184;mso-padding-alt:0in 0in 0in 0in'>
- <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+ style='width:100.0%;background:#FFD1A4'>
+ <tr>
   <td style='padding:1.5pt 2.25pt 1.5pt 2.25pt'>
-  <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-  line-height:normal;mso-outline-level:3'><b><span style='font-family:"Courier New";
-  mso-fareast-font-family:"Times New Roman";mso-ansi-language:EN-GB;mso-fareast-language:
-  EN-GB'>1.1.2 Global CPU Usage by LDOM<o:p></o:p></span></b></p>
+  <p class=MsoNormal style='line-height:normal'><b><span style='font-family:
+  "Courier New"'>1.1.2 Global CPU Usage by LDOM</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><u><span style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:
-  "Courier New";mso-fareast-font-family:"Times New Roman";color:blue;
-  mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>[Prev Subsection][Next
-  Subsection]---[Prev Section][Next Section][Table of Contents]</span></u><span
-  style='font-size:12.0pt;font-family:"Times New Roman",serif;mso-fareast-font-family:
-  "Times New Roman";mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+  normal'><u><span style='font-size:9.0pt;font-family:"Courier New";color:blue'>[Prev
+  Subsection][Next Subsection]---[Prev Section][Next Section][Table of
+  Contents]</span></u></p>
   </td>
  </tr>
 </table>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><b><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>node<span style='mso-spacerun:yes'> 
-</span>ncpu<span style='mso-spacerun:yes'>     </span>Total Busy<span
-style='mso-spacerun:yes'>          </span>sys<span
-style='mso-spacerun:yes'>          </span>usr<span
-style='mso-spacerun:yes'>         </span>idle<span style='mso-spacerun:yes'> 
-</span>hardirq_sys hardirq_user hardirq idle<span style='mso-spacerun:yes'> 
-</span>softirq_sys softirq_user softirq_idle</span></b><span style='font-size:
-9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:
-"Times New Roman";color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><o:p></o:p></span></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>node 
+ncpu     Total Busy          sys          usr         idle  hardirq_sys
+hardirq_user hardirq idle  softirq_sys softirq_user softirq_idle</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>   </span>0 [ 36]
-:<span style='mso-spacerun:yes'>       </span>61.75%<span
-style='mso-spacerun:yes'>       </span><span style='background:yellow;
-mso-highlight:yellow'>22.75%</span><span style='mso-spacerun:yes'>      
-</span>33.51%<span style='mso-spacerun:yes'>       </span>35.33%<span
-style='mso-spacerun:yes'>        </span>0.12%<span
-style='mso-spacerun:yes'>        </span>0.19%<span
-style='mso-spacerun:yes'>        </span>0.16%<span
-style='mso-spacerun:yes'>        </span>2.76%<span
-style='mso-spacerun:yes'>        </span>2.42%<span
-style='mso-spacerun:yes'>        </span>2.75%<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>  
+0 [ 36] :       61.75%       <span style='background:yellow'>22.75%</span>      
+33.51%       35.33%        0.12%        0.19%        0.16%        2.76%       
+2.42%        2.75%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>   </span>1 [ 36]
-:<span style='mso-spacerun:yes'>       </span>49.43%<span
-style='mso-spacerun:yes'>       </span><span style='background:yellow;
-mso-highlight:yellow'>18.78%</span><span style='mso-spacerun:yes'>      
-</span>30.06%<span style='mso-spacerun:yes'>       </span>50.28%<span
-style='mso-spacerun:yes'>        </span>0.01%<span
-style='mso-spacerun:yes'>        </span>0.01%<span
-style='mso-spacerun:yes'>        </span>0.03%<span
-style='mso-spacerun:yes'>        </span>0.42%<span
-style='mso-spacerun:yes'>        </span>0.15%<span
-style='mso-spacerun:yes'>        </span>0.26%<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>  
+1 [ 36] :       49.43%       <span style='background:yellow'>18.78%</span>      
+30.06%       50.28%        0.01%        0.01%        0.03%        0.42%       
+0.15%        0.26%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><b><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>Total<span style='mso-spacerun:yes'>             
-</span>55.59%<span style='mso-spacerun:yes'>       </span><span
-style='background:yellow;mso-highlight:yellow'>20.77%</span><span
-style='mso-spacerun:yes'>       </span>31.78%<span
-style='mso-spacerun:yes'>       </span>42.81%<span
-style='mso-spacerun:yes'>        </span>0.07%<span
-style='mso-spacerun:yes'>        </span>0.10%<span
-style='mso-spacerun:yes'>        </span>0.10%<span
-style='mso-spacerun:yes'>        </span>1.59%<span
-style='mso-spacerun:yes'>        </span>1.29%<span
-style='mso-spacerun:yes'>        </span>1.51%</span></b><span style='font-size:
-9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:
-"Times New Roman";color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><o:p></o:p></span></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Total             
+55.59%       <span style='background:yellow'>20.77%</span>       31.78%      
+42.81%        0.07%        0.10%        0.10%        1.59%        1.29%       
+1.51%</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><u><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:blue;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><a
+normal'><u><span style='font-size:9.0pt;font-family:"Courier New";color:blue'><a
 href="http://gse-rose-st068.us.hpecorp.net/work/mcr/cerner/flhofldb11/0927_0104/kirunq.0927_0104.csv"
-target="csv file"><span style='color:blue'>[CSV]</span></a></span></u><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+target="csv file"><span style='color:blue'>[CSV]</span></a></span></u></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>The kernel profiling data showed the pcc_cpufreq_target() and
-acpi_hw_write_port() functions as top functions taking System CPU time:<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>The kernel profiling data showed the
+pcc_cpufreq_target() and acpi_hw_write_port() functions as top functions taking
+System CPU time:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
- style='width:100.0%;mso-cellspacing:0in;background:#FFD1A4;mso-yfti-tbllook:
- 1184;mso-padding-alt:0in 0in 0in 0in'>
- <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+ style='width:100.0%;background:#FFD1A4'>
+ <tr>
   <td style='padding:1.5pt 2.25pt 1.5pt 2.25pt'>
-  <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-  line-height:normal;mso-outline-level:3'><b><span style='mso-bidi-font-size:
-  10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-  mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>1.4.3 Report of non-idle
-  kernel functions at each clock tick<o:p></o:p></span></b></p>
+  <p class=MsoNormal style='line-height:normal'><b><span style='font-family:
+  "Courier New"'>1.4.3 Report of non-idle kernel functions at each clock tick</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><u><span style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:
-  "Courier New";mso-fareast-font-family:"Times New Roman";color:blue;
-  mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>[Prev Subsection][Next
-  Subsection]---[Prev Section][Next Section][Table of Contents]</span></u><span
-  style='font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:
-  "Times New Roman";mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+  normal'><u><span style='font-size:9.0pt;font-family:"Courier New";color:blue'>[Prev
+  Subsection][Next Subsection]---[Prev Section][Next Section][Table of
+  Contents]</span></u></p>
   </td>
  </tr>
 </table>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><b><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>   </span>Count<span style='mso-spacerun:yes'>    
-</span>Pct<span style='mso-spacerun:yes'>  </span>Function <o:p></o:p></span></b></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>  
+Count     Pct  Function </span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;background:#EEEEEE;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><span style='mso-spacerun:yes'>   </span>51609<span
-style='mso-spacerun:yes'>  </span>50.15%<span style='mso-spacerun:yes'> 
-</span>USER<span style='mso-spacerun:yes'>   </span>0xffffffffffffffff<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:#EEEEEE'>   51609  50.15%  USER   0xffffffffffffffff</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>    </span>7021<span style='mso-spacerun:yes'>  
-</span>6.82%<span style='mso-spacerun:yes'>  </span>INTR<span
-style='mso-spacerun:yes'>   </span>__schedule<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+7021   6.82%  INTR   __schedule</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;background:#EEEEEE;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><span style='mso-spacerun:yes'>    </span>5931<span
-style='mso-spacerun:yes'>   </span>5.76%<span style='mso-spacerun:yes'> 
-</span>SYS<span style='mso-spacerun:yes'>    </span><span style='background:
-yellow;mso-highlight:yellow'>pcc_cpufreq_target</span><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:#EEEEEE'>    5931   5.76%  SYS    <span style='background:yellow'>pcc_cpufreq_target</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>    </span>1621<span style='mso-spacerun:yes'>  
-</span>1.58%<span style='mso-spacerun:yes'>  </span>SYS<span
-style='mso-spacerun:yes'>    </span><span style='background:yellow;mso-highlight:
-yellow'>acpi_hw_write_port</span><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+1621   1.58%  SYS    <span style='background:yellow'>acpi_hw_write_port</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;background:#EEEEEE;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><span style='mso-spacerun:yes'>    </span>1189<span
-style='mso-spacerun:yes'>   </span>1.16%<span style='mso-spacerun:yes'> 
-</span>SYS<span style='mso-spacerun:yes'>    </span>syscall_trace_leave<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:#EEEEEE'>    1189   1.16%  SYS    syscall_trace_leave</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>     </span>958<span style='mso-spacerun:yes'>  
-</span>0.93%<span style='mso-spacerun:yes'>  </span>SYS<span
-style='mso-spacerun:yes'>    </span>syscall_trace_enter_phase2<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>    
+958   0.93%  SYS    syscall_trace_enter_phase2</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;background:#EEEEEE;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><span style='mso-spacerun:yes'>     </span>744<span
-style='mso-spacerun:yes'>   </span>0.72%<span style='mso-spacerun:yes'> 
-</span>INTR<span style='mso-spacerun:yes'>   </span>rds_recv_local.isra.7<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:#EEEEEE'>     744   0.72%  INTR   rds_recv_local.isra.7</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>     </span>696<span style='mso-spacerun:yes'>  
-</span>0.68%<span style='mso-spacerun:yes'>  </span>INTR<span
-style='mso-spacerun:yes'>   </span>irq_exit<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>    
+696   0.68%  INTR   irq_exit</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;background:#EEEEEE;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><span style='mso-spacerun:yes'>     </span>518<span
-style='mso-spacerun:yes'>   </span>0.50%<span style='mso-spacerun:yes'> 
-</span>SYS<span style='mso-spacerun:yes'>    </span>tracesys_phase2</span><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:#EEEEEE'>     518   0.50%  SYS    tracesys_phase2</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>The stack traces will also confirm the same:<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>The stack traces will also confirm the same:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
- style='width:100.0%;mso-cellspacing:0in;background:#FFD1A4;mso-yfti-tbllook:
- 1184;mso-padding-alt:0in 0in 0in 0in'>
- <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+ style='width:100.0%;background:#FFD1A4'>
+ <tr>
   <td style='padding:1.5pt 2.25pt 1.5pt 2.25pt'>
-  <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-  line-height:normal;mso-outline-level:3'><b><span style='mso-bidi-font-size:
-  9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-  mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>1.4.4 Report of non-idle
-  kernel stack traces at each clock tick<o:p></o:p></span></b></p>
+  <p class=MsoNormal style='line-height:normal'><b><span style='font-family:
+  "Courier New"'>1.4.4 Report of non-idle kernel stack traces at each clock
+  tick</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><u><span style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:
-  "Times New Roman";color:blue;mso-ansi-language:EN-GB;mso-fareast-language:
-  EN-GB'>[Prev Subsection][Next Subsection]---[Prev Section][Next
-  Section][Table of Contents]</span></u><span style='font-size:9.0pt;
-  font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-  mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+  normal'><u><span style='font-size:9.0pt;font-family:"Courier New";color:blue'>[Prev
+  Subsection][Next Subsection]---[Prev Section][Next Section][Table of
+  Contents]</span></u></p>
   </td>
  </tr>
 </table>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><b><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>   </span>Count<span style='mso-spacerun:yes'>    
-</span>Pct<span style='mso-spacerun:yes'>  </span>Stack trace<o:p></o:p></span></b></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>    </span>5353<span style='mso-spacerun:yes'>  
-</span>5.20%<span style='mso-spacerun:yes'>  </span><span style='background:
-yellow;mso-highlight:yellow'>pcc_cpufreq_target</span><span
-style='mso-spacerun:yes'>  </span>__cpufreq_driver_target<span
-style='mso-spacerun:yes'>  </span>od_check_cpu<span style='mso-spacerun:yes'> 
-</span>dbs_check_cpu<span style='mso-spacerun:yes'>  </span>od_dbs_timer<span
-style='mso-spacerun:yes'>  </span>process_one_work<span
-style='mso-spacerun:yes'>  </span>worker_thread<span style='mso-spacerun:yes'> 
-</span>kthread<span style='mso-spacerun:yes'>  </span>ret_from_fork<span
-style='mso-spacerun:yes'>  </span>unknown<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>    </span>1572<span style='mso-spacerun:yes'>  
-</span>1.53%<span style='mso-spacerun:yes'>  </span>unknown<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>    </span>1488<span style='mso-spacerun:yes'>  
-</span>1.45%<span style='mso-spacerun:yes'>  </span><span style='background:
-yellow;mso-highlight:yellow'>acpi_hw_write_port</span><span
-style='mso-spacerun:yes'>  </span>acpi_write<span style='mso-spacerun:yes'> 
-</span><span style='background:yellow;mso-highlight:yellow'>pcc_cpufreq_target</span><span
-style='mso-spacerun:yes'>  </span>__cpufreq_driver_target<span
-style='mso-spacerun:yes'>  </span>od_check_cpu<span style='mso-spacerun:yes'> 
-</span>dbs_check_cpu<span style='mso-spacerun:yes'>  </span>od_dbs_timer<span
-style='mso-spacerun:yes'>  </span>process_one_work<span
-style='mso-spacerun:yes'>  </span>worker_thread<span style='mso-spacerun:yes'> 
-</span>kthread<span style='mso-spacerun:yes'>  </span>ret_from_fork<span
-style='mso-spacerun:yes'>  </span>unknown<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>    </span>1460<span style='mso-spacerun:yes'>  
-</span>1.42%<span style='mso-spacerun:yes'>  </span>__schedule<span
-style='mso-spacerun:yes'>   </span>schedule_hrtimeout_range_clock.part.26<span
-style='mso-spacerun:yes'>  </span>schedule_hrtimeout_range_clock<span
-style='mso-spacerun:yes'>  </span>schedule_hrtimeout_range<span
-style='mso-spacerun:yes'>  </span>poll_schedule_timeout<span
-style='mso-spacerun:yes'>  </span>do_sys_poll<span style='mso-spacerun:yes'> 
-</span>sys_poll<span style='mso-spacerun:yes'>  </span>tracesys_phase2<span
-style='mso-spacerun:yes'>  </span>unknown<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>    </span>1347<span style='mso-spacerun:yes'>  
-</span>1.31%<span style='mso-spacerun:yes'>  </span>__schedule<span
-style='mso-spacerun:yes'>   </span>schedule_user<span
-style='mso-spacerun:yes'>  </span>retint_careful<span
-style='mso-spacerun:yes'>  </span>unknown<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>    </span>1189<span style='mso-spacerun:yes'>  
-</span>1.16%<span style='mso-spacerun:yes'>  </span>syscall_trace_leave<span
-style='mso-spacerun:yes'>  </span>int_very_careful<span
-style='mso-spacerun:yes'>  </span>unknown<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>     </span>958<span style='mso-spacerun:yes'>  
-</span>0.93%<span style='mso-spacerun:yes'> 
-</span>syscall_trace_enter_phase2<span style='mso-spacerun:yes'> 
-</span>tracesys_phase2<span style='mso-spacerun:yes'>  </span>unknown<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>     </span>820<span style='mso-spacerun:yes'>  
-</span>0.80%<span style='mso-spacerun:yes'>  </span>__schedule<span
-style='mso-spacerun:yes'>   </span>worker_thread<span
-style='mso-spacerun:yes'>  </span>kthread<span style='mso-spacerun:yes'> 
-</span>ret_from_fork<span style='mso-spacerun:yes'>  </span>unknown<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>     </span>586<span style='mso-spacerun:yes'>  
-</span>0.57%<span style='mso-spacerun:yes'>  </span>__schedule<span
-style='mso-spacerun:yes'>  </span>schedule<span style='mso-spacerun:yes'> 
-</span>schedule_timeout<span style='mso-spacerun:yes'> 
-</span>sk_wait_data<span style='mso-spacerun:yes'>  </span>tcp_recvmsg<span
-style='mso-spacerun:yes'>  </span>inet_recvmsg<span style='mso-spacerun:yes'> 
-</span>sock_recvmsg<span style='mso-spacerun:yes'>  </span>sock_read_iter<span
-style='mso-spacerun:yes'>  </span>__vfs_read<span style='mso-spacerun:yes'> 
-</span>vfs_read<span style='mso-spacerun:yes'>  </span>sys_read<span
-style='mso-spacerun:yes'>  </span>tracesys_phase2<span
-style='mso-spacerun:yes'>  </span>unknown<o:p></o:p></span></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New"'>   Count    
+Pct  Stack trace</span></b></p>
 
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>     </span>578<span style='mso-spacerun:yes'>  
-</span>0.56%<span style='mso-spacerun:yes'>  </span><span style='background:
-yellow;mso-highlight:yellow'>pcc_cpufreq_target</span><span
-style='mso-spacerun:yes'>  </span>__cpufreq_driver_target<span
-style='mso-spacerun:yes'>  </span>dbs_freq_increase<span
-style='mso-spacerun:yes'>  </span>od_check_cpu<span style='mso-spacerun:yes'> 
-</span>dbs_check_cpu<span style='mso-spacerun:yes'>  </span>od_dbs_timer<span
-style='mso-spacerun:yes'>  </span>process_one_work<span
-style='mso-spacerun:yes'>  </span>worker_thread<span style='mso-spacerun:yes'> 
-</span>kthread<span style='mso-spacerun:yes'>  </span>ret_from_fork<span
-style='mso-spacerun:yes'>  </span>unknown<o:p></o:p></span></p>
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>    5353  
+5.20%  <span style='background:yellow'>pcc_cpufreq_target</span> 
+__cpufreq_driver_target  od_check_cpu  dbs_check_cpu  od_dbs_timer 
+process_one_work  worker_thread  kthread  ret_from_fork  unknown</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>    1572  
+1.53%  unknown</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>    1488  
+1.45%  <span style='background:yellow'>acpi_hw_write_port</span>  acpi_write  <span
+style='background:yellow'>pcc_cpufreq_target</span>  __cpufreq_driver_target 
+od_check_cpu  dbs_check_cpu  od_dbs_timer  process_one_work  worker_thread 
+kthread  ret_from_fork  unknown</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>    1460  
+1.42%  __schedule   schedule_hrtimeout_range_clock.part.26  schedule_hrtimeout_range_clock 
+schedule_hrtimeout_range  poll_schedule_timeout  do_sys_poll  sys_poll 
+tracesys_phase2  unknown</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>    1347  
+1.31%  __schedule   schedule_user  retint_careful  unknown</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>    1189  
+1.16%  syscall_trace_leave  int_very_careful  unknown</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>     958  
+0.93%  syscall_trace_enter_phase2  tracesys_phase2  unknown</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>     820  
+0.80%  __schedule   worker_thread  kthread  ret_from_fork  unknown</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>     586  
+0.57%  __schedule  schedule  schedule_timeout  sk_wait_data  tcp_recvmsg 
+inet_recvmsg  sock_recvmsg  sock_read_iter  __vfs_read  vfs_read  sys_read 
+tracesys_phase2  unknown</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>     578  
+0.56%  <span style='background:yellow'>pcc_cpufreq_target</span> 
+__cpufreq_driver_target  dbs_freq_increase  od_check_cpu  dbs_check_cpu 
+od_dbs_timer  process_one_work  worker_thread  kthread  ret_from_fork  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>     </span>518<span style='mso-spacerun:yes'>  
-</span>0.50%<span style='mso-spacerun:yes'>  </span>tracesys_phase2<span
-style='mso-spacerun:yes'>  </span>unknown<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>     518  
+0.50%  tracesys_phase2  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>     </span>497<span style='mso-spacerun:yes'>  
-</span>0.48%<span style='mso-spacerun:yes'>  </span>__schedule<span
-style='mso-spacerun:yes'>  </span>schedule<span style='mso-spacerun:yes'> 
-</span>schedule_user<span style='mso-spacerun:yes'>  </span>int_careful<span
-style='mso-spacerun:yes'>  </span>unknown<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>     497  
+0.48%  __schedule  schedule  schedule_user  int_careful  unknown</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Source code analysis of the pcc_cpufreq driver shows that there is
-a single system-wide pcc_lock spinlock to control access for the ACPI writes,
-and with multiple core’s trying to adjust the CPU frequencies, the spinlock
-contention can increase.<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>Source code analysis of the pcc_cpufreq driver
+shows that there is a single system-wide pcc_lock spinlock to control access
+for the ACPI writes, and with multiple core’s trying to adjust the CPU
+frequencies, the spinlock contention can increase.</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'>static int
-pcc_cpufreq_target(struct cpufreq_policy *policy,<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>static int pcc_cpufreq_target(struct cpufreq_policy
+*policy,</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-3'>                     </span><span style='mso-spacerun:yes'>     
-</span>unsigned int target_freq,<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>                           unsigned int target_freq,</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-3'>                     </span><span style='mso-spacerun:yes'>     
-</span>unsigned int relation)<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>                           unsigned int relation)</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'>{<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>{</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>struct pcc_cpu *pcc_cpu_data;<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       struct pcc_cpu *pcc_cpu_data;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>struct cpufreq_freqs freqs;<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       struct cpufreq_freqs freqs;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>u16 status;<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       u16 status;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>u32 input_buffer;<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       u32 input_buffer;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>int cpu;<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       int cpu;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>cpu = policy-&gt;cpu;<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       cpu = policy-&gt;cpu;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>pcc_cpu_data = per_cpu_ptr(pcc_cpu_info, cpu);<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       pcc_cpu_data = per_cpu_ptr(pcc_cpu_info,
+cpu);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>pr_debug(&quot;target: CPU %d should go to target freq: %d
-&quot;<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       pr_debug(&quot;target: CPU %d should go to
+target freq: %d &quot;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-2'>              </span>&quot;(virtual) input_offset is 0x%p\n&quot;,<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>              &quot;(virtual) input_offset is
+0x%p\n&quot;,</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-2'>              </span>cpu, target_freq,<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>              cpu, target_freq,</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-2'>              </span>(pcch_virt_addr + pcc_cpu_data-&gt;input_offset));<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>              (pcch_virt_addr +
+pcc_cpu_data-&gt;input_offset));</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>freqs.old = policy-&gt;cur;<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       freqs.old = policy-&gt;cur;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>freqs.new = target_freq;<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       freqs.new = target_freq;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>cpufreq_freq_transition_begin(policy, &amp;freqs);<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       cpufreq_freq_transition_begin(policy,
+&amp;freqs);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span><span style='background:yellow;mso-highlight:yellow'>spin_lock(&amp;pcc_lock);</span><o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       <span style='background:yellow'>spin_lock(&amp;pcc_lock);</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>input_buffer = 0x1 | (((target_freq * 100)<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       input_buffer = 0x1 | (((target_freq * 100)</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-3'>                     </span><span style='mso-spacerun:yes'>       </span>/
-(ioread32(&amp;pcch_hdr-&gt;nominal) * 1000)) &lt;&lt; 8);<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>                            /
+(ioread32(&amp;pcch_hdr-&gt;nominal) * 1000)) &lt;&lt; 8);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>iowrite32(input_buffer,<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       iowrite32(input_buffer,</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-3'>                     </span>(pcch_virt_addr +
-pcc_cpu_data-&gt;input_offset));<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>                     (pcch_virt_addr +
+pcc_cpu_data-&gt;input_offset));</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>iowrite16(CMD_SET_FREQ, &amp;pcch_hdr-&gt;command);<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       iowrite16(CMD_SET_FREQ,
+&amp;pcch_hdr-&gt;command);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>pcc_cmd();<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       pcc_cmd();</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>/* Clear the input buffer - we are done with the current
-command */<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       /* Clear the input buffer - we are done with
+the current command */</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>memset_io((pcch_virt_addr + pcc_cpu_data-&gt;input_offset), 0,
-BUF_SZ);<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       memset_io((pcch_virt_addr +
+pcc_cpu_data-&gt;input_offset), 0, BUF_SZ);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>status = ioread16(&amp;pcch_hdr-&gt;status);<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       status = ioread16(&amp;pcch_hdr-&gt;status);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>iowrite16(0, &amp;pcch_hdr-&gt;status);<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       iowrite16(0, &amp;pcch_hdr-&gt;status);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>cpufreq_freq_transition_end(policy, &amp;freqs, status !=
-CMD_COMPLETE);<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       cpufreq_freq_transition_end(policy,
+&amp;freqs, status != CMD_COMPLETE);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span><span style='background:yellow;mso-highlight:yellow'>spin_unlock(&amp;pcc_lock);</span><o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       <span style='background:yellow'>spin_unlock(&amp;pcc_lock);</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>if (status != CMD_COMPLETE) {<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       if (status != CMD_COMPLETE) {</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-2'>              </span>pr_debug(&quot;target: FAILED for cpu %d, with status:
-0x%x\n&quot;,<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>              pr_debug(&quot;target: FAILED for cpu
+%d, with status: 0x%x\n&quot;,</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-3'>                     </span>cpu, status);<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>                     cpu, status);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-2'>              </span>return -EINVAL;<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>              return -EINVAL;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>}<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       }</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>pr_debug(&quot;target: was SUCCESSFUL for cpu %d\n&quot;,
-cpu);<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       pr_debug(&quot;target: was SUCCESSFUL for cpu
+%d\n&quot;, cpu);</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span style='mso-tab-count:
-1'>       </span>return 0;<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       return 0;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:#E7E6E6;mso-background-themecolor:background2'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'>}<o:p></o:p></span></p>
+normal;background:#E7E6E6'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>}</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Another side effect of the of the pcc_cpufreq driver is that it
-can drop the CPU Frequency to run at lower speeds quickly, but takes too long
-to increase the CPU frequency as CPUs become busy, thus artificially keeping
-the CPU frequency low even during busy periods.<span
-style='mso-spacerun:yes'>   </span><span style='mso-spacerun:yes'> </span>The Kparse
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>Another side effect of the of the pcc_cpufreq
+driver is that it can drop the CPU Frequency to run at lower speeds quickly,
+but takes too long to increase the CPU frequency as CPUs become busy, thus
+artificially keeping the CPU frequency low even during busy periods.    The Kparse
 Report will show the high and low frequencies of each CPU core in the Power
-Savings Report section:<o:p></o:p></span></p>
+Savings Report section:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
- style='width:100.0%;mso-cellspacing:0in;background:#FFD1A4;mso-yfti-tbllook:
- 1184;mso-padding-alt:0in 0in 0in 0in'>
- <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+ style='width:100.0%;background:#FFD1A4'>
+ <tr>
   <td style='padding:1.5pt 2.25pt 1.5pt 2.25pt'>
-  <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-  line-height:normal;mso-outline-level:3'><b><span style='mso-bidi-font-size:
-  9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-  mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>1.1.3 Power Savings
-  Report<o:p></o:p></span></b></p>
+  <p class=MsoNormal style='line-height:normal'><b><span style='font-family:
+  "Courier New"'>1.1.3 Power Savings Report</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><u><span style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:
-  "Times New Roman";color:blue;mso-ansi-language:EN-GB;mso-fareast-language:
-  EN-GB'>[Prev Subsection][Next Subsection]---[Prev Section][Next
-  Section][Table of Contents]</span></u><span style='font-size:9.0pt;
-  font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-  mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+  normal'><u><span style='font-size:9.0pt;font-family:"Courier New";color:blue'>[Prev
+  Subsection][Next Subsection]---[Prev Section][Next Section][Table of
+  Contents]</span></u></p>
   </td>
  </tr>
 </table>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><b><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>cpu node<span
-style='mso-spacerun:yes'>    </span>Events<span style='mso-spacerun:yes'>  
-</span>Cstate1<span style='mso-spacerun:yes'>   </span>Cstate2<span
-style='mso-spacerun:yes'>   </span>Cstate3<span style='mso-spacerun:yes'>  
-</span>Cstate4<span style='mso-spacerun:yes'>  </span>freq_changes<span
-style='mso-spacerun:yes'>    </span>freq_hi<span style='mso-spacerun:yes'>  
-</span>freq_low<o:p></o:p></span></b></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>cpu
+node    Events   Cstate1   Cstate2   Cstate3   Cstate4  freq_changes   
+freq_hi   freq_low</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>0<span
-style='mso-spacerun:yes'>   </span>[ 0]<span style='mso-spacerun:yes'>        
-</span>0<span style='mso-spacerun:yes'>    </span>27.46%</span><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:#CC0000;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>    </span>51.16%<span style='mso-spacerun:yes'>   
-</span>20.66%<span style='mso-spacerun:yes'>     </span>0.72%<span
-style='mso-spacerun:yes'>         </span>1480<span style='mso-spacerun:yes'>   
-</span>2300000<span style='mso-spacerun:yes'>    </span>1629000</span><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>0  
+[ 0]         0    27.46%</span><span style='font-size:9.0pt;font-family:"Courier New";
+color:#CC0000'>    51.16%    20.66%     0.72%         1480    2300000   
+1629000</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>1<span
-style='mso-spacerun:yes'>   </span>[ 0]<span style='mso-spacerun:yes'>        
-</span>0<span style='mso-spacerun:yes'>    </span>26.98%</span><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:#CC0000;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>    </span>40.01%<span style='mso-spacerun:yes'>   
-</span>32.40%<span style='mso-spacerun:yes'>     </span>0.61%<span
-style='mso-spacerun:yes'>         </span>1614<span style='mso-spacerun:yes'>   
-</span>2300000<span style='mso-spacerun:yes'>    </span>1332000</span><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>1  
+[ 0]         0    26.98%</span><span style='font-size:9.0pt;font-family:"Courier New";
+color:#CC0000'>    40.01%    32.40%     0.61%         1614    2300000   
+1332000</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>2<span
-style='mso-spacerun:yes'>   </span>[ 0]<span style='mso-spacerun:yes'>        
-</span>0<span style='mso-spacerun:yes'>     </span>1.01%</span><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:#CC0000;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>     </span>8.47%<span style='mso-spacerun:yes'>   
-</span>85.66%<span style='mso-spacerun:yes'>     </span>4.86%<span
-style='mso-spacerun:yes'>         </span>1797<span style='mso-spacerun:yes'>   
-</span>2300000<span style='mso-spacerun:yes'>    </span>1299000</span><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>2  
+[ 0]         0     1.01%</span><span style='font-size:9.0pt;font-family:"Courier New";
+color:#CC0000'>     8.47%    85.66%     4.86%         1797    2300000   
+1299000</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>3<span
-style='mso-spacerun:yes'>   </span>[ 0]<span style='mso-spacerun:yes'>        
-</span>0<span style='mso-spacerun:yes'>     </span>1.65%</span><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:#CC0000;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>    </span>10.64%<span style='mso-spacerun:yes'>   
-</span>82.21%<span style='mso-spacerun:yes'>     </span>5.51%<span
-style='mso-spacerun:yes'>         </span>1470<span style='mso-spacerun:yes'>   
-</span>2300000<span style='mso-spacerun:yes'>    </span>1211000</span><span
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>3  
+[ 0]         0     1.65%</span><span style='font-size:9.0pt;font-family:"Courier New";
+color:#CC0000'>    10.64%    82.21%     5.51%         1470    2300000   
+1211000</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>...<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>...</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:#CC0000;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>Warning: System enabled for power savings </span><u><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:blue;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>[INFO][Next]</span></u><span style='font-size:9.0pt;
-mso-bidi-font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:
-"Times New Roman";color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:#CC0000'>Warning:
+System enabled for power savings </span><u><span style='font-size:9.0pt;
+font-family:"Courier New";color:blue'>[INFO][Next]</span></u></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Reducing the CPU frequency can help promote Turboboost in busy CPU
-cores, however, the pcc_cpufreq driver isn’t efficient in increasing the CPU
-frequency when the CPU core becomes busy.<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>Reducing the CPU frequency can help promote Turboboost
+in busy CPU cores, however, the pcc_cpufreq driver isn’t efficient in
+increasing the CPU frequency when the CPU core becomes busy.</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><b style='mso-bidi-font-weight:normal'><span
-lang=EN-US style='mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'>Solution<o:p></o:p></span></b></p>
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-family:"Arial",sans-serif;
+color:black'>Solution</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><b style='mso-bidi-font-weight:normal'><span
-lang=EN-US style='mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></b></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>The best solution is to disable the pcc_cpufreq driver.<span
-style='mso-spacerun:yes'>   </span>This can be done in a variety of ways:<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>The best solution is to disable the
+pcc_cpufreq driver.   This can be done in a variety of ways:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoListParagraphCxSpFirst style='margin-bottom:0in;margin-bottom:.0001pt;
-mso-add-space:auto;text-indent:-.25in;line-height:11.25pt;mso-list:l1 level1 lfo3;
-vertical-align:top'><![if !supportLists]><span lang=EN-US style='font-size:
-10.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
-Symbol;color:black'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Change the CPU governor from ondemand to performance<o:p></o:p></span></p>
+text-indent:-.25in;line-height:11.25pt;vertical-align:top'><span lang=EN-US
+style='font-size:10.0pt;font-family:Symbol;color:black'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Change the CPU governor from ondemand to performance</span></p>
 
 <p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
-.0001pt;mso-add-space:auto;text-indent:-.25in;line-height:11.25pt;mso-list:
-l1 level1 lfo3;vertical-align:top'><![if !supportLists]><span lang=EN-US
-style='font-size:10.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;
-mso-bidi-font-family:Symbol;color:black'><span style='mso-list:Ignore'>·<span
+.0001pt;text-indent:-.25in;line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:Symbol;color:black'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+</span></span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
 color:black'>Use tuned-adm to change profile from throughput-performance to
-latency-performance (or similar)<o:p></o:p></span></p>
+latency-performance (or similar)</span></p>
 
 <p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
-.0001pt;mso-add-space:auto;text-indent:-.25in;line-height:11.25pt;mso-list:
-l1 level1 lfo3;vertical-align:top'><![if !supportLists]><span lang=EN-US
-style='font-size:10.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;
-mso-bidi-font-family:Symbol;color:black'><span style='mso-list:Ignore'>·<span
+.0001pt;text-indent:-.25in;line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:Symbol;color:black'>·<span
 style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Disable Collaborative Power Control in the system BIOS<o:p></o:p></span></p>
+</span></span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Disable Collaborative Power Control in the system BIOS</span></p>
 
 <p class=MsoListParagraphCxSpLast style='margin-bottom:0in;margin-bottom:.0001pt;
-mso-add-space:auto;text-indent:-.25in;line-height:11.25pt;mso-list:l1 level1 lfo3;
-vertical-align:top'><![if !supportLists]><span lang=EN-US style='font-size:
-10.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
-Symbol;color:black'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>blacklist the pcc_cpufreq driver so it does not load at boot<o:p></o:p></span></p>
+text-indent:-.25in;line-height:11.25pt;vertical-align:top'><span lang=EN-US
+style='font-size:10.0pt;font-family:Symbol;color:black'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>blacklist the pcc_cpufreq driver so it does not load at boot</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Keep in mind that some of the solutions above may also limit
-c-states to 1, which would increase power usage.<span
-style='mso-spacerun:yes'>   </span><o:p></o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>Keep in mind that some of the
+solutions above may also limit c-states to 1, which would increase power
+usage.   </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>For more information on Power savings and Performance, refer to
-the following article:<o:p></o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>For more information on Power
+savings and Performance, refer to the following article:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span class=MsoHyperlink><span lang=EN-US
-style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman"'><a
-href="http://htmlpreview.github.io/?https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/power_vs_perf.htm">http://htmlpreview.github.io/?https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/power_vs_perf.htm</a></span></span><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p></o:p></span></p>
+style='font-size:10.0pt;font-family:"Arial",sans-serif'><a
+href="http://htmlpreview.github.io/?https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/power_vs_perf.htm">http://htmlpreview.github.io/?https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/power_vs_perf.htm</a></span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='mso-bidi-font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman"'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman"'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman"'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman"'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman"'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif'>&nbsp;</span></p>
 
 </div>
 

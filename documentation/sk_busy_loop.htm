@@ -1,2217 +1,995 @@
-<html xmlns:v="urn:schemas-microsoft-com:vml"
-xmlns:o="urn:schemas-microsoft-com:office:office"
-xmlns:w="urn:schemas-microsoft-com:office:word"
-xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
-xmlns="http://www.w3.org/TR/REC-html40">
+<html>
 
 <head>
 <meta http-equiv=Content-Type content="text/html; charset=windows-1252">
-<meta name=ProgId content=Word.Document>
-<meta name=Generator content="Microsoft Word 15">
-<meta name=Originator content="Microsoft Word 15">
-<link rel=File-List href="sk_busy_loop_files/filelist.xml">
-<!--[if gte mso 9]><xml>
- <o:DocumentProperties>
-  <o:Author>Ray, Mark C (GSA&amp;E - GSE Team)</o:Author>
-  <o:LastAuthor>Ray, Mark C (Global Solutions Engineering (GSE))</o:LastAuthor>
-  <o:Revision>2</o:Revision>
-  <o:TotalTime>129</o:TotalTime>
-  <o:Created>2018-05-10T13:56:00Z</o:Created>
-  <o:LastSaved>2018-05-10T13:56:00Z</o:LastSaved>
-  <o:Pages>1</o:Pages>
-  <o:Words>1870</o:Words>
-  <o:Characters>10660</o:Characters>
-  <o:Company>Hewlett Packard</o:Company>
-  <o:Lines>88</o:Lines>
-  <o:Paragraphs>25</o:Paragraphs>
-  <o:CharactersWithSpaces>12505</o:CharactersWithSpaces>
-  <o:Version>15.00</o:Version>
- </o:DocumentProperties>
- <o:OfficeDocumentSettings>
-  <o:RelyOnVML/>
-  <o:AllowPNG/>
- </o:OfficeDocumentSettings>
-</xml><![endif]-->
-<link rel=themeData href="sk_busy_loop_files/themedata.thmx">
-<link rel=colorSchemeMapping href="sk_busy_loop_files/colorschememapping.xml">
-<!--[if gte mso 9]><xml>
- <w:WordDocument>
-  <w:SpellingState>Clean</w:SpellingState>
-  <w:GrammarState>Clean</w:GrammarState>
-  <w:TrackMoves>false</w:TrackMoves>
-  <w:TrackFormatting/>
-  <w:PunctuationKerning/>
-  <w:ValidateAgainstSchemas/>
-  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
-  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
-  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
-  <w:DoNotPromoteQF/>
-  <w:LidThemeOther>EN-US</w:LidThemeOther>
-  <w:LidThemeAsian>X-NONE</w:LidThemeAsian>
-  <w:LidThemeComplexScript>X-NONE</w:LidThemeComplexScript>
-  <w:Compatibility>
-   <w:BreakWrappedTables/>
-   <w:SnapToGridInCell/>
-   <w:WrapTextWithPunct/>
-   <w:UseAsianBreakRules/>
-   <w:DontGrowAutofit/>
-   <w:SplitPgBreakAndParaMark/>
-   <w:EnableOpenTypeKerning/>
-   <w:DontFlipMirrorIndents/>
-   <w:OverrideTableStyleHps/>
-  </w:Compatibility>
-  <m:mathPr>
-   <m:mathFont m:val="Cambria Math"/>
-   <m:brkBin m:val="before"/>
-   <m:brkBinSub m:val="&#45;-"/>
-   <m:smallFrac m:val="off"/>
-   <m:dispDef/>
-   <m:lMargin m:val="0"/>
-   <m:rMargin m:val="0"/>
-   <m:defJc m:val="centerGroup"/>
-   <m:wrapIndent m:val="1440"/>
-   <m:intLim m:val="subSup"/>
-   <m:naryLim m:val="undOvr"/>
-  </m:mathPr></w:WordDocument>
-</xml><![endif]--><!--[if gte mso 9]><xml>
- <w:LatentStyles DefLockedState="false" DefUnhideWhenUsed="false"
-  DefSemiHidden="false" DefQFormat="false" DefPriority="99"
-  LatentStyleCount="371">
-  <w:LsdException Locked="false" Priority="0" QFormat="true" Name="Normal"/>
-  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 1"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 2"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 3"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 4"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 5"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 6"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 7"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 8"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 9"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 6"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 7"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 8"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 9"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 1"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 2"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 3"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 4"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 5"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 6"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 7"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 8"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 9"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Normal Indent"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="footnote text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="annotation text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="header"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="footer"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index heading"/>
-  <w:LsdException Locked="false" Priority="35" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="caption"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="table of figures"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="envelope address"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="envelope return"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="footnote reference"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="annotation reference"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="line number"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="page number"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="endnote reference"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="endnote text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="table of authorities"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="macro"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="toa heading"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number 5"/>
-  <w:LsdException Locked="false" Priority="10" QFormat="true" Name="Title"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Closing"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Signature"/>
-  <w:LsdException Locked="false" Priority="1" SemiHidden="true"
-   UnhideWhenUsed="true" Name="Default Paragraph Font"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text Indent"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Message Header"/>
-  <w:LsdException Locked="false" Priority="11" QFormat="true" Name="Subtitle"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Salutation"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Date"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text First Indent"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text First Indent 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Note Heading"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text Indent 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text Indent 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Block Text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Hyperlink"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="FollowedHyperlink"/>
-  <w:LsdException Locked="false" Priority="22" QFormat="true" Name="Strong"/>
-  <w:LsdException Locked="false" Priority="20" QFormat="true" Name="Emphasis"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Document Map"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Plain Text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="E-mail Signature"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Top of Form"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Bottom of Form"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Normal (Web)"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Acronym"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Address"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Cite"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Code"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Definition"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Keyboard"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Preformatted"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Sample"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Typewriter"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Variable"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Normal Table"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="annotation subject"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="No List"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Outline List 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Outline List 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Outline List 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Simple 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Simple 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Simple 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Classic 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Classic 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Classic 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Classic 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Colorful 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Colorful 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Colorful 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 6"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 7"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 8"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 6"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 7"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 8"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table 3D effects 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table 3D effects 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table 3D effects 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Contemporary"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Elegant"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Professional"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Subtle 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Subtle 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Web 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Web 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Web 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Balloon Text"/>
-  <w:LsdException Locked="false" Priority="39" Name="Table Grid"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Theme"/>
-  <w:LsdException Locked="false" SemiHidden="true" Name="Placeholder Text"/>
-  <w:LsdException Locked="false" Priority="1" QFormat="true" Name="No Spacing"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 1"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 1"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 1"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 1"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" Name="Revision"/>
-  <w:LsdException Locked="false" Priority="34" QFormat="true"
-   Name="List Paragraph"/>
-  <w:LsdException Locked="false" Priority="29" QFormat="true" Name="Quote"/>
-  <w:LsdException Locked="false" Priority="30" QFormat="true"
-   Name="Intense Quote"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 1"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 1"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 1"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 1"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 1"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 1"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 2"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 2"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 2"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 2"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 2"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 2"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 2"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 2"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 2"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 2"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 2"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 3"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 3"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 3"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 3"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 3"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 3"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 3"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 3"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 3"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 3"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 3"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 4"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 4"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 4"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 4"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 4"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 4"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 4"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 4"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 4"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 4"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 4"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 5"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 5"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 5"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 5"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 5"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 5"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 5"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 5"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 5"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 5"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 5"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 6"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 6"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 6"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 6"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 6"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 6"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 6"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 6"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 6"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 6"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 6"/>
-  <w:LsdException Locked="false" Priority="19" QFormat="true"
-   Name="Subtle Emphasis"/>
-  <w:LsdException Locked="false" Priority="21" QFormat="true"
-   Name="Intense Emphasis"/>
-  <w:LsdException Locked="false" Priority="31" QFormat="true"
-   Name="Subtle Reference"/>
-  <w:LsdException Locked="false" Priority="32" QFormat="true"
-   Name="Intense Reference"/>
-  <w:LsdException Locked="false" Priority="33" QFormat="true" Name="Book Title"/>
-  <w:LsdException Locked="false" Priority="37" SemiHidden="true"
-   UnhideWhenUsed="true" Name="Bibliography"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="TOC Heading"/>
-  <w:LsdException Locked="false" Priority="41" Name="Plain Table 1"/>
-  <w:LsdException Locked="false" Priority="42" Name="Plain Table 2"/>
-  <w:LsdException Locked="false" Priority="43" Name="Plain Table 3"/>
-  <w:LsdException Locked="false" Priority="44" Name="Plain Table 4"/>
-  <w:LsdException Locked="false" Priority="45" Name="Plain Table 5"/>
-  <w:LsdException Locked="false" Priority="40" Name="Grid Table Light"/>
-  <w:LsdException Locked="false" Priority="46" Name="Grid Table 1 Light"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark"/>
-  <w:LsdException Locked="false" Priority="51" Name="Grid Table 6 Colorful"/>
-  <w:LsdException Locked="false" Priority="52" Name="Grid Table 7 Colorful"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 1"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 1"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 1"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 1"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 1"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 1"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 2"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 2"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 2"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 2"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 2"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 2"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 3"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 3"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 3"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 3"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 3"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 3"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 4"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 4"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 4"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 4"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 4"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 4"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 5"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 5"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 5"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 5"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 5"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 5"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 6"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 6"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 6"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 6"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 6"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 6"/>
-  <w:LsdException Locked="false" Priority="46" Name="List Table 1 Light"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark"/>
-  <w:LsdException Locked="false" Priority="51" Name="List Table 6 Colorful"/>
-  <w:LsdException Locked="false" Priority="52" Name="List Table 7 Colorful"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 1"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 1"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 1"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 1"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 1"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 1"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 2"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 2"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 2"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 2"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 2"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 2"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 3"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 3"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 3"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 3"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 3"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 3"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 4"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 4"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 4"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 4"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 4"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 4"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 5"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 5"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 5"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 5"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 5"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 5"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 6"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 6"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 6"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 6"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 6"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 6"/>
- </w:LatentStyles>
-</xml><![endif]-->
+<meta name=Generator content="Microsoft Word 15 (filtered)">
 <style>
 <!--
  /* Font Definitions */
  @font-face
 	{font-family:Courier;
-	panose-1:2 7 4 9 2 2 5 2 4 4;
-	mso-font-charset:0;
-	mso-generic-font-family:modern;
-	mso-font-format:other;
-	mso-font-pitch:fixed;
-	mso-font-signature:3 0 0 0 1 0;}
+	panose-1:2 7 4 9 2 2 5 2 4 4;}
 @font-face
 	{font-family:"Cambria Math";
-	panose-1:2 4 5 3 5 4 6 3 2 4;
-	mso-font-charset:0;
-	mso-generic-font-family:roman;
-	mso-font-pitch:variable;
-	mso-font-signature:-536870145 1107305727 0 0 415 0;}
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
 @font-face
 	{font-family:Calibri;
-	panose-1:2 15 5 2 2 2 4 3 2 4;
-	mso-font-charset:0;
-	mso-generic-font-family:swiss;
-	mso-font-pitch:variable;
-	mso-font-signature:-536859905 -1073732485 9 0 511 0;}
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
  /* Style Definitions */
  p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{mso-style-unhide:no;
-	mso-style-qformat:yes;
-	mso-style-parent:"";
-	margin-top:0in;
+	{margin-top:0in;
 	margin-right:0in;
 	margin-bottom:8.0pt;
 	margin-left:0in;
 	line-height:107%;
-	mso-pagination:widow-orphan;
 	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-fareast-font-family:Calibri;
-	mso-fareast-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
+	font-family:"Calibri",sans-serif;}
 a:link, span.MsoHyperlink
-	{mso-style-priority:99;
-	color:#0563C1;
-	mso-themecolor:hyperlink;
-	text-decoration:underline;
-	text-underline:single;}
+	{color:#0563C1;
+	text-decoration:underline;}
 a:visited, span.MsoHyperlinkFollowed
-	{mso-style-noshow:yes;
-	mso-style-priority:99;
-	color:#954F72;
-	mso-themecolor:followedhyperlink;
-	text-decoration:underline;
-	text-underline:single;}
-span.SpellE
-	{mso-style-name:"";
-	mso-spl-e:yes;}
-span.GramE
-	{mso-style-name:"";
-	mso-gram-e:yes;}
+	{color:#954F72;
+	text-decoration:underline;}
 .MsoChpDefault
-	{mso-style-type:export-only;
-	mso-default-props:yes;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-fareast-font-family:Calibri;
-	mso-fareast-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
+	{font-family:"Calibri",sans-serif;}
 .MsoPapDefault
-	{mso-style-type:export-only;
-	margin-bottom:8.0pt;
+	{margin-bottom:8.0pt;
 	line-height:107%;}
 @page WordSection1
 	{size:8.5in 11.0in;
-	margin:.5in .5in .5in .5in;
-	mso-header-margin:.5in;
-	mso-footer-margin:.5in;
-	mso-paper-source:0;}
+	margin:.5in .5in .5in .5in;}
 div.WordSection1
 	{page:WordSection1;}
 -->
 </style>
-<!--[if gte mso 10]>
-<style>
- /* Style Definitions */
- table.MsoNormalTable
-	{mso-style-name:"Table Normal";
-	mso-tstyle-rowband-size:0;
-	mso-tstyle-colband-size:0;
-	mso-style-noshow:yes;
-	mso-style-priority:99;
-	mso-style-parent:"";
-	mso-padding-alt:0in 5.4pt 0in 5.4pt;
-	mso-para-margin-top:0in;
-	mso-para-margin-right:0in;
-	mso-para-margin-bottom:8.0pt;
-	mso-para-margin-left:0in;
-	line-height:107%;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
-</style>
-<![endif]--><!--[if gte mso 9]><xml>
- <o:shapedefaults v:ext="edit" spidmax="1026"/>
-</xml><![endif]--><!--[if gte mso 9]><xml>
- <o:shapelayout v:ext="edit">
-  <o:idmap v:ext="edit" data="1"/>
- </o:shapelayout></xml><![endif]-->
+
 </head>
 
-<body lang=EN-GB link="#0563C1" vlink="#954F72" style='tab-interval:.5in'>
+<body lang=EN-GB link="#0563C1" vlink="#954F72">
 
 <div class=WordSection1>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
-justify;mso-line-height-alt:11.25pt;vertical-align:top'><b><i style='mso-bidi-font-style:
-normal'><span lang=EN-US style='font-size:12.0pt;mso-bidi-font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>LinuxKI Warning<o:p></o:p></span></i></b></p>
+justify;vertical-align:top'><b><i><span lang=EN-US style='font-size:12.0pt;
+font-family:"Arial",sans-serif;color:black'>LinuxKI Warning</span></i></b></p>
 
 <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
 text-align:center;line-height:11.25pt;vertical-align:top'><b><span lang=EN-US
-style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></b></p>
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>&#8203;&#8203;&#8203;&#8203;Network-latency tuned profile may
-increase System CPU usage and decrease overall performance <o:p></o:p></span></b></p>
+font-family:"Arial",sans-serif;color:black'>&#8203;&#8203;&#8203;&#8203;Network-latency
+tuned profile may increase System CPU usage and decrease overall performance </span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>03/30/2017<o:p></o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>03/30/2017</span></p>
 
 <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
 text-align:center;line-height:11.25pt;vertical-align:top'><span lang=EN-US
-style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><b><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'>Problem</span></b><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+color:black'>Problem</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>The&nbsp;network-latency tuned profile was&nbsp;introduced in RHEL
-7.0.&nbsp; &nbsp;It is a superset of the latency-performance tuned profile with
-some additional parameter settings as seen below.<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black'>#</span><span lang=EN-US
-style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black'># tuned configuration</span><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black'>#</span><span lang=EN-US
-style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black'>[main]</span><span lang=EN-US
-style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black'>summary=Optimize for deterministic
-performance at the cost of increased power consumption, focused on low latency
-network performance</span><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black;background:yellow;mso-highlight:yellow'>include=latency-performance</span><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black'>[vm]</span><span lang=EN-US
-style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black'>transparent_hugepages=never</span><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black'>[sysctl]</span><span lang=EN-US
-style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><b style='mso-bidi-font-weight:normal'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:Courier;
-mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>net.core.busy_read=50</span></b><b style='mso-bidi-font-weight:
-normal'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></b></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><b style='mso-bidi-font-weight:normal'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:Courier;
-mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>net.core.busy_poll=50</span></b><b style='mso-bidi-font-weight:
-normal'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></b></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black'>net.ipv4.tcp_fastopen=3</span><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black'>kernel.numa_balancing=0</span><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>The&nbsp;network-latency tuned profile
+was&nbsp;introduced in RHEL 7.0.&nbsp; &nbsp;It is a superset of the
+latency-performance tuned profile with some additional parameter settings as
+seen below.</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><br>
-</span><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:11.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>#</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'># tuned configuration</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>#</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>[main]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>summary=Optimize for deterministic performance at the cost
+of increased power consumption, focused on low latency network performance</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black;background:yellow'>include=latency-performance</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>[vm]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>transparent_hugepages=never</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>[sysctl]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>net.core.busy_read=50</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>net.core.busy_poll=50</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>net.ipv4.tcp_fastopen=3</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>kernel.numa_balancing=0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
+color:black'><br>
+</span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
 color:black'>Since the network-latency profile also disables transparent
 hugepages and sets the kernel.numa_balancing parameter to 0, some customer may
 be tempted to use the network-latency profile where the latency-performance
-profile was used in the past.<span style='mso-spacerun:yes'>   </span>Not to
-mention, who doesn’t want low latency?<o:p></o:p></span></p>
+profile was used in the past.   Not to mention, who doesn’t want low latency?</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>However, the network-latency tuned profile also sets the
-net.core.busy_read and net.core.busy_poll parameters to 50, which can increase
-the overall System CPU usage and subsequently decrease overall performance in
-traditional OLTP workloads, such as Oracle and other transactional DB
-workloads.<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>However, the network-latency tuned profile also
+sets the net.core.busy_read and net.core.busy_poll parameters to 50, which can
+increase the overall System CPU usage and subsequently decrease overall performance
+in traditional OLTP workloads, such as Oracle and other transactional DB
+workloads.</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Note also that the busy_read and busy_poll parameters were
-introduced in Linux versions 3.11 and later, which includes SLES 12 and was
-also brought into RHEL 7. <o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>Note also that the busy_read and busy_poll
+parameters were introduced in Linux versions 3.11 and later, which includes
+SLES 12 and was also brought into RHEL 7. </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><b><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'>Investigation</span></b><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+color:black'>Investigation</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>In a recent OLTP benchmark using Oracle RAC database on RHEL 7.3,
-the customer was concerned that System CPU time was around 10-20% and overall
-throughput was lower than expected.<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>In a recent OLTP benchmark using Oracle RAC
+database on RHEL 7.3, the customer was concerned that System CPU time was
+around 10-20% and overall throughput was lower than expected.</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>LinuxKI data was taken for analysis.&nbsp; &nbsp;For example:<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>$ <span class=GramE>cd</span> /dev/mem&nbsp;</span><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>$ <span class=SpellE><span class=GramE>runki</span></span>&nbsp;</span><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>LinuxKI data was taken for analysis.&nbsp;
+&nbsp;For example:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>The CPU Profiling Report (<span class=SpellE>kiprof</span>*.txt)
-showed that 12% of the CPU profile hits occurred in kernel (system) code.&nbsp;
-&nbsp; Note that this doesn't include Interrupt profile hits:<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>$ cd /dev/mem&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>$ runki&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>******** GLOBAL HARDCLOCK REPORT ********</span><span lang=EN-US
-style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>&nbsp; Count&nbsp; &nbsp;USER%&nbsp; &nbsp; SYS%&nbsp; &nbsp;INTR%&nbsp;
-&nbsp;IDLE%</span><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>&nbsp;151170<span class=GramE>&nbsp; 73.30</span>%&nbsp;
-12.06%&nbsp; 14.62%&nbsp; &nbsp;0.02%</span><span lang=EN-US style='font-family:
-"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>The CPU Profiling Report (kiprof*.txt) showed
+that 12% of the CPU profile hits occurred in kernel (system) code.&nbsp; &nbsp;
+Note that this doesn't include Interrupt profile hits:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+Courier;color:black'>******** GLOBAL HARDCLOCK REPORT ********</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>Kernel Functions executed during profile</span><span lang=EN-US
-style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+Courier;color:black'>&nbsp; Count&nbsp; &nbsp;USER%&nbsp; &nbsp; SYS%&nbsp;
+&nbsp;INTR%&nbsp; &nbsp;IDLE%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>&nbsp; &nbsp;Count&nbsp; &nbsp; &nbsp;<span class=SpellE>Pct</span><span
-class=GramE>&nbsp; State</span>&nbsp; Function</span><span lang=EN-US
-style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>&nbsp; 111273<span class=GramE>&nbsp; 73.61</span>%&nbsp;
-USER&nbsp; &nbsp;UNKNOWN</span><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black;background:yellow'>&nbsp; &nbsp; 8795&nbsp; &nbsp;5.82%<span
-class=GramE>&nbsp; SYS</span>&nbsp; &nbsp; sk_busy_loop</span><span lang=EN-US
-style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>&nbsp; &nbsp; 4910&nbsp; &nbsp;3.25%<span class=GramE>&nbsp; INTR</span>&nbsp;
-&nbsp;<span class=SpellE>tcp_recvmsg</span></span><span lang=EN-US
-style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black;background:yellow'>&nbsp; &nbsp; 3034&nbsp; &nbsp;2.01%<span
-class=GramE>&nbsp; SYS</span>&nbsp; &nbsp; <span class=SpellE>sched_clock</span></span><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black;background:yellow'>&nbsp; &nbsp; 2998&nbsp; &nbsp;1.98%<span
-class=GramE>&nbsp; INTR</span>&nbsp; &nbsp;<span class=SpellE>ixgbe_busy_poll_recv</span></span><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>&nbsp; &nbsp; 2742&nbsp; &nbsp;1.81%<span class=GramE>&nbsp; SYS</span>&nbsp;
-&nbsp; __schedule</span><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>&nbsp; &nbsp; 1425&nbsp; &nbsp;0.94%<span class=GramE>&nbsp; INTR</span>&nbsp;
-&nbsp;__<span class=SpellE>wake_up_sync_key</span></span><span lang=EN-US
-style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>&nbsp; &nbsp; 1412&nbsp; &nbsp;0.93%<span class=GramE>&nbsp; INTR</span>&nbsp;
-&nbsp;<span class=SpellE>call_softirq</span></span><span lang=EN-US
-style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>&nbsp; &nbsp; &nbsp;922&nbsp; &nbsp;0.61%<span class=GramE>&nbsp;
-INTR</span>&nbsp; &nbsp;<span class=SpellE>net_rx_action</span></span><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>&nbsp; &nbsp; &nbsp;856&nbsp; &nbsp;0.57%<span class=GramE>&nbsp;
-SYS</span>&nbsp; &nbsp; __<span class=SpellE>alloc_pages_nodemask</span></span><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black;background:yellow'>&nbsp; &nbsp; &nbsp;731&nbsp; &nbsp;0.48%<span
-class=GramE>&nbsp; SYS</span>&nbsp; &nbsp; <span class=SpellE>local_clock</span></span><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>&nbsp; &nbsp; &nbsp;558&nbsp; &nbsp;0.37%<span class=GramE>&nbsp;
-SYS</span>&nbsp; &nbsp; <span class=SpellE>syscall_trace_leave</span></span><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+Courier;color:black'>&nbsp;151170&nbsp; 73.30%&nbsp; 12.06%&nbsp; 14.62%&nbsp;
+&nbsp;0.02%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span class=GramE><span lang=EN-US style='font-size:
-9.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:
-Arial;color:black'>non-idle</span></span><span lang=EN-US style='font-size:
-9.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:
-Arial;color:black'> GLOBAL HARDCLOCK STACK TRACES (sort by count):</span><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>Kernel Functions executed during profile</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>&nbsp; &nbsp;Count&nbsp; &nbsp; &nbsp;Pct&nbsp;
+State&nbsp; Function</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>&nbsp; 111273&nbsp; 73.61%&nbsp; USER&nbsp; &nbsp;UNKNOWN</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black;background:yellow'>&nbsp; &nbsp; 8795&nbsp;
+&nbsp;5.82%&nbsp; SYS&nbsp; &nbsp; sk_busy_loop</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>&nbsp; &nbsp; 4910&nbsp; &nbsp;3.25%&nbsp; INTR&nbsp;
+&nbsp;tcp_recvmsg</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black;background:yellow'>&nbsp; &nbsp; 3034&nbsp;
+&nbsp;2.01%&nbsp; SYS&nbsp; &nbsp; sched_clock</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black;background:yellow'>&nbsp; &nbsp; 2998&nbsp;
+&nbsp;1.98%&nbsp; INTR&nbsp; &nbsp;ixgbe_busy_poll_recv</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>&nbsp; &nbsp; 2742&nbsp; &nbsp;1.81%&nbsp; SYS&nbsp;
+&nbsp; __schedule</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>&nbsp; &nbsp; 1425&nbsp; &nbsp;0.94%&nbsp; INTR&nbsp;
+&nbsp;__wake_up_sync_key</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>&nbsp; &nbsp; 1412&nbsp; &nbsp;0.93%&nbsp; INTR&nbsp;
+&nbsp;call_softirq</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>&nbsp; &nbsp; &nbsp;922&nbsp; &nbsp;0.61%&nbsp; INTR&nbsp;
+&nbsp;net_rx_action</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>&nbsp; &nbsp; &nbsp;856&nbsp; &nbsp;0.57%&nbsp; SYS&nbsp;
+&nbsp; __alloc_pages_nodemask</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black;background:yellow'>&nbsp; &nbsp; &nbsp;731&nbsp;
+&nbsp;0.48%&nbsp; SYS&nbsp; &nbsp; local_clock</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>&nbsp; &nbsp; &nbsp;558&nbsp; &nbsp;0.37%&nbsp; SYS&nbsp;
+&nbsp; syscall_trace_leave</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>&nbsp; &nbsp;Count&nbsp; &nbsp; &nbsp;<span class=SpellE>Pct</span><span
-class=GramE>&nbsp; Stack</span> trace</span><span lang=EN-US style='font-family:
-"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:Arial;
-color:black'>============================================================</span><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";mso-fareast-font-family:"Times New Roman";color:black'>&nbsp;
-&nbsp; 8794&nbsp; &nbsp;5.82%<span class=GramE>&nbsp;&nbsp;<span class=SpellE><span
-style='background:yellow;mso-highlight:yellow;mso-bidi-font-weight:bold'>sk</span></span></span><span
-class=SpellE><span style='background:yellow;mso-highlight:yellow;mso-bidi-font-weight:
-bold'>_busy_loop</span></span>&nbsp; <span class=SpellE>tcp_recvmsg</span>&nbsp;
-<span class=SpellE>inet_recvmsg</span>&nbsp; sock_aio_read.part.7&nbsp; <span
-class=SpellE>sock_aio_read</span>&nbsp; <span class=SpellE>do_sync_read</span>&nbsp;
-<span class=SpellE>vfs_read</span>&nbsp; <span class=SpellE>sys_read</span>&nbsp;
-<span class=SpellE>tracesys</span><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";mso-fareast-font-family:"Times New Roman";color:black'>&nbsp;
-&nbsp; 4910&nbsp; &nbsp;3.25%<span class=GramE>&nbsp; <span class=SpellE>tcp</span></span><span
-class=SpellE>_recvmsg</span>&nbsp; <span class=SpellE>inet_recvmsg</span>&nbsp;
-sock_aio_read.part.7&nbsp; <span class=SpellE>sock_aio_read</span>&nbsp; <span
-class=SpellE>do_sync_read</span>&nbsp; <span class=SpellE>vfs_read</span>&nbsp;
-<span class=SpellE>sys_read</span>&nbsp; <span class=SpellE>tracesys</span><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";mso-fareast-font-family:"Times New Roman";color:black'>&nbsp;
-&nbsp; 3010&nbsp; &nbsp;1.99%&nbsp; <span class=SpellE>sched_clock</span>&nbsp;
-<span class=SpellE>local_clock</span>&nbsp;&nbsp;<span class=SpellE><span
-style='background:yellow;mso-highlight:yellow;mso-shading:white;mso-bidi-font-weight:
-bold'>sk_busy_loop</span></span>&nbsp; <span class=SpellE>tcp_recvmsg</span>&nbsp;
-<span class=SpellE>inet_recvmsg</span>&nbsp; sock_aio_read.part.7&nbsp; <span
-class=SpellE>sock_aio_read</span>&nbsp; <span class=SpellE>do_sync_read</span>&nbsp;
-<span class=SpellE>vfs_read</span>&nbsp; <span class=SpellE>sys_read</span>&nbsp;
-<span class=SpellE>tracesys</span><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";mso-fareast-font-family:"Times New Roman";color:black'>&nbsp;
-&nbsp; 2998&nbsp; &nbsp;1.98%&nbsp; <span class=SpellE>ixgbe_busy_poll_recv</span>&nbsp;&nbsp;</span><span
-class=SpellE><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:#444444;background:yellow;
-mso-highlight:yellow;mso-bidi-font-weight:bold'>sk_busy_loop</span></span><span
-lang=EN-US style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:
-"Times New Roman";color:black'>&nbsp;&nbsp;<span class=SpellE>tcp_recvmsg</span>&nbsp;
-<span class=SpellE>inet_recvmsg</span>&nbsp; sock_aio_read.part.7&nbsp; <span
-class=SpellE>sock_aio_read</span>&nbsp; <span class=SpellE>do_sync_read</span>&nbsp;
-<span class=SpellE>vfs_read</span>&nbsp; <span class=SpellE>sys_read</span>&nbsp;
-<span class=SpellE>tracesys</span><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";mso-fareast-font-family:"Times New Roman";color:black'>&nbsp;
-&nbsp; 1759&nbsp; &nbsp;1.16%&nbsp; __schedule&nbsp; <span class=SpellE>schedule</span>&nbsp;
-<span class=SpellE>schedule_timeout</span>&nbsp; <span class=SpellE>sk_wait_data</span>&nbsp;
-<span class=SpellE>tcp_recvmsg</span>&nbsp; <span class=SpellE>inet_recvmsg</span>&nbsp;
-sock_aio_read.part.7&nbsp; <span class=SpellE>sock_aio_read</span>&nbsp; <span
-class=SpellE>do_sync_read</span>&nbsp; <span class=SpellE>vfs_read</span>&nbsp;
-<span class=SpellE>sys_read</span>&nbsp; <span class=SpellE>tracesys</span><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";mso-fareast-font-family:"Times New Roman";color:black'>&nbsp;
-&nbsp; 1193&nbsp; &nbsp;0.79%<span class=GramE>&nbsp; <span class=SpellE>call</span></span><span
-class=SpellE>_softirq</span>&nbsp; <span class=SpellE>do_softirq</span>&nbsp; <span
-class=SpellE>irq_exit</span>&nbsp; __<span class=SpellE>irqentry_text_start</span>&nbsp;
-<span class=SpellE>ret_from_intr</span><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";mso-fareast-font-family:"Times New Roman";color:black'>&nbsp;
-&nbsp; 1128&nbsp; &nbsp;0.75%&nbsp; __<span class=SpellE>wake_up_sync_key</span>&nbsp;
-<span class=SpellE>tcp_prequeue</span>&nbsp; tcp_v4_rcv&nbsp; <span
-class=SpellE>ip_local_deliver_finish</span>&nbsp; <span class=SpellE>ip_local_deliver</span>&nbsp;
-<span class=SpellE>ip_rcv_finish</span>&nbsp; <span class=SpellE>ip_rcv</span>&nbsp;
-__<span class=SpellE>netif_receive_skb_core</span>&nbsp; __<span class=SpellE>netif_receive_skb</span>&nbsp;
-<span class=SpellE>netif_receive_skb_internal</span>&nbsp; <span class=SpellE>napi_gro_receive</span>&nbsp;
-<span class=SpellE>ixgbe_clean_rx_irq</span>&nbsp; <span class=SpellE>ixgbe_poll</span>&nbsp;
-<span class=SpellE>net_rx_action</span>&nbsp; __<span class=SpellE>do_softirq</span>&nbsp;
-<span class=SpellE>call_softirq</span><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";mso-fareast-font-family:"Times New Roman";color:black'>&nbsp;
-&nbsp; &nbsp;802&nbsp; &nbsp;0.53%<span class=GramE>&nbsp; _</span>_schedule&nbsp;
-<span class=SpellE>schedule_user</span>&nbsp; <span class=SpellE>retint_careful</span><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";mso-fareast-font-family:"Times New Roman";color:black'>&nbsp;
-&nbsp; &nbsp;725&nbsp; &nbsp;0.48%&nbsp; <span class=SpellE>local_clock</span>&nbsp;&nbsp;<span
-class=SpellE><span style='background:yellow;mso-highlight:yellow;mso-bidi-font-weight:
-bold'>sk_busy_loop</span></span>&nbsp; <span class=SpellE>tcp_recvmsg</span>&nbsp;
-<span class=SpellE>inet_recvmsg</span>&nbsp; sock_aio_read.part.7&nbsp; <span
-class=SpellE>sock_aio_read</span>&nbsp; <span class=SpellE>do_sync_read</span>&nbsp;
-<span class=SpellE>vfs_read</span>&nbsp; <span class=SpellE>sys_read</span>&nbsp;
-<span class=SpellE>tracesys</span><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";mso-fareast-font-family:"Times New Roman";color:black'>&nbsp;
-&nbsp; &nbsp;673&nbsp; &nbsp;0.45%<span class=GramE>&nbsp; <span class=SpellE>net</span></span><span
-class=SpellE>_rx_action</span>&nbsp; __<span class=SpellE>do_softirq</span>&nbsp;
-<span class=SpellE>call_softirq</span>&nbsp; <span class=SpellE>do_softirq</span>&nbsp;
-<span class=SpellE>irq_exit</span>&nbsp; __<span class=SpellE>irqentry_text_start</span>&nbsp;
-<span class=SpellE>ret_from_intr</span><o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";mso-fareast-font-family:"Times New Roman";color:black'>&nbsp;
-&nbsp; &nbsp;602&nbsp; &nbsp;0.40%<span class=GramE>&nbsp; _</span>_<span
-class=SpellE>alloc_pages_nodemask</span>&nbsp; <span class=SpellE>alloc_pages_vma</span>&nbsp;
-<span class=SpellE>handle_mm_fault</span>&nbsp; __<span class=SpellE>do_page_fault</span>&nbsp;
-<span class=SpellE>do_page_fault</span>&nbsp; <span class=SpellE>page_fault</span><o:p></o:p></span></p>
+Courier;color:black'>non-idle GLOBAL HARDCLOCK STACK TRACES (sort by count):</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><br style='mso-special-character:
-line-break'>
-<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
-<![endif]><o:p></o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Note that most of the System profile hits occur in the context of
-the sk_busy_loop() function.&nbsp;<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>&nbsp; &nbsp;Count&nbsp; &nbsp; &nbsp;Pct&nbsp; Stack
+trace</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+Courier;color:black'>============================================================</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>The busy_poll/busy_read parameters will cause the <span
-class=GramE>select(</span>), poll(), or socket read() to loop in the
-sk_busy_loop function until network data is received on the socket queue, or
-until the busy_poll/busy_read timeout expires (in microseconds).<span
-style='mso-spacerun:yes'>    </span><o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp; &nbsp; 8794&nbsp; &nbsp;5.82%&nbsp;&nbsp;<span
+style='background:yellow'>sk_busy_loop</span>&nbsp; tcp_recvmsg&nbsp;
+inet_recvmsg&nbsp; sock_aio_read.part.7&nbsp; sock_aio_read&nbsp;
+do_sync_read&nbsp; vfs_read&nbsp; sys_read&nbsp; tracesys</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp; &nbsp; 4910&nbsp; &nbsp;3.25%&nbsp;
+tcp_recvmsg&nbsp; inet_recvmsg&nbsp; sock_aio_read.part.7&nbsp;
+sock_aio_read&nbsp; do_sync_read&nbsp; vfs_read&nbsp; sys_read&nbsp; tracesys</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>If the network-latency tuned profile is used, then sk_busy_<span
-class=GramE>loop(</span>)<span style='mso-spacerun:yes'>  </span>may loop for
-50 microseconds.<span style='mso-spacerun:yes'>   </span>While 50 microseconds
-does not sound like a lot of time, it can add up if there are many TCP
-connections.<span style='mso-spacerun:yes'>    </span>Also, if it typically takes
-longer than 50 microseconds to receive data on the sockets, then the additional
-CPU is still used and the process still goes to sleep, resulting in no benefit
-from the polling along the increased CPU overhead.<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp; &nbsp; 3010&nbsp; &nbsp;1.99%&nbsp;
+sched_clock&nbsp; local_clock&nbsp;&nbsp;<span style='background:yellow'>sk_busy_loop</span>&nbsp;
+tcp_recvmsg&nbsp; inet_recvmsg&nbsp; sock_aio_read.part.7&nbsp;
+sock_aio_read&nbsp; do_sync_read&nbsp; vfs_read&nbsp; sys_read&nbsp; tracesys</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp; &nbsp; 2998&nbsp; &nbsp;1.98%&nbsp;
+ixgbe_busy_poll_recv&nbsp;&nbsp;</span><span lang=EN-US style='font-size:9.0pt;
+font-family:"Courier New";color:#444444;background:yellow'>sk_busy_loop</span><span
+lang=EN-US style='font-size:9.0pt;font-family:"Courier New";color:black'>&nbsp;&nbsp;tcp_recvmsg&nbsp;
+inet_recvmsg&nbsp; sock_aio_read.part.7&nbsp; sock_aio_read&nbsp;
+do_sync_read&nbsp; vfs_read&nbsp; sys_read&nbsp; tracesys</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>The LinuxKI Toolset can help you identify if setting
-busy_poll/busy_read might help or hurt.<span style='mso-spacerun:yes'>  
-</span>Based on the Network Activity Report (kisock.*.txt) below, you can see
-the average socket read() time is 1.237 milliseconds, which is much more than
-the 50 microseconds for busy_poll():<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp; &nbsp; 1759&nbsp; &nbsp;1.16%&nbsp;
+__schedule&nbsp; schedule&nbsp; schedule_timeout&nbsp; sk_wait_data&nbsp;
+tcp_recvmsg&nbsp; inet_recvmsg&nbsp; sock_aio_read.part.7&nbsp;
+sock_aio_read&nbsp; do_sync_read&nbsp; vfs_read&nbsp; sys_read&nbsp; tracesys</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp; &nbsp; 1193&nbsp; &nbsp;0.79%&nbsp;
+call_softirq&nbsp; do_softirq&nbsp; irq_exit&nbsp; __irqentry_text_start&nbsp;
+ret_from_intr</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>Local IP Statistics<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp; &nbsp; 1128&nbsp; &nbsp;0.75%&nbsp;
+__wake_up_sync_key&nbsp; tcp_prequeue&nbsp; tcp_v4_rcv&nbsp;
+ip_local_deliver_finish&nbsp; ip_local_deliver&nbsp; ip_rcv_finish&nbsp;
+ip_rcv&nbsp; __netif_receive_skb_core&nbsp; __netif_receive_skb&nbsp;
+netif_receive_skb_internal&nbsp; napi_gro_receive&nbsp;
+ixgbe_clean_rx_irq&nbsp; ixgbe_poll&nbsp; net_rx_action&nbsp;
+__do_softirq&nbsp; call_softirq</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>==================================================<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp; &nbsp; &nbsp;802&nbsp; &nbsp;0.53%&nbsp;
+__schedule&nbsp; schedule_user&nbsp; retint_careful</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp; &nbsp; &nbsp;725&nbsp; &nbsp;0.48%&nbsp;
+local_clock&nbsp;&nbsp;<span style='background:yellow'>sk_busy_loop</span>&nbsp;
+tcp_recvmsg&nbsp; inet_recvmsg&nbsp; sock_aio_read.part.7&nbsp;
+sock_aio_read&nbsp; do_sync_read&nbsp; vfs_read&nbsp; sys_read&nbsp; tracesys</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>L=10.14.26.27<span style='mso-spacerun:yes'>   </span>Syscalls:
-9018955<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp; &nbsp; &nbsp;673&nbsp; &nbsp;0.45%&nbsp;
+net_rx_action&nbsp; __do_softirq&nbsp; call_softirq&nbsp; do_softirq&nbsp;
+irq_exit&nbsp; __irqentry_text_start&nbsp; ret_from_intr</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>System Call Name<span style='mso-spacerun:yes'>    
-</span>Count<span style='mso-spacerun:yes'>     </span>Rate<span
-style='mso-spacerun:yes'>     </span>ElpTime<span
-style='mso-spacerun:yes'>        </span><span style='background:yellow;
-mso-highlight:yellow'>Avg</span><span style='mso-spacerun:yes'>       
-</span>Max<span style='mso-spacerun:yes'>    </span>Errs<span
-style='mso-spacerun:yes'>    </span>AvSz<span style='mso-spacerun:yes'>    
-</span>KB/s<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>read<span style='mso-spacerun:yes'>               </span>4209500
-210473.2 5208.657345<span style='mso-spacerun:yes'>   </span><span
-style='background:yellow;mso-highlight:yellow'>0.001237</span><span
-style='mso-spacerun:yes'>  </span>11.948590<span style='mso-spacerun:yes'>     
-</span>23<span style='mso-spacerun:yes'>     </span>235<span
-style='mso-spacerun:yes'>  </span>48505.6<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>write<span style='mso-spacerun:yes'>              </span>4808199
-240407.9<span style='mso-spacerun:yes'>   </span>34.068338<span
-style='mso-spacerun:yes'>   </span>0.000007<span style='mso-spacerun:yes'>  
-</span>0.033348<span style='mso-spacerun:yes'>       </span>0<span
-style='mso-spacerun:yes'>    </span>1516 356102.7<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>writev<span style='mso-spacerun:yes'>               
-</span>1256<span style='mso-spacerun:yes'>     </span>62.8<span
-style='mso-spacerun:yes'>    </span>0.011227<span style='mso-spacerun:yes'>  
-</span>0.000009<span style='mso-spacerun:yes'>   </span>0.000062<span
-style='mso-spacerun:yes'>       </span>0<span style='mso-spacerun:yes'>  
-</span>10923<span style='mso-spacerun:yes'>    </span>669.9<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp; &nbsp; &nbsp;602&nbsp; &nbsp;0.40%&nbsp;
+__alloc_pages_nodemask&nbsp; alloc_pages_vma&nbsp; handle_mm_fault&nbsp;
+__do_page_fault&nbsp; do_page_fault&nbsp; page_fault</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'><br>
+<br>
+</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Of course, 1.237 milliseconds is only an average, and we may have
-different sockets for different purposes.<span style='mso-spacerun:yes'> 
-</span>With <span class=SpellE>busy_poll</span>/<span class=SpellE>busy_read</span>
-set to 50, the processes can be analyzed using the PID Analysis Report
-(kipid.*.txt) to see how often they actually go to sleep waiting on the network
-data.<span style='mso-spacerun:yes'>   </span>Below is sample data for one of
-the Oracle processes.<span style='mso-spacerun:yes'>   </span><o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>Note that most of the System profile hits occur
+in the context of the sk_busy_loop() function.&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'> </span></span><span lang=EN-US
-style='font-size:9.0pt;mso-bidi-font-size:11.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'>PID 22781<span
-style='mso-spacerun:yes'>  </span>oracleEPH001<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>The busy_poll/busy_read parameters will cause
+the select(), poll(), or socket read() to loop in the sk_busy_loop function
+until network data is received on the socket queue, or until the
+busy_poll/busy_read timeout expires (in microseconds).    </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>********* SCHEDULER
-ACTIVITY REPORT ********<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>If the network-latency tuned profile is used,
+then sk_busy_loop()  may loop for 50 microseconds.   While 50 microseconds does
+not sound like a lot of time, it can add up if there are many TCP
+connections.    Also, if it typically takes longer than 50 microseconds to
+receive data on the sockets, then the additional CPU is still used and the
+process still goes to sleep, resulting in no benefit from the polling along the
+increased CPU overhead.</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>RunTime<span
-style='mso-spacerun:yes'>    </span>:<span style='mso-spacerun:yes'> 
-</span>6.271904<span style='mso-spacerun:yes'>  </span><span style='background:
-yellow;mso-highlight:yellow'>SysTime<span style='mso-spacerun:yes'>  
-</span>:<span style='mso-spacerun:yes'>  </span>3.276771</span><span
-style='mso-spacerun:yes'>   </span>UserTime<span style='mso-spacerun:yes'>  
-</span>:<span style='mso-spacerun:yes'>  </span>2.757877<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>SleepTime<span
-style='mso-spacerun:yes'>  </span>:<span style='mso-spacerun:yes'> 
-</span>8.227489<span style='mso-spacerun:yes'>  </span>Sleep Cnt :<span
-style='mso-spacerun:yes'>     </span>47729<span style='mso-spacerun:yes'>  
-</span>Wakeup Cnt :<span style='mso-spacerun:yes'>       </span>284<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>The LinuxKI Toolset can help you identify if
+setting busy_poll/busy_read might help or hurt.   Based on the Network Activity
+Report (kisock.*.txt) below, you can see the average socket read() time is
+1.237 milliseconds, which is much more than the 50 microseconds for
+busy_poll():</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>RunQTime<span
-style='mso-spacerun:yes'>   </span>:<span style='mso-spacerun:yes'> 
-</span>5.500701<span style='mso-spacerun:yes'>  </span>Switch Cnt:<span
-style='mso-spacerun:yes'>     </span>51376<span style='mso-spacerun:yes'>  
-</span>PreemptCnt :<span style='mso-spacerun:yes'>      </span>3647<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>HardIRQ<span
-style='mso-spacerun:yes'>    </span>:<span style='mso-spacerun:yes'> 
-</span>0.022136<span style='mso-spacerun:yes'>  </span>HardIRQ-S :<span
-style='mso-spacerun:yes'>  </span>0.012025<span style='mso-spacerun:yes'>   
-</span>HardIRQ-U :<span style='mso-spacerun:yes'>  </span>0.010111<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>Local IP Statistics</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>SoftIRQ<span
-style='mso-spacerun:yes'>    </span>:<span style='mso-spacerun:yes'> 
-</span>0.215121<span style='mso-spacerun:yes'>  </span>SoftIRQ-S :<span
-style='mso-spacerun:yes'>  </span>0.114559<span style='mso-spacerun:yes'>   
-</span>SoftIRQ-U :<span style='mso-spacerun:yes'>  </span>0.100562<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>==================================================</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>Last CPU<span
-style='mso-spacerun:yes'>   </span>:<span style='mso-spacerun:yes'>       
-</span>54<span style='mso-spacerun:yes'>  </span>CPU Migrs :<span
-style='mso-spacerun:yes'>        </span>14<span style='mso-spacerun:yes'>  
-</span>NODE Migrs :<span style='mso-spacerun:yes'>         </span>0<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>Policy<span
-style='mso-spacerun:yes'>     </span>: SCHED_NORMAL<span
-style='mso-spacerun:yes'>     </span><span class=SpellE><span class=GramE>vss</span></span><span
-class=GramE> :</span><span style='mso-spacerun:yes'>  </span>90155761<span
-style='mso-spacerun:yes'>          </span><span class=SpellE>rss</span> :<span
-style='mso-spacerun:yes'>      </span>8644<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>L=10.14.26.27   Syscalls: 9018955</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>System Call Name     Count     Rate    
+ElpTime        <span style='background:yellow'>Avg</span>        Max    Errs   
+AvSz     KB/s</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span><span class=GramE>busy</span><span
-style='mso-spacerun:yes'>    </span>:<span style='mso-spacerun:yes'>    
-</span>31.36%<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>read               4209500 210473.2 5208.657345   <span
+style='background:yellow'>0.001237</span>  11.948590      23     235  48505.6</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>      </span><span class=GramE>sys</span><span
-style='mso-spacerun:yes'>   </span>:<span style='mso-spacerun:yes'>    
-</span>16.38%<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>write              4808199 240407.9   34.068338  
+0.000007   0.033348       0    1516 356102.7</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>      </span><span class=GramE>user
-<span style='mso-spacerun:yes'> </span>:</span><span
-style='mso-spacerun:yes'>     </span>13.79%<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>writev                1256     62.8    0.011227  
+0.000009   0.000062       0   10923    669.9</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>      </span><span class=SpellE><span
-class=GramE>irq</span></span><span style='mso-spacerun:yes'>   </span>:<span
-style='mso-spacerun:yes'>      </span>1.19%<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span><span class=SpellE><span
-class=GramE>runQ</span></span><span style='mso-spacerun:yes'>    </span>:<span
-style='mso-spacerun:yes'>     </span>27.50%<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>Of course, 1.237 milliseconds is only an
+average, and we may have different sockets for different purposes.  With
+busy_poll/busy_read set to 50, the processes can be analyzed using the PID
+Analysis Report (kipid.*.txt) to see how often they actually go to sleep
+waiting on the network data.   Below is sample data for one of the Oracle
+processes.   </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span><span class=GramE>sleep</span><span
-style='mso-spacerun:yes'>   </span>:<span style='mso-spacerun:yes'>    
-</span>41.14%<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'> </span><span lang=EN-US style='font-size:9.0pt;
+font-family:"Courier New";color:black'>PID 22781  oracleEPH001</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>...<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    ********* SCHEDULER ACTIVITY REPORT ********</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>******** CPU ACTIVITY
-REPORT ********<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    RunTime    :  6.271904  <span style='background:
+yellow'>SysTime   :  3.276771</span>   UserTime   :  2.757877</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>The percentages below
-reflect the percentage<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    SleepTime  :  8.227489  Sleep Cnt :     47729  
+Wakeup Cnt :       284</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>of the Thread's total
-RunTime spent in either<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    RunQTime   :  5.500701  Switch Cnt:     51376  
+PreemptCnt :      3647</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>User code or System code<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    HardIRQ    :  0.022136  HardIRQ-S :  0.012025   
+HardIRQ-U :  0.010111</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>RunTime:<span
-style='mso-spacerun:yes'>   </span>6.2719<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    SoftIRQ    :  0.215121  SoftIRQ-S :  0.114559   
+SoftIRQ-U :  0.100562</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    Last CPU   :        54  CPU Migrs :        14  
+NODE Migrs :         0</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>      </span>Count<span
-style='mso-spacerun:yes'>    </span>USER<span style='mso-spacerun:yes'>    
-</span>SYS<span style='mso-spacerun:yes'>    </span>INTR<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    Policy     : SCHED_NORMAL     vss : 
+90155761          rss :      8644</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>        </span>562<span
-style='mso-spacerun:yes'>     </span>198<span style='mso-spacerun:yes'>    
-</span>174<span style='mso-spacerun:yes'>     </span>190<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>              </span>35.23%<span
-style='mso-spacerun:yes'>  </span>30.96%<span style='mso-spacerun:yes'> 
-</span>33.81%<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    busy    :     31.36%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>      sys   :     16.38%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>HARDCLOCK entries<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>      user  :     13.79%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>       </span>Count<span
-style='mso-spacerun:yes'>     </span>Pct<span style='mso-spacerun:yes'> 
-</span>State<span style='mso-spacerun:yes'>  </span>Function<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>      irq   :      1.19%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>          </span><span
-style='background:yellow;mso-highlight:yellow'>89<span
-style='mso-spacerun:yes'>  </span>15.84%<span style='mso-spacerun:yes'> 
-</span>INTR<span style='mso-spacerun:yes'>   </span>sk_busy_loop</span><o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    runQ    :     27.50%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>          </span>59<span
-style='mso-spacerun:yes'>  </span>10.50%<span style='mso-spacerun:yes'> 
-</span>SYS<span style='mso-spacerun:yes'>    </span>tcp_recvmsg<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    sleep   :     41.14%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>          </span><span
-style='background:yellow;mso-highlight:yellow'>49<span
-style='mso-spacerun:yes'>   </span>8.72%<span style='mso-spacerun:yes'> 
-</span>SYS<span style='mso-spacerun:yes'>    </span>sched_clock</span><o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>          </span><span
-style='background:yellow;mso-highlight:yellow'>44<span
-style='mso-spacerun:yes'>   </span>7.83%<span style='mso-spacerun:yes'> 
-</span>INTR<span style='mso-spacerun:yes'>   </span>ixgbe_busy_poll_recv</span><o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>...</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>          </span>16<span
-style='mso-spacerun:yes'>   </span>2.85%<span style='mso-spacerun:yes'> 
-</span>SYS<span style='mso-spacerun:yes'>    </span>__schedule<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>          </span>14<span
-style='mso-spacerun:yes'>   </span>2.49%<span style='mso-spacerun:yes'> 
-</span>USER<span style='mso-spacerun:yes'>   </span>kcbgtcr
-[/oracle/EPH/12102/bin/oracle]<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    ******** CPU ACTIVITY REPORT ********</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>   </span><span
-style='mso-spacerun:yes'>       </span><span style='background:yellow;
-mso-highlight:yellow'>10<span style='mso-spacerun:yes'>   </span>1.78%<span
-style='mso-spacerun:yes'>  </span>SYS<span style='mso-spacerun:yes'>   
-</span>local_clock</span><o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    The percentages below reflect the percentage</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>           </span>9<span
-style='mso-spacerun:yes'>   </span>1.60%<span style='mso-spacerun:yes'> 
-</span>INTR<span style='mso-spacerun:yes'>   </span>__wake_up_sync_key<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    of the Thread's total RunTime spent in either</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>           </span>8<span
-style='mso-spacerun:yes'>   </span>1.42%<span style='mso-spacerun:yes'> 
-</span>USER<span style='mso-spacerun:yes'>   </span>opiexe
-[/oracle/EPH/12102/bin/oracle]<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    User code or System code</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    RunTime:   6.2719</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>...<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>      Count    USER     SYS    INTR</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>******** FILE ACTIVITY
-REPORT ********<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>        562     198     174     190</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>FD: 19 IPv4<span
-style='mso-spacerun:yes'>     </span>TCP 10.14.26.27:1527-&gt;10.14.27.28:17696
-(ESTABLISHED)<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>              35.23%  30.96%  33.81%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>System Call Name<span
-style='mso-spacerun:yes'>     </span>Count<span style='mso-spacerun:yes'>    
-</span>Rate<span style='mso-spacerun:yes'>     </span>ElpTime<span
-style='mso-spacerun:yes'>        </span>Avg<span
-style='mso-spacerun:yes'>        </span>Max<span style='mso-spacerun:yes'>   
-</span>Errs<span style='mso-spacerun:yes'>    </span>AvSz<span
-style='mso-spacerun:yes'>     </span>KB/s<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>read<span
-style='mso-spacerun:yes'>                 </span><span style='background:yellow;
-mso-highlight:yellow'>48697</span><span style='mso-spacerun:yes'>  
-</span>2434.8<span style='mso-spacerun:yes'>   </span>15.692413<span
-style='mso-spacerun:yes'>   </span>0.000322<span style='mso-spacerun:yes'>  
-</span>1.014531<span style='mso-spacerun:yes'>       </span>0<span
-style='mso-spacerun:yes'>     </span>230<span style='mso-spacerun:yes'>   
-</span>549.1<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    HARDCLOCK entries</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>       </span>SLEEP<span
-style='mso-spacerun:yes'>             </span><span style='background:yellow;
-mso-highlight:yellow'>47642</span><span style='mso-spacerun:yes'>  
-</span>2382.1<span style='mso-spacerun:yes'>    </span>7.392777<span
-style='mso-spacerun:yes'>   </span>0.000155<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       Count     Pct  State  Function</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>          </span>Sleep Func<span
-style='mso-spacerun:yes'>     </span>47641<span
-style='mso-spacerun:yes'>             </span>7.392777<span
-style='mso-spacerun:yes'>   </span>0.000155<span style='mso-spacerun:yes'>  
-</span>1.014460<span style='mso-spacerun:yes'>  </span>sk_wait_data<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>          <span style='background:yellow'>89 
+15.84%  INTR   sk_busy_loop</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>       </span>RUNQ<span
-style='mso-spacerun:yes'>                                </span>5.226376<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>          59  10.50%  SYS    tcp_recvmsg</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>       </span><span
-style='background:yellow;mso-highlight:yellow'>CPU<span
-style='mso-spacerun:yes'>                                 </span>3.073316</span><o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>          <span style='background:yellow'>49  
+8.72%  SYS    sched_clock</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>write<span
-style='mso-spacerun:yes'>                </span>51994<span
-style='mso-spacerun:yes'>   </span>2599.7<span style='mso-spacerun:yes'>   
-</span>0.355760<span style='mso-spacerun:yes'>   </span>0.000007<span
-style='mso-spacerun:yes'>   </span>0.001040<span
-style='mso-spacerun:yes'>       </span>0<span style='mso-spacerun:yes'>   
-</span>1117<span style='mso-spacerun:yes'>   </span>2837.9<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>          <span style='background:yellow'>44  
+7.83%  INTR   ixgbe_busy_poll_recv</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>       </span>RUNQ<span
-style='mso-spacerun:yes'>                                </span>0.026644<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>          16   2.85%  SYS    __schedule</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>       </span>CPU<span
-style='mso-spacerun:yes'>                                 </span>0.329116<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>          14   2.49%  USER   kcbgtcr
+[/oracle/EPH/12102/bin/oracle]</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>writev<span
-style='mso-spacerun:yes'>                   </span>7<span
-style='mso-spacerun:yes'>      </span>0.3<span style='mso-spacerun:yes'>   
-</span>0.000039<span style='mso-spacerun:yes'>   </span>0.000006<span
-style='mso-spacerun:yes'>   </span>0.000012<span
-style='mso-spacerun:yes'>       </span>0<span style='mso-spacerun:yes'>   
-</span>5177<span style='mso-spacerun:yes'>      </span>1.8<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>          <span style='background:yellow'>10  
+1.78%  SYS    local_clock</span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>           9   1.60%  INTR   __wake_up_sync_key</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'> </span><o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>           8   1.42%  USER   opiexe
+[/oracle/EPH/12102/bin/oracle]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>...</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    ******** FILE ACTIVITY REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    FD: 19 IPv4     TCP
+10.14.26.27:1527-&gt;10.14.27.28:17696 (ESTABLISHED)</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    System Call Name     Count     Rate    
+ElpTime        Avg        Max    Errs    AvSz     KB/s</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    read                 <span style='background:
+yellow'>48697</span>   2434.8   15.692413   0.000322   1.014531       0    
+230    549.1</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       SLEEP             <span style='background:
+yellow'>47642</span>   2382.1    7.392777   0.000155</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>          Sleep Func     47641            
+7.392777   0.000155   1.014460  sk_wait_data</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       RUNQ                                5.226376</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       <span style='background:yellow'>CPU                                
+3.073316</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    write                51994   2599.7   
+0.355760   0.000007   0.001040       0    1117   2837.9</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       RUNQ                                0.026644</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>       CPU                                 0.329116</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    writev                   7      0.3   
+0.000039   0.000006   0.000012       0    5177      1.8</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'> </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>In the data above, we can see a lot of CPU time spent in sk_busy_<span
-class=GramE>loop(</span>) and its relative functions</span><span lang=EN-US> </span><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'>such as <span class=SpellE>sched_clock</span>(),
-<span class=SpellE>ixgbe_busy_poll_recv</span>() and <span class=SpellE>local_clock</span>().
-.<span style='mso-spacerun:yes'>    </span>But notice that out of 48697 <span
-class=GramE>read(</span>) system calls on the socket, 47642 of those read()
-system calls (97.8%) resulted in the process going to sleep.<span
-style='mso-spacerun:yes'>   </span>So most of the CPU used by the <span
-class=GramE>read(</span>) system call is unnecessary.<o:p></o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>In the data above, we can see a lot
+of CPU time spent in sk_busy_loop() and its relative functions</span><span
+lang=EN-US> </span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>such as sched_clock(), ixgbe_busy_poll_recv() and local_clock(). .   
+But notice that out of 48697 read() system calls on the socket, 47642 of those
+read() system calls (97.8%) resulted in the process going to sleep.   So most
+of the CPU used by the read() system call is unnecessary.</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><b style='mso-bidi-font-weight:normal'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'>Summary<o:p></o:p></span></b></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Summary</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>The network-latency tuned <span class=GramE>profile<span
-style='mso-spacerun:yes'>  </span>should</span> not be used unless the
-application has been verified to be network latency sensitive.<span
-style='mso-spacerun:yes'>   </span>Also, the <span class=SpellE>net.core</span>
-<span class=SpellE>busy_loop</span>/<span class=SpellE>busy_read</span>
-parameters should remain at 0 unless a network sensitive application is
-used.<span style='mso-spacerun:yes'>    </span>In a network latency sensitive
-application, the network socket data would most often be received in less than <span
-class=SpellE>busy_poll</span>/<span class=SpellE>busy_read</span> microseconds
-from when the <span class=GramE>select(</span>), poll(), read() or related
-system call is made.<o:p></o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>The network-latency tuned profile 
+should not be used unless the application has been verified to be network latency
+sensitive.   Also, the net.core busy_loop/busy_read parameters should remain at
+0 unless a network sensitive application is used.    In a network latency
+sensitive application, the network socket data would most often be received in
+less than busy_poll/busy_read microseconds from when the select(), poll(),
+read() or related system call is made.</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>The <span class=SpellE>LinuxKI</span> toolset <span class=SpellE>Kparse</span>
-Report will now issue a warning if the sk_busy_<span class=GramE>loop(</span>)
-function is detected as using more than 0.5% of the CPU.<span
-style='mso-spacerun:yes'>   </span>For example:<o:p></o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>The LinuxKI toolset Kparse Report
+will now issue a warning if the sk_busy_loop() function is detected as using
+more than 0.5% of the CPU.   For example:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
- style='width:100.0%;mso-cellspacing:0in;background:#FFD1A4;mso-yfti-tbllook:
- 1184;mso-padding-alt:0in 0in 0in 0in'>
- <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+ style='width:100.0%;background:#FFD1A4'>
+ <tr>
   <td style='padding:1.5pt 2.25pt 1.5pt 2.25pt'>
-  <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-  line-height:normal;mso-outline-level:3'><b><span lang=EN-US style='font-size:
-  12.0pt;mso-bidi-font-size:13.5pt;font-family:"Times New Roman",serif;
-  mso-fareast-font-family:"Times New Roman"'>1.4.3 Report of non-idle kernel
-  functions at each clock tick<o:p></o:p></span></b></p>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN-US
+  style='font-size:12.0pt;font-family:"Times New Roman",serif'>1.4.3 Report of
+  non-idle kernel functions at each clock tick</span></b></p>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New"'><a
+  normal'><u><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+  color:blue'><a
   href="http://gse-rose-st068.us.hpecorp.net/work/mcr/HKMC/0918_loadrunner_stress_test/herppd00/0918_1313/kp.0918_1313.html#subsection1.4.2"><span
-  style='mso-fareast-font-family:"Times New Roman";color:blue'>[<span
-  class=SpellE>Prev</span> Subsection]</span></a><a
+  style='color:blue'>[Prev Subsection]</span></a><a
   href="http://gse-rose-st068.us.hpecorp.net/work/mcr/HKMC/0918_loadrunner_stress_test/herppd00/0918_1313/kp.0918_1313.html#subsection1.4.4"><span
-  style='mso-fareast-font-family:"Times New Roman";color:blue'>[Next
-  Subsection]</span></a><a
+  style='color:blue'>[Next Subsection]</span></a><a
   href="http://gse-rose-st068.us.hpecorp.net/work/mcr/HKMC/0918_loadrunner_stress_test/herppd00/0918_1313/kp.0918_1313.html#Section1"><span
-  style='mso-fareast-font-family:"Times New Roman";color:blue'>---[<span
-  class=SpellE>Prev</span> Section]</span></a><a
+  style='color:blue'>---[Prev Section]</span></a><a
   href="http://gse-rose-st068.us.hpecorp.net/work/mcr/HKMC/0918_loadrunner_stress_test/herppd00/0918_1313/kp.0918_1313.html#Section2"><span
-  style='mso-fareast-font-family:"Times New Roman";color:blue'>[Next Section]</span></a><a
+  style='color:blue'>[Next Section]</span></a><a
   href="http://gse-rose-st068.us.hpecorp.net/work/mcr/HKMC/0918_loadrunner_stress_test/herppd00/0918_1313/kp.0918_1313.html#TOC"><span
-  style='mso-fareast-font-family:"Times New Roman";color:blue'>[Table of
-  Contents]</span></a></span><span lang=EN-US style='font-size:9.0pt;
-  font-family:"Courier New";mso-fareast-font-family:"Times New Roman"'><o:p></o:p></span></p>
+  style='color:blue'>[Table of Contents]</span></a></span></u></p>
   </td>
  </tr>
 </table>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><b><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span
-style='mso-spacerun:yes'>   </span>Count<span style='mso-spacerun:yes'>    
-</span><span class=SpellE><span class=GramE>Pct</span></span><span class=GramE><span
-style='mso-spacerun:yes'>  </span>Function</span> <o:p></o:p></span></b></p>
+normal'><b><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black'>   Count     Pct  Function </span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:#EEEEEE'><span
-style='mso-spacerun:yes'>  </span><span class=GramE>111273<span
-style='mso-spacerun:yes'>  </span>73.61</span>%<span style='mso-spacerun:yes'> 
-</span>USER<span style='mso-spacerun:yes'>   </span>0xffffffffffffffff<o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:#EEEEEE'>  111273  73.61%  USER   0xffffffffffffffff</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:#CC0000'><span
-style='mso-spacerun:yes'>    </span>8795<span style='mso-spacerun:yes'>  
-</span>5.82<span class=GramE>%<span style='mso-spacerun:yes'>  </span>SYS</span><span
-style='mso-spacerun:yes'>    </span>sk_busy_loop</span><span lang=EN-US
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:#CC0000'>    8795   5.82%  SYS    sk_busy_loop</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:#EEEEEE'><span
-style='mso-spacerun:yes'>    </span>4910<span style='mso-spacerun:yes'>  
-</span>3.25<span class=GramE>%<span style='mso-spacerun:yes'>  </span>INTR</span><span
-style='mso-spacerun:yes'>   </span><span class=SpellE>tcp_recvmsg</span><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:#EEEEEE'>    4910   3.25%  INTR   tcp_recvmsg</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span
-style='mso-spacerun:yes'>    </span>3034<span style='mso-spacerun:yes'>  
-</span>2.01<span class=GramE>%<span style='mso-spacerun:yes'>  </span>SYS</span><span
-style='mso-spacerun:yes'>    </span><span class=SpellE>sched_clock</span><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black'>    3034   2.01%  SYS    sched_clock</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:#EEEEEE'><span
-style='mso-spacerun:yes'>    </span>2998<span style='mso-spacerun:yes'>  
-</span>1.98<span class=GramE>% <span style='mso-spacerun:yes'> </span>INTR</span><span
-style='mso-spacerun:yes'>   </span><span class=SpellE>ixgbe_busy_poll_recv</span><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:#EEEEEE'>    2998   1.98%  INTR   ixgbe_busy_poll_recv</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span
-style='mso-spacerun:yes'>    </span>2742<span style='mso-spacerun:yes'>  
-</span>1.81<span class=GramE>%<span style='mso-spacerun:yes'>  </span>SYS</span><span
-style='mso-spacerun:yes'>    </span>__schedule<o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black'>    2742   1.81%  SYS    __schedule</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:#EEEEEE'><span
-style='mso-spacerun:yes'>    </span>1425<span style='mso-spacerun:yes'>  
-</span>0.94<span class=GramE>%<span style='mso-spacerun:yes'>  </span>INTR</span><span
-style='mso-spacerun:yes'>   </span>__<span class=SpellE>wake_up_sync_key</span><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:#EEEEEE'>    1425   0.94%  INTR   __wake_up_sync_key</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span
-style='mso-spacerun:yes'>    </span>1412<span style='mso-spacerun:yes'>  
-</span>0.93<span class=GramE>%<span style='mso-spacerun:yes'>  </span>INTR</span><span
-style='mso-spacerun:yes'>   </span><span class=SpellE>call_softirq</span><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black'>    1412   0.93%  INTR   call_softirq</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:#EEEEEE'><span
-style='mso-spacerun:yes'>     </span>922<span style='mso-spacerun:yes'>  
-</span>0.61<span class=GramE>%<span style='mso-spacerun:yes'>  </span>INTR</span><span
-style='mso-spacerun:yes'>   </span><span class=SpellE>net_rx_action</span><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:#EEEEEE'>     922   0.61%  INTR   net_rx_action</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span
-style='mso-spacerun:yes'>     </span>856<span style='mso-spacerun:yes'>  
-</span>0.57<span class=GramE>%<span style='mso-spacerun:yes'>  </span>SYS</span><span
-style='mso-spacerun:yes'>    </span>__<span class=SpellE>alloc_pages_nodemask</span><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black'>     856   0.57%  SYS    __alloc_pages_nodemask</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:#EEEEEE'><span
-style='mso-spacerun:yes'>     </span>731<span style='mso-spacerun:yes'>  
-</span>0.48<span class=GramE>%<span style='mso-spacerun:yes'>  </span>SYS</span>
-<span style='mso-spacerun:yes'>   </span><span class=SpellE>local_clock</span><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:#EEEEEE'>     731   0.48%  SYS    local_clock</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span
-style='mso-spacerun:yes'>     </span>558<span style='mso-spacerun:yes'>  
-</span>0.37<span class=GramE>%<span style='mso-spacerun:yes'>  </span>SYS</span><span
-style='mso-spacerun:yes'>    </span><span class=SpellE>syscall_trace_leave</span><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black'>     558   0.37%  SYS    syscall_trace_leave</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:#EEEEEE'><span
-style='mso-spacerun:yes'>     </span>527<span style='mso-spacerun:yes'>  
-</span>0.35<span class=GramE>%<span style='mso-spacerun:yes'>  </span>INTR</span><span
-style='mso-spacerun:yes'>   </span>__<span class=SpellE>do_softirq</span><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:#EEEEEE'>     527   0.35%  INTR   __do_softirq</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span
-style='mso-spacerun:yes'>     </span>495<span style='mso-spacerun:yes'>  
-</span>0.33<span class=GramE>%<span style='mso-spacerun:yes'>  </span>INTR</span><span
-style='mso-spacerun:yes'>   </span><span class=SpellE>ixgbe_poll</span><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black'>     495   0.33%  INTR   ixgbe_poll</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:#EEEEEE'><span
-style='mso-spacerun:yes'>     </span>466<span style='mso-spacerun:yes'>  
-</span>0.31<span class=GramE>%<span style='mso-spacerun:yes'>  </span>INTR</span><span
-style='mso-spacerun:yes'>   </span><span class=SpellE>tcp_rcv_established</span><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:#EEEEEE'>     466   0.31%  INTR   tcp_rcv_established</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span
-style='mso-spacerun:yes'>     </span>317<span style='mso-spacerun:yes'>  
-</span>0.21<span class=GramE>%<span style='mso-spacerun:yes'>  </span>INTR</span><span
-style='mso-spacerun:yes'>   </span><span class=SpellE>ixgbe_xmit_frame</span><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black'>     317   0.21%  INTR   ixgbe_xmit_frame</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:#EEEEEE'><span
-style='mso-spacerun:yes'>     </span>316<span style='mso-spacerun:yes'>  
-</span>0.21<span class=GramE>%<span style='mso-spacerun:yes'>  </span>SYS</span><span
-style='mso-spacerun:yes'>    </span><span class=SpellE>tracesys</span><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:#EEEEEE'>     316   0.21%  SYS    tracesys</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span
-style='mso-spacerun:yes'>     </span>313<span style='mso-spacerun:yes'>  
-</span>0.21<span class=GramE>%<span style='mso-spacerun:yes'>  </span>INTR</span><span
-style='mso-spacerun:yes'>   </span><span class=SpellE>mod_timer</span><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black'>     313   0.21%  INTR   mod_timer</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:#EEEEEE'><span
-style='mso-spacerun:yes'>     </span>277<span style='mso-spacerun:yes'>  
-</span>0.18<span class=GramE>%<span style='mso-spacerun:yes'>  </span>SYS</span><span
-style='mso-spacerun:yes'>    </span><span class=SpellE>syscall_trace_enter</span><o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:#EEEEEE'>     277   0.18%  SYS    syscall_trace_enter</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><span
-style='mso-spacerun:yes'>     </span>...<o:p></o:p></span></p>
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black'>     ...</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><a
-name=warncheck1></a><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:#CC0000'>Warning: Suspect network-latency tuned profile used </span><span
-lang=EN-US><a
+normal'><a name=warncheck1></a><span lang=EN-US style='font-size:9.0pt;
+font-family:"Courier New";color:#CC0000'>Warning: Suspect network-latency tuned
+profile used </span><u><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:blue'><a
 href="http://htmlpreview.github.io/?https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/sk_busy_loop.htm"
-target="_blank"><span style='font-size:9.0pt;mso-bidi-font-size:10.0pt;
-font-family:"Courier New";mso-fareast-font-family:"Times New Roman";color:blue'>[INFO<span
-class=GramE>]</span></span></a><a
+target="_blank"><span style='color:blue'>[INFO]</span></a><a
 href="http://gse-rose-st068.us.hpecorp.net/work/mcr/HKMC/0918_loadrunner_stress_test/herppd00/0918_1313/kp.0918_1313.html#warncheck2"><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:blue'>[Next]</span></a></span><span
-lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
+style='color:blue'>[Next]</span></a></span></u></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>If you see this warning, you should verify whether or not the applications
-are benefiting from busy polling by examining the average poll(), select() or
-socket read times as well as the number of times the processes go to sleep in
-the related system calls.<o:p></o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>If you see this warning, you should
+verify whether or not the applications are benefiting from busy polling by
+examining the average poll(), select() or socket read times as well as the
+number of times the processes go to sleep in the related system calls.</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>For more information, refer to the following Redhat documentation:<o:p></o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>For more information, refer to the
+following Redhat documentation:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US><a
-href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/performance_tuning_guide/sect-red_hat_enterprise_linux-performance_tuning_guide-networking-configuration_tools"><span
-style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman"'>https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/performance_tuning_guide/sect-red_hat_enterprise_linux-performance_tuning_guide-networking-configuration_tools</span></a></span><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span class=MsoHyperlink><span lang=EN-US
+style='font-size:10.0pt;font-family:"Arial",sans-serif'><a
+href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/performance_tuning_guide/sect-red_hat_enterprise_linux-performance_tuning_guide-networking-configuration_tools">https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/performance_tuning_guide/sect-red_hat_enterprise_linux-performance_tuning_guide-networking-configuration_tools</a></span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 </div>
 

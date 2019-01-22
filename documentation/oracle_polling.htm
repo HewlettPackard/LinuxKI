@@ -1,1851 +1,564 @@
-<html xmlns:v="urn:schemas-microsoft-com:vml"
-xmlns:o="urn:schemas-microsoft-com:office:office"
-xmlns:w="urn:schemas-microsoft-com:office:word"
-xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
-xmlns="http://www.w3.org/TR/REC-html40">
+<html>
 
 <head>
 <meta http-equiv=Content-Type content="text/html; charset=windows-1252">
-<meta name=ProgId content=Word.Document>
-<meta name=Generator content="Microsoft Word 15">
-<meta name=Originator content="Microsoft Word 15">
-<link rel=File-List href="oracle_polling_files/filelist.xml">
-<!--[if gte mso 9]><xml>
- <o:DocumentProperties>
-  <o:Author>Ray, Mark C (GSA&amp;E - GSE Team)</o:Author>
-  <o:LastAuthor>Ray, Mark C (Global Solutions Engineering (GSE))</o:LastAuthor>
-  <o:Revision>2</o:Revision>
-  <o:TotalTime>265</o:TotalTime>
-  <o:Created>2019-01-22T17:20:00Z</o:Created>
-  <o:LastSaved>2019-01-22T17:20:00Z</o:LastSaved>
-  <o:Pages>1</o:Pages>
-  <o:Words>1016</o:Words>
-  <o:Characters>5797</o:Characters>
-  <o:Company>Hewlett Packard</o:Company>
-  <o:Lines>48</o:Lines>
-  <o:Paragraphs>13</o:Paragraphs>
-  <o:CharactersWithSpaces>6800</o:CharactersWithSpaces>
-  <o:Version>15.00</o:Version>
- </o:DocumentProperties>
- <o:OfficeDocumentSettings>
-  <o:RelyOnVML/>
-  <o:AllowPNG/>
- </o:OfficeDocumentSettings>
-</xml><![endif]-->
-<link rel=themeData href="oracle_polling_files/themedata.thmx">
-<link rel=colorSchemeMapping href="oracle_polling_files/colorschememapping.xml">
-<!--[if gte mso 9]><xml>
- <w:WordDocument>
-  <w:SpellingState>Clean</w:SpellingState>
-  <w:GrammarState>Clean</w:GrammarState>
-  <w:TrackMoves>false</w:TrackMoves>
-  <w:TrackFormatting/>
-  <w:PunctuationKerning/>
-  <w:ValidateAgainstSchemas/>
-  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
-  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
-  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
-  <w:DoNotPromoteQF/>
-  <w:LidThemeOther>EN-US</w:LidThemeOther>
-  <w:LidThemeAsian>X-NONE</w:LidThemeAsian>
-  <w:LidThemeComplexScript>X-NONE</w:LidThemeComplexScript>
-  <w:Compatibility>
-   <w:BreakWrappedTables/>
-   <w:SnapToGridInCell/>
-   <w:WrapTextWithPunct/>
-   <w:UseAsianBreakRules/>
-   <w:DontGrowAutofit/>
-   <w:SplitPgBreakAndParaMark/>
-   <w:EnableOpenTypeKerning/>
-   <w:DontFlipMirrorIndents/>
-   <w:OverrideTableStyleHps/>
-  </w:Compatibility>
-  <m:mathPr>
-   <m:mathFont m:val="Cambria Math"/>
-   <m:brkBin m:val="before"/>
-   <m:brkBinSub m:val="&#45;-"/>
-   <m:smallFrac m:val="off"/>
-   <m:dispDef/>
-   <m:lMargin m:val="0"/>
-   <m:rMargin m:val="0"/>
-   <m:defJc m:val="centerGroup"/>
-   <m:wrapIndent m:val="1440"/>
-   <m:intLim m:val="subSup"/>
-   <m:naryLim m:val="undOvr"/>
-  </m:mathPr></w:WordDocument>
-</xml><![endif]--><!--[if gte mso 9]><xml>
- <w:LatentStyles DefLockedState="false" DefUnhideWhenUsed="false"
-  DefSemiHidden="false" DefQFormat="false" DefPriority="99"
-  LatentStyleCount="371">
-  <w:LsdException Locked="false" Priority="0" QFormat="true" Name="Normal"/>
-  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 1"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 2"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 3"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 4"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 5"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 6"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 7"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 8"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 9"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 6"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 7"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 8"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 9"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 1"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 2"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 3"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 4"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 5"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 6"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 7"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 8"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 9"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Normal Indent"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="footnote text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="annotation text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="header"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="footer"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index heading"/>
-  <w:LsdException Locked="false" Priority="35" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="caption"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="table of figures"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="envelope address"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="envelope return"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="footnote reference"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="annotation reference"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="line number"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="page number"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="endnote reference"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="endnote text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="table of authorities"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="macro"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="toa heading"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number 5"/>
-  <w:LsdException Locked="false" Priority="10" QFormat="true" Name="Title"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Closing"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Signature"/>
-  <w:LsdException Locked="false" Priority="1" SemiHidden="true"
-   UnhideWhenUsed="true" Name="Default Paragraph Font"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text Indent"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Message Header"/>
-  <w:LsdException Locked="false" Priority="11" QFormat="true" Name="Subtitle"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Salutation"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Date"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text First Indent"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text First Indent 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Note Heading"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text Indent 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text Indent 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Block Text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Hyperlink"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="FollowedHyperlink"/>
-  <w:LsdException Locked="false" Priority="22" QFormat="true" Name="Strong"/>
-  <w:LsdException Locked="false" Priority="20" QFormat="true" Name="Emphasis"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Document Map"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Plain Text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="E-mail Signature"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Top of Form"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Bottom of Form"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Normal (Web)"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Acronym"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Address"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Cite"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Code"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Definition"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Keyboard"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Preformatted"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Sample"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Typewriter"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Variable"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Normal Table"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="annotation subject"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="No List"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Outline List 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Outline List 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Outline List 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Simple 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Simple 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Simple 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Classic 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Classic 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Classic 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Classic 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Colorful 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Colorful 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Colorful 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 6"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 7"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 8"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 6"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 7"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 8"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table 3D effects 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table 3D effects 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table 3D effects 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Contemporary"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Elegant"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Professional"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Subtle 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Subtle 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Web 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Web 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Web 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Balloon Text"/>
-  <w:LsdException Locked="false" Priority="39" Name="Table Grid"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Theme"/>
-  <w:LsdException Locked="false" SemiHidden="true" Name="Placeholder Text"/>
-  <w:LsdException Locked="false" Priority="1" QFormat="true" Name="No Spacing"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 1"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 1"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 1"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 1"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" Name="Revision"/>
-  <w:LsdException Locked="false" Priority="34" QFormat="true"
-   Name="List Paragraph"/>
-  <w:LsdException Locked="false" Priority="29" QFormat="true" Name="Quote"/>
-  <w:LsdException Locked="false" Priority="30" QFormat="true"
-   Name="Intense Quote"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 1"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 1"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 1"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 1"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 1"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 1"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 2"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 2"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 2"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 2"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 2"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 2"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 2"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 2"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 2"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 2"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 2"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 3"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 3"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 3"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 3"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 3"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 3"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 3"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 3"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 3"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 3"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 3"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 4"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 4"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 4"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 4"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 4"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 4"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 4"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 4"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 4"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 4"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 4"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 5"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 5"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 5"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 5"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 5"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 5"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 5"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 5"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 5"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 5"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 5"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 6"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 6"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 6"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 6"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 6"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 6"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 6"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 6"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 6"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 6"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 6"/>
-  <w:LsdException Locked="false" Priority="19" QFormat="true"
-   Name="Subtle Emphasis"/>
-  <w:LsdException Locked="false" Priority="21" QFormat="true"
-   Name="Intense Emphasis"/>
-  <w:LsdException Locked="false" Priority="31" QFormat="true"
-   Name="Subtle Reference"/>
-  <w:LsdException Locked="false" Priority="32" QFormat="true"
-   Name="Intense Reference"/>
-  <w:LsdException Locked="false" Priority="33" QFormat="true" Name="Book Title"/>
-  <w:LsdException Locked="false" Priority="37" SemiHidden="true"
-   UnhideWhenUsed="true" Name="Bibliography"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="TOC Heading"/>
-  <w:LsdException Locked="false" Priority="41" Name="Plain Table 1"/>
-  <w:LsdException Locked="false" Priority="42" Name="Plain Table 2"/>
-  <w:LsdException Locked="false" Priority="43" Name="Plain Table 3"/>
-  <w:LsdException Locked="false" Priority="44" Name="Plain Table 4"/>
-  <w:LsdException Locked="false" Priority="45" Name="Plain Table 5"/>
-  <w:LsdException Locked="false" Priority="40" Name="Grid Table Light"/>
-  <w:LsdException Locked="false" Priority="46" Name="Grid Table 1 Light"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark"/>
-  <w:LsdException Locked="false" Priority="51" Name="Grid Table 6 Colorful"/>
-  <w:LsdException Locked="false" Priority="52" Name="Grid Table 7 Colorful"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 1"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 1"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 1"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 1"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 1"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 1"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 2"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 2"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 2"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 2"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 2"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 2"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 3"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 3"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 3"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 3"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 3"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 3"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 4"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 4"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 4"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 4"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 4"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 4"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 5"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 5"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 5"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 5"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 5"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 5"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 6"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 6"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 6"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 6"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 6"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 6"/>
-  <w:LsdException Locked="false" Priority="46" Name="List Table 1 Light"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark"/>
-  <w:LsdException Locked="false" Priority="51" Name="List Table 6 Colorful"/>
-  <w:LsdException Locked="false" Priority="52" Name="List Table 7 Colorful"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 1"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 1"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 1"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 1"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 1"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 1"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 2"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 2"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 2"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 2"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 2"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 2"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 3"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 3"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 3"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 3"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 3"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 3"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 4"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 4"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 4"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 4"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 4"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 4"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 5"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 5"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 5"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 5"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 5"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 5"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 6"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 6"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 6"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 6"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 6"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 6"/>
- </w:LatentStyles>
-</xml><![endif]-->
+<meta name=Generator content="Microsoft Word 15 (filtered)">
 <style>
 <!--
  /* Font Definitions */
  @font-face
 	{font-family:Courier;
-	panose-1:2 7 4 9 2 2 5 2 4 4;
-	mso-font-charset:0;
-	mso-generic-font-family:modern;
-	mso-font-format:other;
-	mso-font-pitch:fixed;
-	mso-font-signature:3 0 0 0 1 0;}
+	panose-1:2 7 4 9 2 2 5 2 4 4;}
 @font-face
 	{font-family:Wingdings;
-	panose-1:5 0 0 0 0 0 0 0 0 0;
-	mso-font-charset:2;
-	mso-generic-font-family:auto;
-	mso-font-pitch:variable;
-	mso-font-signature:0 268435456 0 0 -2147483648 0;}
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
 @font-face
 	{font-family:"Cambria Math";
-	panose-1:2 4 5 3 5 4 6 3 2 4;
-	mso-font-charset:0;
-	mso-generic-font-family:roman;
-	mso-font-pitch:variable;
-	mso-font-signature:-536870145 1107305727 0 0 415 0;}
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
 @font-face
 	{font-family:Calibri;
-	panose-1:2 15 5 2 2 2 4 3 2 4;
-	mso-font-charset:0;
-	mso-generic-font-family:swiss;
-	mso-font-pitch:variable;
-	mso-font-signature:-536859905 -1073732485 9 0 511 0;}
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
  /* Style Definitions */
  p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{mso-style-unhide:no;
-	mso-style-qformat:yes;
-	mso-style-parent:"";
-	margin-top:0in;
+	{margin-top:0in;
 	margin-right:0in;
 	margin-bottom:8.0pt;
 	margin-left:0in;
 	line-height:107%;
-	mso-pagination:widow-orphan;
 	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-fareast-font-family:Calibri;
-	mso-fareast-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
+	font-family:"Calibri",sans-serif;}
 a:link, span.MsoHyperlink
-	{mso-style-priority:99;
-	color:#0563C1;
-	mso-themecolor:hyperlink;
-	text-decoration:underline;
-	text-underline:single;}
+	{color:#0563C1;
+	text-decoration:underline;}
 a:visited, span.MsoHyperlinkFollowed
-	{mso-style-noshow:yes;
-	mso-style-priority:99;
-	color:#954F72;
-	mso-themecolor:followedhyperlink;
-	text-decoration:underline;
-	text-underline:single;}
+	{color:#954F72;
+	text-decoration:underline;}
 p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
-	{mso-style-priority:34;
-	mso-style-unhide:no;
-	mso-style-qformat:yes;
-	margin-top:0in;
+	{margin-top:0in;
 	margin-right:0in;
 	margin-bottom:8.0pt;
 	margin-left:.5in;
-	mso-add-space:auto;
 	line-height:107%;
-	mso-pagination:widow-orphan;
 	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-fareast-font-family:Calibri;
-	mso-fareast-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
+	font-family:"Calibri",sans-serif;}
 p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
-	{mso-style-priority:34;
-	mso-style-unhide:no;
-	mso-style-qformat:yes;
-	mso-style-type:export-only;
-	margin-top:0in;
+	{margin-top:0in;
 	margin-right:0in;
 	margin-bottom:0in;
 	margin-left:.5in;
 	margin-bottom:.0001pt;
-	mso-add-space:auto;
 	line-height:107%;
-	mso-pagination:widow-orphan;
 	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-fareast-font-family:Calibri;
-	mso-fareast-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
+	font-family:"Calibri",sans-serif;}
 p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
-	{mso-style-priority:34;
-	mso-style-unhide:no;
-	mso-style-qformat:yes;
-	mso-style-type:export-only;
-	margin-top:0in;
+	{margin-top:0in;
 	margin-right:0in;
 	margin-bottom:0in;
 	margin-left:.5in;
 	margin-bottom:.0001pt;
-	mso-add-space:auto;
 	line-height:107%;
-	mso-pagination:widow-orphan;
 	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-fareast-font-family:Calibri;
-	mso-fareast-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
+	font-family:"Calibri",sans-serif;}
 p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
-	{mso-style-priority:34;
-	mso-style-unhide:no;
-	mso-style-qformat:yes;
-	mso-style-type:export-only;
-	margin-top:0in;
+	{margin-top:0in;
 	margin-right:0in;
 	margin-bottom:8.0pt;
 	margin-left:.5in;
-	mso-add-space:auto;
 	line-height:107%;
-	mso-pagination:widow-orphan;
 	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-fareast-font-family:Calibri;
-	mso-fareast-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
-span.SpellE
-	{mso-style-name:"";
-	mso-spl-e:yes;}
-span.GramE
-	{mso-style-name:"";
-	mso-gram-e:yes;}
+	font-family:"Calibri",sans-serif;}
 .MsoChpDefault
-	{mso-style-type:export-only;
-	mso-default-props:yes;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-fareast-font-family:Calibri;
-	mso-fareast-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
+	{font-family:"Calibri",sans-serif;}
 .MsoPapDefault
-	{mso-style-type:export-only;
-	margin-bottom:8.0pt;
+	{margin-bottom:8.0pt;
 	line-height:107%;}
 @page WordSection1
 	{size:8.5in 11.0in;
-	margin:.5in .5in .5in .5in;
-	mso-header-margin:.5in;
-	mso-footer-margin:.5in;
-	mso-paper-source:0;}
+	margin:.5in .5in .5in .5in;}
 div.WordSection1
 	{page:WordSection1;}
  /* List Definitions */
- @list l0
-	{mso-list-id:1865241629;
-	mso-list-type:hybrid;
-	mso-list-template-ids:1801111700 134807553 134807555 134807557 134807553 134807555 134807557 134807553 134807555 134807557;}
-@list l0:level1
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0B7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:.25in;
-	text-indent:-.25in;
-	font-family:Symbol;}
-@list l0:level2
-	{mso-level-number-format:bullet;
-	mso-level-text:o;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:.75in;
-	text-indent:-.25in;
-	font-family:"Courier New";}
-@list l0:level3
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0A7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:1.25in;
-	text-indent:-.25in;
-	font-family:Wingdings;}
-@list l0:level4
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0B7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:1.75in;
-	text-indent:-.25in;
-	font-family:Symbol;}
-@list l0:level5
-	{mso-level-number-format:bullet;
-	mso-level-text:o;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:2.25in;
-	text-indent:-.25in;
-	font-family:"Courier New";}
-@list l0:level6
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0A7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:2.75in;
-	text-indent:-.25in;
-	font-family:Wingdings;}
-@list l0:level7
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0B7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:3.25in;
-	text-indent:-.25in;
-	font-family:Symbol;}
-@list l0:level8
-	{mso-level-number-format:bullet;
-	mso-level-text:o;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:3.75in;
-	text-indent:-.25in;
-	font-family:"Courier New";}
-@list l0:level9
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0A7;
-	mso-level-tab-stop:none;
-	mso-level-number-position:left;
-	margin-left:4.25in;
-	text-indent:-.25in;
-	font-family:Wingdings;}
-ol
+ ol
 	{margin-bottom:0in;}
 ul
 	{margin-bottom:0in;}
 -->
 </style>
-<!--[if gte mso 10]>
-<style>
- /* Style Definitions */
- table.MsoNormalTable
-	{mso-style-name:"Table Normal";
-	mso-tstyle-rowband-size:0;
-	mso-tstyle-colband-size:0;
-	mso-style-noshow:yes;
-	mso-style-priority:99;
-	mso-style-parent:"";
-	mso-padding-alt:0in 5.4pt 0in 5.4pt;
-	mso-para-margin-top:0in;
-	mso-para-margin-right:0in;
-	mso-para-margin-bottom:8.0pt;
-	mso-para-margin-left:0in;
-	line-height:107%;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
-</style>
-<![endif]--><!--[if gte mso 9]><xml>
- <o:shapedefaults v:ext="edit" spidmax="1026"/>
-</xml><![endif]--><!--[if gte mso 9]><xml>
- <o:shapelayout v:ext="edit">
-  <o:idmap v:ext="edit" data="1"/>
- </o:shapelayout></xml><![endif]-->
+
 </head>
 
-<body lang=EN-GB link="#0563C1" vlink="#954F72" style='tab-interval:.5in'>
+<body lang=EN-GB link="#0563C1" vlink="#954F72">
 
 <div class=WordSection1>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
-justify;mso-line-height-alt:11.25pt;vertical-align:top'><b><i style='mso-bidi-font-style:
-normal'><span lang=EN-US style='font-size:12.0pt;mso-bidi-font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>LinuxKI Warning<o:p></o:p></span></i></b></p>
+justify;vertical-align:top'><b><i><span lang=EN-US style='font-size:12.0pt;
+font-family:"Arial",sans-serif;color:black'>LinuxKI Warning</span></i></b></p>
 
 <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
 text-align:center;line-height:11.25pt;vertical-align:top'><b><span lang=EN-US
-style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></b></p>
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>&#8203;&#8203;&#8203;&#8203;Excessive <span class=GramE>poll(</span>)
-calls by Oracle <o:p></o:p></span></b></p>
+font-family:"Arial",sans-serif;color:black'>&#8203;&#8203;&#8203;&#8203;Excessive
+poll() calls by Oracle </span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>11/28/2018<o:p></o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>11/28/2018</span></p>
 
 <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
 text-align:center;line-height:11.25pt;vertical-align:top'><span lang=EN-US
-style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><b><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'>Background</span></b><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+color:black'>Background</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black;background:white;
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>The&nbsp;<span class=GramE>poll(</span>)
-calls by Oracle server processes can be used to detect in-band breaks from
-clients that do not support out-of-band breaks. A break is an exception such as
-a CNTL-C to abort a transaction. Data exceptions can be transmitted as part of
-the regular data stream (in-band) or as a separate asynchronous message
-(out-of-band). By default, Oracle uses out-of-band (OOB) breaks. OOB breaks are
-handled more quickly and with less overhead as they interrupt the flow of data
-and Oracle does not need to poll for them. There is a&nbsp;<span class=SpellE>sqlnet.ora</span>&nbsp;parameter
-(DISABLE_OOB=on) than can be used to disable OOB for all clients.</span><span
-style='mso-ascii-font-family:Calibri;mso-fareast-font-family:"Times New Roman";
-mso-hansi-font-family:Calibri;mso-bidi-font-family:Calibri;color:black;
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+color:black;background:white'>The&nbsp;poll() calls by Oracle server processes
+can be used to detect in-band breaks from clients that do not support
+out-of-band breaks. A break is an exception such as a CNTL-C to abort a
+transaction. Data exceptions can be transmitted as part of the regular data
+stream (in-band) or as a separate asynchronous message (out-of-band). By
+default, Oracle uses out-of-band (OOB) breaks. OOB breaks are handled more
+quickly and with less overhead as they interrupt the flow of data and Oracle
+does not need to poll for them. There is a&nbsp;sqlnet.ora&nbsp;parameter
+(DISABLE_OOB=on) than can be used to disable OOB for all clients.</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span style='font-size:9.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>&nbsp;</span><span style='mso-ascii-font-family:
-Calibri;mso-fareast-font-family:"Times New Roman";mso-hansi-font-family:Calibri;
-mso-bidi-font-family:Calibri;color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><o:p></o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>Generally it is best to use OOB (DISABLE_OOB=off)
-and most Oracle servers are set up that way. However, some clients do not
-support OOB and so for those clients the server must use in-band breaks
-instead. As mentioned above, in-band breaks are part of the data stream and
-Oracle must poll for them, which it does rather aggressively.&nbsp;&nbsp;This
-can cause excessive polling by the Oracle server processes, especially CPU
-intensive processes.&nbsp;</span><span style='mso-ascii-font-family:Calibri;
-mso-fareast-font-family:"Times New Roman";mso-hansi-font-family:Calibri;
-mso-bidi-font-family:Calibri;color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><o:p></o:p></span></p>
+color:black'>Generally it is best to use OOB (DISABLE_OOB=off) and most Oracle
+servers are set up that way. However, some clients do not support OOB and so
+for those clients the server must use in-band breaks instead. As mentioned
+above, in-band breaks are part of the data stream and Oracle must poll for
+them, which it does rather aggressively.&nbsp;&nbsp;This can cause excessive
+polling by the Oracle server processes, especially CPU intensive
+processes.&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>&nbsp;</span><span style='mso-ascii-font-family:
-Calibri;mso-fareast-font-family:"Times New Roman";mso-hansi-font-family:Calibri;
-mso-bidi-font-family:Calibri;color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><o:p></o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>These&nbsp;<span class=GramE>poll(</span>) calls
-are typically very fast, so it doesn’t usually cause any major issues, only a
-slight performance impact.</span><span style='mso-ascii-font-family:Calibri;
-mso-fareast-font-family:"Times New Roman";mso-hansi-font-family:Calibri;
-mso-bidi-font-family:Calibri;color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><o:p></o:p></span></p>
+color:black'>These&nbsp;poll() calls are typically very fast, so it doesn’t
+usually cause any major issues, only a slight performance impact.</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><b><span lang=EN-US style='font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'>Investigation</span></b><span
-lang=EN-US style='font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+color:black'>Investigation</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span class=SpellE><span lang=EN-US style='font-size:
-10.0pt;mso-bidi-font-size:11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'>LinuxKI</span></span><span lang=EN-US
-style='font-size:10.0pt;mso-bidi-font-size:11.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'> analysis will show an
-Oracle process making lots of calls to <span class=GramE>poll(</span>) which
-return very quickly.<span style='mso-spacerun:yes'>   </span>For example:<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>LinuxKI analysis will show an Oracle process
+making lots of calls to poll() which return very quickly.   For example:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>PID <span class=GramE>103552<span
-style='mso-spacerun:yes'>  </span><span class=SpellE>oracleTPCC</span></span><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>PID
+103552  oracleTPCC</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>  </span>PPID <span
-class=GramE>1<span style='mso-spacerun:yes'>  </span>/</span><span
-class=SpellE>usr</span>/lib/<span class=SpellE>systemd</span>/<span
-class=SpellE>systemd</span><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'> 
+PPID 1  /usr/lib/systemd/systemd</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><o:p>&nbsp;</o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>    </span>*********
-SCHEDULER ACTIVITY REPORT ********<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+********* SCHEDULER ACTIVITY REPORT ********</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>    </span><span
-class=SpellE>RunTime</span><span style='mso-spacerun:yes'>    </span>: <span
-class=GramE>15.033237<span style='mso-spacerun:yes'>  </span><span
-class=SpellE>SysTime</span></span><span style='mso-spacerun:yes'>  
-</span>:<span style='mso-spacerun:yes'>  </span>0.341156<span
-style='mso-spacerun:yes'>   </span><span class=SpellE>UserTime</span><span
-style='mso-spacerun:yes'>   </span>: 14.210855<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+RunTime    : 15.033237  SysTime   :  0.341156   UserTime   : 14.210855</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>    </span><span
-class=SpellE><span class=GramE>SleepTime</span></span><span class=GramE><span
-style='mso-spacerun:yes'>  </span>:</span><span style='mso-spacerun:yes'> 
-</span>3.933331<span style='mso-spacerun:yes'>  </span>Sleep <span
-class=SpellE>Cnt</span> :<span style='mso-spacerun:yes'>     </span>12284<span
-style='mso-spacerun:yes'>   </span>Wakeup <span class=SpellE>Cnt</span> :<span
-style='mso-spacerun:yes'>       </span>775<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+SleepTime  :  3.933331  Sleep Cnt :     12284   Wakeup Cnt :       775</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>    </span><span
-class=SpellE>RunQTime</span><span style='mso-spacerun:yes'>   </span>:<span
-style='mso-spacerun:yes'>  </span><span class=GramE>1.033595<span
-style='mso-spacerun:yes'>  </span>Switch</span> <span class=SpellE>Cnt</span>:<span
-style='mso-spacerun:yes'>     </span>12813<span style='mso-spacerun:yes'>  
-</span><span class=SpellE>PreemptCnt</span> :<span
-style='mso-spacerun:yes'>       </span>529<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+RunQTime   :  1.033595  Switch Cnt:     12813   PreemptCnt :       529</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>    </span><span
-class=SpellE>HardIRQ</span><span style='mso-spacerun:yes'>    </span>:<span
-style='mso-spacerun:yes'>  </span><span class=GramE>0.020170<span
-style='mso-spacerun:yes'>  </span><span class=SpellE>HardIRQ</span></span>-S
-:<span style='mso-spacerun:yes'>  </span>0.000375<span
-style='mso-spacerun:yes'>    </span><span class=SpellE>HardIRQ</span>-U :<span
-style='mso-spacerun:yes'>  </span>0.019795<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+HardIRQ    :  0.020170  HardIRQ-S :  0.000375    HardIRQ-U :  0.019795</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>    </span><span
-class=SpellE>SoftIRQ</span><span style='mso-spacerun:yes'>    </span>:<span
-style='mso-spacerun:yes'>  </span><span class=GramE>0.461056<span
-style='mso-spacerun:yes'>  </span><span class=SpellE>SoftIRQ</span></span>-S
-:<span style='mso-spacerun:yes'>  </span>0.008035<span
-style='mso-spacerun:yes'>    </span><span class=SpellE>SoftIRQ</span>-U :<span
-style='mso-spacerun:yes'>  </span>0.453021<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+SoftIRQ    :  0.461056  SoftIRQ-S :  0.008035    SoftIRQ-U :  0.453021</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>    </span>Last
-CPU<span style='mso-spacerun:yes'>   </span>:<span
-style='mso-spacerun:yes'>        </span><span class=GramE>34<span
-style='mso-spacerun:yes'>  </span>CPU</span> <span class=SpellE>Migrs</span>
-:<span style='mso-spacerun:yes'>        </span>22<span
-style='mso-spacerun:yes'>   </span>NODE <span class=SpellE>Migrs</span> :<span
-style='mso-spacerun:yes'>         </span>0<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+Last CPU   :        34  CPU Migrs :        22   NODE Migrs :         0</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>   
-</span>Policy<span style='mso-spacerun:yes'>     </span>: SCHED_NORMAL<span
-style='mso-spacerun:yes'>     </span><span class=SpellE><span class=GramE>vss</span></span><span
-class=GramE> :</span><span style='mso-spacerun:yes'>  </span>157301054<span
-style='mso-spacerun:yes'>          </span><span class=SpellE>rss</span> :<span
-style='mso-spacerun:yes'>      </span>7679<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+Policy     : SCHED_NORMAL     vss :  157301054          rss :      7679</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><o:p>&nbsp;</o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>    </span><span
-class=GramE>busy</span><span style='mso-spacerun:yes'>    </span>:<span
-style='mso-spacerun:yes'>     </span>75.17%<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+busy    :     75.17%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>      </span><span
-class=GramE>sys</span><span style='mso-spacerun:yes'>   </span>:<span
-style='mso-spacerun:yes'>      </span>1.71%<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>     
+sys   :      1.71%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>      </span><span
-class=GramE>user<span style='mso-spacerun:yes'>  </span>:</span><span
-style='mso-spacerun:yes'>     </span>71.05%<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>     
+user  :     71.05%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>      </span><span
-class=SpellE><span class=GramE>irq</span></span><span
-style='mso-spacerun:yes'>   </span>:<span style='mso-spacerun:yes'>     
-</span>2.41%<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>     
+irq   :      2.41%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>    </span><span
-class=SpellE><span class=GramE>runQ</span></span><span
-style='mso-spacerun:yes'>    </span>:<span style='mso-spacerun:yes'>     
-</span>5.17%<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+runQ    :      5.17%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>    </span><span
-class=GramE>sleep</span><span style='mso-spacerun:yes'>   </span>:<span
-style='mso-spacerun:yes'>     </span>19.67%<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+sleep   :     19.67%</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><o:p>&nbsp;</o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>...<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>...</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><o:p>&nbsp;</o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>    </span>********
-SYSTEM CALL REPORT ********<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+******** SYSTEM CALL REPORT ********</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>    </span>System
-Call Name <span style='mso-spacerun:yes'> </span><span
-style='mso-spacerun:yes'> </span><span
-style='mso-spacerun:yes'> </span>Count<span style='mso-spacerun:yes'>   
-</span>Rate<span style='mso-spacerun:yes'>    </span><span class=SpellE>ElpTime</span><span
-style='mso-spacerun:yes'>        </span><span class=SpellE>Avg</span><span
-style='mso-spacerun:yes'>        </span><span class=GramE>Max<span
-style='mso-spacerun:yes'>  </span>Errs</span><span style='mso-spacerun:yes'> 
-</span><span class=SpellE>AvSz</span><span style='mso-spacerun:yes'>   
-</span>KB/s<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+System Call Name    Count    Rate    ElpTime        Avg        Max  Errs 
+AvSz    KB/s</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>    </span><span
-class=GramE>read</span><span style='mso-spacerun:yes'>             </span><span
-style='mso-spacerun:yes'> </span><span style='mso-spacerun:yes'> </span><span
-style='mso-spacerun:yes'> </span>11345<span style='mso-spacerun:yes'>  
-</span>567.2<span style='mso-spacerun:yes'>   </span>3.043106<span
-style='mso-spacerun:yes'>   </span>0.000268<span style='mso-spacerun:yes'>  
-</span>0.004910<span style='mso-spacerun:yes'>  </span><span
-style='mso-spacerun:yes'> </span><span style='mso-spacerun:yes'>  </span>0<span
-style='mso-spacerun:yes'>    </span>73<span style='mso-spacerun:yes'>   
-</span>40.8<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+read                11345   567.2   3.043106   0.000268   0.004910     0   
+73    40.8</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>      
-</span>SLEEP<span style='mso-spacerun:yes'>         </span><span
-style='mso-spacerun:yes'> </span><span style='mso-spacerun:yes'> </span><span
-style='mso-spacerun:yes'> </span>11274<span style='mso-spacerun:yes'>  
-</span>563.7<span style='mso-spacerun:yes'>   </span>2.088460<span
-style='mso-spacerun:yes'>   </span>0.000185<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>      
+SLEEP            11274   563.7   2.088460   0.000185</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>         
-</span>Sleep <span class=SpellE>Func</span> <span
-style='mso-spacerun:yes'> </span><span style='mso-spacerun:yes'> </span><span
-style='mso-spacerun:yes'> </span>11274<span style='mso-spacerun:yes'>          
-</span>2.088460<span style='mso-spacerun:yes'>   </span>0.000185<span
-style='mso-spacerun:yes'>   </span><span class=GramE>0.003362<span
-style='mso-spacerun:yes'>  </span><span class=SpellE>sk</span></span><span
-class=SpellE>_wait_data</span><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>         
+Sleep Func    11274           2.088460   0.000185   0.003362  sk_wait_data</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>...<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>...</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:yellow;
-mso-highlight:yellow;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>    </span><span class=GramE>poll</span><span
-style='mso-spacerun:yes'>               </span><span
-style='mso-spacerun:yes'> </span>57860<span style='mso-spacerun:yes'> 
-</span>2892.9<span style='mso-spacerun:yes'>   </span>0.040999<span
-style='mso-spacerun:yes'>   </span>0.000001<span style='mso-spacerun:yes'>  
-</span>0.000244<span style='mso-spacerun:yes'>     </span>0<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:yellow'>    poll                57860  2892.9   0.040999  
+0.000001   0.000244     0</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:yellow;
-mso-highlight:yellow;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>       </span>RUNQ<span
-style='mso-spacerun:yes'>            </span><span
-style='mso-spacerun:yes'> </span><span
-style='mso-spacerun:yes'>                </span>0.004763<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:yellow'>       RUNQ                             0.004763</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:yellow;
-mso-highlight:yellow;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>       </span>CPU<span
-style='mso-spacerun:yes'>             </span><span
-style='mso-spacerun:yes'> </span><span
-style='mso-spacerun:yes'>                </span>0.036236</span><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:yellow'>       CPU                              0.036236</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p>&nbsp;</o:p></span></p>
+normal'><span style='font-size:10.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Note that in the 20 second trace sample, the process called <span
-class=GramE>poll(</span>) 57860 times, nearly 2900 times/sec.<span
-style='mso-spacerun:yes'>   </span>Overall, the overhead for the process is
-pretty small (~0.2%), but it is unnecessary to call <span class=GramE>poll(</span>)
-that often.<span style='mso-spacerun:yes'>     </span>Note that the <span
-class=GramE>poll(</span>) call never sleeps, and we didn’t capture any in-band
-breaks.<span style='mso-spacerun:yes'>   </span>Looking at the KI ASCII trace
-data for the process we can see that the <span class=GramE>poll(</span>) call
-always returns 0, so there were no in-band breaks occurring:<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>Note that in the 20 second trace sample, the
+process called poll() 57860 times, nearly 2900 times/sec.   Overall, the
+overhead for the process is pretty small (~0.2%), but it is unnecessary to call
+poll() that often.     Note that the poll() call never sleeps, and we didn’t
+capture any in-band breaks.   Looking at the KI ASCII trace data for the
+process we can see that the poll() call always returns 0, so there were no
+in-band breaks occurring:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>$ <span class=GramE>grep</span> &quot;<span class=SpellE>pid</span>=103552&quot;
-ki.1* |<span style='mso-spacerun:yes'>  </span>grep <span class=SpellE>syscallbeg</span>=
-| grep -v <span class=SpellE>getrusage</span> | more<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>$ grep &quot;pid=103552&quot; ki.1* |  grep
+syscallbeg= | grep -v getrusage | more</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>...<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>...</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>0.015849 <span
-class=SpellE><span class=GramE>cpu</span></span><span class=GramE>=</span>50 <span
-class=SpellE>pid</span>=103552 <span class=SpellE>tgid</span>=103552 read [0]
-ret=0x34 <span class=SpellE>syscallbeg</span>=<span
-style='mso-spacerun:yes'>    </span>0.000259 <span class=SpellE>fd</span>=21 *<span
-class=SpellE>buf</span>=0x7ffff7f59e5e count=8208 family=INET6 type=TCP
-L=10.85.232.2:1521 R=10.85.232.101:63727<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    0.015849 cpu=50 pid=103552 tgid=103552 read [0]
+ret=0x34 syscallbeg=    0.000259 fd=21 *buf=0x7ffff7f59e5e count=8208
+family=INET6 type=TCP L=10.85.232.2:1521 R=10.85.232.101:63727</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>0.015927 <span
-class=SpellE>cpu</span>=50 <span class=SpellE>pid</span>=103552 <span
-class=SpellE>tgid</span>=103552 <span style='background:yellow;mso-highlight:
-yellow'>poll [7] ret=0x0</span> <span class=SpellE>syscallbeg</span>=<span
-style='mso-spacerun:yes'>    </span>0.000001 *<span class=SpellE>fds</span>=0x7fffffff2728
-<span class=SpellE>nfds</span>=1 timeout=0 <span class=SpellE><span
-class=GramE>pollfd</span></span><span class=GramE>[</span>0]={21 0x41 0x0}<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    0.015927 cpu=50 pid=103552 tgid=103552 <span
+style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=    0.000001
+*fds=0x7fffffff2728 nfds=1 timeout=0 pollfd[0]={21 0x41 0x0}</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>0.016114 <span
-class=SpellE>cpu</span>=50 <span class=SpellE>pid</span>=103552 <span
-class=SpellE>tgid</span>=103552 <span style='background:yellow;mso-highlight:
-yellow'>poll [7] ret=0x0</span> <span class=SpellE>syscallbeg</span>=<span
-style='mso-spacerun:yes'>    </span>0.000001 *<span class=SpellE>fds</span>=0x7fffffff1948
-<span class=SpellE>nfds</span>=1 timeout=0 <span class=SpellE><span
-class=GramE>pollfd</span></span><span class=GramE>[</span>0]={21 0x41 0x0}<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    0.016114 cpu=50 pid=103552 tgid=103552 <span
+style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=    0.000001
+*fds=0x7fffffff1948 nfds=1 timeout=0 pollfd[0]={21 0x41 0x0}</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>0.016144 <span
-class=SpellE>cpu</span>=50 <span class=SpellE>pid</span>=103552 <span
-class=SpellE>tgid</span>=103552 <span style='background:yellow;mso-highlight:
-yellow'>poll [7] ret=0x0</span> <span class=SpellE>syscallbeg</span>=<span
-style='mso-spacerun:yes'>    </span>0.000000 *<span class=SpellE>fds</span>=0x7fffffff1948
-<span class=SpellE>nfds</span>=1 timeout=0 <span class=SpellE><span
-class=GramE>pollfd</span></span><span class=GramE>[</span>0]={21 0x41 0x0}<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    0.016144 cpu=50 pid=103552 tgid=103552 <span
+style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=    0.000000 *fds=0x7fffffff1948
+nfds=1 timeout=0 pollfd[0]={21 0x41 0x0}</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>0.016216 <span
-class=SpellE>cpu</span>=50 <span class=SpellE>pid</span>=103552 <span
-class=SpellE>tgid</span>=103552 <span style='background:yellow;mso-highlight:
-yellow'>poll [7] ret=0x0</span> <span class=SpellE>syscallbeg</span>=<span
-style='mso-spacerun:yes'>    </span>0.000000 *<span class=SpellE>fds</span>=0x7fffffff1a18
-<span class=SpellE>nfds</span>=1 timeout=0 <span class=SpellE><span
-class=GramE>pollfd</span></span><span class=GramE>[</span>0]={21 0x41 0x0}<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    0.016216 cpu=50 pid=103552 tgid=103552 <span
+style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=    0.000000
+*fds=0x7fffffff1a18 nfds=1 timeout=0 pollfd[0]={21 0x41 0x0}</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>0.016472 <span
-class=SpellE>cpu</span>=50 <span class=SpellE>pid</span>=103552 <span
-class=SpellE>tgid</span>=103552 <span style='background:yellow;mso-highlight:
-yellow'>poll [7] ret=0x0</span> <span class=SpellE>syscallbeg</span>=<span
-style='mso-spacerun:yes'>    </span>0.000001 *<span class=SpellE>fds</span>=0x7fffffff1a18
-<span class=SpellE>nfds</span>=1 timeout=0 <span class=SpellE><span
-class=GramE>pollfd</span></span><span class=GramE>[</span>0]={21 0x41 0x0}<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    0.016472 cpu=50 pid=103552 tgid=103552 <span
+style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=    0.000001
+*fds=0x7fffffff1a18 nfds=1 timeout=0 pollfd[0]={21 0x41 0x0}</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>0.016540 <span
-class=SpellE>cpu</span>=50 <span class=SpellE>pid</span>=103552 <span
-class=SpellE>tgid</span>=103552 <span style='background:yellow;mso-highlight:
-yellow'>poll [7] ret=0x0</span> <span class=SpellE>syscallbeg</span>=<span
-style='mso-spacerun:yes'>    </span>0.000000 *<span class=SpellE>fds</span>=0x7fffffff1948
-<span class=SpellE>nfds</span>=1 timeout=0 <span class=SpellE><span
-class=GramE>pollfd</span></span><span class=GramE>[</span>0]={21 0x41 0x0}<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    0.016540 cpu=50 pid=103552 tgid=103552 <span
+style='background:yellow'>poll [7] ret=0x0</span> syscallbeg=    0.000000
+*fds=0x7fffffff1948 nfds=1 timeout=0 pollfd[0]={21 0x41 0x0}</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>...<o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>...</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>While the system calls are quite fast, it is a break in the normal
-code execution to repeatedly check the socket descriptor of the client, and can
-have a small impact on performance.<span style='mso-spacerun:yes'>    </span><o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>While the system calls are quite fast, it is a
+break in the normal code execution to repeatedly check the socket descriptor of
+the client, and can have a small impact on performance.    </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>With <span class=SpellE>LinuxKI</span> version 5.8, the <span
-class=SpellE>Kparse</span> report will produce a warning if excessive <span
-class=GramE>poll(</span>) calls are observed by an Oracle server process if it
-shows up in the following section: <o:p></o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>With LinuxKI version 5.8, the Kparse report
+will produce a warning if excessive poll() calls are observed by an Oracle
+server process if it shows up in the following section: </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
-<p class=MsoNormal style='mso-margin-bottom-alt:auto;line-height:normal;
-mso-outline-level:3;background:#FFD1A4'><b><span style='mso-bidi-font-size:
-9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>1.3.3 Trace
-Events of Top 10 Processes<o:p></o:p></span></b></p>
+<p class=MsoNormal style='line-height:normal;background:#FFD1A4'><b><span
+style='font-family:"Courier New";color:black'>1.3.3 Trace Events of Top 10
+Processes</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;background:white'><u><span style='font-size:9.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:blue;background:#FFD1A4;
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>[<span class=SpellE>Prev</span>
-Subsection][Next Subsection]<span class=GramE>---[</span><span class=SpellE>Prev</span>
-Section][Next Section][Table of Contents]</span></u><span lang=EN-US
-style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+color:blue;background:#FFD1A4'>[Prev Subsection][Next Subsection]---[Prev
+Section][Next Section][Table of Contents]</span></u></p>
 
 <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0
- style='border-collapse:collapse;mso-yfti-tbllook:1184;mso-padding-alt:0in 0in 0in 0in'>
- <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+ style='border-collapse:collapse'>
+ <tr>
   <td style='padding:0in 0in 0in 0in'>
   <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-  normal;background:#DDDDDD'><span class=SpellE><b><span style='font-size:9.0pt;
-  font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-  mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>Analyzing</span></b></span><b><span
-  style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:
-  "Times New Roman";mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'> <span
-  class=SpellE>Pid</span>:&nbsp;</span></b><u><span style='font-size:9.0pt;
-  font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-  color:blue;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>103552</span></u><span
-  style='font-size:9.0pt;font-family:"Courier New";mso-fareast-font-family:
-  "Times New Roman";mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>&nbsp;<b>Trace
-  Records:&nbsp;</b>187253&nbsp;<span class=SpellE><b>cmd</b></span><b>:&nbsp;</b><span
-  class=SpellE>oracleTPCC</span><o:p></o:p></span></p>
+  normal;background:#DDDDDD'><b><span style='font-size:9.0pt;font-family:"Courier New"'>Analyzing
+  Pid:&nbsp;</span></b><u><span style='font-size:9.0pt;font-family:"Courier New";
+  color:blue'>103552</span></u><span style='font-size:9.0pt;font-family:"Courier New"'>&nbsp;<b>Trace
+  Records:&nbsp;</b>187253&nbsp;<b>cmd:&nbsp;</b>oracleTPCC</span></p>
   </td>
  </tr>
- <tr style='mso-yfti-irow:1;mso-yfti-lastrow:yes'>
+ <tr>
   <td style='padding:0in 0in 0in 0in'></td>
  </tr>
 </table>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-class=SpellE><b><span style='font-size:9.0pt;mso-bidi-font-size:10.0pt;
-font-family:"Courier New";mso-fareast-font-family:"Times New Roman";color:black;
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>Freq</span></b></span><b><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><span style='mso-spacerun:yes'>     </span><span
-class=GramE>Percent<span style='mso-spacerun:yes'>  </span><span class=SpellE>Trace</span></span><span
-class=SpellE>_type</span><span style='mso-spacerun:yes'>           
-</span>64bit<span style='mso-spacerun:yes'>    </span><span class=SpellE>ElapsedT</span><span
-style='mso-spacerun:yes'>       </span>Max<span style='mso-spacerun:yes'>      
-</span>Ave<span style='mso-spacerun:yes'>    </span>Errors<o:p></o:p></span></b></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Freq    
+Percent  Trace_type            64bit    ElapsedT       Max       Ave    Errors</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:#EEEEEE;
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>85837<span
-style='mso-spacerun:yes'>     </span>45.84<span class=GramE>%<span
-style='mso-spacerun:yes'>  </span><span class=SpellE>sys</span></span><span
-class=SpellE>_enter</span><span
-style='mso-spacerun:yes'>                                                               
-</span></span><span style='font-size:9.0pt;mso-bidi-font-size:10.0pt;
-font-family:"Courier New";mso-fareast-font-family:"Times New Roman";color:black;
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:#EEEEEE'>85837     45.84% 
+sys_enter                                                                </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:#CC0000;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>57860<span style='mso-spacerun:yes'>    
-</span>30.90<span class=GramE>%<span style='mso-spacerun:yes'>  </span>poll</span><span
-style='mso-spacerun:yes'>                      </span>1<span
-style='mso-spacerun:yes'>       </span>0.041<span style='mso-spacerun:yes'>   
-</span>0.0002<span style='mso-spacerun:yes'>  </span>0.000001<span
-style='mso-spacerun:yes'>         </span>0</span><span style='font-size:9.0pt;
-mso-bidi-font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:
-"Times New Roman";color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:#CC0000'>57860    
+30.90%  poll                      1       0.041    0.0002  0.000001         0</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:#EEEEEE;
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>12813<span
-style='mso-spacerun:yes'>      </span>6.84<span class=GramE>%<span
-style='mso-spacerun:yes'>  </span><span class=SpellE>sched</span></span><span
-class=SpellE>_switch</span><span
-style='mso-spacerun:yes'>                                                              
-</span></span><span style='font-size:9.0pt;mso-bidi-font-size:10.0pt;
-font-family:"Courier New";mso-fareast-font-family:"Times New Roman";color:black;
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:#EEEEEE'>12813      6.84% 
+sched_switch                                                               </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>11345<span style='mso-spacerun:yes'>     
-</span>6.06<span class=GramE>%<span style='mso-spacerun:yes'>  </span>read</span><span
-style='mso-spacerun:yes'>                      </span>1<span
-style='mso-spacerun:yes'>       </span>3.043<span style='mso-spacerun:yes'>   
-</span>0.0049<span style='mso-spacerun:yes'>  </span>0.000268<span
-style='mso-spacerun:yes'>         </span>0<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>11345     
+6.06%  read                      1       3.043    0.0049  0.000268         0</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:#EEEEEE;
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>11278<span
-style='mso-spacerun:yes'>      </span>6.02<span class=GramE>%<span
-style='mso-spacerun:yes'>  </span>write</span><span
-style='mso-spacerun:yes'>                     </span>1<span
-style='mso-spacerun:yes'>       </span>0.132<span style='mso-spacerun:yes'>   
-</span>0.0027<span style='mso-spacerun:yes'>  </span>0.000012<span
-style='mso-spacerun:yes'>         </span>0</span><span style='font-size:9.0pt;
-mso-bidi-font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:
-"Times New Roman";color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:#EEEEEE'>11278      6.02%  write                     1      
+0.132    0.0027  0.000012         0</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>3602<span style='mso-spacerun:yes'>      
-</span>1.92<span class=GramE>%<span style='mso-spacerun:yes'>  </span><span
-class=SpellE>mmap</span></span><span
-style='mso-spacerun:yes'>                      </span>1<span
-style='mso-spacerun:yes'>       </span>0.014<span style='mso-spacerun:yes'>   
-</span>0.0003<span style='mso-spacerun:yes'>  </span>0.000004<span
-style='mso-spacerun:yes'>         </span>0<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>3602      
+1.92%  mmap                      1       0.014    0.0003  0.000004         0</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;background:#EEEEEE;
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>1655<span
-style='mso-spacerun:yes'>       </span>0.88<span class=GramE>%<span
-style='mso-spacerun:yes'>  </span><span class=SpellE>hardclock</span></span><span
-style='mso-spacerun:yes'>                                       </span><span
-style='mso-spacerun:yes'>                             </span></span><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:#EEEEEE'>1655       0.88% 
+hardclock                                                                    </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>775<span style='mso-spacerun:yes'>       
-</span>0.41<span class=GramE>%<span style='mso-spacerun:yes'>  </span><span
-class=SpellE>sched</span></span><span class=SpellE>_wakeup</span><span
-style='mso-spacerun:yes'>        </span><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>775       
+0.41%  sched_wakeup        </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>...<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>...</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:#CC0000;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>Warning: Excessive <span class=GramE>poll(</span>)
-calls by Oracle </span><u><span style='font-size:9.0pt;mso-bidi-font-size:10.0pt;
-font-family:"Courier New";mso-fareast-font-family:"Times New Roman";color:blue;
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>[INFO][Next]</span></u><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:#CC0000'>Warning:
+Excessive poll() calls by Oracle </span><u><span style='font-size:9.0pt;
+font-family:"Courier New";color:blue'>[INFO][Next]</span></u></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p>&nbsp;</o:p></span></p>
+normal'><span style='font-size:10.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><span
-style='mso-spacerun:yes'>                                                        
-</span><o:p></o:p></span></p>
+normal'><span style='font-size:10.0pt;font-family:"Courier New";color:black'>                                                        
+</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><b style='mso-bidi-font-weight:normal'><i
-style='mso-bidi-font-style:normal'><span lang=EN-US style='font-size:10.0pt;
-mso-bidi-font-size:11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'>NOTE:</span></i></b><span lang=EN-US
-style='font-size:10.0pt;mso-bidi-font-size:11.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><span
-style='mso-spacerun:yes'>   </span><i style='mso-bidi-font-style:normal'>Do not
-confuse these fast <span class=GramE>poll(</span>) calls with poll() calls that
-may sleep and have a higher Average (Ave) time, which typically indicates that
-the Oracle server process is on a RAC wait.<span style='mso-spacerun:yes'>  
-</span></i><o:p></o:p></span></p>
+normal;background:white'><b><i><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>NOTE:</span></i></b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>  
+<i>Do not confuse these fast poll() calls with poll() calls that may sleep and
+have a higher Average (Ave) time, which typically indicates that the Oracle
+server process is on a RAC wait.   </i></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;background:white'><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><b style='mso-bidi-font-weight:normal'><span
-lang=EN-US style='mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'>Solution<o:p></o:p></span></b></p>
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-family:"Arial",sans-serif;
+color:black'>Solution</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><b style='mso-bidi-font-weight:normal'><span
-lang=EN-US style='mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></b></p>
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>For the most part, the overhead of the excessive <span
-class=GramE>poll(</span>) calls is quite small and can often be ignored.<span
-style='mso-spacerun:yes'>  </span>However, if you are trying to maximize
-throughput for a benchmark or other reads, the <span class=GramE>poll(</span>)
-overhead can be drastically reduced by tuning the BREAK_POLL_SKIP parameter in
-the <span class=SpellE>sqlnet.ora</span> file on both the clients and
-servers.<span style='mso-spacerun:yes'>   </span><o:p></o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>For the most part, the overhead of
+the excessive poll() calls is quite small and can often be ignored.  However,
+if you are trying to maximize throughput for a benchmark or other reads, the
+poll() overhead can be drastically reduced by tuning the BREAK_POLL_SKIP
+parameter in the sqlnet.ora file on both the clients and servers.   </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
 margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><b><span
-style='font-size:12.0pt;mso-bidi-font-size:13.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>SQLNET.ORA: BREAK_POLL_SKIP</span></b><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+style='font-size:12.0pt;font-family:"Arial",sans-serif;color:black'>SQLNET.ORA:
+BREAK_POLL_SKIP</span></b></p>
 
 <p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
 margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
-style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><o:p>&nbsp;</o:p></span></p>
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
 margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
-style='font-size:10.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'>A lesser known SQL*Net parameter. This value specifies the number</span><span
-style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><o:p></o:p></span></p>
+style='font-size:10.0pt;font-family:Courier;color:black'>A lesser known SQL*Net
+parameter. This value specifies the number</span></p>
 
 <p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
 margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
-class=GramE><span style='font-size:10.0pt;font-family:Courier;mso-fareast-font-family:
-"Times New Roman";mso-bidi-font-family:Arial;color:black;mso-ansi-language:
-EN-GB;mso-fareast-language:EN-GB'>of</span></span><span style='font-size:10.0pt;
-font-family:Courier;mso-fareast-font-family:"Times New Roman";mso-bidi-font-family:
-Arial;color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'> packets
-to skip before checking for a user break.</span><span style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+style='font-size:10.0pt;font-family:Courier;color:black'>of packets to skip
+before checking for a user break.</span></p>
 
 <p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
 margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
-style='font-size:10.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'>Rules of thumb here: &nbsp;&nbsp;</span><span style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+style='font-size:10.0pt;font-family:Courier;color:black'>Rules of thumb here:
+&nbsp;&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
 margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
-style='font-size:10.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'>- The higher the value, the less frequent CTRL-C checking, and the
-&nbsp; &nbsp;&nbsp;</span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+style='font-size:10.0pt;font-family:Courier;color:black'>- The higher the
+value, the less frequent CTRL-C checking, and the &nbsp; &nbsp;&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
 margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
-style='font-size:10.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'>&nbsp; <span class=GramE>less</span> CPU overhead used. &nbsp;&nbsp;</span><span
-style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><o:p></o:p></span></p>
+style='font-size:10.0pt;font-family:Courier;color:black'>&nbsp; less CPU
+overhead used. &nbsp;&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
 margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
-style='font-size:10.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'>- The lower the value, the more frequent CTRL-C checking, and the &nbsp;
-&nbsp;</span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+style='font-size:10.0pt;font-family:Courier;color:black'>- The lower the value,
+the more frequent CTRL-C checking, and the &nbsp; &nbsp;</span></p>
 
 <p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
 margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
-style='font-size:10.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'>&nbsp; <span class=GramE>more</span> CPU overhead used. &nbsp;&nbsp;</span><span
-style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><o:p></o:p></span></p>
+style='font-size:10.0pt;font-family:Courier;color:black'>&nbsp; more CPU
+overhead used. &nbsp;&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
 margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
-style='font-size:10.0pt;font-family:Courier;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:Arial;color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'>The default for this parameter is 4.</span><span style='font-size:10.0pt;
-font-family:"Cambria Math",serif;mso-fareast-font-family:"Times New Roman";
-mso-bidi-font-family:"Cambria Math";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>&#8203;</span><span style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+style='font-size:10.0pt;font-family:Courier;color:black'>The default for this
+parameter is 4.</span><span style='font-size:10.0pt;font-family:"Cambria Math",serif;
+color:black'>&#8203;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman"'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman"'>A
-good value for BREAK_POLL_SKIP to reduce the amount of polling but still allow
-in-band breaks is 10000.<span style='mso-spacerun:yes'>   </span><o:p></o:p></span></p>
+font-family:"Arial",sans-serif'>A good value for BREAK_POLL_SKIP to reduce the
+amount of polling but still allow in-band breaks is 10000.   </span></p>
 
 </div>
 

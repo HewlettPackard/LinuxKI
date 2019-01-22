@@ -1,1365 +1,436 @@
-<html xmlns:v="urn:schemas-microsoft-com:vml"
-xmlns:o="urn:schemas-microsoft-com:office:office"
-xmlns:w="urn:schemas-microsoft-com:office:word"
-xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
-xmlns="http://www.w3.org/TR/REC-html40">
+<html>
 
 <head>
 <meta http-equiv=Content-Type content="text/html; charset=windows-1252">
-<meta name=ProgId content=Word.Document>
-<meta name=Generator content="Microsoft Word 15">
-<meta name=Originator content="Microsoft Word 15">
-<link rel=File-List href="sca_vuln_files/filelist.xml">
-<!--[if gte mso 9]><xml>
- <o:DocumentProperties>
-  <o:Author>Ray, Mark C (GSA&amp;E - GSE Team)</o:Author>
-  <o:LastAuthor>Ray, Mark C (Global Solutions Engineering (GSE))</o:LastAuthor>
-  <o:Revision>2</o:Revision>
-  <o:TotalTime>769</o:TotalTime>
-  <o:Created>2019-01-22T17:15:00Z</o:Created>
-  <o:LastSaved>2019-01-22T17:15:00Z</o:LastSaved>
-  <o:Pages>1</o:Pages>
-  <o:Words>1126</o:Words>
-  <o:Characters>6421</o:Characters>
-  <o:Company>Hewlett Packard</o:Company>
-  <o:Lines>53</o:Lines>
-  <o:Paragraphs>15</o:Paragraphs>
-  <o:CharactersWithSpaces>7532</o:CharactersWithSpaces>
-  <o:Version>15.00</o:Version>
- </o:DocumentProperties>
- <o:OfficeDocumentSettings>
-  <o:RelyOnVML/>
-  <o:AllowPNG/>
- </o:OfficeDocumentSettings>
-</xml><![endif]-->
-<link rel=themeData href="sca_vuln_files/themedata.thmx">
-<link rel=colorSchemeMapping href="sca_vuln_files/colorschememapping.xml">
-<!--[if gte mso 9]><xml>
- <w:WordDocument>
-  <w:SpellingState>Clean</w:SpellingState>
-  <w:GrammarState>Clean</w:GrammarState>
-  <w:TrackMoves>false</w:TrackMoves>
-  <w:TrackFormatting/>
-  <w:PunctuationKerning/>
-  <w:ValidateAgainstSchemas/>
-  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
-  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
-  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
-  <w:DoNotPromoteQF/>
-  <w:LidThemeOther>EN-US</w:LidThemeOther>
-  <w:LidThemeAsian>X-NONE</w:LidThemeAsian>
-  <w:LidThemeComplexScript>X-NONE</w:LidThemeComplexScript>
-  <w:Compatibility>
-   <w:BreakWrappedTables/>
-   <w:SnapToGridInCell/>
-   <w:WrapTextWithPunct/>
-   <w:UseAsianBreakRules/>
-   <w:DontGrowAutofit/>
-   <w:SplitPgBreakAndParaMark/>
-   <w:EnableOpenTypeKerning/>
-   <w:DontFlipMirrorIndents/>
-   <w:OverrideTableStyleHps/>
-  </w:Compatibility>
-  <m:mathPr>
-   <m:mathFont m:val="Cambria Math"/>
-   <m:brkBin m:val="before"/>
-   <m:brkBinSub m:val="&#45;-"/>
-   <m:smallFrac m:val="off"/>
-   <m:dispDef/>
-   <m:lMargin m:val="0"/>
-   <m:rMargin m:val="0"/>
-   <m:defJc m:val="centerGroup"/>
-   <m:wrapIndent m:val="1440"/>
-   <m:intLim m:val="subSup"/>
-   <m:naryLim m:val="undOvr"/>
-  </m:mathPr></w:WordDocument>
-</xml><![endif]--><!--[if gte mso 9]><xml>
- <w:LatentStyles DefLockedState="false" DefUnhideWhenUsed="false"
-  DefSemiHidden="false" DefQFormat="false" DefPriority="99"
-  LatentStyleCount="371">
-  <w:LsdException Locked="false" Priority="0" QFormat="true" Name="Normal"/>
-  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 1"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 2"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 3"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 4"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 5"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 6"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 7"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 8"/>
-  <w:LsdException Locked="false" Priority="9" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="heading 9"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 6"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 7"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 8"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index 9"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 1"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 2"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 3"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 4"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 5"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 6"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 7"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 8"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" Name="toc 9"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Normal Indent"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="footnote text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="annotation text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="header"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="footer"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="index heading"/>
-  <w:LsdException Locked="false" Priority="35" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="caption"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="table of figures"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="envelope address"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="envelope return"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="footnote reference"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="annotation reference"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="line number"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="page number"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="endnote reference"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="endnote text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="table of authorities"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="macro"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="toa heading"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Bullet 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Number 5"/>
-  <w:LsdException Locked="false" Priority="10" QFormat="true" Name="Title"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Closing"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Signature"/>
-  <w:LsdException Locked="false" Priority="1" SemiHidden="true"
-   UnhideWhenUsed="true" Name="Default Paragraph Font"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text Indent"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="List Continue 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Message Header"/>
-  <w:LsdException Locked="false" Priority="11" QFormat="true" Name="Subtitle"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Salutation"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Date"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text First Indent"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text First Indent 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Note Heading"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text Indent 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Body Text Indent 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Block Text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Hyperlink"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="FollowedHyperlink"/>
-  <w:LsdException Locked="false" Priority="22" QFormat="true" Name="Strong"/>
-  <w:LsdException Locked="false" Priority="20" QFormat="true" Name="Emphasis"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Document Map"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Plain Text"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="E-mail Signature"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Top of Form"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Bottom of Form"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Normal (Web)"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Acronym"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Address"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Cite"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Code"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Definition"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Keyboard"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Preformatted"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Sample"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Typewriter"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="HTML Variable"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Normal Table"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="annotation subject"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="No List"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Outline List 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Outline List 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Outline List 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Simple 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Simple 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Simple 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Classic 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Classic 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Classic 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Classic 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Colorful 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Colorful 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Colorful 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Columns 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 6"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 7"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Grid 8"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 4"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 5"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 6"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 7"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table List 8"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table 3D effects 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table 3D effects 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table 3D effects 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Contemporary"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Elegant"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Professional"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Subtle 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Subtle 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Web 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Web 2"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Web 3"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Balloon Text"/>
-  <w:LsdException Locked="false" Priority="39" Name="Table Grid"/>
-  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
-   Name="Table Theme"/>
-  <w:LsdException Locked="false" SemiHidden="true" Name="Placeholder Text"/>
-  <w:LsdException Locked="false" Priority="1" QFormat="true" Name="No Spacing"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 1"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 1"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 1"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 1"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 1"/>
-  <w:LsdException Locked="false" SemiHidden="true" Name="Revision"/>
-  <w:LsdException Locked="false" Priority="34" QFormat="true"
-   Name="List Paragraph"/>
-  <w:LsdException Locked="false" Priority="29" QFormat="true" Name="Quote"/>
-  <w:LsdException Locked="false" Priority="30" QFormat="true"
-   Name="Intense Quote"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 1"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 1"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 1"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 1"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 1"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 1"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 2"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 2"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 2"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 2"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 2"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 2"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 2"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 2"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 2"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 2"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 2"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 3"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 3"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 3"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 3"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 3"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 3"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 3"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 3"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 3"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 3"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 3"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 4"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 4"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 4"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 4"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 4"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 4"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 4"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 4"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 4"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 4"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 4"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 5"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 5"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 5"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 5"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 5"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 5"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 5"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 5"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 5"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 5"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 5"/>
-  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 6"/>
-  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 6"/>
-  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 6"/>
-  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 6"/>
-  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 6"/>
-  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 6"/>
-  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 6"/>
-  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 6"/>
-  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 6"/>
-  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 6"/>
-  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 6"/>
-  <w:LsdException Locked="false" Priority="19" QFormat="true"
-   Name="Subtle Emphasis"/>
-  <w:LsdException Locked="false" Priority="21" QFormat="true"
-   Name="Intense Emphasis"/>
-  <w:LsdException Locked="false" Priority="31" QFormat="true"
-   Name="Subtle Reference"/>
-  <w:LsdException Locked="false" Priority="32" QFormat="true"
-   Name="Intense Reference"/>
-  <w:LsdException Locked="false" Priority="33" QFormat="true" Name="Book Title"/>
-  <w:LsdException Locked="false" Priority="37" SemiHidden="true"
-   UnhideWhenUsed="true" Name="Bibliography"/>
-  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
-   UnhideWhenUsed="true" QFormat="true" Name="TOC Heading"/>
-  <w:LsdException Locked="false" Priority="41" Name="Plain Table 1"/>
-  <w:LsdException Locked="false" Priority="42" Name="Plain Table 2"/>
-  <w:LsdException Locked="false" Priority="43" Name="Plain Table 3"/>
-  <w:LsdException Locked="false" Priority="44" Name="Plain Table 4"/>
-  <w:LsdException Locked="false" Priority="45" Name="Plain Table 5"/>
-  <w:LsdException Locked="false" Priority="40" Name="Grid Table Light"/>
-  <w:LsdException Locked="false" Priority="46" Name="Grid Table 1 Light"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark"/>
-  <w:LsdException Locked="false" Priority="51" Name="Grid Table 6 Colorful"/>
-  <w:LsdException Locked="false" Priority="52" Name="Grid Table 7 Colorful"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 1"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 1"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 1"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 1"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 1"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 1"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 2"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 2"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 2"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 2"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 2"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 2"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 3"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 3"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 3"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 3"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 3"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 3"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 4"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 4"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 4"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 4"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 4"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 4"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 5"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 5"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 5"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 5"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 5"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 5"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="Grid Table 1 Light Accent 6"/>
-  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 6"/>
-  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 6"/>
-  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 6"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="Grid Table 6 Colorful Accent 6"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="Grid Table 7 Colorful Accent 6"/>
-  <w:LsdException Locked="false" Priority="46" Name="List Table 1 Light"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark"/>
-  <w:LsdException Locked="false" Priority="51" Name="List Table 6 Colorful"/>
-  <w:LsdException Locked="false" Priority="52" Name="List Table 7 Colorful"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 1"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 1"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 1"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 1"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 1"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 1"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 1"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 2"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 2"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 2"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 2"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 2"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 2"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 2"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 3"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 3"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 3"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 3"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 3"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 3"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 3"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 4"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 4"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 4"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 4"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 4"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 4"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 4"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 5"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 5"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 5"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 5"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 5"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 5"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 5"/>
-  <w:LsdException Locked="false" Priority="46"
-   Name="List Table 1 Light Accent 6"/>
-  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 6"/>
-  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 6"/>
-  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 6"/>
-  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 6"/>
-  <w:LsdException Locked="false" Priority="51"
-   Name="List Table 6 Colorful Accent 6"/>
-  <w:LsdException Locked="false" Priority="52"
-   Name="List Table 7 Colorful Accent 6"/>
- </w:LatentStyles>
-</xml><![endif]-->
+<meta name=Generator content="Microsoft Word 15 (filtered)">
 <style>
 <!--
  /* Font Definitions */
  @font-face
 	{font-family:"Cambria Math";
-	panose-1:2 4 5 3 5 4 6 3 2 4;
-	mso-font-charset:1;
-	mso-generic-font-family:roman;
-	mso-font-format:other;
-	mso-font-pitch:variable;
-	mso-font-signature:0 0 0 0 0 0;}
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
 @font-face
 	{font-family:Calibri;
-	panose-1:2 15 5 2 2 2 4 3 2 4;
-	mso-font-charset:0;
-	mso-generic-font-family:swiss;
-	mso-font-pitch:variable;
-	mso-font-signature:-536859905 -1073732485 9 0 511 0;}
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
  /* Style Definitions */
  p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{mso-style-unhide:no;
-	mso-style-qformat:yes;
-	mso-style-parent:"";
-	margin-top:0in;
+	{margin-top:0in;
 	margin-right:0in;
 	margin-bottom:8.0pt;
 	margin-left:0in;
 	line-height:107%;
-	mso-pagination:widow-orphan;
 	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-fareast-font-family:Calibri;
-	mso-fareast-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
+	font-family:"Calibri",sans-serif;}
 a:link, span.MsoHyperlink
-	{mso-style-priority:99;
-	color:#0563C1;
-	mso-themecolor:hyperlink;
-	text-decoration:underline;
-	text-underline:single;}
+	{color:#0563C1;
+	text-decoration:underline;}
 a:visited, span.MsoHyperlinkFollowed
-	{mso-style-noshow:yes;
-	mso-style-priority:99;
-	color:#954F72;
-	mso-themecolor:followedhyperlink;
-	text-decoration:underline;
-	text-underline:single;}
-span.SpellE
-	{mso-style-name:"";
-	mso-spl-e:yes;}
+	{color:#954F72;
+	text-decoration:underline;}
 .MsoChpDefault
-	{mso-style-type:export-only;
-	mso-default-props:yes;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-fareast-font-family:Calibri;
-	mso-fareast-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
+	{font-family:"Calibri",sans-serif;}
 .MsoPapDefault
-	{mso-style-type:export-only;
-	margin-bottom:8.0pt;
+	{margin-bottom:8.0pt;
 	line-height:107%;}
 @page WordSection1
 	{size:8.5in 11.0in;
-	margin:.5in .5in .5in .5in;
-	mso-header-margin:.5in;
-	mso-footer-margin:.5in;
-	mso-paper-source:0;}
+	margin:.5in .5in .5in .5in;}
 div.WordSection1
 	{page:WordSection1;}
 -->
 </style>
-<!--[if gte mso 10]>
-<style>
- /* Style Definitions */
- table.MsoNormalTable
-	{mso-style-name:"Table Normal";
-	mso-tstyle-rowband-size:0;
-	mso-tstyle-colband-size:0;
-	mso-style-noshow:yes;
-	mso-style-priority:99;
-	mso-style-parent:"";
-	mso-padding-alt:0in 5.4pt 0in 5.4pt;
-	mso-para-margin-top:0in;
-	mso-para-margin-right:0in;
-	mso-para-margin-bottom:8.0pt;
-	mso-para-margin-left:0in;
-	line-height:107%;
-	mso-pagination:widow-orphan;
-	font-size:11.0pt;
-	font-family:"Calibri",sans-serif;
-	mso-ascii-font-family:Calibri;
-	mso-ascii-theme-font:minor-latin;
-	mso-hansi-font-family:Calibri;
-	mso-hansi-theme-font:minor-latin;
-	mso-bidi-font-family:"Times New Roman";
-	mso-bidi-theme-font:minor-bidi;
-	mso-ansi-language:EN-US;
-	mso-fareast-language:EN-US;}
-</style>
-<![endif]--><!--[if gte mso 9]><xml>
- <o:shapedefaults v:ext="edit" spidmax="1026"/>
-</xml><![endif]--><!--[if gte mso 9]><xml>
- <o:shapelayout v:ext="edit">
-  <o:idmap v:ext="edit" data="1"/>
- </o:shapelayout></xml><![endif]-->
+
 </head>
 
-<body lang=EN-GB link="#0563C1" vlink="#954F72" style='tab-interval:.5in'>
+<body lang=EN-GB link="#0563C1" vlink="#954F72">
 
 <div class=WordSection1>
 
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;mso-line-height-alt:
-11.25pt;vertical-align:top'><b><i style='mso-bidi-font-style:normal'><span
-lang=EN-US style='font-size:12.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'>LinuxKI Warning<o:p></o:p></span></i></b></p>
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;vertical-align:
+top'><b><i><span lang=EN-US style='font-size:12.0pt;font-family:"Arial",sans-serif;
+color:black'>LinuxKI Warning</span></i></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></b></p>
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Side-Channel Attack (Spectre/Meltdown) mitigation can negatively
-impact performance</span></b><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p></o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>Side-Channel Attack
+(Spectre/Meltdown) mitigation can negatively impact performance</span></b></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'>Date: 01/16/2019<o:p></o:p></span></p>
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Date:
+01/16/2019</span></p>
 
-<p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:normal;vertical-align:top'><b><span lang=EN-US style='font-size:
-10.0pt;mso-bidi-font-size:12.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'>Problem</span></b><span lang=EN-US
-style='font-size:8.0pt;mso-bidi-font-size:10.0pt;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'><o:p></o:p></span></p>
+<p class=MsoNormal style='line-height:normal;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Problem</span></b></p>
 
-<p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:normal;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>In early 2018, various hardware chip manufacturers including
-Intel, AMD, IBM, and ARM, announced several security vulnerabilities known as
-Side-Channel Attacks.<span style='mso-spacerun:yes'>   </span>In order to
-address these security vulnerabilities, a combination of firmware and Linux
-operating system changes were introduced.<span style='mso-spacerun:yes'>   
-</span>These changes can have minor to severe implications on system and
-application performance.<span style='mso-spacerun:yes'>   </span><o:p></o:p></span></p>
+<p class=MsoNormal style='line-height:normal;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>In
+early 2018, various hardware chip manufacturers including Intel, AMD, IBM, and
+ARM, announced several security vulnerabilities known as Side-Channel
+Attacks.   In order to address these security vulnerabilities, a combination of
+firmware and Linux operating system changes were introduced.  These changes can
+have minor to severe implications on system and application performance.   </span></p>
 
-<p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:normal;vertical-align:top'><b style='mso-bidi-font-weight:normal'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'>Identifying if Side Channel Attack (SCA) fixes
-are present<o:p></o:p></span></b></p>
+<p class=MsoNormal style='line-height:normal;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Identifying
+if Side Channel Attack (SCA) fixes are present</span></b></p>
 
-<p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Applications, software, and data are often migrated to new servers,
-or the Linux OS of an existing server can be upgraded. <span
-style='mso-spacerun:yes'>   </span>Performance on new faster hardware or new
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Applications,
+software, and data are often migrated to new servers, or the Linux OS of an
+existing server can be upgraded.    Performance on new faster hardware or new
 Linux OS may be less than expected or may actually decline after the migration
 as the old environment may not have the Side-Channel Attack mitigations, while
-the new hardware with a later Linux OS may have the Side-Channel Attack mitigations.<o:p></o:p></span></p>
-
-<p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>To determine if the SCA are mitigated, the following can be
-performed:<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>$ for file in `ls /sys/devices/system/cpu/vulnerabilities/*
-2&gt;/dev/null`; do \<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>    </span>echo $file `cat $file`; done<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>/sys/devices/system/cpu/vulnerabilities/l1tf <span
-style='background:yellow;mso-highlight:yellow'>Mitigation</span>: PTE Inversion<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>/sys/devices/system/cpu/vulnerabilities/meltdown <span
-style='background:yellow;mso-highlight:yellow'>Mitigation</span>: PTI<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>/sys/devices/system/cpu/vulnerabilities/spec_store_bypass
-Vulnerable<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>/sys/devices/system/cpu/vulnerabilities/spectre_v1 <span
-style='background:yellow;mso-highlight:yellow'>Mitigation</span>: __user
-pointer sanitization<o:p></o:p></span></p>
-
-<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>/sys/devices/system/cpu/vulnerabilities/spectre_v2 <span
-style='background:yellow;mso-highlight:yellow'>Mitigation</span>: Full generic
-retpoline<o:p></o:p></span></p>
-
-<p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>From the above, 4 of the 5 vulnerabilities have been mitigated
-(fixed).<span style='mso-spacerun:yes'>    </span>As a result, there will be
-some performance impact.<span style='mso-spacerun:yes'>   </span>However, the
-extent of the performance impact may be minor or severe, depending on the
-applications being executed.<o:p></o:p></span></p>
-
-<p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-line-height:11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:
-10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>LinuxKI and Side-Channel Attack (SCA) mitigations</span></b><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p></o:p></span></p>
+the new hardware with a later Linux OS may have the Side-Channel Attack mitigations.</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'>The Side-Channel Attack mitigations leave very
-little evidence in the LinuxKI data.<span style='mso-spacerun:yes'>   </span>The
-only real difference in the data which can be seen is an increase in the Cycles
-per Instruction (CPI).<span style='mso-spacerun:yes'>    </span>The CPI metric can
-be gathered with <span class=SpellE>LinuxKI</span> by enabling the Advance CPU
-statistics.<span style='mso-spacerun:yes'>  </span><span
-style='mso-spacerun:yes'> </span>For example:<o:p></o:p></span></p>
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>To
+determine if the SCA are mitigated, the following can be performed:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>$ for file in `ls /sys/devices/system/cpu/vulnerabilities/*
+2&gt;/dev/null`; do \</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    echo $file `cat $file`; done</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>/sys/devices/system/cpu/vulnerabilities/l1tf <span
+style='background:yellow'>Mitigation</span>: PTE Inversion</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>/sys/devices/system/cpu/vulnerabilities/meltdown <span
+style='background:yellow'>Mitigation</span>: PTI</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>/sys/devices/system/cpu/vulnerabilities/spec_store_bypass
+Vulnerable</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>/sys/devices/system/cpu/vulnerabilities/spectre_v1 <span
+style='background:yellow'>Mitigation</span>: __user pointer sanitization</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>/sys/devices/system/cpu/vulnerabilities/spectre_v2 <span
+style='background:yellow'>Mitigation</span>: Full generic retpoline</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:
-"Times New Roman";color:black'>$ runki <span style='background:yellow;
-mso-highlight:yellow'>-R</span><o:p></o:p></span></p>
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>From
+the above, 4 of the 5 vulnerabilities have been mitigated (fixed).    As a
+result, there will be some performance impact.   However, the extent of the
+performance impact may be minor or severe, depending on the applications being
+executed.</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>LinuxKI
+and Side-Channel Attack (SCA) mitigations</span></b></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'>The following LinuxKI data shows the CPU metrics
-from a Gen8 server running RHEL 6.9 (2.6.32-696.3.2):<o:p></o:p></span></p>
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>The
+Side-Channel Attack mitigations leave very little evidence in the LinuxKI
+data.   The only real difference in the data which can be seen is an increase
+in the Cycles per Instruction (CPI).    The CPI metric can be gathered with
+LinuxKI by enabling the Advance CPU statistics.   For example:</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Courier New";color:black'>$
+runki <span style='background:yellow'>-R</span></span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>The
+following LinuxKI data shows the CPU metrics from a Gen8 server running RHEL
+6.9 (2.6.32-696.3.2):</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>node<span style='mso-spacerun:yes'>  </span>ncpu<span
-style='mso-spacerun:yes'>     </span>Total Busy<span
-style='mso-spacerun:yes'>          </span>sys<span
-style='mso-spacerun:yes'>          </span>usr<span
-style='mso-spacerun:yes'>         </span>idle<span
-style='mso-spacerun:yes'>      </span>LLC_hit%<span
-style='mso-spacerun:yes'>    </span><span style='background:yellow;mso-highlight:
-yellow'>CPI</span><span style='mso-spacerun:yes'>   </span>Avg_MHz<span
-style='mso-spacerun:yes'>  </span><o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>node  ncpu     Total Busy          sys         
+usr         idle      LLC_hit%    CPI   Avg_MHz  </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>   </span>0 [ 20] :<span
-style='mso-spacerun:yes'>       </span>34.63%<span
-style='mso-spacerun:yes'>        </span>7.50%<span
-style='mso-spacerun:yes'>       </span>26.90%<span
-style='mso-spacerun:yes'>       </span>65.20%<span
-style='mso-spacerun:yes'>        </span>84.18%<span style='mso-spacerun:yes'>  
-</span><span style='background:yellow;mso-highlight:yellow'>1.30</span><span
-style='mso-spacerun:yes'>   </span>3100.01<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>   0 [ 20] :       34.63%        7.50%      
+26.90%       65.20%        84.18%   <span style='background:yellow'>1.30</span>  
+3100.01</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>   </span>1 [ 20] :<span
-style='mso-spacerun:yes'>       </span>32.86%<span
-style='mso-spacerun:yes'>        </span>7.51%<span
-style='mso-spacerun:yes'>       </span>25.30%<span
-style='mso-spacerun:yes'>       </span>67.08%<span
-style='mso-spacerun:yes'>        </span>82.83%<span style='mso-spacerun:yes'>  
-</span><span style='background:yellow;mso-highlight:yellow'>1.32</span><span
-style='mso-spacerun:yes'>   </span>3100.01<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>   1 [ 20] :       32.86%        7.51%      
+25.30%       67.08%        82.83%   <span style='background:yellow'>1.32</span>  
+3100.01</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>Total<span style='mso-spacerun:yes'>             
-</span>34.97%<span style='mso-spacerun:yes'>        </span>7.86%<span
-style='mso-spacerun:yes'>       </span>26.97%<span
-style='mso-spacerun:yes'>       </span>64.92%<span
-style='mso-spacerun:yes'>        </span>83.54%<span style='mso-spacerun:yes'>  
-</span><span style='background:yellow;mso-highlight:yellow'>1.31</span><span
-style='mso-spacerun:yes'>   </span>3100.01<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>Total              34.97%        7.86%      
+26.97%       64.92%        83.54%   <span style='background:yellow'>1.31</span>  
+3100.01</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Note the output has been formatted (IRQ metrics removed) to fit on
-the page.<span style='mso-spacerun:yes'>  </span>Also, <span class=SpellE>LinuxKI</span>
-only collects the Advanced CPU statistics for physical servers and are not
-collected for virtual servers.<span style='mso-spacerun:yes'>    </span><o:p></o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>Note the output has been formatted
+(IRQ metrics removed) to fit on the page.  Also, LinuxKI only collects the
+Advanced CPU statistics for physical servers and are not collected for virtual
+servers.    </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>After Migrating to Synergy with Skylake CPUs running RHEL 7.4
-(3.10.0-693.21.1)<o:p></o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>After Migrating to Synergy with
+Skylake CPUs running RHEL 7.4 (3.10.0-693.21.1)</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>node<span style='mso-spacerun:yes'>  </span>ncpu<span
-style='mso-spacerun:yes'>     </span>Total Busy<span
-style='mso-spacerun:yes'>          </span>sys<span
-style='mso-spacerun:yes'>          </span>usr<span
-style='mso-spacerun:yes'>         </span>idle<span style='mso-spacerun:yes'> 
-</span><span style='mso-spacerun:yes'>    </span>LLC_hit%<span
-style='mso-spacerun:yes'>    </span><span style='background:yellow;mso-highlight:
-yellow'>CPI</span><span style='mso-spacerun:yes'>   </span>Avg_MHz<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>node  ncpu     Total Busy          sys         
+usr         idle      LLC_hit%    CPI   Avg_MHz</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>   </span>0 [ 16] :<span
-style='mso-spacerun:yes'>       </span>34.27%<span
-style='mso-spacerun:yes'>        </span>5.91%<span
-style='mso-spacerun:yes'>       </span>28.24%<span
-style='mso-spacerun:yes'>       </span>65.51%<span
-style='mso-spacerun:yes'>        </span>72.91%<span style='mso-spacerun:yes'>  
-</span><span style='background:yellow;mso-highlight:yellow'>1.51</span><span
-style='mso-spacerun:yes'>   </span>3700.00<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>   0 [ 16] :       34.27%        5.91%      
+28.24%       65.51%        72.91%   <span style='background:yellow'>1.51</span>  
+3700.00</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>   </span>1 [ 16] :<span
-style='mso-spacerun:yes'>       </span>28.96%<span
-style='mso-spacerun:yes'>        </span>5.11%<span
-style='mso-spacerun:yes'>       </span>23.81%<span
-style='mso-spacerun:yes'>       </span>71.00%<span
-style='mso-spacerun:yes'>        </span>66.28%<span style='mso-spacerun:yes'>  
-</span><span style='background:yellow;mso-highlight:yellow'>1.46</span><span
-style='mso-spacerun:yes'>   </span>3700.00<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>   1 [ 16] :       28.96%        5.11%      
+23.81%       71.00%        66.28%   <span style='background:yellow'>1.46</span>  
+3700.00</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>Total<span style='mso-spacerun:yes'>             
-</span>31.93%<span style='mso-spacerun:yes'>        </span>5.60%<span
-style='mso-spacerun:yes'>       </span>26.25%<span
-style='mso-spacerun:yes'>       </span>67.94%<span
-style='mso-spacerun:yes'>        </span>70.06%<span style='mso-spacerun:yes'>  
-</span><span style='background:yellow;mso-highlight:yellow'>1.49</span><span
-style='mso-spacerun:yes'>   </span>3700.00<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>Total              31.93%        5.60%      
+26.25%       67.94%        70.06%   <span style='background:yellow'>1.49</span>  
+3700.00</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'>You can see the CPI increased from 1.31 to
-1.49.<span style='mso-spacerun:yes'>    </span>The CPI metric can change throughout
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>You
+can see the CPI increased from 1.31 to 1.49.    The CPI metric can change throughout
 the day and can be caused by a variety of reasons unrelated to the SCA mitigations
-(such as memory locality and program optimizations).<span
-style='mso-spacerun:yes'>    </span>The performance increased from the old
-environment by 5-10%, but with newer hardware and CPU frequency that is 20%
-higher, the performance increase was less than expected.<span
-style='mso-spacerun:yes'>   </span><span style='mso-spacerun:yes'> </span><o:p></o:p></span></p>
+(such as memory locality and program optimizations).    The performance
+increased from the old environment by 5-10%, but with newer hardware and CPU
+frequency that is 20% higher, the performance increase was less than
+expected.    </span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'>After disabling the Side-Channel Attack
-mitigations and re-running the workload, the CPI dropped by ~28%, from 1.49 to
-1.08, and the overall performance of the new Synergy server was 35% better than
-the Gen8 server. <span style='mso-spacerun:yes'>   </span>In this case, the
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>After
+disabling the Side-Channel Attack mitigations and re-running the workload, the
+CPI dropped by ~28%, from 1.49 to 1.08, and the overall performance of the new
+Synergy server was 35% better than the Gen8 server.    In this case, the
 Side-Channel Attack mitigations had a 25-30% impact on performance and
-transaction response times.<span style='mso-spacerun:yes'>  </span><o:p></o:p></span></p>
+transaction response times.  </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>node<span style='mso-spacerun:yes'>  </span>ncpu<span
-style='mso-spacerun:yes'>     </span>Total Busy<span
-style='mso-spacerun:yes'>          </span>sys<span
-style='mso-spacerun:yes'>          </span>usr<span
-style='mso-spacerun:yes'>         </span>idle<span
-style='mso-spacerun:yes'>     </span>LLC_hit%<span style='mso-spacerun:yes'>   
-</span><span style='background:yellow;mso-highlight:yellow'>CPI</span><span
-style='mso-spacerun:yes'>   </span>Avg_MHz<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>node  ncpu     Total Busy          sys         
+usr         idle     LLC_hit%    <span style='background:yellow'>CPI</span>  
+Avg_MHz</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>   </span>0 [ 16] :<span
-style='mso-spacerun:yes'>       </span>37.19%<span
-style='mso-spacerun:yes'>        </span>7.84%<span
-style='mso-spacerun:yes'>       </span>29.19%<span
-style='mso-spacerun:yes'>       </span>62.58%<span
-style='mso-spacerun:yes'>       </span>71.42%<span style='mso-spacerun:yes'>  
-</span><span style='background:yellow;mso-highlight:yellow'>1.09</span><span
-style='mso-spacerun:yes'>   </span>3700.00<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>   0 [ 16] :       37.19%        7.84%      
+29.19%       62.58%       71.42%   <span style='background:yellow'>1.09</span>  
+3700.00</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><span style='mso-spacerun:yes'>   </span>1 [ 16] :<span
-style='mso-spacerun:yes'>       </span>39.76%<span
-style='mso-spacerun:yes'>        </span>8.11%<span
-style='mso-spacerun:yes'>       </span>31.60%<span
-style='mso-spacerun:yes'>       </span>60.18%<span
-style='mso-spacerun:yes'>       </span>69.58%<span style='mso-spacerun:yes'>  
-</span><span style='background:yellow;mso-highlight:yellow'>1.08</span><span
-style='mso-spacerun:yes'>   </span>3700.00<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>   1 [ 16] :       39.76%        8.11%      
+31.60%       60.18%       69.58%   <span style='background:yellow'>1.08</span>  
+3700.00</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>Total<span style='mso-spacerun:yes'>             
-</span>37.95%<span style='mso-spacerun:yes'>        </span>7.94%<span
-style='mso-spacerun:yes'>       </span>29.91%<span
-style='mso-spacerun:yes'>       </span>61.90%<span style='mso-spacerun:yes'> 
-</span><span style='mso-spacerun:yes'>     </span>70.51%<span
-style='mso-spacerun:yes'>   </span><span style='background:yellow;mso-highlight:
-yellow'>1.08</span><span style='mso-spacerun:yes'>   </span>3700.00<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>Total              37.95%        7.94%      
+29.91%       61.90%       70.51%   <span style='background:yellow'>1.08</span>  
+3700.00</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'><o:p>&nbsp;</o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'>Unfortunately, you cannot look at a single
-environment and conclude that the CPI is high or low.<span
-style='mso-spacerun:yes'>   </span>You would need to compare 2
-environments/servers running the same workload in order to compare the CPI.<o:p></o:p></span></p>
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Unfortunately,
+you cannot look at a single environment and conclude that the CPI is high or
+low.   You would need to compare 2 environments/servers running the same workload
+in order to compare the CPI.</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'>With LinuxKI version 5.8, the runki script has
-been enhanced to capture the data Side-Channel Attach vulnerability data in the
-scavuln.&lt;timestamp&gt; file:<o:p></o:p></span></p>
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>With
+LinuxKI version 5.8, the runki script has been enhanced to capture the data
+Side-Channel Attach vulnerability data in the scavuln.&lt;timestamp&gt; file:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>$ cat scsvuln.*<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>$ cat scsvuln.*</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>/sys/devices/system/cpu/vulnerabilities/meltdown Mitigation: PTI<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>/sys/devices/system/cpu/vulnerabilities/meltdown
+Mitigation: PTI</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>/sys/devices/system/cpu/vulnerabilities/spectre_v1 Mitigation:
-Load fences<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>/sys/devices/system/cpu/vulnerabilities/spectre_v1
+Mitigation: Load fences</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;mso-bidi-font-size:
-10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black'>/sys/devices/system/cpu/vulnerabilities/spectre_v2 Vulnerable:
-Retpoline without IBPB<o:p></o:p></span></p>
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>/sys/devices/system/cpu/vulnerabilities/spectre_v2
+Vulnerable: Retpoline without IBPB</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'>The kparse report (kp.*.html) will also report
-whether or not the Side-Channel Attack mitigations are present:<o:p></o:p></span></p>
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>The
+kparse report (kp.*.html) will also report whether or not the Side-Channel
+Attack mitigations are present:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><i><u><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>basic system info</span></u></i><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+normal'><i><u><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>basic system info</span></u></i></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><b><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>Number of CPUs<span style='mso-spacerun:yes'>  
-</span>: 60<o:p></o:p></span></b></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Number
+of CPUs   : 60</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><b><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>Number of LCPUs<span style='mso-spacerun:yes'> 
-</span>: 120<o:p></o:p></span></b></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Number
+of LCPUs  : 120</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><b><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>Number of NODEs<span style='mso-spacerun:yes'> 
-</span>: 4<o:p></o:p></span></b></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Number
+of NODEs  : 4</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><o:p>&nbsp;</o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><a
-name=cmdline></a><span style='font-size:9.0pt;mso-bidi-font-size:10.0pt;
-font-family:"Courier New";mso-fareast-font-family:"Times New Roman";color:black;
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>...<o:p></o:p></span></p>
+normal'><a name=cmdline></a><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>...</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><o:p>&nbsp;</o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><a
-name="sca_vuln"></a><b><span style='font-size:9.0pt;mso-bidi-font-size:10.0pt;
-font-family:"Courier New";mso-fareast-font-family:"Times New Roman";color:black;
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>Kernel Side Channel Attack
-(Spectre/Meltdown) Fixes:<o:p></o:p></span></b></p>
+normal'><a name="sca_vuln"></a><b><span style='font-size:9.0pt;font-family:
+"Courier New";color:black'>Kernel Side Channel Attack (Spectre/Meltdown) Fixes:</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>/sys/devices/system/cpu/vulnerabilities/meltdown
-Mitigation: PTI<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>/sys/devices/system/cpu/vulnerabilities/meltdown
+Mitigation: PTI</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>/sys/devices/system/cpu/vulnerabilities/spectre_v1
-Mitigation: Load fences<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>/sys/devices/system/cpu/vulnerabilities/spectre_v1
+Mitigation: Load fences</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>/sys/devices/system/cpu/vulnerabilities/spectre_v2
-Vulnerable: Retpoline without IBPB<o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>/sys/devices/system/cpu/vulnerabilities/spectre_v2
+Vulnerable: Retpoline without IBPB</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><a
-name=warncheck0></a><span style='font-size:9.0pt;mso-bidi-font-size:10.0pt;
-font-family:"Courier New";mso-fareast-font-family:"Times New Roman";color:#CC0000;
-mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>Warning: Side Channel Attack
-(Spectre/Meltdown) mitigations present </span><u><span style='font-size:9.0pt;
-mso-bidi-font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:
-"Times New Roman";color:blue;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'><a
+normal'><a name=warncheck0></a><span style='font-size:9.0pt;font-family:"Courier New";
+color:#CC0000'>Warning: Side Channel Attack (Spectre/Meltdown) mitigations
+present </span><u><span style='font-size:9.0pt;font-family:"Courier New";
+color:blue'><a
 href="http://htmlpreview.github.io/?https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/sca_vuln.htm"
 target="_blank"><span style='color:blue'>[INFO]</span></a><a
 href="http://gse-rose-st068.us.hpecorp.net/work/mcr/kidata/gse-rose-st058/0117_0800/kp.0117_0800.html#warncheck1"><span
-style='color:blue'>[Next]</span></a></span></u><span style='font-size:9.0pt;
-mso-bidi-font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:
-"Times New Roman";color:black;mso-ansi-language:EN-GB;mso-fareast-language:
-EN-GB'><o:p></o:p></span></p>
+style='color:blue'>[Next]</span></a></span></u></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'>Also, the clparse report (clparse.*.html) for
-cluster analysis has been enhanced as follows:<o:p></o:p></span></p>
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Also,
+the clparse report (clparse.*.html) for cluster analysis has been enhanced as
+follows:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><i><u><span
-style='font-size:10.0pt;font-family:"Courier New";mso-fareast-font-family:"Times New Roman";
-color:black;mso-ansi-language:EN-GB;mso-fareast-language:EN-GB'>basic system
-info</span></u></i><span style='font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'><o:p></o:p></span></p>
+normal'><i><u><span style='font-size:10.0pt;font-family:"Courier New";
+color:black'>basic system info</span></u></i></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><b><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>Server<span style='mso-spacerun:yes'>        
-</span>Linux Version<span style='mso-spacerun:yes'>                
-</span>CPUs<span style='mso-spacerun:yes'>   </span>HT Nodes <span
-style='mso-spacerun:yes'>    </span>Memory<span style='mso-spacerun:yes'>  
-</span><span style='background:yellow;mso-highlight:yellow'>SCAfix</span><span
-style='mso-spacerun:yes'>   </span>TotTime<o:p></o:p></span></b></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Server        
+Linux Version                 CPUs   HT Nodes     Memory   <span
+style='background:yellow'>SCAfix</span>   TotTime</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>cnode1<span style='mso-spacerun:yes'>        
-</span>3.10.0-693.21.1.el7.x86_64<span style='mso-spacerun:yes'>    
-</span>120<span style='mso-spacerun:yes'>    </span>Y<span
-style='mso-spacerun:yes'>  </span><span
-style='mso-spacerun:yes'>   </span>4<span style='mso-spacerun:yes'>   </span>1547825M<span
-style='mso-spacerun:yes'>        </span>Y<span style='mso-spacerun:yes'>    
-</span>20.00<span style='mso-spacerun:yes'>   </span><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>cnode1        
+3.10.0-693.21.1.el7.x86_64     120    Y     4   1547825M        Y     20.00   </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
-style='font-size:9.0pt;mso-bidi-font-size:10.0pt;font-family:"Courier New";
-mso-fareast-font-family:"Times New Roman";color:black;mso-ansi-language:EN-GB;
-mso-fareast-language:EN-GB'>cnode2<span style='mso-spacerun:yes'>        
-</span>3.10.0-693.21.1.el7.x86_64<span style='mso-spacerun:yes'>    
-</span>120<span style='mso-spacerun:yes'>    </span>Y<span
-style='mso-spacerun:yes'>     </span>4<span style='mso-spacerun:yes'>  
-</span>1547825M<span style='mso-spacerun:yes'>        </span>N<span
-style='mso-spacerun:yes'>     </span>20.00<span style='mso-spacerun:yes'>  
-</span><o:p></o:p></span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>cnode2        
+3.10.0-693.21.1.el7.x86_64     120    Y     4   1547825M        N     20.00   </span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;mso-fareast-font-family:
-"Times New Roman";color:black'><o:p>&nbsp;</o:p></span></p>
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
-<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span lang=EN-US
-style='font-size:10.0pt;line-height:107%;font-family:"Arial",sans-serif;
-mso-fareast-font-family:"Times New Roman";color:black'>Summary<o:p></o:p></span></b></p>
+<p class=MsoNormal><b><span lang=EN-US style='font-size:10.0pt;line-height:
+107%;font-family:"Arial",sans-serif;color:black'>Summary</span></b></p>
 
 <p class=MsoNormal><span lang=EN-US style='font-size:10.0pt;line-height:107%;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Be aware that the mitigations for the Side-Channel Attacks
-(Spectre/Meltdown) can have performance impacts, and these impact can be minor
-of severe.<span style='mso-spacerun:yes'>    </span>The SCA mitigations should
-be checked before and after any server migration or Linux OS upgrades.<o:p></o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>Be aware that the mitigations for
+the Side-Channel Attacks (Spectre/Meltdown) can have performance impacts, and
+these impact can be minor of severe.    The SCA mitigations should be checked
+before and after any server migration or Linux OS upgrades.</span></p>
 
 <p class=MsoNormal><span lang=EN-US style='font-size:10.0pt;line-height:107%;
-font-family:"Arial",sans-serif;mso-fareast-font-family:"Times New Roman";
-color:black'>Refer to the following URLs for additional information:<o:p></o:p></span></p>
+font-family:"Arial",sans-serif;color:black'>Refer to the following URLs for
+additional information:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;line-height:107%'><a href="https://spectreattack.com/">https://spectreattack.com/</a></span></span><span
-lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:11.0pt;line-height:107%'><o:p></o:p></span></p>
+class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;line-height:107%'><a
+href="https://spectreattack.com/">https://spectreattack.com/</a></span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;line-height:107%'><a href="https://meltdownattack.com/">https://meltdownattack.com/</a></span></span><span
-lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:11.0pt;line-height:107%'><o:p></o:p></span></p>
+class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;line-height:107%'><a
+href="https://meltdownattack.com/">https://meltdownattack.com/</a></span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;line-height:107%'><a
-href="https://newsroom.intel.com/wp-content/uploads/sites/11/2018/01/Intel-Analysis-of-Speculative-Execution-Side-Channels.pdf">https://newsroom.intel.com/wp-content/uploads/sites/11/2018/01/Intel-Analysis-of-Speculative-Execution-Side-Channels.pdf</a></span></span><span
-lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:11.0pt;line-height:107%'><o:p></o:p></span></p>
+class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;line-height:107%'><a
+href="https://newsroom.intel.com/wp-content/uploads/sites/11/2018/01/Intel-Analysis-of-Speculative-Execution-Side-Channels.pdf">https://newsroom.intel.com/wp-content/uploads/sites/11/2018/01/Intel-Analysis-of-Speculative-Execution-Side-Channels.pdf</a></span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;line-height:107%'><a
-href="https://www.suse.com/support/kb/doc/?id=7022512">https://www.suse.com/support/kb/doc/?id=7022512</a></span></span><span
-lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:11.0pt;line-height:107%'><o:p></o:p></span></p>
+class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;line-height:107%'><a
+href="https://www.suse.com/support/kb/doc/?id=7022512">https://www.suse.com/support/kb/doc/?id=7022512</a></span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;line-height:107%'><a href="https://access.redhat.com/articles/3311301">https://access.redhat.com/articles/3311301</a></span></span><span
-lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:11.0pt;line-height:107%'><o:p></o:p></span></p>
+class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;line-height:107%'><a
+href="https://access.redhat.com/articles/3311301">https://access.redhat.com/articles/3311301</a></span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;line-height:107%'><a
-href="https://access.redhat.com/security/cve/cve-2017-5753">https://access.redhat.com/security/cve/cve-2017-5753</a></span></span><span
-lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:11.0pt;line-height:107%'><o:p></o:p></span></p>
+class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;line-height:107%'><a
+href="https://access.redhat.com/security/cve/cve-2017-5753">https://access.redhat.com/security/cve/cve-2017-5753</a></span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;line-height:107%'><a
-href="https://access.redhat.com/security/cve/cve-2017-5715">https://access.redhat.com/security/cve/cve-2017-5715</a></span></span><span
-lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:11.0pt;line-height:107%'><o:p></o:p></span></p>
+class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;line-height:107%'><a
+href="https://access.redhat.com/security/cve/cve-2017-5715">https://access.redhat.com/security/cve/cve-2017-5715</a></span></span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
-class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:
-11.0pt;line-height:107%'><a
-href="https://access.redhat.com/security/cve/cve-2017-5754">https://access.redhat.com/security/cve/cve-2017-5754</a></span></span><span
-lang=EN-US style='font-size:10.0pt;mso-bidi-font-size:11.0pt;line-height:107%'><o:p></o:p></span></p>
+class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;line-height:107%'><a
+href="https://access.redhat.com/security/cve/cve-2017-5754">https://access.redhat.com/security/cve/cve-2017-5754</a></span></span></p>
 
 </div>
 

@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
 <meta name=Generator content="Microsoft Word 15 (filtered)">
 <style>
 <!--
@@ -69,10 +69,10 @@ lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>P
 <p class=MsoNormal style='line-height:normal;vertical-align:top'><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>In
 early 2018, various hardware chip manufacturers including Intel, AMD, IBM, and
-ARM, announced several security vulnerabilities known as Side-Channel
-Attacks.   In order to address these security vulnerabilities, a combination of
-firmware and Linux operating system changes were introduced.  These changes can
-have minor to severe implications on system and application performance.   </span></p>
+ARM, announced several security vulnerabilities known as Side-Channel Attacks. In
+order to address these security vulnerabilities, a combination of firmware and
+Linux operating system changes were introduced. These changes can have minor to
+severe implications on system and application performance.</span></p>
 
 <p class=MsoNormal style='line-height:normal;vertical-align:top'><b><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Identifying
@@ -80,11 +80,11 @@ if Side Channel Attack (SCA) fixes are present</span></b></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Applications,
-software, and data are often migrated to new servers, or the Linux OS of an
-existing server can be upgraded.    Performance on new faster hardware or new
-Linux OS may be less than expected or may actually decline after the migration
-as the old environment may not have the Side-Channel Attack mitigations, while
-the new hardware with a later Linux OS may have the Side-Channel Attack mitigations.</span></p>
+software, and data are often migrated to new servers, or the Linux OS of an existing
+server can be upgraded. Performance on new faster hardware or new Linux OS may
+be less than expected or may actually decline after the migration as the old
+environment may not have the Side-Channel Attack mitigations, while the new
+hardware with a later Linux OS may have the Side-Channel Attack mitigations.</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>To
@@ -97,7 +97,7 @@ determine if the SCA are mitigated, the following can be performed:</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>    echo $file `cat $file`; done</span></p>
+"Courier New";color:black'>Â Â Â  echo $file `cat $file`; done</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -126,10 +126,9 @@ style='background:yellow'>Mitigation</span>: Full generic retpoline</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>From
-the above, 4 of the 5 vulnerabilities have been mitigated (fixed).    As a
-result, there will be some performance impact.   However, the extent of the
-performance impact may be minor or severe, depending on the applications being
-executed.</span></p>
+the above, 4 of the 5 vulnerabilities have been mitigated (fixed). As a result,
+there will be some performance impact. However, the extent of the performance
+impact may be minor or severe, depending on the applications being executed.</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>LinuxKI
@@ -137,10 +136,10 @@ and Side-Channel Attack (SCA) mitigations</span></b></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>The
-Side-Channel Attack mitigations leave very little evidence in the LinuxKI
-data.   The only real difference in the data which can be seen is an increase
-in the Cycles per Instruction (CPI).    The CPI metric can be gathered with
-LinuxKI by enabling the Advance CPU statistics.   For example:</span></p>
+Side-Channel Attack mitigations leave very little evidence in the LinuxKI data.
+The only real difference in the data which can be seen is an increase in the Cycles
+per Instruction (CPI). The CPI metric can be gathered with LinuxKI by enabling
+the Advance CPU statistics. For example:</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
 lang=EN-US style='font-size:10.0pt;font-family:"Courier New";color:black'>$
@@ -153,25 +152,25 @@ following LinuxKI data shows the CPU metrics from a Gen8 server running RHEL
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>node  ncpu     Total Busy          sys         
-usr         idle      LLC_hit%    CPI   Avg_MHz  </span></p>
+"Courier New";color:black'>nodeÂ  ncpuÂ Â Â Â  Total BusyÂ Â Â Â Â Â Â Â Â  sysÂ Â Â Â Â Â Â Â Â 
+usrÂ Â Â Â Â Â Â Â  idleÂ Â Â Â Â  LLC_hit%Â Â Â  CPIÂ Â  Avg_MHzÂ  </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>   0 [ 20] :       34.63%        7.50%      
-26.90%       65.20%        84.18%   <span style='background:yellow'>1.30</span>  
+"Courier New";color:black'>Â Â  0 [ 20] :Â Â Â Â Â Â  34.63%Â Â Â Â Â Â Â  7.50%Â Â Â Â Â Â 
+26.90%Â Â Â Â Â Â  65.20%Â Â Â Â Â Â Â  84.18%Â Â  <span style='background:yellow'>1.30</span>Â Â 
 3100.01</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>   1 [ 20] :       32.86%        7.51%      
-25.30%       67.08%        82.83%   <span style='background:yellow'>1.32</span>  
+"Courier New";color:black'>Â Â  1 [ 20] :Â Â Â Â Â Â  32.86%Â Â Â Â Â Â Â  7.51%Â Â Â Â Â Â 
+25.30%Â Â Â Â Â Â  67.08%Â Â Â Â Â Â Â  82.83%Â Â  <span style='background:yellow'>1.32</span>Â Â 
 3100.01</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>Total              34.97%        7.86%      
-26.97%       64.92%        83.54%   <span style='background:yellow'>1.31</span>  
+"Courier New";color:black'>TotalÂ Â Â Â Â Â Â Â Â Â Â Â Â  34.97%Â Â Â Â Â Â Â  7.86%Â Â Â Â Â Â 
+26.97%Â Â Â Â Â Â  64.92%Â Â Â Â Â Â Â  83.54%Â Â  <span style='background:yellow'>1.31</span>Â Â 
 3100.01</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -181,9 +180,9 @@ usr         idle      LLC_hit%    CPI   Avg_MHz  </span></p>
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;color:black'>Note the output has been formatted
-(IRQ metrics removed) to fit on the page.  Also, LinuxKI only collects the
+(IRQ metrics removed) to fit on the page.Â  Also, LinuxKI only collects the
 Advanced CPU statistics for physical servers and are not collected for virtual
-servers.    </span></p>
+servers.</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
@@ -192,7 +191,7 @@ font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;color:black'>After Migrating to Synergy with
-Skylake CPUs running RHEL 7.4 (3.10.0-693.21.1)</span></p>
+Skylake CPUs running RHEL 7.4 (3.10.0-693.21.1):</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -200,69 +199,66 @@ Skylake CPUs running RHEL 7.4 (3.10.0-693.21.1)</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>node  ncpu     Total Busy          sys         
-usr         idle      LLC_hit%    CPI   Avg_MHz</span></p>
+"Courier New";color:black'>nodeÂ  ncpuÂ Â Â Â  Total BusyÂ Â Â Â Â Â Â Â Â  sysÂ Â Â Â Â Â Â Â Â 
+usrÂ Â Â Â Â Â Â Â  idleÂ Â Â Â Â  LLC_hit%Â Â Â  CPIÂ Â  Avg_MHz</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>   0 [ 16] :       34.27%        5.91%      
-28.24%       65.51%        72.91%   <span style='background:yellow'>1.51</span>  
+"Courier New";color:black'>Â Â  0 [ 16] :Â Â Â Â Â Â  34.27%Â Â Â Â Â Â Â  5.91%Â Â Â Â Â Â 
+28.24%Â Â Â Â Â Â  65.51%Â Â Â Â Â Â Â  72.91%Â Â  <span style='background:yellow'>1.51</span>Â Â 
 3700.00</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>   1 [ 16] :       28.96%        5.11%      
-23.81%       71.00%        66.28%   <span style='background:yellow'>1.46</span>  
+"Courier New";color:black'>Â Â  1 [ 16] :Â Â Â Â Â Â  28.96%Â Â Â Â Â Â Â  5.11%Â Â Â Â Â Â 
+23.81%Â Â Â Â Â Â  71.00%Â Â Â Â Â Â Â  66.28%Â Â  <span style='background:yellow'>1.46</span>Â Â 
 3700.00</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>Total              31.93%        5.60%      
-26.25%       67.94%        70.06%   <span style='background:yellow'>1.49</span>  
-3700.00</span></p>
+"Courier New";color:black'>TotalÂ Â Â Â Â Â Â Â Â Â Â Â Â  31.93%Â Â Â Â Â Â Â  5.60%Â Â Â Â Â Â  26.25%Â Â Â Â Â Â 
+67.94%Â Â Â Â Â Â Â  70.06%Â Â  <span style='background:yellow'>1.49</span>Â Â  3700.00</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>You
-can see the CPI increased from 1.31 to 1.49.    The CPI metric can change throughout
+can see the CPI increased from 1.31 to 1.49.Â Â Â  The CPI metric can change throughout
 the day and can be caused by a variety of reasons unrelated to the SCA mitigations
-(such as memory locality and program optimizations).    The performance
-increased from the old environment by 5-10%, but with newer hardware and CPU
-frequency that is 20% higher, the performance increase was less than
-expected.    </span></p>
+(such as memory locality and program optimizations). The performance increased
+from the old environment by 5-10%, but with newer hardware and CPU frequency
+that is 20% higher, the performance increase was less than expected.</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>After
 disabling the Side-Channel Attack mitigations and re-running the workload, the
 CPI dropped by ~28%, from 1.49 to 1.08, and the overall performance of the new
-Synergy server was 35% better than the Gen8 server.    In this case, the
-Side-Channel Attack mitigations had a 25-30% impact on performance and
-transaction response times.  </span></p>
+Synergy server was 35% better than the Gen8 server. In this case, the
+Side-Channel Attack mitigations had a 25-30% impact on performance and transaction
+response times.Â  </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>node  ncpu     Total Busy          sys         
-usr         idle     LLC_hit%    <span style='background:yellow'>CPI</span>  
+"Courier New";color:black'>nodeÂ  ncpuÂ Â Â Â  Total BusyÂ Â Â Â Â Â Â Â Â  sysÂ Â Â Â Â Â Â Â Â 
+usrÂ Â Â Â Â Â Â Â  idleÂ Â Â Â  LLC_hit%Â Â Â  <span style='background:yellow'>CPI</span>Â Â 
 Avg_MHz</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>   0 [ 16] :       37.19%        7.84%      
-29.19%       62.58%       71.42%   <span style='background:yellow'>1.09</span>  
+"Courier New";color:black'>Â Â  0 [ 16] :Â Â Â Â Â Â  37.19%Â Â Â Â Â Â Â  7.84%Â Â Â Â Â Â 
+29.19%Â Â Â Â Â Â  62.58%Â Â Â Â Â Â  71.42%Â Â  <span style='background:yellow'>1.09</span>Â Â 
 3700.00</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>   1 [ 16] :       39.76%        8.11%      
-31.60%       60.18%       69.58%   <span style='background:yellow'>1.08</span>  
-3700.00</span></p>
+"Courier New";color:black'>Â Â  1 [ 16] :Â Â Â Â Â Â  39.76%Â Â Â Â Â Â Â  8.11%Â Â Â  Â Â Â 31.60%Â Â Â Â Â Â 
+60.18%Â Â Â Â Â Â  69.58%Â Â  <span style='background:yellow'>1.08</span>Â Â  3700.00</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New";color:black'>Total              37.95%        7.94%      
-29.91%       61.90%       70.51%   <span style='background:yellow'>1.08</span>  
+"Courier New";color:black'>TotalÂ Â Â Â Â Â Â Â Â Â Â Â Â  37.95%Â Â Â Â Â Â Â  7.94%Â Â Â Â Â Â 
+29.91%Â Â Â Â Â Â  61.90%Â Â Â Â Â Â  70.51%Â Â  <span style='background:yellow'>1.08</span>Â Â 
 3700.00</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -272,7 +268,7 @@ Avg_MHz</span></p>
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Unfortunately,
 you cannot look at a single environment and conclude that the CPI is high or
-low.   You would need to compare 2 environments/servers running the same workload
+low.Â Â  You would need to compare 2 environments/servers running the same workload
 in order to compare the CPI.</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
@@ -313,15 +309,15 @@ color:black'>basic system info</span></u></i></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Number
-of CPUs   : 60</span></b></p>
+of CPUsÂ Â  : 60</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Number
-of LCPUs  : 120</span></b></p>
+of LCPUsÂ  : 120</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Number
-of NODEs  : 4</span></b></p>
+of NODEsÂ  : 4</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
@@ -372,17 +368,17 @@ normal'><i><u><span style='font-size:10.0pt;font-family:"Courier New";
 color:black'>basic system info</span></u></i></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>Server        
-Linux Version                 CPUs   HT Nodes     Memory   <span
-style='background:yellow'>SCAfix</span>   TotTime</span></b></p>
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>ServerÂ Â Â Â Â Â Â Â 
+Linux VersionÂ Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â  CPUsÂ Â  HT Nodes Â Â Â Â MemoryÂ Â  <span
+style='background:yellow'>SCAfix</span>Â Â  TotTime</span></b></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>cnode1        
-3.10.0-693.21.1.el7.x86_64     120    Y     4   1547825M        Y     20.00   </span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>cnode1Â Â Â Â Â Â Â Â 
+3.10.0-693.21.1.el7.x86_64Â Â Â Â  120Â Â Â  YÂ Â Â Â  4Â Â  1547825MÂ Â Â Â Â Â Â  YÂ Â Â Â  20.00Â Â  </span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
-normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>cnode2        
-3.10.0-693.21.1.el7.x86_64     120    Y     4   1547825M        N     20.00   </span></p>
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>cnode2Â Â Â Â Â Â Â Â 
+3.10.0-693.21.1.el7.x86_64Â Â Â Â  120Â Â Â  YÂ Â Â Â  4Â Â  1547825MÂ Â Â Â Â Â Â  NÂ Â Â Â  20.00Â Â  </span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
@@ -393,7 +389,7 @@ lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&
 <p class=MsoNormal><span lang=EN-US style='font-size:10.0pt;line-height:107%;
 font-family:"Arial",sans-serif;color:black'>Be aware that the mitigations for
 the Side-Channel Attacks (Spectre/Meltdown) can have performance impacts, and
-these impact can be minor of severe.    The SCA mitigations should be checked
+these impact can be minor of severe. The SCA mitigations should be checked
 before and after any server migration or Linux OS upgrades.</span></p>
 
 <p class=MsoNormal><span lang=EN-US style='font-size:10.0pt;line-height:107%;

@@ -875,6 +875,10 @@ liki_next_merged_chunk(char *buf)
 			return(-EMEDIUMTYPE);
 		}
 
+		if ((sz = trace_len(am.mips[earliest].p)) == 0) {
+			fprintf(stderr, "found zero-length trace in input file (earliest=%d)\n", earliest);
+			return(-EMEDIUMTYPE);
+		}
 
 		/* The output records must not cross a chunk boundary, so
 		 * if this record won't fit in the remaining space fix-up

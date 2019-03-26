@@ -764,7 +764,7 @@ block_rq_complete_func(void *a, void *v)
 		incr_trc_stats(rec_ptr, pidp);
 	}
 
-        if ((kitrace_flag && !filter_flag) ||  (INVALID_SECTOR(rec_ptr->sector) && !BARRIER_IO(rec_ptr))) { 
+        if ((kitrace_flag && !filter_flag) &&  (INVALID_SECTOR(rec_ptr->sector) && !BARRIER_IO(rec_ptr))) { 
 		if ((rec_ptr->nr_sectors==0) && rec_ptr->bytes && !IS_LIKI) {
                 	scsi_cmd_addr = (char *)trcinfop->cur_rec + block_rq_complete_attr[BLOCK_RQ_CMD].offset;
         	}

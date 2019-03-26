@@ -18,7 +18,7 @@
  *
  * likit.c	LInux Kernel Instrumentation
  *
- *		v5.6
+ *		v5.9
  *		colin.honess@gmail.com
  *		mark.ray@hpe.com
  *		pokilfoyle@gmail.com
@@ -326,6 +326,7 @@ STATIC int			liki_clock_stable = FALSE;
  */
 STATIC volatile unsigned long	reader_cnt ____cacheline_aligned_in_smp = 0;
 STATIC volatile int	want_shutdown = FALSE;
+STATIC volatile int	shutdown_pending = FALSE;
 
 
 /* dentry is used to maintain a pointer to the root directory of
@@ -2570,6 +2571,8 @@ sched_migrate_task_trace(RXUNUSED struct task_struct *p, unsigned int new_cpu)
 
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0)					
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,18,0)					
 #define POPULATE_COMMON_BLOCK_FIELDS(q, r, T)						\
 	T->dev = r->rq_disk ? disk_devt(r->rq_disk) : 0;				\
 	T->sector = blk_rq_is_passthrough(r) ? 0 : blk_rq_pos(r);			\
@@ -2577,7 +2580,18 @@ sched_migrate_task_trace(RXUNUSED struct task_struct *p, unsigned int new_cpu)
 	T->cmd_type = 0;								\
 	T->cmd_flags = r->cmd_flags;							\
 	T->async_in_flight = q->in_flight[BLK_RW_ASYNC];				\
-	T->sync_in_flight = q->in_flight[BLK_RW_SYNC];
+	T->sync_in_flight = q->in_flight[BLK_RW_SYNC];					
+#else
+#define POPULATE_COMMON_BLOCK_FIELDS(q, r, T)						\
+	T->dev = r->rq_disk ? disk_devt(r->rq_disk) : 0;				\
+	T->sector = blk_rq_is_passthrough(r) ? 0 : blk_rq_pos(r);			\
+	T->nr_sectors = blk_rq_is_passthrough(r) ? 0 : blk_rq_sectors(r);	 	\
+	T->cmd_type = 0;								\
+	T->cmd_flags = r->cmd_flags;							\
+	T->async_in_flight = 0;								\
+	T->sync_in_flight = 0;								
+#endif
+
 #else
 #define POPULATE_COMMON_BLOCK_FIELDS(q, r, T)						\
 	T->dev = r->rq_disk ? disk_devt(r->rq_disk) : 0;				\
@@ -2587,7 +2601,7 @@ sched_migrate_task_trace(RXUNUSED struct task_struct *p, unsigned int new_cpu)
 	T->cmd_type = r->cmd_type;							\
 	T->cmd_flags = r->cmd_flags;							\
 	T->async_in_flight = q->in_flight[BLK_RW_ASYNC];				\
-	T->sync_in_flight = q->in_flight[BLK_RW_SYNC];
+	T->sync_in_flight = q->in_flight[BLK_RW_SYNC];				
 #endif
 
 
@@ -4103,7 +4117,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		struct sockaddr_storage	remote;
 		struct sockaddr_storage	local;
 		struct socket		*sock;
-		int			loclen, remlen;
+		int			loclen = 0, remlen = 0;
 		int			fd;
 		int			err;
 		int			fput_needed;
@@ -4772,7 +4786,9 @@ hardclock_timer(struct timer_list *t)
 
 	hardclock_trace(regs);
 
-	mod_timer(&timer_lists[cpu], target_jiffy);
+	if (!shutdown_pending) {
+		mod_timer(&timer_lists[cpu], target_jiffy);
+	}
 }
 
 STATIC void
@@ -6766,6 +6782,7 @@ shutdown(void)
 	printk(KERN_INFO "LiKI: tracing shutting down...\n");
 
 	mutex_lock(&state_mutex);
+	shutdown_pending=TRUE;
 
 	change_installed_traces(TT_BITMASK_NO_TRACES);
 	remove_fork_hook();

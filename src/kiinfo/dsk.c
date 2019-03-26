@@ -526,16 +526,14 @@ print_iosum_detail(iostats_t *statsp)
 int
 print_pid_iototals(void *arg1)
 {
-	pid_info_t *pidp = (pid_info_t *)arg1;
+	iostats_t *iostats = (iostats_t *)arg1;
 	iostats_t *rstatp, *wstatp, *tstatp;
 	
-	if (pidp == NULL) return 0;
-	
-	tstatp = &pidp->iostats[IO_TOTAL];
+	tstatp = &iostats[IO_TOTAL];
 	if (tstatp->compl_cnt == 0) return 0;
 
-	rstatp = &pidp->iostats[IO_READ];
-	wstatp = &pidp->iostats[IO_WRITE];
+	rstatp = &iostats[IO_READ];
+	wstatp = &iostats[IO_WRITE];
 
 	pid_printf ("\n    Totals:\n", tab);
 

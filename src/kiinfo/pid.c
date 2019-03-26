@@ -731,19 +731,23 @@ pid_dsk_report(pid_info_t *pidp, void *v)
 
 	if (pid_csvfile) print_pid_iototals_csv(pidp);
 
-	if (pidp->iostats[IO_TOTAL].compl_cnt == 0) return;
+	if (pidp->iostats[IO_TOTAL].compl_cnt) {
+		pid_printf ("\n    ******** PHYSICAL DEVICE REPORT ********\n");
+		pid_printf ("%s    device   rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+		foreach_hash_entry((void **)pidp->devhash, DEV_HSIZE, calc_dev_totals, NULL, 0, NULL);
+		foreach_hash_entry((void **)pidp->devhash, DEV_HSIZE, dsk_print_dev_iostats, dev_sort_by_dev, 0, NULL);
 
-	pid_printf ("\n    ******** PHYSICAL DEVICE REPORT ********\n");
-	pid_printf ("%s    device   rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
-	foreach_hash_entry((void **)pidp->devhash, DEV_HSIZE, calc_dev_totals, NULL, 0, NULL);
-	foreach_hash_entry((void **)pidp->devhash, DEV_HSIZE, dsk_print_dev_iostats, dev_sort_by_dev, 0, NULL);
+		print_pid_iototals(&pidp->iostats[0]);
+	} 
 
-	pid_printf ("\n    ******** DEVICE-MAPPER REPORT ********\n");
-	pid_printf ("%s    device   rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
-	foreach_hash_entry((void **)pidp->mdevhash, DEV_HSIZE, calc_dev_totals, NULL, 0, NULL);
-	foreach_hash_entry((void **)pidp->mdevhash, DEV_HSIZE, dsk_print_dev_iostats, dev_sort_by_dev, 0, NULL);
+	if (pidp->miostats[IO_TOTAL].compl_cnt) {
+		pid_printf ("\n    ******** DEVICE-MAPPER REPORT ********\n");
+		pid_printf ("%s    device   rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+		foreach_hash_entry((void **)pidp->mdevhash, DEV_HSIZE, calc_dev_totals, NULL, 0, NULL);
+		foreach_hash_entry((void **)pidp->mdevhash, DEV_HSIZE, dsk_print_dev_iostats, dev_sort_by_dev, 0, NULL);
 
-	print_pid_iototals(pidp);
+		print_pid_iototals(&pidp->miostats[0]);
+	}
 }
 
 /*

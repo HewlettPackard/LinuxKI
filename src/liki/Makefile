@@ -83,6 +83,9 @@ ifeq ($(hostdistro),rhel) # Red Hat Enterprise Linux (RHEL)
    else ifneq (,$(findstring 7.,$(hostversion)))
       #RHEL 7 (3.10)
       EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
+   else ifneq (,$(findstring 8.,$(hostversion)))
+      #RHEL 8 (4.18)
+      EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
    endif
 else ifeq ($(hostdistro),centos) #  Centos
    ifneq (,$(findstring 6.,$(hostversion)))
@@ -90,6 +93,9 @@ else ifeq ($(hostdistro),centos) #  Centos
       EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
    else ifneq (,$(findstring 7.,$(hostversion)))
       #RHEL 7 (3.10)
+      EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
+   else ifneq (,$(findstring 8.,$(hostversion)))
+      #RHEL 8 (4.18)
       EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
    endif
 else ifeq ($(hostdistro),ol) # Oracle Linux (OL)

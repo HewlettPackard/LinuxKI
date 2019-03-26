@@ -1113,6 +1113,7 @@ flag_t kparse_flags[] = {
   { "edus",        "filename", FA_ALL, FT_REG, "s"},
   { "jstack",      "filename", FA_ALL, FT_REG, "s"},
   { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
+  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "mangle",   "mangle", FA_ALL, FT_OPT, NULL},
   { "vis",         NULL,   FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "events",	"default | all | tool | event", FA_ALL, FT_REG, "s"},
@@ -1132,6 +1133,7 @@ flag_t pid_flags[] = {
   { "npid",   "npid",    FA_ALL, FT_REG, "i" },
   { "pidtree",     NULL,    FA_ALL, FT_OPT, NULL},
   { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
+  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "mangle",   "mangle", FA_ALL, FT_OPT, NULL},
   { "vis",         NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL},
   { "vpct",        "vpct",  FA_ALL, FT_REG | FT_HIDDEN, "i" },
@@ -1162,6 +1164,7 @@ flag_t pid_flags[] = {
 flag_t dock_flags[] = {
   { "help",        NULL,    FA_ALL, FT_OPT, NULL},
   { "npid",   "npid",    FA_ALL, FT_REG, "i" },
+  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { 0,0,0,0,0 }
 };
 
@@ -1171,6 +1174,7 @@ flag_t live_flags[] = {
   { "edus",        "filename", FA_ALL, FT_REG, "s"},  
   { "msr",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
+  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "mangle",   "mangle", FA_ALL, FT_OPT, NULL},
   { "step",	   "<time_in_secs>",  FA_ALL, FT_OPT, "s" },
   { 0,0,0,0,0 }
@@ -1185,6 +1189,7 @@ flag_t dsk_flags[] = {
   { "percpu",  	  NULL,  FA_ALL, FT_OPT, NULL },
   { "nodev",      NULL,  FA_ALL, FT_OPT, NULL },
   { "nomapper",   NULL,  FA_ALL, FT_OPT, NULL },
+  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "mpath_detail", NULL, FA_ALL, FT_OPT, NULL },
   { "bkfname",     "filename",   FA_ALL, FT_REG, "s" },
   { "detail",   "detail (default 1)",    FA_ALL, FT_REG, "i" },
@@ -1289,6 +1294,7 @@ flag_t trace_flags[] = {
   { "objfile",     "filename",    FA_ALL, FT_REG, "s" },
   { "nomapper", NULL, FA_ALL, FT_OPT, NULL },
   { "nomarker", NULL, FA_ALL, FT_OPT, NULL },
+  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "mangle",   "mangle", FA_ALL, FT_OPT, NULL},
   { "abstime", NULL, FA_ALL, FT_OPT, NULL },
   { "fmttime", NULL, FA_ALL, FT_OPT, NULL },
@@ -1332,6 +1338,7 @@ flag_t clparse_flags[] = {
   { "csv",         NULL,   FA_ALL, FT_OPT, NULL },
   { "vis",         NULL,   FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
+  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "mangle",   "mangle", FA_ALL, FT_OPT, NULL},
   { "help",        NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
@@ -1348,6 +1355,7 @@ flag_t kiall_flags[] = {
   { "vint",        "vint",    FA_ALL, FT_OPT | FT_HIDDEN, "i"},
   { "edus",        "filename", FA_ALL, FT_REG, "s"},
   { "jstack",      "filename", FA_ALL, FT_REG, "s"},
+  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "help",        NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
 };

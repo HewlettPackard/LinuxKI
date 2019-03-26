@@ -670,7 +670,7 @@ parse_mpsched()
 	char *rtnptr;
 	int i, ret;
 	cpu_info_t *cpuinfop;
-	int cpu[64], ldom, nlcpu;
+	int cpu[96], ldom, nlcpu;
 	short nitems, nldom;
 	char parse_start = FALSE;
 
@@ -700,7 +700,7 @@ parse_mpsched()
 
 		if (!parse_start) continue;
 		
-		nitems = sscanf (input_str, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", 
+		nitems = sscanf (input_str, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", 
 			&ldom, 
 			&cpu[0], &cpu[1], &cpu[2], &cpu[3], &cpu[4], &cpu[5], &cpu[6], &cpu[7],
 			&cpu[8], &cpu[9], &cpu[10], &cpu[11], &cpu[12], &cpu[13], &cpu[14], &cpu[15],
@@ -709,7 +709,11 @@ parse_mpsched()
 			&cpu[32], &cpu[33], &cpu[34], &cpu[35], &cpu[36], &cpu[37], &cpu[38], &cpu[39],
 			&cpu[40], &cpu[41], &cpu[42], &cpu[43], &cpu[44], &cpu[45], &cpu[46], &cpu[47],
 			&cpu[48], &cpu[49], &cpu[50], &cpu[51], &cpu[52], &cpu[53], &cpu[54], &cpu[55],
-			&cpu[56], &cpu[57], &cpu[58], &cpu[59], &cpu[60], &cpu[61], &cpu[62], &cpu[63]);
+			&cpu[56], &cpu[57], &cpu[58], &cpu[59], &cpu[60], &cpu[61], &cpu[62], &cpu[63],
+			&cpu[64], &cpu[65], &cpu[66], &cpu[67], &cpu[68], &cpu[69], &cpu[70], &cpu[71],
+			&cpu[72], &cpu[73], &cpu[74], &cpu[75], &cpu[76], &cpu[77], &cpu[78], &cpu[79],
+			&cpu[80], &cpu[81], &cpu[82], &cpu[83], &cpu[84], &cpu[85], &cpu[86], &cpu[87],
+			&cpu[88], &cpu[89], &cpu[90], &cpu[91], &cpu[92], &cpu[93], &cpu[94], &cpu[95]);
 
 		if (nitems > 1) {
 			nldom++;
@@ -1232,6 +1236,7 @@ parse_mpath()
 
 		if ((strncmp(input_str, "  |- ", 5) == 0) || 
 		    (strncmp(input_str, "  `- ", 5) == 0) || 
+		    (strncmp(input_str, "| `- ", 5) == 0) || 
 		    (strncmp(input_str, "| |- ", 5) == 0)) {
 			sscanf(&input_str[5], "%d:%d:%d:%d %s %d:%d", 
 				&path1, &path2, &path3, &path4, devname, &major, &minor);

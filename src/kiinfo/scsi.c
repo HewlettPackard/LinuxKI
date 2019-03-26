@@ -91,6 +91,52 @@ print_scsi_dispatch_cmd_start_rec(void *a)
 	return 0;
 }
 
+#define status_byte(result) (((result) >> 1) & 0x7f)
+#define msg_byte(result)    (((result) >> 8) & 0xff)
+#define host_byte(result)   (((result) >> 16) & 0xff)
+#define driver_byte(result) (((result) >> 24) & 0xff)
+
+static const char * const hostbyte_table[]={
+"DID_OK", "DID_NO_CONNECT", "DID_BUS_BUSY", "DID_TIME_OUT", "DID_BAD_TARGET",
+"DID_ABORT", "DID_PARITY", "DID_ERROR", "DID_RESET", "DID_BAD_INTR",
+"DID_PASSTHROUGH", "DID_SOFT_ERROR", "DID_IMM_RETRY", "DID_REQUEUE",
+"DID_TRANSPORT_DISRUPTED", "DID_TRANSPORT_FAILFAST", "DID_TARGET_FAILURE",
+"DID_NEXUS_FAILURE" };
+
+static const char * const driverbyte_table[]={
+"DRIVER_OK", "DRIVER_BUSY", "DRIVER_SOFT",  "DRIVER_MEDIA", "DRIVER_ERROR",
+"DRIVER_INVALID", "DRIVER_TIMEOUT", "DRIVER_HARD", "DRIVER_SENSE"};
+
+static const char * const msgbyte_table[]={
+"COMMAND_COMPLETE","EXTENDED_MSG","SAVE_POINTERS","RESTORE_POINTERS","DISCONNECT",
+"INITIATOR_ERROR","ABORT_TASK_SET","MESSAGE_REJECT","NOP","MSG_PARITY_ERROR",
+"LINKED_CMD_COMPLETE","LINKED_FLG_CMD_COMPLETE","TARGET_RESET","ABORT_TASK",
+"CLEAR_TASK_SET","INITIATE_RECOVER","RELEASE_RECOVERY","0x11","0x12","0x13",
+"0x14","0x15","CLEAR_ACA","LOGICAL_UNIT_RESET","0x18","0x19","0x1a","0x1b",
+"0x1c","0x1d","0x1e","0x1f","SIMPLE_QUEUE_TAG","HEAD_OF_QUEUE_TAG",
+"ORDERED_QUEUE_TAG","IGNORE_WIDE_RESIDUE","ACA"};
+
+static const char * const statusbyte_table[]={
+"GOOD","CHECK_CONDITION","0x3","BUSY","0x5","0x6","0x7","INTERMEDIATE_GOOD",
+"0x9", "INTERMEDIATE_C_GOOD","0xb","RESERVATION_CONFLICT","0xd","0xe","0xf",
+"0x10","COMMAND_TERMINATED","0x12","0x13","QUEUE_FULL","0x15","0x16","0x17",
+"ACA_ACTIVE","0x19","0x1a","0x1b","0x1c","0x1d","0x1e","0x1f","TASK_ABORTED"};
+
+static inline int
+print_result(unsigned int result)
+{
+	printf ("%cresult=0x%x", fsep, result);
+	if (result) {
+		printf ("%c%s/%s/%s/%s", fsep, 
+			driverbyte_table[driver_byte(result)],
+			hostbyte_table[host_byte(result)],
+			msg_byte(result) < 0x25 ? msgbyte_table[msg_byte(result)] : "?",
+			status_byte(result) < 0x21 ? statusbyte_table[status_byte(result)] : "?");
+	}
+	return 0;
+}
+
+
 int
 scsi_dispatch_cmd_start_func(void *a, void *v)
 {
@@ -127,7 +173,8 @@ print_scsi_dispatch_cmd_done_rec(void *a)
 		print_scsi_cmd (rec_ptr->cmd_len, &rec_ptr->cmnd[0]);
 	}
 
-	printf ("%cresult=%d\n", fsep, rec_ptr->result);
+	print_result(rec_ptr->result);
+	printf ("\n");
 
 	return 0;
 }

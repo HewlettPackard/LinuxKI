@@ -73,4 +73,4 @@ echo Server running on port $port
 
 html_file=$(find . -iname 'kp.*.html')
 [[ $(echo $html_file | wc --words) -ne 1 ]] && unset html_file
-xdg-open http://localhost:$port/linuxki/$html_file
+gio open http://localhost:$port/linuxki/$html_file

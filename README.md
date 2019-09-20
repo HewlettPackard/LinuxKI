@@ -67,6 +67,8 @@ Refer to the COPYING.liki, COPYING.kiinfo, LICENSE.txt files for additional info
 ## Overview
 The following documentation provides a brief overview for downloading and installing the LinuxKI Toolset, as well as data collection and report generation.   Be sure to refer to the LinuxKI MasterClass, LinuxKI Quick Reference Guide, and LinuxKI FAQ for complete documentation:
 
+[LinuxKI Video Series](https://github.com/HewlettPackard/LinuxKI/wiki/LinuxKI-Video-Series)
+\
 [LinuxKI Quick Reference Guide](https://github.com/HewlettPackard/LinuxKI/raw/master/documentation/LinuxKI_QuickRefGuide.pdf)
 \
 [LinuxKI Frequently Asked Questions](https://github.com/HewlettPackard/LinuxKI/raw/master/documentation/LinuxKI_FAQ.pdf)

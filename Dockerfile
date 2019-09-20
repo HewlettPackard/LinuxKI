@@ -43,9 +43,9 @@ RUN yum update -y
 RUN yum install -y yum-utils
 RUN yum install -y httpd mod_ssl
 RUN yum install -y http://rpms.remirepo.net/enterprise/remi-release-7.rpm && \
-  yum-config-manager --enable remi-php72 && \
+  yum-config-manager --enable remi-php73 && \
   yum install -y php php-opcache
-RUN yum install -y https://raw.githubusercontent.com/HewlettPackard/LinuxKI/master/rpms/linuxki-5.5-1.noarch.rpm
+RUN yum install -y https://raw.githubusercontent.com/HewlettPackard/LinuxKI/master/rpms/linuxki-5.9-1.noarch.rpm
 RUN yum clean all -y && rm -rf /var/cache/yum
 
 RUN echo '<?php phpinfo(); ?>' > /var/www/html/info.php

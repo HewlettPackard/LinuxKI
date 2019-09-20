@@ -429,7 +429,7 @@ int load_elf(char *fnamep, vtxt_preg_t *pregp)
 	/* called only if objfile= is passed to kiinfo */
 	if (fnamep == NULL) return 0;
 	
-	/* printf ("Loading symbols from %s\n", fnamep); */
+	if (debug) printf ("Loading symbols from %s\n", fnamep);
 
 	/* check to see if elf already mapped.   If so, just return the saved mmap addr */
 	elfmapp = GET_ELFMAPP(&globals->elfmap_hash, ELFMAP_KEY(fnamep));

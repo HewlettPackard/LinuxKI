@@ -192,7 +192,15 @@ kiall_init_func(void *v)
                         fprintf (stderr, "Unable to make PIDS directory, errno %d\n", errno);
                         fprintf (stderr, "  Continuing...\n");
 			CLEAR(PIDTREE_FLAG);
-                }
+		}
+	
+		/* for Docker/Contanter kparse data */
+               	ret = mkdir("CIDS", 0777);
+               	if (ret && (errno != EEXIST)) {
+                       	fprintf (stderr, "Unable to make CIDS directory, errno %d\n", errno);
+                       	fprintf (stderr, "  Continuing...\n");
+			CLEAR(DOCKTREE_FLAG);
+		}
         }
 
 
@@ -622,7 +630,9 @@ kiall_print_report(void *v)
         	printf("Command line: %s -kidock npid=%d -ts %s\n\n", cmdstr, npid, timestamp);
         	printf ("%s (%s)\n\n", tool_name, tool_version);
 		parse_uname(1);
+		if (html_flag) SET(DOCKTREE_FLAG);
 		docker_print_report(v);
+		CLEAR(DOCKTREE_FLAG);
 		printf ("\nTotal time captured (secs): %3.2f\n", globals->total_secs);
 		print_cpu_buf_info();
 	}

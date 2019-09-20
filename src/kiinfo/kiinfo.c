@@ -80,6 +80,7 @@ trace_info_t  trace_file_merged;
 char ts_begin_marker[64];
 char ts_end_marker[64];
 
+FILE *dockfile = NULL;
 FILE *pidfile = NULL;
 FILE *pid_jsonfile = NULL;
 FILE *pid_wtree_jsonfile = NULL;

@@ -137,7 +137,7 @@ pid_update_fdinfo(void *arg1, void *arg2)
 	fileaddr_t	*faddr;
 	unsigned int	dev;
 
-	/* if the file was previously closed, let's cleanup the fdinfop.  We will keep the syscall stats */
+	/* if the file was previously closed, let's cleanup the fdinfop.  We will keep the syscall stats 
 	if (fdinfop->closed) {
 		fdinfop->dev=0;
 		fdinfop->node=0;
@@ -150,13 +150,14 @@ pid_update_fdinfo(void *arg1, void *arg2)
 			FREE(fdinfop->rsock);
 			fdinfop->rsock = NULL;
 		}
-		if (fdinfop->fnamep) {
+		 if (fdinfop->fnamep) {
 			FREE(fdinfop->fnamep);
 			fdinfop->fnamep = NULL;
 		}
 		fdinfop->multiple_fnames++;
 		fdinfop->closed=0;
 	}
+	*/
 		
 
 	/* printf ("pid_update_fdinfo() rec_ptr: 0x%llx  reclen: %d %d\n", rec_ptr, rec_ptr->reclen, sizeof(syscall_exit_t));  */
@@ -1362,6 +1363,9 @@ incr_gbl_futex_stats(syscall_exit_t *rec_ptr, pid_info_t *pidp, gbl_futex_info_t
 		fpidp->n_othererr++;
 		foppidp->n_othererr++;
 	}
+
+	/* if (uaddr1 == 0x7d0a6a033c54) { 	
+		printf ("ftuexp: 0x%llx uaddr=0x%llx tgid=%d cnt=%d n_eagain=%d op=0x%llx\n", futexp, uaddr1, tgid, futexp->cnt, futexp->n_eagain, op); } */
 }
 
 int
@@ -1378,7 +1382,8 @@ ki_futex(void *arg1, void *arg2, uint64 scalltime)
 
 	uaddr1 =	pidp->last_syscall_args[0];
 	op =		pidp->last_syscall_args[1];
-	if (op & FUTEX_PRIVATE_FLAG) tgid = pidp->tgid;
+	if (rec_ptr->tgid && (pidp->tgid == 0)) pidp->tgid = rec_ptr->tgid;
+	if (op & FUTEX_PRIVATE_FLAG) tgid = rec_ptr->tgid;
 
         /* Take care of the per-pid stats first */
         pid_futex_infop = GET_FUTEXP(&pidp->futex_hash,FUTEX_KEY(tgid, uaddr1));
@@ -1390,7 +1395,7 @@ ki_futex(void *arg1, void *arg2, uint64 scalltime)
 	if (global_stats) {
         	gbl_futex_infop = GET_GFUTEXP(&globals->futex_hash,FUTEX_KEY(tgid,uaddr1));
 		incr_gbl_futex_stats(rec_ptr, pidp, gbl_futex_infop, scalltime, pid_futex_infop->last_waker);
-	}
+	} 
 
         pid_futex_infop->last_waker = 0;
         pid_futex_infop->last_waker_uaddr1 = 0;

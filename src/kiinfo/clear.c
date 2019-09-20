@@ -442,8 +442,8 @@ clear_all_stats()
 	free_hash_table((lle_t ***)&globals->syscall_hash, SYSCALL_HASHSZ);
 	foreach_hash_entry((void **)globals->trc_hash, TRC_HASHSZ, clear_trc_info, NULL, 0, NULL);
 	free_hash_table((lle_t ***)&globals->trc_hash, TRC_HASHSZ);
-	foreach_hash_entry((void **)globals->futex_hash, FUTEX_HSIZE, clear_gbl_futex_info, NULL, 0, NULL);
-	free_hash_table((lle_t ***)&globals->futex_hash, FUTEX_HSIZE);
+	foreach_hash_entry((void **)globals->futex_hash, GFUTEX_HSIZE, clear_gbl_futex_info, NULL, 0, NULL);
+	free_hash_table((lle_t ***)&globals->futex_hash, GFUTEX_HSIZE);
 	free_hash_table((lle_t ***)&globals->dskblk_hash, DSKBLK_HSIZE);
 
 	foreach_hash_entry((void **)globals->ctx_hash, CTX_HSIZE, clear_ctx_info, NULL, 0, NULL);

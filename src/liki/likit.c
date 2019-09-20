@@ -18,7 +18,7 @@
  *
  * likit.c	LInux Kernel Instrumentation
  *
- *		v5.9
+ *		v5.10
  *		colin.honess@gmail.com
  *		mark.ray@hpe.com
  *		pokilfoyle@gmail.com
@@ -266,7 +266,9 @@ STATIC int 	tt_fork_hook_installed = FALSE;
 
 /* Function pointers for unexported functions */
 static struct socket *(*sockfd_lookup_light_fp)(int, int *, int *);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
+unsigned int (*stack_trace_save_regs_fp)(struct pt_regs*, unsigned long *, unsigned int, unsigned int);
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
 static struct stack_trace *(*save_stack_trace_regs_fp)(struct pt_regs*, struct stack_trace*);
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
 static struct stack_trace *(*save_stack_trace_regs_fp)(struct stack_trace*, struct pt_regs*);
@@ -393,7 +395,12 @@ struct tp_struct tp_table[];
 #define GETNAME(sock, addr, len, peer) (sock->ops->getname(sock, addr, len, peer))
 #endif
 
-
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,1,0)
+#define SYSCALL_GET_ARGUMENTS(a1, a2, a3, a4, a5) syscall_get_arguments(a1, a2, a5)
+#define synchronize_sched() synchronize_rcu()
+#else
+#define SYSCALL_GET_ARGUMENTS(a1, a2, a3, a4, a5) syscall_get_arguments(a1, a2, a3, a4, a5)
+#endif
 
 /* Here we have a few helper macros that save typing in the trace
  * collection code below.
@@ -455,7 +462,27 @@ struct tp_struct tp_table[];
 
 #ifdef CONFIG_X86_64
 
-#if (defined SLES15)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
+
+struct stack_trace {
+	unsigned int nr_entries, max_entries;
+	unsigned long *entries;
+	int skip;	/* input argument: How many entries to skip */
+};
+
+void save_stack_trace_regs(struct stack_trace *st, struct pt_regs *regs)
+{
+	st->nr_entries = stack_trace_save_regs_fp(regs, st->entries, st->max_entries, st->skip);
+}
+
+#define STACK_TRACE(DATA, REGS)						\
+	save_stack_trace_regs(DATA, REGS);
+
+#elif (defined SLES15)
+#define STACK_TRACE(DATA, REGS)						\
+	save_stack_trace_regs_fp(NULL, DATA);
+
+#elif (defined RHEL8)
 #define STACK_TRACE(DATA, REGS)						\
 	save_stack_trace_regs_fp(NULL, DATA);
 
@@ -545,7 +572,13 @@ liki_fetch_kern_caller_regs(struct pt_regs *regs)
 	/* Derived from perf_arch_fetch_caller_regs() */
 	memset(regs, 0, sizeof(struct pt_regs));
        	regs->ip = (unsigned long)__builtin_return_address(0);
-       	regs->bp = (unsigned long)caller_frame_pointer();
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
+	asm volatile(_ASM_MOV "%%" _ASM_BP ", %0\n"
+			: "=m" ((regs)->bp)
+			:: "memory" );
+#else
+	regs->bp = (unsigned long)caller_frame_pointer();
+#endif
        	regs->cs = __KERNEL_CS; 
        	regs->flags = 0;
 	asm volatile(_ASM_MOV "%%" _ASM_SP ", %0\n"
@@ -2257,7 +2290,7 @@ sched_switch_trace(RXUNUSED struct rq *rq, struct task_struct *p, struct task_st
 #endif
 	register unsigned long 		irqtmp, softirqtmp, stealtmp;
 	struct perf_callchain_entry	*callchain = NULL;
-	int				first_entry;
+	int				first_entry = 0;
 	TRACE_COMMON_DECLS;
 
 	if (unlikely(!p || !n)) {
@@ -2502,7 +2535,7 @@ sched_migrate_task_trace(RXUNUSED struct task_struct *p, unsigned int new_cpu)
 {
 	sched_migrate_task_t		*t;
 	unsigned int			sz, stksz;
-	unsigned int			first_entry;
+	unsigned int			first_entry = 0;
 	struct perf_callchain_entry	*callchain;
 	TRACE_COMMON_DECLS;
 
@@ -2945,7 +2978,7 @@ mm_page_alloc_trace(RXUNUSED struct page *page, unsigned int order, unsigned int
 {
 	mm_page_alloc_t	*t;
 	unsigned int			sz, stksz;
-	unsigned int			first_entry;
+	unsigned int			first_entry = 0;
 	struct perf_callchain_entry	*callchain;
 	TRACE_COMMON_DECLS;
 
@@ -3009,7 +3042,7 @@ mm_page_free_trace(RXUNUSED struct page *page, unsigned int order )
 {
 	mm_page_free_t	*t;
 	unsigned int			sz, stksz;
-	unsigned int			first_entry;
+	unsigned int			first_entry = 0;
 	struct perf_callchain_entry	*callchain;
 	TRACE_COMMON_DECLS;
 
@@ -3147,7 +3180,7 @@ page_cache_evict_trace(RXUNUSED struct page *page)
 	cache_evict_t			*t;
 	unsigned int			sz, stksz;
 	struct perf_callchain_entry	*callchain = NULL;
-	int				first_entry;
+	int				first_entry = 0;
 	TRACE_COMMON_DECLS;
 
 
@@ -3326,7 +3359,7 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
 		/* Need to read in the args so we can find the filename. Only need
 		 * to read in 3 args for read().
 		 */
-		syscall_get_arguments(current, regs, 0, 3, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, 3, args_tmp);
 		fnlen=strnlen_user((const char __user *)*args_tmp, 32767);
 
 		if (unlikely(fnlen==0))
@@ -3410,7 +3443,7 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
 		/* Need to read in the args so we can find the filename. Only need
 		 * to read in 4 args for openat().
 		 */
-		syscall_get_arguments(current, regs, 0, 4, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, 4, args_tmp);
 		fnlen=strnlen_user((const char __user *)args_tmp[1], 32767);
 
 		if (unlikely(fnlen==0))
@@ -3463,7 +3496,7 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
 		int		vldsz;
 
 
-		syscall_get_arguments(current, regs, 0, 3, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, 3, args_tmp);
 
 		/* We may have many more iocb structures than we have space
 		 * for.
@@ -3547,7 +3580,7 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
 		void	*p;
 
 
-		syscall_get_arguments(current, regs, 0, 5, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, 5, args_tmp);
 
 		/* I'm going to implement the vldata thing a little differently
 		 * here. Rather than give you the first so many bytes, you'll
@@ -3633,7 +3666,7 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
 		void		*p;
 
 
-		syscall_get_arguments(current, regs, 0, 6, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, 6, args_tmp);
 
 		fds_bytes = (args_tmp[0]/8) + (args_tmp[0] & 07ULL ? 1 : 0);
 		vldsz = sizeof(struct timespec) + (3 * fds_bytes);
@@ -3700,7 +3733,7 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
 		int	fdssz;
 
 
-		syscall_get_arguments(current, regs, 0, 3, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, 3, args_tmp);
 
 		/* Number of pollfd structures is given in args_tmp[1] */
 		fdssz = sizeof(struct pollfd) * args_tmp[1];
@@ -3744,7 +3777,7 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
 		void 	*p;
 
 
-		syscall_get_arguments(current, regs, 0, 4, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, 4, args_tmp);
 
 		fdssz = sizeof(struct pollfd) * args_tmp[1];
 		vldsz = fdssz + sizeof(struct timespec);
@@ -3805,7 +3838,7 @@ scentry_skip_vldata:
 		 * did on HP-UX, and the userspace tools filter out the bogus
 		 * ones. It would be better if I returned only the used args.
 		 */
-		syscall_get_arguments(current, regs, 0, N_SYSCALL_ARGS, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, N_SYSCALL_ARGS, args_tmp);
 
 		raw_local_irq_save(flags);
 
@@ -3892,7 +3925,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		void	*p;
 
 
-		syscall_get_arguments(current, regs, 0, 5, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, 5, args_tmp);
 
 		fds_bytes = (args_tmp[0]/8) + (args_tmp[0] & 07ULL ? 1 : 0);
 		vldsz = (3 * fds_bytes);
@@ -3961,7 +3994,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		void		*p;
 
 
-		syscall_get_arguments(current, regs, 0, 6, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, 6, args_tmp);
 
 		fds_bytes = (args_tmp[0]/8) + (args_tmp[0] & 07ULL ? 1 : 0);
 		vldsz = (3 * fds_bytes);
@@ -4022,7 +4055,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		int	fdssz;
 
 
-		syscall_get_arguments(current, regs, 0, 3, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, 3, args_tmp);
 
 		/* Number of pollfd structures is given in args_tmp[1] */
 		fdssz = sizeof(struct pollfd) * args_tmp[1];
@@ -4064,7 +4097,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		void 	*p;
 
 
-		syscall_get_arguments(current, regs, 0, 4, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, 4, args_tmp);
 
 		vldsz = sizeof(struct pollfd) * args_tmp[1];
 
@@ -4129,7 +4162,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		local.ss_family = 0;
 		sock = NULL;
 
-		syscall_get_arguments(current, regs, 0, 6, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, 6, args_tmp);
 
 		/* Get the LOCAL address from the socket. Get this first so
 		 * we can check whether it is AF_INET. If it isn't we don't
@@ -4221,7 +4254,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		struct socket		*sock;
  		struct kstat		stat_struct;
  		fileaddr_t		*fileaddr;
-		int			loclen, remlen;
+		int			loclen = 0, remlen = 0;
 		int			fd;
 		int			err;
 		int			fput_needed;
@@ -4234,7 +4267,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		/* Conveniently all these syscalls have the file descriptor as the
 		 * first argument
 		 */
-		syscall_get_arguments(current, regs, 0, 6, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, 6, args_tmp);
 		remote.ss_family = 0;
 		sock = NULL;
 
@@ -4329,7 +4362,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		/* Only care about socket addresses if we transferred data */
 		if (ret <= 0) goto scexit_skip_vldata;
 
-		syscall_get_arguments(current, regs, 0, 6, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, 6, args_tmp);
 
 
 		/* Figure out how much data was actually sent/received.
@@ -4424,7 +4457,7 @@ mmsgexit_skip_addresses:
 		struct sockaddr_storage	remote;
 		struct sockaddr_storage	local;
 		struct socket		*sock;
-		int			loclen, remlen;
+		int			loclen = 0, remlen = 0;
 		int			out_fd;
 		int			err;
 		int			fput_needed;
@@ -4434,7 +4467,7 @@ mmsgexit_skip_addresses:
 		if (ret <= 0) goto scexit_skip_vldata;
 
 		/* Get args for the out_fd */
-		syscall_get_arguments(current, regs, 0, 4, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, 4, args_tmp);
 		remote.ss_family = 0;
 		sock = NULL;
 
@@ -4492,7 +4525,7 @@ mmsgexit_skip_addresses:
 		if (ret <= 0) goto scexit_skip_vldata;
 
 
-		syscall_get_arguments(current, regs, 0, 4, args_tmp);
+		SYSCALL_GET_ARGUMENTS(current, regs, 0, 4, args_tmp);
 
 		/* We may have many more io_event structures than we have space
 		 * for.
@@ -4581,7 +4614,7 @@ hardclock_trace(struct pt_regs *regs)
 	hardclock_t			*t;
 	unsigned long			time;
 	unsigned int			sz, stksz;
-	int				first_entry;
+	int				first_entry = 0;
 	struct perf_callchain_entry	*callchain = NULL;
 	int				preempt_cnt;
 	TRACE_COMMON_DECLS;
@@ -4786,7 +4819,7 @@ hardclock_timer(struct timer_list *t)
 
 	hardclock_trace(regs);
 
-	if (!shutdown_pending) {
+	if (!shutdown_pending && !(tracing_state == TRACING_DISABLED)) {
 		mod_timer(&timer_lists[cpu], target_jiffy);
 	}
 }
@@ -5607,6 +5640,16 @@ STATIC struct jprobe jplo = {
 };
 #endif
 
+/* debugfs dummy open
+ * This is to work around a bug in RHEL 8 where the 
+ * access to debugfs files fails with EPERM if there is
+ * not an .open definition in the file ops.
+ */
+STATIC int
+liki_dummy_open(struct inode *ino, struct file *f)
+{
+        return 0;
+}
 
 /* debugfs interface to the ring buffer
  * 
@@ -6052,6 +6095,7 @@ liki_sync_write(struct file *file, const char __user *ubuf,
 
 
 STATIC const struct file_operations liki_sync_fops = {
+	.open = liki_dummy_open,
 	.write = liki_sync_write,
 	.owner = THIS_MODULE,
 };
@@ -6093,6 +6137,7 @@ liki_ignored_syscalls32_write(struct file *file, const char __user *ubuf,
 
 
 STATIC const struct file_operations liki_ignored_syscalls32_fops = {
+	.open = liki_dummy_open,
 	.write = liki_ignored_syscalls32_write,
 	.owner = THIS_MODULE,
 };
@@ -6134,6 +6179,7 @@ liki_ignored_syscalls64_write(struct file *file, const char __user *ubuf,
 
 
 STATIC const struct file_operations liki_ignored_syscalls64_fops = {
+	.open = liki_dummy_open,
 	.write = liki_ignored_syscalls64_write,
 	.owner = THIS_MODULE,
 };
@@ -6473,6 +6519,7 @@ liki_set_et(struct file *file, const char __user *ubuf,
 
 
 STATIC const struct file_operations liki_et_fops = {
+	.open = liki_dummy_open,
 	.read = liki_get_et,
 	.write = liki_set_et,
 	.owner = THIS_MODULE,
@@ -6648,6 +6695,7 @@ liki_modify_traced_resources(struct file *file, const char __user *ubuf,
 
 
 STATIC const struct file_operations liki_traced_resources_fops = {
+	.open = liki_dummy_open,
 	.write = liki_modify_traced_resources,
 	.owner = THIS_MODULE,
 };
@@ -6845,7 +6893,7 @@ liki_initialize(void)
 	int	i;
 #endif
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(4,19,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,3,0)
 	printk(KERN_INFO "LiKI: unsupported kernel version\n");
 	return(-EINVAL);
 #else
@@ -6876,7 +6924,13 @@ liki_initialize(void)
 		return(-EINVAL);
 	}
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
+	if ((stack_trace_save_regs_fp = (void *)kallsyms_lookup_name("stack_trace_save_regs")) == 0) {
+		printk(KERN_WARNING "LiKI: cannot find stack_trace_save_regs()\n");
+		printk(KERN_WARNING "LiKI: tracing initialization failed\n");
+		return(-EINVAL);
+	}
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
         if ((save_stack_trace_regs_fp = (void *)kallsyms_lookup_name("save_stack_trace_regs")) == 0) {
 		printk(KERN_WARNING "LiKI: cannot find save_stack_trace_regs()\n");
 		printk(KERN_WARNING "LiKI: tracing initialization failed\n");

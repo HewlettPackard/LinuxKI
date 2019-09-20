@@ -29,6 +29,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <linux/in.h>
 #include <linux/in6.h>
 #include <sys/mman.h>
+#include <sys/utsname.h>
 #include "ki_tool.h"
 #include "liki.h"
 #include "developers.h"
@@ -37,7 +38,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "html.h"
 #include "oracle.h"
 #include "hash.h"
-#include <sys/utsname.h>
 
 extern struct utsname  utsname;
 
@@ -874,7 +874,8 @@ add_oracle_sid(pid_info_t *pidp)
                         return ;
                 }
                 /* no match.  Need new SID entry */
-                strncpy (sid_table[next_sid].sid_name, sid_name, MIN(strlen(sid_name),20));
+		sprintf (sid_table[next_sid].sid_name, "%19s", sid_name);
+		sid_table[next_sid].sid_name[19] = 0;
                 next_sid++;
         }
 
@@ -939,7 +940,7 @@ parse_pself()
 			break;
 		}
 
-		sscanf (lineptr, "%s %lld %lld %lld %d %d %s %s %s %s", uid, &tgid, &ppid, &pid, &crit, &nlwp, stime, tty, time, cmd);
+		sscanf (lineptr, "%s %lld %lld %lld %d %d %s %s %s %78s", uid, &tgid, &ppid, &pid, &crit, &nlwp, stime, tty, time, cmd);
 
 		pidp = GET_PIDP(&globals->pid_hash, pid);
 		pidp->ppid = ppid;
@@ -960,7 +961,7 @@ parse_pself()
 			add_command(&pidp->hcmd, "mapreduce");
 		}
 	}
-	
+
 	FREE(lineptr);	
 }
 
@@ -1836,6 +1837,48 @@ void load_objfile_and_shlibs()
 	}
 }
 
+void
+print_docker_ps()
+{
+        FILE *f = NULL;
+	char fname[30];
+        char *rtnptr;
+	int ret;
+	uint64 id;
+
+	/* if (debug) fprintf (stderr, "print_docker_ps\n"); */
+	if (is_alive) {
+		ret = system("docker ps >/tmp/.docker_ps  2>/dev/null");
+		sprintf (fname, "/tmp/.docker_ps");
+	} else {
+		sprintf (fname, "docker_ps.%s", timestamp);
+	}
+
+        if ( (f = fopen(fname,"r")) == NULL) {
+                return;
+        }
+	
+	/* first line here should be the header */
+        rtnptr = fgets((char *)&input_str, 1024, f);
+	if (rtnptr) BOLD ("%s", rtnptr);
+	
+	while (rtnptr = fgets((char *)&input_str, 1024, f)) {
+                if (sscanf(rtnptr, "%12llx", &id)) {
+			DOCKER_URL_FIELD(id);
+			printf ("%s", &rtnptr[12]);
+		} else {
+			printf ("%s", rtnptr);
+		}
+
+                rtnptr = fgets((char *)&input_str, 1024, f);
+	}
+
+	if (!HTML) printf ("\n");
+	fclose(f);
+	if (is_alive) {
+		unlink(fname);	
+	}
+}
 
 void
 parse_docker_ps()
@@ -1864,7 +1907,7 @@ parse_docker_ps()
         }
 	
 	/* first line here should be the header */
-        rtnptr = fgets((char *)&input_str, 256, f);
+        rtnptr = fgets((char *)&input_str, 1024, f);
 	while (rtnptr != NULL) {
 		if (strncmp(input_str, "CONTAINER ID", 12 ) == 0) {
                         if ((strptr = strstr(input_str, "NAMES")) == NULL) {
@@ -1874,7 +1917,7 @@ parse_docker_ps()
 
                         offset = strptr - rtnptr;
 
-                        rtnptr = fgets((char *)&input_str, 256, f);
+                        rtnptr = fgets((char *)&input_str, 1024, f);
                         continue;
                 }
 
@@ -1883,13 +1926,42 @@ parse_docker_ps()
 			add_command(&dockerp->name, name);
                 }
 
-                rtnptr = fgets((char *)&input_str, 256, f);
+                rtnptr = fgets((char *)&input_str, 1024, f);
 	}
 
 	fclose(f);
 	if (is_alive) {
 		unlink(fname);	
 	}
+}
+
+uint64 get_container_id(char *str) {
+	int i;
+	uint64 id = 0ull;
+	docker_info_t *dockerp;
+	char id_str[16];
+	
+	if (globals->docker_hash == NULL) return 0ull;
+
+	for (i = 0; i < DOCKER_HASHSZ; i++) {
+		dockerp = globals->docker_hash[i];
+	
+		while (dockerp != NULL) {
+			sprintf (&id_str[0], "%012llx", dockerp->lle.key);
+			id_str[12] = 0;
+				
+			if (strstr(str, id_str)) { 
+				/* We have a match! */
+				id = dockerp->lle.key;
+				goto found;
+			}
+			
+			dockerp = (docker_info_t *)dockerp->lle.next;
+		}
+	}
+
+found:	
+	return id;
 }
 
 void
@@ -1934,10 +2006,18 @@ parse_proc_cgroup()
 			continue;
 		}
 
-		/* I have seen ../docker-containterID as well as ../docker/containerID,
-		 * so we need to accomodate for both.   */
-		if ((id == 0) && (pos = strstr(rtnptr, "/docker"))) {
-			if (sscanf(pos+8, "%12llx", &id)) {
+		/* so we need to see if the containerID is embedded in the string.  
+		 * The format may vary, however, so we need to be flexible with the search 
+		 *
+		 * we will only look at the long strings and assume they are 
+		 * related to a containerID 
+		 */
+
+		if ((id == 0) && (strlen(rtnptr) > 64)) {
+			/* for each container from docker ps output, 
+			 * let's see if there's a match.
+			 */
+			if (id = get_container_id(rtnptr)) {
 				pidp = GET_PIDP(&globals->pid_hash, pid);
 				dockerp = GET_DOCKERP(&globals->docker_hash, id);
 				pidp->dockerp = dockerp;
@@ -1945,7 +2025,7 @@ parse_proc_cgroup()
 				dkpidp = GET_DKPIDP(&dockerp->dkpid_hash, pid);
 				dkpidp->dockerp = dockerp;
 				dkpidp->pidp = pidp;
-				/* fprintf (stderr, "PID: %d   [%s]\n", pid, dockerp->name); */
+				/* fprintf (stderr, "PID: %d   id: %012llx name: %s\n", pid, id, dockerp->name); */
 			}
 		}
 

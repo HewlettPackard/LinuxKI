@@ -79,6 +79,7 @@ irq_entry_update_stats(common_t *rec_ptr, int irq, int irqtype)
 
 	if (irqtype==SOFTIRQ) {
 		cpuinfop->last_softirq_vec = irq;
+		cpuinfop->last_softirq_time = rec_ptr->hrtime; 
 	} else if (cpuinfop->last_softirq_vec) {
 		/* upate softirq time if we are entering a hardirq
 		 * while in a softirq context
@@ -133,6 +134,7 @@ irq_exit_update_stats(common_t *rec_ptr, int irq, int irqtype)
 		/* we are not in the expected state for an irq exit */
 		/* assume we missed a buffer and ignore this one */
 		cpuinfop->last_softirq_vec = 0;
+		cpuinfop->last_softirq_time = 0;
 		return 0;		
 	}
 
@@ -144,7 +146,6 @@ irq_exit_update_stats(common_t *rec_ptr, int irq, int irqtype)
 		statp->C_hardirq_cnt++;
 	} else {
 		statp->C_softirq_cnt++;
-		cpuinfop->last_softirq_vec = 0;
 	}
 
 	if (global_stats && perirq_stats) {
@@ -312,12 +313,19 @@ softirq_exit_func(void *a, void *v)
 	softirq_exit_t tt_rec_ptr;
 	softirq_exit_t *rec_ptr;
 	uint64 delta;
+	cpu_info_t *cpuinfop;
 
 	rec_ptr = conv_softirq_exit(a, &tt_rec_ptr);
+	cpuinfop = GET_CPUP(&globals->cpu_hash, rec_ptr->cpu);
 
 	if (pertrc_stats) incr_trc_stats(rec_ptr, NULL);
 	delta = irq_exit_update_stats((common_t *)rec_ptr, rec_ptr->vec, SOFTIRQ);
-	if (kitrace_flag) print_softirq_exit_rec(rec_ptr, delta);
+	if (kitrace_flag) {
+		print_softirq_exit_rec(rec_ptr, cpuinfop->last_softirq_time ? rec_ptr->hrtime - cpuinfop->last_softirq_time : delta);
+	}
+
+	cpuinfop->last_softirq_vec = 0;
+	cpuinfop->last_softirq_time = 0;
 
 	return 0;
 }

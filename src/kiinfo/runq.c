@@ -1272,7 +1272,7 @@ print_wakeup_pids(void *arg1, void *arg2)
                 pidp->cmd);
 	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
         if (pidp->thread_cmd) printf ("  (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
         if (cluster_flag) { SPACE; SERVER_URL_FIELD_BRACKETS(globals) }
         printf ("\n");
 
@@ -1333,7 +1333,7 @@ sched_print_setrq_pids(void *arg1, void *arg2)
         	if (pidp->cmd) pid_printf ("  %s", pidp->cmd);
 		if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
 		if (pidp->thread_cmd) pid_printf ("  (%s)", pidp->thread_cmd);
-		if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+		if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 	        coopinfop->waker_is_ICS = 0;
         }
         pid_printf ("\n");
@@ -2100,7 +2100,7 @@ pid_json_print_summary(pid_info_t *pidp, sched_stats_t *statp)
                 else sprintf (json_temp, "  (%s)", pidp->thread_cmd);
                 strcat(json_detail,json_temp);
         }
-	if (pidp->dockerp) sprintf (json_temp, HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) sprintf (json_temp, HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
         sprintf (json_temp, "\\n");
         strcat(json_detail,json_temp);
 
@@ -2319,6 +2319,7 @@ sched_report(void *arg1, void *v)
 {
 	pid_info_t *pidp = arg1;
         sched_info_t *schedp = pidp->schedp;
+	cpu_info_t *cpuinfop;
         sched_stats_t *statp;
 	uint64 total_time;
 	int print_irq_stats = 0;
@@ -2329,14 +2330,16 @@ sched_report(void *arg1, void *v)
         coop_info_t coopinfo;
         if (schedp == NULL) {
 		csv_printf(pid_csvfile, ",IDLE,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0,0,0,0,0,0,0,0");
-                if (pid_jsonfile)
-                  fclose(pid_jsonfile);
-		  pid_jsonfile = NULL;
+                if (pid_jsonfile) { 
+			fclose(pid_jsonfile);
+			pid_jsonfile = NULL;
+		}
 		return 0;
 	}
         bzero(&coopinfo,sizeof(coop_info_t));
 	coopinfo.rep_pidp =  pidp;
-        statp = &schedp->sched_stats;
+
+	cpuinfop = FIND_CPUP(globals->cpu_hash, schedp->cpu);
 
 	if (debug) printf ("sched_report: 0x%llx\n", schedp);
 
@@ -2401,7 +2404,7 @@ sched_report(void *arg1, void *v)
 		pid_printf ("%ssleep   : %9.2f%%\n", tab, (statp->T_sleep_time*100.0) / total_time );
 	}
 
-	csv_printf(pid_csvfile, ",%s,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%d,%d,%d,%d,%7.6f,%d,%d,%d,%d,%d",
+	csv_printf(pid_csvfile, ",%s,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%d,%d,%d,%d,%7.6f,%d,%d,%d,%d,%d,%d",
 		sched_policy_name[schedp->policy],
                 SECS(statp->T_run_time),
                 SECS(statp->T_sys_time),
@@ -2416,6 +2419,7 @@ sched_report(void *arg1, void *v)
                 statp->C_wakeup_cnt,
 		SECS((statp->T_run_time * 1.0) / statp->C_switch_cnt),
 		schedp->cpu,
+		cpuinfop->ldom,
                 schedp->cpu_migrations,
 		schedp->ldom_migrations,
 		pidp->vss,
@@ -2685,21 +2689,29 @@ print_pid_runtime_summary(void *arg1, void *arg2)
 	if ((schedp = pidp->schedp) == NULL) return 0;
 	statp = &schedp->sched_stats;
 
-	PID_URL_FIELD8(pidp->PID);
-        printf (" %12.6f %12.6f %12.6f %12.6f %12.6f", 
+	if (dockfile) {
+		dock_printf ("%-8d", pidp->PID);
+	} else {
+		PID_URL_FIELD8(pidp->PID);
+	}
+
+        dock_printf (" %12.6f %12.6f %12.6f %12.6f %12.6f", 
                 SECS(statp->T_run_time),
                 SECS(statp->T_sys_time),
                 SECS(statp->T_user_time),
                 SECS(statp->T_runq_time),
                 SECS(statp->T_sleep_time));
 
-	if (pidp->cmd) printf ("  %s", (char *)pidp->cmd);
-	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
-	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
-        if (cluster_flag) { SPACE; SERVER_URL_FIELD_BRACKETS(globals) }
+	if (pidp->cmd) dock_printf ("  %s", (char *)pidp->cmd);
+	if (pidp->hcmd) dock_printf ("  {%s}", pidp->hcmd);
+	if (pidp->thread_cmd) dock_printf (" (%s)", pidp->thread_cmd);
+	if (pidp->dockerp && (dockfile == NULL)) {
+		printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
+	}
 
-        printf ("\n");
+        if (cluster_flag && dockfile == NULL) { SPACE; SERVER_URL_FIELD_BRACKETS(globals) }
+
+        dock_printf ("\n");
 
         return 0;
 
@@ -2729,7 +2741,7 @@ print_pid_stealtime_summary(void *arg1, void *arg2)
 	if (pidp->cmd) printf ("  %s", (char *)pidp->cmd);
 	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
         if (cluster_flag) { SPACE; SERVER_URL_FIELD_BRACKETS(globals) }
 
         printf ("\n");

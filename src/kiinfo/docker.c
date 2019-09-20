@@ -16,6 +16,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <unistd.h>
 #include <sys/time.h>
 #include <sys/errno.h>
 #include <sys/types.h>
@@ -44,7 +45,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "sort.h"
 #include "conv.h"
 #include "json.h"
-#include "futex.h"
+#include "html.h"
 
 int docker_print_report(void *);
 
@@ -150,8 +151,8 @@ docker_init_func(void *v)
 	if (is_alive) parse_cpumaps();
 	parse_kallsyms();
 	parse_devices();
-	parse_docker_ps();
         parse_ll_R();
+	parse_docker_ps();
 
 	if (objfile) {
 		load_elf(objfile, &objfile_preg);
@@ -171,12 +172,12 @@ docker_init_func(void *v)
         parse_mpath();
 	parse_jstack();
 
-	if (pidtree) {
-                ret = mkdir("PIDS", 0777);
+	if (docktree) {
+                ret = mkdir("CIDS", 0777);
                 if (ret && (errno != EEXIST)) {
-	                fprintf (stderr, "Unable to make PIDS directory, errno %d\n", errno);
+	                fprintf (stderr, "Unable to make CIDS directory, errno %d\n", errno);
                         fprintf (stderr, "  Continuing... it may alreaady exist \n");
-			CLEAR(PIDTREE_FLAG);
+			CLEAR(DOCKTREE_FLAG);
                 }
         }
 }
@@ -263,7 +264,7 @@ find_docker_by_name(char *name)
 		dockerp = globals->docker_hash[i];
 		while (dockerp) {
 			if (strcmp(name, dockerp->name) == 0) {
-				return dockerp->lle.key;
+				return dockerp->ID;
 			}
 
 			dockerp = (docker_info_t *)dockerp->lle.next;
@@ -274,12 +275,42 @@ find_docker_by_name(char *name)
 }
 
 int
+print_docker_summary(void *arg1, void *arg2)
+{
+	docker_info_t *dockerp = (docker_info_t *)arg1;
+	sched_stats_t *statp = &dockerp->sched_stats;
+	if (dockfile) {
+		dock_printf ("%012llx", dockerp->ID);
+	} else {
+		DOCKER_URL_FIELD(dockerp->ID);
+	}
+
+	dock_printf (" %12.6f %12.6f %12.6f %12.6f %12.6f",
+		SECS(statp->T_run_time),
+		SECS(statp->T_sys_time),
+		SECS(statp->T_user_time),
+		SECS(statp->T_irq_time),
+		SECS(statp->T_runq_time));
+
+	dock_printf (" %8.1f %8.1f",
+		dockerp->iostats[IOTOT].compl_cnt / secs,
+		((dockerp->iostats[IOTOT].sect_xfrd / 2.0)/1024.0) / secs);
+	dock_printf (" %8.1f %8.1f",
+                (dockerp->netstats.rd_cnt+dockerp->netstats.wr_cnt)/secs,
+                ((dockerp->netstats.rd_bytes+dockerp->netstats.wr_bytes)/(1024*1024))/secs);
+
+
+	dock_printf ("\n");
+	return 0;
+}
+
+int
 print_docker_totals(void *arg1, void *arg2)
 {
 	docker_info_t *dockerp = (docker_info_t *)arg1;
 	sched_stats_t *statp = &dockerp->sched_stats;
-	printf ("%-20s %12.6f %12.6f %12.6f %12.6f",
-		dockerp->name,
+	DOCKER_URL_FIELD(dockerp->ID);
+	printf (" %12.6f %12.6f %12.6f %12.6f",
 		SECS(statp->T_run_time),
 		SECS(statp->T_sys_time),
 		SECS(statp->T_user_time),
@@ -301,7 +332,8 @@ print_docker_iototals(void *arg1, void *arg2)
 {
         docker_info_t *dockerp = (docker_info_t *)arg1;
 
-	printf ("%-16s", dockerp->name);
+	DOCKER_URL_FIELD(dockerp->ID);
+	printf ("  ");
 	print_iostats_totals(globals, &dockerp->iostats[0], NULL);
 	printf ("\n");
 }
@@ -333,50 +365,71 @@ int
 print_docker_detail(void *arg1, void *arg2)
 {
 	docker_info_t *dockerp = (docker_info_t *)arg1;
-	printf ("\n---------------------------------------------------\n");
-	printf ("Container: %s\n", dockerp->name);
+	char dock_fname[20];
 
-	BOLD ("\nTop Tasks sorted by RunTime\n");
-        BOLD ("PID           RunTime      SysTime     UserTime     RunqTime    SleepTime  Command\n");
+        if (docktree) {
+                sprintf (dock_fname, "CIDS/%012llx", dockerp->ID);
+                if ((dockfile = fopen(dock_fname, "w")) == NULL) {
+                        fprintf (stderr, "Unable to open Docker file %s, errno %d\n", dock_fname, errno);
+                        fprintf (stderr, "  Continuing without CIDS output\n");
+			CLEAR(DOCKTREE_FLAG);
+                }
+        } else {
+                dockfile = NULL;
+        }
+
+	dock_printf ("\n---------------------------------------------------\n");
+	dock_printf ("Container ID: %012llx  name: %s\n", dockerp->ID, dockerp->name);
+
+	dock_printf ("\nContainer            busy          sys         user          irq         runq");
+        dock_printf ("     IOPS     MB/s");
+        dock_printf("   NetOPS  NetMB/s\n");
+
+	print_docker_summary(dockerp, NULL);
+
+	dock_printf ("\nTop Tasks sorted by RunTime\n");
+        dock_printf ("PID           RunTime      SysTime     UserTime     RunqTime    SleepTime  Command\n");
         foreach_hash_entry((void **)dockerp->dkpid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_dkpid_runtime_summary,
                            (int (*)()) dkpid_sort_by_runtime,
                            npid, NULL);
 	
-	BOLD ("\nTop Tasks sorted by SysTime\n");
-        BOLD ("PID           RunTime      SysTime     UserTime     RunqTime    SleepTime  Command\n");
+	dock_printf ("\nTop Tasks sorted by SysTime\n");
+        dock_printf ("PID           RunTime      SysTime     UserTime     RunqTime    SleepTime  Command\n");
         foreach_hash_entry((void **)dockerp->dkpid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_dkpid_runtime_summary,
                            (int (*)()) dkpid_sort_by_systime,
                            npid, NULL);
 
-	BOLD ("\nTop Tasks sorted by RunQTime\n");
-        BOLD ("PID           RunTime      SysTime     UserTime     RunqTime    SleepTime  Command\n");
+	dock_printf ("\nTop Tasks sorted by RunQTime\n");
+        dock_printf ("PID           RunTime      SysTime     UserTime     RunqTime    SleepTime  Command\n");
         foreach_hash_entry((void **)dockerp->dkpid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_dkpid_runtime_summary,
                            (int (*)()) dkpid_sort_by_runqtime,
                            npid, NULL);
 
-	BOLD ("\nTop Tasks sorted by Memory Usage\n");
-	BOLD("     vss      rss      PID Command\n");
+	dock_printf ("\nTop Tasks sorted by Memory Usage\n");
+	dock_printf("     vss      rss      PID Command\n");
         foreach_hash_entry((void **)dockerp->dkpid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_dkpid_rss,
                            (int (*)()) dkpid_sort_by_rss,
                            npid, NULL);
 
-	BOLD ("\nTop Tasks sorted by physical IO\n");
-	BOLD ("     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process\n");
+	dock_printf ("\nTop Tasks sorted by physical IO\n");
+	dock_printf ("     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process\n");
         foreach_hash_entry((void **)dockerp->dkpid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_dkpid_iosum,
                            (int (*)()) dkpid_sort_by_iocnt,
                            npid, NULL);
+
+	if (dockfile) fclose(dockfile);
 	return 0;
 }
 
 int
 docker_print_cpu_report()
 {
-	BOLD ("Container                   busy          sys         user         runq");
+	BOLD ("Container            busy          sys         user         runq");
 	if (globals->schedp->sched_stats.T_irq_time)
 		BOLD ("  hardirq_sys hardirq_user  softirq_sys softirq_user");
 	printf ("\n");
@@ -386,8 +439,8 @@ docker_print_cpu_report()
 int
 docker_print_io_report()
 {
-	BOLD("                --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-        BOLD("Container          IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+	BOLD("              --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
+        BOLD("Container        IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
 	foreach_hash_entry((void **)globals->docker_hash, DOCKER_HASHSZ, print_docker_iototals, docker_sort_by_iocnt, 0, NULL);
 }
 
@@ -403,6 +456,9 @@ docker_print_report(void *v)
 		dockerp = GET_DOCKERP(&globals->docker_hash, 0);
 		dockerp->name = "system";
 	}
+
+	BOLD ("Docker Containers\n\n");
+	print_docker_ps();
 
 	BOLD ("CPU Statistics\n\n");
 	docker_print_cpu_report();

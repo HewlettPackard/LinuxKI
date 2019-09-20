@@ -325,6 +325,7 @@ void kp_toc()
 	    UL;	
               LI; ARF(_LNK_8_1, _MSG_8_1); NLt;
               LI; ARF(_LNK_8_2, _MSG_8_2); NLt;
+              LI; ARF(_LNK_8_3, _MSG_8_3); NLt;
 	    _UL;
 	  }
 
@@ -753,7 +754,7 @@ kp_pid_freq(void *arg1, void *arg2)
                 pidp->cmd);
 	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 	printf ("\n");
 
         if ((lineno & 0x1) == 0) _SPAN;
@@ -808,7 +809,7 @@ kp_pid_traces(void *arg1, void *arg2)
         printf("%s ", pidp->cmd);
 	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
         _CAPTION;
 
         TEXT("\n");
@@ -1364,7 +1365,7 @@ kp_print_sleep_pids(void *arg1, void *arg2)
         printf("%s", pidp->cmd);
 	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 	if (cluster_flag) {DSPACE; SERVER_URL_FIELD_SECTION_BRACKETS(globals, _LNK_2_1_3); }
         _CAPTION;
 
@@ -1502,7 +1503,7 @@ kp_futex_summary_by_cnt()                              /* Section 2.3.1 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-        foreach_hash_entry((void **)globals->futex_hash,FUTEX_HSIZE,
+        foreach_hash_entry((void **)globals->futex_hash,GFUTEX_HSIZE,
                         (int (*)(void *, void *))hash_count_entries,
                         NULL, 0, &globals->futex_cnt);
 	BOLD("%sTotal Futex count = %d (Top %d listed)\n", tab, globals->futex_cnt, MIN(globals->futex_cnt, nfutex));
@@ -2587,7 +2588,7 @@ kp_pid_memory(void *arg1, void *arg2)
         printf (" %s", pidp->cmd);
 	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 	printf ("\n");
 
         return 0;
@@ -2942,7 +2943,7 @@ kp_dockers()			/* Section 8.0 */
 }
 
 void
-kp_docker_cpu()				/* Section 8.1 */
+kp_docker_ps()				/* Section 8.1 */
 {
         GREEN_TABLE;
         TEXT("\n");
@@ -2961,19 +2962,43 @@ kp_docker_cpu()				/* Section 8.1 */
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
 
-	docker_print_cpu_report();
-
+	print_docker_ps();
 }
+	
 
 void
-kp_docker_io()				/* Section 8.2 */
+kp_docker_cpu()				/* Section 8.1 */
 {
         GREEN_TABLE;
         TEXT("\n");
         ANM(_LNK_8_2);
         HEAD3(_MSG_8_2);
         FONT_SIZE(-1);
-        ARFx(_LNK_8_1,"[Prev Subsection]"); 
+        ARFx(_LNK_8_2,"[Next Subsection]"); 
+	if (next_sid > 1)  {
+        	ARFx(_LNK_7_0,"---[Prev Section]"); 
+	} else if (IS_LIKI_V2_PLUS)  { 
+        	ARFx(_LNK_6_0,"---[Prev Section]");
+	} else { 
+        	ARFx(_LNK_5_0,"---[Prev Section]");
+	}
+        ARFx(_LNK_9_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+
+	docker_print_cpu_report();
+
+}
+
+void
+kp_docker_io()				/* Section 8.3 */
+{
+        GREEN_TABLE;
+        TEXT("\n");
+        ANM(_LNK_8_3);
+        HEAD3(_MSG_8_3);
+        FONT_SIZE(-1);
+        ARFx(_LNK_8_2,"[Prev Subsection]"); 
 	if (globals->docker_hash) {
         	ARFx(_LNK_8_0,"---[Prev Section]"); 
 	} else if (next_sid > 1)  {

@@ -13,13 +13,13 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #***************************************************************************
 # runki script  -- captures LinuxKI trace data
-# @(#) runki for Linux $Date: 2017/08/24 $Revision: 5.9
+# @(#) runki for Linux $Date: 2017/08/24 $Revision: 5.10
 
 TOOLDIR=/opt/linuxki
 
 # need to make sure /usr/sbin and /sbin are in the path 
 PATH=$TOOLDIR:$PATH:/usr/sbin:/sbin
-version="runki for Linux version 5.9"
+version="runki for Linux version 5.10"
 tag=`date +%m%d_%H%M`
 HOSTNAME=`hostname -s`
 KIDIR=`pwd`

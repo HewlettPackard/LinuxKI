@@ -444,8 +444,9 @@ kparse_print_report(void *v)
 	
 	if (globals->docker_hash) {
 		kp_dockers();				/* Section 8.0 */
-		kp_docker_cpu();			/* Section 8.1 */
-		kp_docker_io();				/* Section 8.2 */
+		kp_docker_ps();				/* Section 8.1 */
+		kp_docker_cpu();			/* Section 8.2 */
+		kp_docker_io();				/* Section 8.3 */
 	}
 
 	if (HTML) {

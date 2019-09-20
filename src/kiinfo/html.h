@@ -121,8 +121,10 @@ extern int font_color;
 
 #define PID_URL_FIELD8(pid) 										\
 	char pidlink[80];										\
-	if (kptree && HTML && vis) { 									\
-		sprintf (pidlink, "%d</A>", (int)pid); 						\
+	if (dockfile) {											\
+		dock_printf("%-8d", (int)pid); 								\
+	} else if (kptree && HTML && vis) { 								\
+		sprintf (pidlink, "%d</A>", (int)pid); 							\
 		printf("<A Href=\"VIS/%d/pid_detail.html\" TARGET=\"kipid vis file\">%-12s", (int)pid, (char *)pidlink);	\
 	} else if (cltree && HTML && vis) {								\
 		sprintf (pidlink, "%d</A>", (int)pid);							\
@@ -173,13 +175,21 @@ extern int font_color;
                 printf("%8d", (int)pid);                                                                \
         }
 
-#define SERVER_URL_FIELD(serverp)										\
-	if (cltree && HTML) {											\
-		char serverlink[128];											\
-		sprintf (serverlink, "%s</A>", serverp->hostname);						\
+#define DOCKER_URL_FIELD(id)										\
+	if (kptree && HTML) {										\
+                printf("<A Href=\"CIDS/%012llx\" TARGET=\"docker file\">%012llx</A>", id, id);		\
+	} else {											\
+		printf("%012llx", id);									\
+	}
+
+
+#define SERVER_URL_FIELD(serverp)									\
+	if (cltree && HTML) {										\
+		char serverlink[128];									\
+		sprintf (serverlink, "%s</A>", serverp->hostname);					\
 		printf("<A Href=\"%s/kp.%s.html\" TARGET=\"kparse file\">%s", serverp->subdir, timestamp, serverlink);	\
-	} else {												\
-		printf("%s", serverp->hostname);								\
+	} else {											\
+		printf("%s", serverp->hostname);							\
 	}
 
 #define SERVER_URL_FIELD_BRACKETS(serverp)									\

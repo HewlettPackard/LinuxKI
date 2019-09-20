@@ -15,7 +15,7 @@
 #		-v              Skip vxfs, misc disc data collection
 #		-d <secs>       Duration of KI data collection. Defaults to 20 secs if not specified.
 #		-t <secs>       Maximum time for data collection tools to run. Defaults to 120 secs if not specified.
-#               -p              Use liKI DLKM instead of kiinfo/ftrace to dump trace data.
+#               -p              Skip Per-PID data (lsof, stacks, numa_maps, maps)
 #               -e <event>      Identify events to dump. Possible values are: default | all | <event>
 #               -s <subsys>     Identify subsys to dump. For example: irq, scsi, block, etc.
 #               -c "comment"    echo comment into comment.$tag file

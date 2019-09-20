@@ -1376,7 +1376,7 @@ clpid_print_miostats(void *arg1, void *arg2)
 	printf (" %s", pidp->cmd);
 	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printf ("  (%s)", pidp->thread_cmd);	
-	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 	DSPACE;
 	SERVER_URL_FIELD_SECTION_BRACKETS(globals, _LNK_4_2_1);
 	printf ("\n");
@@ -1417,7 +1417,7 @@ clpid_print_iostats(void *arg1, void *arg2)
 	printf (" %s", pidp->cmd);
 	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printf ("  (%s)", pidp->thread_cmd);	
-	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 	DSPACE;
 	SERVER_URL_FIELD_SECTION_BRACKETS(globals, _LNK_4_2_1);
 	printf ("\n");

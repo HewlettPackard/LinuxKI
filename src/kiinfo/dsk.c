@@ -77,7 +77,7 @@ devstr_to_dev(char *str)
 			}
 		}
 
-		if (dev == 0ull) {
+		if ((dev == 0ull) && (globals->mdevhash))  {
 			/* next, search the multipath table */
 			for (i=0; i < DEV_HSIZE; i++) {
 				devinfop = globals->mdevhash[i]; 
@@ -442,7 +442,7 @@ print_pid_iosum(void *arg1, void *arg2)
 	wstatp = &pidp->iostats[IO_WRITE];
 
 	SPAN_GREY;
-	printf ("%8d %8.0f %8.0f %9.1f %9.3f ",
+	dock_printf ("%8d %8.0f %8.0f %9.1f %9.3f ",
 		tstatp->compl_cnt,
 		rstatp->compl_cnt / secs,
 		wstatp->compl_cnt / secs,
@@ -450,13 +450,21 @@ print_pid_iosum(void *arg1, void *arg2)
 		MSECS(tstatp->cum_ioserv / tstatp->compl_cnt),
 		MSECS(tstatp->cum_ioserv / tstatp->compl_cnt));
 
-	PID_URL_FIELD8_R(pidp->PID);
-	if (pidp->cmd) printf ("  %s", pidp->cmd);
-	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
-	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (dockfile) {
+		dock_printf ("%8d", pidp->PID);
+	} else {
+		PID_URL_FIELD8_R(pidp->PID);
+	}
 
-	printf ("\n");
+	dockerp = pidp->dockerp;
+	if (pidp->cmd) dock_printf ("  %s", pidp->cmd);
+	if (pidp->hcmd) dock_printf ("  {%s}", pidp->hcmd);
+	if (pidp->thread_cmd) dock_printf (" (%s)", pidp->thread_cmd);
+	if (dockerp && (dockfile == NULL)) {
+		printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", dockerp->ID);
+	}
+
+	dock_printf ("\n");
 			
 	_SPAN;	
 
@@ -488,10 +496,11 @@ print_pid_miosum(void *arg1, void *arg2)
 		MSECS(tstatp->cum_ioserv / tstatp->compl_cnt));
 
 	PID_URL_FIELD8_R(pidp->PID);
+	dockerp = pidp->dockerp;
 	if (pidp->cmd) printf ("  %s", pidp->cmd);
 	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", dockerp->ID);
 
 	printf ("\n");
 			
@@ -708,7 +717,7 @@ dsk_print_wwn_iostats(void *arg1, void *arg2)
 		sprintf (wwnpath_str, "unkn");
 	}
 
-	printf ("%s%-188s\n", tab, wwnpath_str);
+	printf ("%s%-18s\n", tab, wwnpath_str);
 
 	print_dev_iostats(statp, wwnpath_str, NULL, NULL, NULL, 0);
 

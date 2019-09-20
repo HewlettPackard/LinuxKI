@@ -101,6 +101,7 @@ extern void  kp_socket();
 extern void  kp_dockers();
 extern void  kp_docker_cpu();
 extern void  kp_docker_io();
+extern void  kp_docker_ps();
 extern void  kp_file_links();
 extern void  kp_txt_links();
 extern void  kp_csv_links();

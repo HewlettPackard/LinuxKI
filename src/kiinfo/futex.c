@@ -142,7 +142,7 @@ futex_print_pids_detail(void *arg1, void *arg2)
 	if (pidp->cmd) printf (" %s", pidp->cmd);
 	if (pidp->hcmd) printf (" {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 
 #if 0
 	/* This is being removed for now */	
@@ -214,7 +214,7 @@ futex_print_ops_detail(void *arg1, void *arg2)
 		if (wpidp->cmd) pid_printf (" %s", wpidp->cmd);
 		if (wpidp->hcmd) printf (" {%s}", wpidp->hcmd);
 		if (wpidp->thread_cmd) pid_printf (" (%s)", wpidp->thread_cmd);
-		if (wpidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(wpidp->dockerp))->name);
+		if (wpidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(wpidp->dockerp))->ID);
 		pid_printf ("\n");
 	} else if (fopsp->max_waker == -1) {
 		pid_printf ("ICS\n");
@@ -390,7 +390,7 @@ futex_clear_stats(void *arg1, void *arg2)
 void
 futex_print_report_by_time(int futex_cnt)
 {
-        foreach_hash_entry((void **)globals->futex_hash,FUTEX_HSIZE,
+        foreach_hash_entry((void **)globals->futex_hash,GFUTEX_HSIZE,
                         (int (*)(void *, void *))futex_print_detail,
                         futex_gblsort_by_time, nfutex, NULL);
 
@@ -399,7 +399,7 @@ futex_print_report_by_time(int futex_cnt)
 void
 futex_print_report_by_cnt(int futex_cnt)
 {
-        foreach_hash_entry((void **)globals->futex_hash,FUTEX_HSIZE,
+        foreach_hash_entry((void **)globals->futex_hash,GFUTEX_HSIZE,
                         (int (*)(void *, void *))futex_print_detail,
                         futex_gblsort_by_cnt, nfutex, NULL);
 }
@@ -411,7 +411,7 @@ futex_print_report()
 		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, get_command, NULL, 0, NULL);
 	}
 
-	foreach_hash_entry((void **)globals->futex_hash, FUTEX_HSIZE,
+	foreach_hash_entry((void **)globals->futex_hash, GFUTEX_HSIZE,
 			(int (*)(void *, void *))hash_count_entries,
 			NULL, 0, &globals->futex_cnt);
 
@@ -427,7 +427,7 @@ futex_print_report()
 	}
 
 	if (is_alive) {
-		foreach_hash_entry((void **)globals->futex_hash,FUTEX_HSIZE,
+		foreach_hash_entry((void **)globals->futex_hash,GFUTEX_HSIZE,
         		futex_clear_stats,
         		NULL, 0, NULL);
 	}

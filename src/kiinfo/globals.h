@@ -152,6 +152,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define HT_DBDI_HISTOGRAM	0x800000000000ull
 #define COOP_DETAIL_ENABLED	0x1000000000000ull
 #define MSR_FLAG		0x2000000000000ull
+#define DOCKTREE_FLAG		0x4000000000000ull
 
 #define SET_STAT(flag) (kiinfo_stats |= flag)
 #define CLEAR_STAT(flag) (kiinfo_stats &= ~flag)
@@ -192,6 +193,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define vis			(ISSET(VIS_FLAG))
 #define kptree			(ISSET(KPTREE_FLAG))
 #define pidtree			(ISSET(PIDTREE_FLAG))
+#define docktree		(ISSET(DOCKTREE_FLAG))
 #define itime_flag		(ISSET(ITIME_FLAG))
 #define sysenter_flag		(ISSET(SYSENTER_FLAG))
 #define sysargs_flag		(ISSET(SYSARGS_FLAG))
@@ -480,7 +482,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #define GET_WTREEP(hashp, key) (wait_tree_nodes_t *)find_add_hash_entry((lle_t ***)hashp, WTREE_HSIZE, key, WTREE_HASH(key), sizeof(wait_tree_nodes_t))
 #define GET_FUTEXP(hashp, key)   (pid_futex_info_t *)find_add_hash_entry((lle_t ***)hashp, FUTEX_HSIZE, key, FUTEX_HASH(key), sizeof(pid_futex_info_t))
-#define GET_GFUTEXP(hashp, key)   (gbl_futex_info_t *)find_add_hash_entry((lle_t ***)hashp, FUTEX_HSIZE, key, FUTEX_HASH(key), sizeof(gbl_futex_info_t))
+#define GET_GFUTEXP(hashp, key)   (gbl_futex_info_t *)find_add_hash_entry((lle_t ***)hashp, GFUTEX_HSIZE, key, GFUTEX_HASH(key), sizeof(gbl_futex_info_t))
 #define GET_FOPSP(hashp, key)  (futex_op_t *)find_add_hash_entry((lle_t ***)hashp, FUTEXOP_HSIZE, key, FUTEXOP_HASH(key), sizeof(futex_op_t))
 #define GET_RQFUTEXP(hashp, key)  (futex_reque_t *)find_add_hash_entry((lle_t ***)hashp, FUTEX_HSIZE, key, FUTEX_HASH(key), sizeof(futex_reque_t))
 #define GET_FUDUPP(hashp, key)  (futex_dup_t *)find_add_hash_entry((lle_t ***)hashp, FUTEX_HSIZE, key, FUTEX_HASH(key), sizeof(futex_dup_t))
@@ -515,7 +517,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define FIND_RQINFOP(hash, key)  (rq_info_t *)find_entry((lle_t **)hash, key, key)
 #define FIND_ELFMAPP(hash, key) (elfmap_info_t *)find_entry((lle_t **)hash, key, ELFMAP_HASH(key))
 #define FIND_CLIPP(hashp, ip) (clip_info_t *)find_entry((lle_t **)hashp, ip, IP_HASH(ip))
-#define FIND_GFUTEXP(hashp, key)  (gbl_futex_info_t *)find_entry((lle_t **)hashp, key, FUTEX_HASH(key))
+#define FIND_GFUTEXP(hashp, key)  (gbl_futex_info_t *)find_entry((lle_t **)hashp, key, GFUTEX_HASH(key))
 
 #define FIND_AND_REMOVE_IOREQP(hashp, key)  (io_req_t *)find_remove_hash_entry((lle_t ***)hashp, IOQ_HSIZE, key, IOQ_HASH(key), sizeof(io_req_t))
 #define FIND_AND_REMOVE_IOCB(hashp, key)  (iocb_info_t *)find_remove_hash_entry((lle_t ***)hashp, IOCB_HSIZE, key, IOCB_HASH(key), sizeof(iocb_info_t))
@@ -532,6 +534,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define SYSCALLNO lle.key
 #define TID lle.key
 #define WAIT_PC lle.key
+#define ID lle.key
 #define THREAD_CNT cpu
 #define F_TYPE(a) (a & 0xffff)
 #define DEV(dev) (dev & 0xffffffff)
@@ -542,13 +545,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define FIND_REQP(hash, key) (futex_reque_t *)find_entry((lle_t **)hash, key, FUTEX_HASH(key))
 #define FUTEX_KEY(tgid, uaddr) ((uaddr & 0xffffffffff) | ((uint64)tgid << 40))
 #define FUTEX_TGID(key) ((key & 0xffffff0000000000) >> 40)
-#define FUTEX_HSIZE 0x80
+#define FUTEX_HSIZE 0x100
 #define FUTEX_HASH(key)  ((key & (key >> 32)) % FUTEX_HSIZE)
-#define FUTEXOP_HSIZE 0x4
+#define GFUTEX_HSIZE 0x4000
+#define GFUTEX_HASH(key)  ((key & (key >> 32)) % GFUTEX_HSIZE)
+#define FUTEXOP_HSIZE 0x8
 #define FUTEXOP_HASH(key) (key %  FUTEXOP_HSIZE)
-#define FUTEXPID_HSIZE 0x20
+#define FUTEXPID_HSIZE 0x40
 #define FUTEXPID_HASH(key) (int)(key & (FUTEXPID_HSIZE-1))
-#define FUTEXRET_HSIZE 0xf
+#define FUTEXRET_HSIZE 0x10 
 #define FUTEXRET_HASH(key) ((key & 0xff) %  FUTEXRET_HSIZE)
 
 #define CLFUTEX_HASHSZ 0x100
@@ -770,7 +775,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WCH_HMASK (WCH_HSIZE - 1)
 #define WCH_HASH(key) ((key >> 9) & WCH_HMASK)
 
-#define IRQ_HSIZE 0x80
+#define IRQ_HSIZE 0x200
 #define IRQ_HMASK (IRQ_HSIZE - 1)
 #define IRQ_HASH(vec) (vec & IRQ_HMASK)
 
@@ -1683,6 +1688,7 @@ typedef struct cpu_info {
 	int 	runq_len;
 	int	max_runq_len;
 	int	last_softirq_vec;
+	uint64	last_softirq_time;
 
 	/* These fields are use for IDLE accounting  */
         uint64 idle_hist[IDLE_TIME_NBUCKETS];

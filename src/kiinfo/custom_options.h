@@ -443,6 +443,8 @@ Kidock(init_t *init, arg_t *arg)
             for (prop = arg->a_props; prop; prop = prop->p_nextp) {
                 if (strcmp("npid", prop->p_name) == 0) {
         		npid = (uint32)prop->p_value.i;
+		} else if (strcmp("docktree", prop->p_name) == 0) {
+			SET(DOCKTREE_FLAG);
                 } else {
 			pw_option_usage(init, NULL, "kidock");
 		}
@@ -1164,6 +1166,7 @@ flag_t pid_flags[] = {
 flag_t dock_flags[] = {
   { "help",        NULL,    FA_ALL, FT_OPT, NULL},
   { "npid",   "npid",    FA_ALL, FT_REG, "i" },
+  { "docktree",     NULL,    FA_ALL, FT_OPT, NULL},
   { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { 0,0,0,0,0 }
 };

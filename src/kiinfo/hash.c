@@ -119,7 +119,7 @@ int     linkcnt=0;
 
                 *hashaddr = hashptr;
         }
-	if (stklen > 16) stklen = 16;
+	if (stklen > LEGACY_STACK_DEPTH) stklen = LEGACY_STACK_DEPTH;
         prevptr = (stklle_t *)&hashptr[idx];
         entryptr = (stklle_t *)hashptr[idx];
         while (entryptr != NULL) {

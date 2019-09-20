@@ -651,18 +651,22 @@ int
 print_pid_memory(void *arg1, void *arg2)
 {
 	pid_info_t *pidp = (pid_info_t *)arg1;
+	docker_info_t *dockerp = pidp->dockerp;
         sched_info_t *schedp;
         uint64 *warnflagp = (uint64 *)arg2;
 
-        printf ("%8d %8d %8d %s",
+        dock_printf ("%8d %8d %8d %s",
                 pidp->vss,
                 pidp->rss,
 		pidp->PID,
 		pidp->cmd);
-        if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
-        if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
-        if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
-        printf ("\n");
+        if (pidp->hcmd) dock_printf ("  {%s}", pidp->hcmd);
+        if (pidp->thread_cmd) dock_printf (" (%s)", pidp->thread_cmd);
+	if (dockerp && (dockfile == NULL)) {
+        	printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", dockerp->ID);
+	}
+
+        dock_printf ("\n");
 
         return 0;
 }
@@ -769,9 +773,11 @@ pid_report(void *arg1, void *v)
         char sym_detail_fname[32];
 	pid_info_t *ppidp, *tgidp;
 	sched_info_t *schedp;
+	docker_info_t *dockerp;
 	unsigned long *msrptr;
 	int ret;
 
+	dockerp = pidp->dockerp;
 	if (pidp->num_tr_recs == 0) return 0;
 	if ((pidp->PID == -1) || (pidp->PID==0)) return 0;
 
@@ -863,7 +869,6 @@ pid_report(void *arg1, void *v)
 	pid_printf ("\nPID %d  %s", (int)pidp->PID, (char *)pidp->cmd);
 	if (pidp->hcmd) pid_printf ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) pid_printf ("  (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
 
 	pid_printf ("\n");
 	
@@ -879,13 +884,17 @@ pid_report(void *arg1, void *v)
 		pid_printf ("    NLWP: %d\n", pidp->nlwp);
 	}
 
+	if (dockerp) {
+		printf ("\n    Container ID: %012llx  Name: %s\n", dockerp->ID, dockerp->name);
+	}
+
 	csv_printf (pid_csvfile, "%d,%s,%s,%s,%d,%d,%d,%s,%llx,%d,%d", (int)pidp->PID, 
 					pidp->cmd,
 					pidp->thread_cmd ? pidp->thread_cmd : " ",
 					pidp->hcmd ? pidp->hcmd : " ",
 					pidp->ppid,pidp->tgid,pidp->nlwp,
-					pidp->dockerp ? ((docker_info_t *)(pidp->dockerp))->name : " ",
-					pidp->dockerp ? ((docker_info_t *)(pidp->dockerp))->lle.key : 0,
+					dockerp ? dockerp->name : " ",
+					dockerp ? dockerp->ID : 0,
 					pidp->elf,pidp->syscall_cnt);
 
 	
@@ -1011,7 +1020,7 @@ pid_print_report(void *v)
 		sid_report(v);
 	} else {
 		csv_printf(pid_csvfile,"PID,Command,Thread,Hadoop Proc,ppid,tgid,nlwp,Container Name,Container ID,elf64,syscalls");
-		if (sched_flag) csv_printf (pid_csvfile,",policy,runtime,systime,usertime,runqtime,sleeptime,irqtime,stealtime,switch,sleep,preempt,wakeup,runtime/swtch,lastcpu,migr,nodemigr,vss,rss");
+		if (sched_flag) csv_printf (pid_csvfile,",policy,runtime,systime,usertime,runqtime,sleeptime,irqtime,stealtime,switch,sleep,preempt,wakeup,runtime/swtch,lastcpu,lastldom,migr,nodemigr,vss,rss");
 		if (hc_flag) csv_printf (pid_csvfile,",TotHC,UserHC,SysHC,IntHC");
 		if (sock_flag) csv_printf(pid_csvfile,",Net Rd/s,Net Rd KB/s,Net Wr/s,Net KB Wr/s");
 		if (dsk_flag)  {

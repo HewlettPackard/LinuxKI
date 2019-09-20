@@ -587,7 +587,7 @@ int print_pid_symbols(void *arg1, void *arg2)
 	}
 	if (pidp->hcmd) printf ("{%s} ", pidp->hcmd);
         if (pidp->thread_cmd) printf("(%s) ", pidp->thread_cmd);
-	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 	if (cluster_flag) {SERVER_URL_FIELD_SECTION_BRACKETS(globals, _LNK_1_4_5); }
 	printf ("\n");
 	

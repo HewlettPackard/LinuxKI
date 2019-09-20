@@ -195,7 +195,7 @@ calc_totals(void *arg1, void *arg2)
 	calc_io_totals(&serverp->iostats[0], NULL);	
 	if (serverp->HT_enabled) calc_global_HT_stats(serverp, NULL);
 
-	foreach_hash_entry((void **)serverp->futex_hash, FUTEX_HSIZE, hash_count_entries, NULL, 0, &serverp->futex_cnt);
+	foreach_hash_entry((void **)serverp->futex_hash, GFUTEX_HSIZE, hash_count_entries, NULL, 0, &serverp->futex_cnt);
 }
 
 int
@@ -285,7 +285,7 @@ build_clfutex_hash(void *arg1, void *arg2)
 {
 	server_info_t *serverp = (server_info_t *)arg1;
 	globals = serverp;	
-	foreach_hash_entry((void **)serverp->futex_hash, FUTEX_HSIZE, 
+	foreach_hash_entry((void **)serverp->futex_hash, GFUTEX_HSIZE, 
 		(int (*)(void *, void *))add_clfutex_entry,
 		NULL, 0, NULL);
 }

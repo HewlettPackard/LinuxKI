@@ -251,7 +251,7 @@ print_pid_swtch_summary(void *arg1, void *arg2)
 
 	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printf("  (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 
 	if (cluster_flag) { DSPACE; SERVER_URL_FIELD_BRACKETS(globals) }
         printf ("\n");
@@ -307,7 +307,7 @@ print_pid_sleeps (void *arg1, void *arg2)
 
 	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printf("  (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printf (HTML ? " &lt;%s&gt;" : " <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 	printf ("\n");
 
         printf ("%sRunTime    : %9.6f  SysTime   : %9.6f   UserTime   : %9.6f\n",  tab,

@@ -1882,7 +1882,7 @@ ks_action_t ks_actions[KI_MAXSYSCALLS] = {
 	{ 1, 0, 1, ki_fcntl},		/*fcntl64*/
 	{ 0, 0, 0, ki_nosys},		/*ukn-222*/
 	{ 0, 0, 0, ki_nosys},		/*ukn-223*/
-	{ 0, 0, 0, ki_nosys},		/*sendfile64*/
+	{ 0, 0, 1, ki_nosys},		/*sendfile64*/
 	{ 0, 0, 0, ki_nosys},		/*sys_set_zone_reclaim*/
 	{ 0, 0, 0, ki_nosys},		/*statfs64*/
 	{ 0, 0, 1, ki_nosys},		/*fstatfs64*/
@@ -5180,7 +5180,7 @@ syscall_arg_list_t syscall_arg_list[KI_MAXSYSCALLS] = {
 {"alarm", "ret", HEX, "seconds", DECIMAL, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"setitimer", "ret", HEX, "which", HEX, "*new_value", HEX, "*old_value", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"getpid", "ret", DECIMAL, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"sendfile", "ret", HEX, "out_fd", DECIMAL, "in_fd", DECIMAL, "*offset", HEX, "*count", HEX, NULL, SKIP, NULL, SKIP},
+{"sendfile", "ret", DECIMAL, "out_fd", DECIMAL, "in_fd", DECIMAL, "*offset", HEX, "count", DECIMAL, NULL, SKIP, NULL, SKIP},
 {"socket", "ret", DECIMAL, "domain", SOCK_DOM, "type", SOCK_TYPE, "protocol", DECIMAL, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"connect", "ret", HEX, "sockfd", DECIMAL, "*addr", HEX, "addrlen", DECIMAL, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"accept", "ret", DECIMAL, "sockfd", DECIMAL, "*addr", HEX, "addrlen", DECIMAL, NULL, SKIP, NULL, SKIP, NULL, SKIP},
@@ -5604,7 +5604,7 @@ syscall_arg_list_t syscall_arg_list[KI_MAXSYSCALLS] = {
 {"fcntl64", "ret", HEX, "fd", DECIMAL, "cmd", DECIMAL, "arg2", HEX, "arg3", HEX, NULL, SKIP, NULL, SKIP},
 {"ukn-222", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"ukn-223", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
-{"sendfile64", "ret", HEX, "out_fd", DECIMAL, "in_fd", DECIMAL, "*offset", HEX, "*count", HEX, NULL, SKIP, NULL, SKIP},
+{"sendfile64", "ret", DECIMAL, "out_fd", DECIMAL, "in_fd", DECIMAL, "*offset", HEX, "count", DECIMAL, NULL, SKIP, NULL, SKIP},
 {"sys_set_zone_reclaim", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"statfs64", "ret", HEX, "*path", HEX, "*buf", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"fstatfs64", "ret", HEX, "fd", DECIMAL, "*buf", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP},

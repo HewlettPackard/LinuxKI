@@ -85,7 +85,7 @@ ifeq ($(hostdistro),rhel) # Red Hat Enterprise Linux (RHEL)
       EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
    else ifneq (,$(findstring 8.,$(hostversion)))
       #RHEL 8 (4.18)
-      EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
+      EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
    endif
 else ifeq ($(hostdistro),centos) #  Centos
    ifneq (,$(findstring 6.,$(hostversion)))
@@ -107,6 +107,17 @@ else ifeq ($(hostdistro),ol) # Oracle Linux (OL)
       EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
    endif
 else ifneq (,$(findstring sles,$(hostdistro))) # SUSE Linux Enterprise Server (SLES)
+    ifneq (,$(findstring 11.,$(hostversion)))
+        #SLES11
+        EXTRA_CFLAGS=-g -O3 -Wall -DSLES11 -DHARDCLOCK_STACK_SKIP=11 -DOTHER_STACK_SKIP=3
+    else ifneq (,$(findstring 12.,$(hostversion)))
+        #SLES12
+        EXTRA_CFLAGS=-g -O3 -Wall -DSLES12 -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=3
+    else ifneq (,$(findstring 15,$(hostversion)))
+        #SLES15
+        EXTRA_CFLAGS=-g -O3 -Wall -DSLES15 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=3
+    endif
+else ifneq (,$(findstring opensuse,$(hostdistro))) # Open SUSE (opensuse)
     ifneq (,$(findstring 11.,$(hostversion)))
         #SLES11
         EXTRA_CFLAGS=-g -O3 -Wall -DSLES11 -DHARDCLOCK_STACK_SKIP=11 -DOTHER_STACK_SKIP=3

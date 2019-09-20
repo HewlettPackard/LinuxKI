@@ -240,11 +240,19 @@ get_pid_cgroup(void *arg1, void *arg2)
 
         rtnptr = fgets((char *)&input_str, 511, f);
         while (rtnptr != NULL) {
-                /* I have seen ../docker-containterID as well as ../docker/containerID,
-		 * so we need to accomodate for both.   
-		 */
-                if (pos = strstr(rtnptr, "/docker")) {
-                        if (sscanf(pos+8, "%12llx", &id)) {
+
+                /* so we need to see if the containerID is embedded in the string.
+                 * The format may vary, however, so we need to be flexible with the search
+                 *
+                 * we will only look at the long strings and assume they are
+                 * related to a containerID
+                 */
+
+                if ((id == 0) && (strlen(rtnptr) > 64)) {
+                        /* for each container from docker ps output,
+                         * let's see if there's a match.
+                         */
+                        if (id = get_container_id(rtnptr)) {
                                 pidp = GET_PIDP(&globals->pid_hash, pidp->PID);
                                 dockerp = GET_DOCKERP(&globals->docker_hash, id);
                                 pidp->dockerp = dockerp;
@@ -252,8 +260,8 @@ get_pid_cgroup(void *arg1, void *arg2)
                                 dkpidp = GET_DKPIDP(&dockerp->dkpid_hash, pidp->PID);
                                 dkpidp->dockerp = dockerp;
                                 dkpidp->pidp = pidp;
-                                /* fprintf (stderr, "PID: %d   [%s]\n", pid, dockerp->name); */
-                                break;
+                                /* fprintf (stderr, "PID: %d   id: %12llx name: %s\n", pid, id, dockerp->name); */
+				break;
                         }
                 }
 
@@ -1397,6 +1405,21 @@ pid_printf(const char *format, ...)
 }
 
 int
+dock_printf(const char *format, ...)
+{
+	va_list ap;
+
+	va_start(ap, format);
+	vprintf(format, ap);
+	if (dockfile)  {
+		va_start(ap, format);
+		vfprintf(dockfile, format, ap);
+	}
+	
+	return 0;
+}
+
+int
 json_printf(FILE *file, const char *format, ...)
 {
         va_list ap;
@@ -1520,13 +1543,23 @@ dmangle(char *sym)
 	if (mangle_flag || (strncmp(sym, "_Z", 2))) {
 		/* doesn't need to be demangled */
 		return sym;
+	} else {
+		i = 2;	
 	}
+
+	/* Locate the first "N" after the _Z */
+	while (i < strlen(sym)) { 
+		if (sym[i] == 'N') break;
+		i++;
+	}
+
+	if (i >= strlen(sym)) return sym;
 
 	/* we need to find the first number after _Z and the first character after 
 	 * the number.
 	 */
 
-	i = 2;	
+	i++;
 	util_str[0] = 0;
 	util_pos = 0;
 	/* we will allow _nested_ symbols, so we loop here */
@@ -2249,17 +2282,15 @@ pathname_key(char *str)
 	for (i=0; i<len; i++) {
 		cksum1 += str[i];
 	}
+	cksum1 += len;
 
-	for (i=0; i<len-3; i++) {
-		cksum1 += str[i];
-		cksum2 += str[i+1];
-		cksum3 += str[i+2];
-		cksum4 += str[i+3];
+	for (i=0; i<len-3; i+=3) {
+		cksum2 += str[i];
+		cksum3 += str[i+1];
+		cksum4 += str[i+2];
 	}
 	
-	cksum3 += len;
-
-	key = cksum1 | cksum2 <<16 | cksum3 << 32 | cksum4 << 48;
+	key = cksum1 | (cksum2 & 0xffff) <<16 | (cksum3 & 0xffff)  << 32 | (cksum4 & 0xffff) << 48;
 
 	return key;
 }

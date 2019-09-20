@@ -1242,7 +1242,7 @@ print_pid_header(pid_info_t *pidp)
 	if (pidp->cmd) printw (" %s", pidp->cmd);
 	if (pidp->hcmd) printw ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printw ("  (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printw (" <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) printw (" <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 
 	schedp = pidp->schedp;
 	if (schedp) {
@@ -1508,7 +1508,7 @@ live_print_setrq_pids(void *arg1, void *arg2)
                 if (pidp->cmd) printw ("  %s", pidp->cmd);
                 if (pidp->hcmd) printw ("  {%s}", pidp->hcmd);
                 if (pidp->thread_cmd) printw ("  (%s)", pidp->thread_cmd);
-		if (pidp->dockerp) printw (" <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+		if (pidp->dockerp) printw (" <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
         }
 }
 
@@ -1721,7 +1721,7 @@ live_pid_runtime_summary(void *arg1, void *arg2)
 		if (pidp->cmd) printw ("  %s", pidp->cmd);
 		if (pidp->hcmd) printw ("  {%s}", pidp->hcmd);
                 if (pidp->thread_cmd) printw ("  (%s)", pidp->thread_cmd);
-		if (pidp->dockerp) printw (" <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+		if (pidp->dockerp) printw (" <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 }
 
 int
@@ -1969,7 +1969,7 @@ print_pid_iosum_live(void *arg1, void *arg2)
 
 	if (pidp->hcmd) printw ("  {%s}", pidp->hcmd);
         if (pidp->thread_cmd) printw ("  (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printw (" <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) printw (" <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 
         return 0;
 }
@@ -1998,7 +1998,7 @@ print_pid_hc_live(void *arg1, void *arg2)
 			pidp->cmd ? pidp->cmd : " ");
 		if (pidp->hcmd) printw ("  {%s}", pidp->hcmd);
                 if (pidp->thread_cmd) printw ("  (%s)", pidp->thread_cmd);
-		if (pidp->dockerp) printw (" <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+		if (pidp->dockerp) printw (" <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 	}
 }
 
@@ -2048,13 +2048,15 @@ print_irq_entry_live(void *arg1, void *arg2)
                 } else {
                         mvprintw (lineno, col, "%3d %-16s", irq, " ");
                 }
-		ncol+=22;
+		ncol+=21;
         } else {
                 mvprintw (lineno, col, "%3d %-11s", irq, softirq_name[irq]);
 		ncol+=16;
         }
 
-        mvprintw(lineno, ncol, "%8d %11.6f", irqentryp->count, SECS(irqentryp->total_time));
+        mvprintw(lineno, ncol, "%8d %11.6f %12.3f", irqentryp->count, SECS(irqentryp->total_time),
+						(SECS(irqentryp->total_time) / irqentryp->count)*1000000.0);
+
 	lineno++;
 }
 
@@ -2109,28 +2111,28 @@ print_select_irq_window()
 		return 0;
 	}
 
-	mvprintw(lineno++, col, "%s: %d %s  Count: %7d  ElpTime: %9.6f", irqtype == HARDIRQ ? "HardIRQ" : "SoftIRQ", 
-				irq, name, irqentryp->count, SECS(irqentryp->total_time));
+	mvprintw(lineno++, col, "%s: %d %s  Count: %7d  ElpTime: %9.6f  Avg(usecs): %7.3f", irqtype == HARDIRQ ? "HardIRQ" : "SoftIRQ", 
+				irq, name, irqentryp->count, SECS(irqentryp->total_time),
+				(SECS(irqentryp->total_time) / irqentryp->count)*1000000.0);
 
 	lineno++;
 	header_lineno = lineno;
-	mvprintw(lineno++, col, "CPU   Count    ElpTime");
+	mvprintw(lineno++, col, "CPU   Count    ElpTime  Avg(usecs)");
 	for (cpu = 0; cpu < MAXCPUS; cpu++) {
 		if (cpuinfop = FIND_CPUP(globals->cpu_hash, cpu)) {
 			if (cirqinfop = (irqtype == HARDIRQ ? cpuinfop->irqp : cpuinfop->softirqp)) {
 				if (cirqentryp = FIND_IRQENTRYP(cirqinfop->irq_entry_hash, irq)) {
 					if (LINES_AVAIL < 1) {
-						col = col+25;
+						col = col+38;
 						if (col+25 < COLS) {
 							lineno = header_lineno;
-							mvprintw(lineno++, col, "CPU   Count    ElpTime");
+							mvprintw(lineno++, col, "CPU   Count    ElpTime  Avg(usecs)");
 						} else 
 							break;
 					}
 
-					mvprintw(lineno++, col, "%3d %7d %10.6f", cpu, cirqentryp->count, SECS(cirqentryp->total_time));
-
-
+					mvprintw(lineno++, col, "%3d %7d %10.6f %11.3f", cpu, cirqentryp->count, SECS(cirqentryp->total_time),
+											(SECS(cirqentryp->total_time) / cirqentryp->count)*1000000.0);
 				}
 			}
 		}
@@ -2164,8 +2166,8 @@ print_irq_window()
 	header_lineno = lineno;
 	lineno++;
 	col = 0;
-	mvprintw(lineno++, col, "---------------- Hard IRQs ---------------");
-	mvprintw(lineno++, col, "IRQ Name                Count      ElpTime");
+	mvprintw(lineno++, col, "---------------------- Hard IRQs ---------------------");
+	mvprintw(lineno++, col, "IRQ Name                Count     ElpTime   Avg(usecs)");
 	irqinfop = globals->irqp;
 	if (irqinfop && (LINES_AVAIL > 3)) {
 		irqtype = HARDIRQ;
@@ -2175,9 +2177,9 @@ print_irq_window()
 			
 	lineno = header_lineno;
 	lineno++;
-	col=44;
-	mvprintw(lineno++, col, "------------- Soft IRQs ------------");
-	mvprintw(lineno++, col, "IRQ Name           Count     ElpTime");
+	col=58;
+	mvprintw(lineno++, col, "-------------------- Soft IRQs ------------------");
+	mvprintw(lineno++, col, "IRQ Name           Count     ElpTime   Avg(usecs)");
 	irqinfop = globals->softirqp;
 	if (irqinfop && (LINES_AVAIL > 3)) {
 		irqtype = SOFTIRQ;
@@ -2512,18 +2514,10 @@ print_select_docker_window()
 		dockerp->name = "system";
 	}
 
-	if (globals->docker_hash) {
-		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, calc_docker_pid_totals, NULL, 0, NULL);
-		dockerp = GET_DOCKERP(&globals->docker_hash, 0);
-		dockerp->name = "system";
-	} else {
-		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, calc_pid_iototals, NULL, 0, NULL);
-	}
-	
 	if ((dockerp = FIND_DOCKERP(globals->docker_hash, curdockid)) == NULL) {
 		mvprintw (lineno++, 0, "Container Not Found ***");
 	} else {
-		mvprintw (lineno++, 0, "Container: %-16s", dockerp->name);
+		mvprintw (lineno++, 0, "Container ID: %012llx  Name: %s", dockerp->ID, dockerp->name);
 	}
 
 	npid = (LINES_AVAIL / 2) - 3;
@@ -2766,7 +2760,7 @@ futex_print_pids_detail_live(void *arg1, void *arg2)
 	if (pidp->cmd) printw (" %s", pidp->cmd);
 	if (pidp->hcmd) printw (" {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printw (" (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printw (" <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) printw (" <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 
 
 	if (LINES_AVAIL && fpidp->n_othererr) 
@@ -2815,7 +2809,7 @@ futex_print_ops_detail_live(void *arg1, void *arg2)
 		if (wpidp->cmd) printw (" %s", wpidp->cmd);
 		if (wpidp->hcmd) printw (" {%s}", wpidp->hcmd);
 		if (wpidp->thread_cmd) printw (" (%s)", wpidp->thread_cmd);
-		if (wpidp->dockerp) printw (" <%s>", ((docker_info_t *)(wpidp->dockerp))->name);
+		if (wpidp->dockerp) printw (" <%012llx>", ((docker_info_t *)(wpidp->dockerp))->ID);
 	} else if (fopsp->max_waker == -1) {
 		printw ("  ICS");
 	}
@@ -2864,7 +2858,7 @@ print_pidfutex_window()
 	if (pidp->cmd) printw (" %s", pidp->cmd);
 	if (pidp->hcmd) printw ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printw ("  (%s)", pidp->thread_cmd);
-	if (pidp->dockerp) printw (" <%s>", ((docker_info_t *)(pidp->dockerp))->name);
+	if (pidp->dockerp) printw (" <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 
 	foreach_hash_entry((void **)pidp->futex_hash, FUTEX_HSIZE, hash_count_entries, NULL, 0, &futex_cnt);
 
@@ -2967,7 +2961,7 @@ print_futex_window()
 	if (COLS > 102) {
 		printw ("         Avg         Max");
 	}
-	foreach_hash_entry((void **)globals->futex_hash ,FUTEX_HSIZE, gbl_futex_print_live,
+	foreach_hash_entry((void **)globals->futex_hash ,GFUTEX_HSIZE, gbl_futex_print_live,
                 		futex_gblsort_by_cnt, LINES_AVAIL, NULL);
 	return 0;
 }
@@ -3094,8 +3088,8 @@ live_print_docker_totals(void *arg1, void *arg2)
 	docker_info_t *dockerp = (docker_info_t *)arg1;
 	sched_stats_t *statp = &dockerp->sched_stats;
 
-	mvprintw (lineno++, col, "%-20s %12.6f %12.6f %12.6f %12.6f %12.6f", 
-		dockerp->name, 
+	mvprintw (lineno++, col, "%012llx %12.6f %12.6f %12.6f %12.6f %12.6f", 
+		dockerp->ID, 
                 SECS(statp->T_run_time),
                 SECS(statp->T_sys_time),
                 SECS(statp->T_user_time),
@@ -3134,7 +3128,7 @@ print_docker_window()
 		dockerp->name = "system";
 	}
 
-	mvprintw(lineno++, 0, "Container                    busy          sys         user          irq         runq");
+	mvprintw(lineno++, 0, "Container            busy          sys         user          irq         runq");
 	if (COLS > 104) printw ("     IOPS     MB/s");
 	if (COLS > 124) printw ("   NetOPS  NetMB/s");
 
@@ -3557,9 +3551,11 @@ select_dsk_window(int win, int prompt)
 		noecho();
 
 		/* need to convert from to a dev_t */
-		dev = devstr_to_dev(str);
-		if (dev > 0x0) { 
-			valid = TRUE;
+		if ((ret >= 0) && (strlen(str) > 1)) {
+			dev = devstr_to_dev(str);
+			if (dev > 0x0) { 
+				valid = TRUE;
+			}
 		}
 	}
 
@@ -3723,13 +3719,13 @@ select_docker_window(int win, int prompt)
 		mvprintw(LINES-1, 0, "Container: ");
 		echo();
 		ret = mvgetnstr(LINES-1, 11, str, 32);
-		if (ret != ERR) {
-			/* need to find docker ID from Docker Name */
-			dockid = find_docker_by_name(str);
+		if ((strlen(str) > 1) && ret != ERR) {
+			sscanf (str, "%12llx", &dockid);
 			if (dockid != NO_DOCKID) { 
 				valid = TRUE;
 			}
 		}
+
 		noecho();
 	}
 
@@ -3755,7 +3751,7 @@ select_irq_window(int win, int prompt)
 	char irqtype, str[80];
 	int valid = FALSE;
 	int ret;
-	int irqnum;
+	int irqnum = 0;
 
 	/* we need to know hard or soft AND the IRQ number */
 	move(LINES-1, 0); clrtoeol();
@@ -3765,12 +3761,12 @@ select_irq_window(int win, int prompt)
 	if ((irqtype == 'h') || (irqtype == 's')) {
 		mvprintw (LINES-1, 34, "IRQ: ");
 		ret = mvgetnstr(LINES-1, 40, str, 8);
-		if (ret != ERR) {
+		if ((strlen(str) > 0) && (ret != ERR)) {
 			irqnum = strtol(str, NULL, 10);
 			if (irqnum >= 0) {
 				if ((irqtype == 's') && (irqnum < 10)) {
 					valid = TRUE;
-				} else if ((irqtype == 'h') && (irqnum < 2048)) {
+				} else if ((irqtype == 'h') && (irqnum < 32768 )) {
 					valid = TRUE;
 				}
 			}

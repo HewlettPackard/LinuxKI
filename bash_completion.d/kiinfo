@@ -1,0 +1,98 @@
+_kiinfo() 
+{
+    local cur opts flags prevcmd timestamp lastidx prev i
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="-help -start -end -dump -html -alarm -passes -live -kilive -kitracedump -ts -timestamp -likidump -likimerge -kparse -kitrace -kipid -kidsk -kirunq -kiprof -kidsk -kiwait -kifile -kifutex -kisock -kidock -kiall -clparse"
+
+    if [[ ${cur} == -* ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+    for (( i=${COMP_CWORD}; i > 1; i-- )) ; do
+	prev="${COMP_WORDS[i-1]}"
+	if [[ ${prev} == -* ]] ; then
+		prevcmd=${prev}
+		i=0
+	fi
+    done
+
+
+    case "${prevcmd}" in
+	-kitrace)
+    		flags="help pid= tgid= cpu= dev= nosysenter nosysargs printcmd objfile= nomapper nomarker abstime fmttime seqcnt events= subsys= sysignore= edus= msr"
+		;;
+	-kipid)
+    		flags="help pid= tgid= scdetail nsym= nfutex= npid= pidtree rqhist oracle mangle coop csv kitrace abstime fmttime nosysenter sysignore= objfile= events= subsys= report= edus= msr"
+		;;
+	-kirunq)
+		flags="help npid= rqpid rqwait= events= subsys= edus= csv kitrace abstime fmttime"
+		;;
+	-kiprof)
+    		flags="help pid= tgid= cpu= npid= nsym= kitrace abstime fmttime objfile= edus="
+		;;
+	-kiwait)
+    		flags="help npid= nsym= edus= csv kitrace abstime fmttime"
+		;;
+	-kidock)
+    		flags="help npid= docktree"
+		;;
+	-kisock)
+    		flags="help nsock= scdetail csv kitrace nosysenter abstime fmttime epochtime sysignore="
+		;;
+	-kifile)
+    		flags="help nfile= scdetail edus= jstack= csv kitrace nosysenter abstime fmttime epochtime sysignore="
+		;;
+	-kidsk)
+    		flags="help dev= pid= tgid= npid= percpu nodev nomapper mpath_detail bkfname= detail= edus= jstack= csv kitrace abstime fmttime epichtime"
+		;;
+	-kifutex)
+    		flags="help uaddr= nfutex= npid= edus= jstack= kitrace= nosysenter abstime fmttime epochtime sysignore="
+		;;
+	-kifutex)
+    		flags="help uaddr= nfutex= npid= edus= jstack= kitrace= nosysenter abstime fmttime epochtime sysignore="
+		;;
+	-kparse)
+    		flags="help lite kptree nooracle mangle edus="
+		;;
+	-kiall)
+    		flags="help oracle mangle edus= csv"
+		;;
+	-clparse)
+		flags="help top= nooracle mangle cltree csv"
+		;;
+	-kilive|-live)
+		flags="help sysignore= edus= msr step="
+		;;
+	-likid|-likidump)
+		flags="help debug_dir= pid= tgid= dev= cpu= dur= events= subsys= sysignore="
+		;;
+	-dump|-kitracedump)
+		flags="help debug_dir= events= subsys="
+		;;
+	-ts|-timestamp)
+		timestamp=$(ls ki.????_???? | cut -d . -f 2 )
+		COMPREPLY=( $(compgen -W "${timestamp}" -- ${cur}) )	
+		return 0
+		;;
+	=)
+		;;
+	*)
+		return 0
+		;;
+    esac
+
+    if [[ ${cur} == *,* ]]; then
+	local realcur prefix
+	realcur=${cur##*,}
+	prefix=${cur%,*}
+   	COMPREPLY=( "${prefix},"$(compgen -W "${flags}" -- ${realcur}) )	
+    else
+   	COMPREPLY=( $(compgen -W "${flags}" -- ${cur}) )	
+    	return 0
+    fi
+
+}
+complete -o nospace -F _kiinfo kiinfo

@@ -232,27 +232,55 @@ kitrace_data()
 	fi
 
 	if [ $do_liki -eq 1 ]; then
-	    echo "=== Installing Linux KI trace points ===" | tee -a ki.err.$tag
-            [ ! -f /lib/modules/`uname -r`/misc/likit.ko ] && $TOOLDIR/module_prep
-            insmod /lib/modules/`uname -r`/misc/likit.ko 2>&1 >>ki.err.$tag
-	    if [ $? -eq 0 ]; then
-	        echo "=== Starting: Linux KI LiKI trace dump for $duration seconds ===" | tee -a ki.err.$tag
-		echo "=== "$Comment  | tee -a comment.$tag
-                echo "=== Starting: kiinfo -likidump dur="$duration",$Varargs,$Event,$Subsys,$pid_filter,$tgid_filter,$cpu_filter,$dev_filter,$MSRARG,debug_dir="$debugfs_mount_point",sysignore=$sysignore -ts "$tag >>ki.err.$tag 
-                $TOOLDIR/kiinfo -likidump dur="$duration",$Varargs,$Event,$Subsys,$pid_filter,$tgid_filter,$cpu_filter,$dev_filter,$MSRARG,debug_dir="$debugfs_mount_point",sysignore=$sysignore -ts $tag 2>>ki.err.$tag 
-		if [ $? -ne 0 ] ; then
+            if [ ! -f /lib/modules/`uname -r`/misc/likit.ko ]; then
+	         echo "=== Missing /lib/modules/`uname -r`/misc/likit.ko module, will try to recompile ===" | tee -a ki.err.$tag
+		 rm -f $TOOLDIR/modules/likit.ko.* >/dev/null 2>&1
+		 $TOOLDIR/module_prep >/dev/null
+	    fi
+
+            if [ -f /lib/modules/`uname -r`/misc/likit.ko ]; then
+	    	echo "=== Installing Linux KI trace points ===" | tee -a ki.err.$tag
+            	insmod /lib/modules/`uname -r`/misc/likit.ko 2>&1 >>ki.err.$tag
+	    	if [ $? -eq 0 ]; then
+	            echo "=== Starting: Linux KI LiKI trace dump for $duration seconds ===" | tee -a ki.err.$tag
+		    echo "=== "$Comment  | tee -a comment.$tag
+                    echo "=== Starting: kiinfo -likidump dur="$duration",$Varargs,$Event,$Subsys,$pid_filter,$tgid_filter,$cpu_filter,$dev_filter,$MSRARG,debug_dir="$debugfs_mount_point",sysignore=$sysignore -ts "$tag >>ki.err.$tag 
+                    $TOOLDIR/kiinfo -likidump dur="$duration",$Varargs,$Event,$Subsys,$pid_filter,$tgid_filter,$cpu_filter,$dev_filter,$MSRARG,debug_dir="$debugfs_mount_point",sysignore=$sysignore -ts $tag 2>>ki.err.$tag 
+		    if [ $? -ne 0 ] ; then
 			echo "=== ERROR: likidump failed ===" 
 			tail -1 ki.err.$tag
 			echo "=== " 
-		else
+			exit 1
+		    else
 	        	echo "=== LinuxKI LiKI dump complete  ===" | tee -a ki.err.$tag
+		    fi
+                    cat /proc/kallsyms      > kallsyms.$tag
+		    rmmod likit.ko
+		else 
+		    # if we cannot install the DLKM, then print error
+		    echo
+	            echo "=== Unable to install /lib/modules/`uname -r`/misc/likit.ko into kernel ===" | tee -a ki.err.$tag
+		    echo Please checked to be sure you have the proper kernel headers package installed
+		    echo and it matches your current kernel version: `uname -r`
+		    echo
+		    echo You may still be able to collect LinuxKI data using ftrace as follows:
+		    echo
+		    echo -e \\trunki -f 
+		    rm ki.err.$tag netstat-s.$tag
+		    exit 1
 		fi
-                cat /proc/kallsyms      > kallsyms.$tag
-                rmmod likit.ko
 	    else
-		# if we cannot install the DLKM, then default to ftrace
-		tail -1 ki.err.$tag
-		do_liki=0
+		# if module_prep fails to build likit.ko, then print error
+		echo
+	        echo "=== Missing /lib/modules/`uname -r`/misc/likit.ko module in /lib/modules, attempt to recompile failed ===" | tee -a ki.err.$tag
+		echo Please checked to be sure you have the proper kernel headers package installed
+		echo and it matches your current kernel version: `uname -r`
+		echo
+		echo You may still be able to collect LinuxKI data using ftrace as follows:
+		echo
+		echo -e \\trunki -f 
+		rm ki.err.$tag netstat-s.$tag
+		exit 1
 	    fi
 	fi
 

@@ -78,6 +78,21 @@ if [ $? -eq 0 ]; then
         echo -e \\tRunning depmod - this might take a moment or two ...
         depmod
 else
-        echo -e \\tUnable to build compatible LiKI module - you may still be able to use ftrace mode
+        echo  
+        echo  ERROR: Unable to build compatible LiKI module
+        echo  Please checked to be sure you have the proper kernel headers package installed
+        echo  and it matches your current kernel version!
+        echo 
+        echo  After installing the proper kernel header package, 
+	echo  you can build the LiKI DLKM as follows:
+        echo 
+        echo -e \\tcd /opt/linuxki
+        echo -e \\trm -f /opt/linuxki/modules/likit.ko\*
+        echo -e \\t/opt/linuxki/module_prep
+        echo 
+        echo You may still be able to use LinuxKI with ftrace mode:
+	echo
+	echo -e \\trunki -f
+	echo
 fi
 rm -rf $TMP_SRC_DIR

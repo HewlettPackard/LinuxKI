@@ -55,6 +55,7 @@ int runq_ftrace_print_func(void *, void *);
 #define SCHED_SOFTIRQ 7
 #define RCU_SOFTIRQ 9
 
+
 /*
 ** The initialization function
 */
@@ -937,7 +938,9 @@ int
 find_coop_ss_slpfuncs(void *arg1,  void *arg2)
 {
         coop_slpfunc_t *slpfuncp = (coop_slpfunc_t *)arg1;
-        coop_info_t    *coopinfop = (coop_info_t *)arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+	FILE *pidfile = (FILE *)vararg->arg1;
+        coop_info_t    *coopinfop = (coop_info_t *)vararg->arg2;
         pid_info_t *pidp;
         coopinfop->slpfunc = slpfuncp->lle.key;
         pidp = coopinfop->pidp;
@@ -964,12 +967,12 @@ find_coop_ss_slpfuncs(void *arg1,  void *arg2)
 
         if (coop_detail_enabled) { /* should always be true ... */
 /*
-                pid_printf ("%44.2f%%    %6.2f%%/%6.2f%%  %8d/%-8d ", slpfuncp->cnt*100.0/coopinfop->total_cnt,
+                pid_printf (pidfile, "%44.2f%%    %6.2f%%/%6.2f%%  %8d/%-8d ", slpfuncp->cnt*100.0/coopinfop->total_cnt,
                                                     coopinfop->scall_slptime*100.0/coopinfop->total_slp_time,
                                                     slpfuncp->sleep_time*100.0/coopinfop->total_slp_time,
                                                     slpfuncp->cnt,coopinfop->scall_cnt);
 */
-                pid_printf ("               %8d   %6.2f%%   %9.6f                    ",
+                pid_printf (pidfile, "               %8d   %6.2f%%   %9.6f                    ",
 						slpfuncp->cnt,
 						slpfuncp->sleep_time*100.0/coopinfop->total_slp_time,
 						SECS(slpfuncp->sleep_time));
@@ -988,7 +991,7 @@ find_coop_ss_slpfuncs(void *arg1,  void *arg2)
                                                 syscall_arg_list[widx].args[0].label,
                                                 coopinfop->waker_arg0);
                 }
-                pid_printf ("%-36s ",strbuf);
+                pid_printf (pidfile, "%-36s ",strbuf);
                 bzero(strbuf,128);
 
                 if (coopinfop->sleeper_scall == DUMMY_SYSCALL)  {
@@ -1003,7 +1006,7 @@ find_coop_ss_slpfuncs(void *arg1,  void *arg2)
                                                 syscall_arg_list[sidx].args[0].label,
                                                 coopinfop->sleeper_arg0);
                 }
-                pid_printf ("%-36s ",strbuf);
+                pid_printf (pidfile, "%-36s ",strbuf);
                 if (coopinfop->slpfunc && (coopinfop->slpfunc != END_STACK)) {
 			idx = 0;
 			offset = 0;
@@ -1012,13 +1015,13 @@ find_coop_ss_slpfuncs(void *arg1,  void *arg2)
                         	offset = coopinfop->slpfunc - globals->symtable[idx].addr;
 			}
                         if ((idx > 0) && (idx < globals->nsyms-1) && (offset < 0x10000))
-                                pid_printf ("%s+0x%llx  ", globals->symtable[idx].nameptr, offset);
+                                pid_printf (pidfile, "%s+0x%llx  ", globals->symtable[idx].nameptr, offset);
                         else
-                                pid_printf ("PC=0x%llx  ", coopinfop->slpfunc);
+                                pid_printf (pidfile, "PC=0x%llx  ", coopinfop->slpfunc);
                 }
                 else
-                        pid_printf ("%12s","unknown");
-                pid_printf ("\n");
+                        pid_printf (pidfile, "%12s","unknown");
+                pid_printf (pidfile, "\n");
         }
 }
 
@@ -1044,7 +1047,9 @@ int
 find_coop_ww_args(void *arg1, void *arg2)
 {
         coop_scall_arg_t *argp = (coop_scall_arg_t *)arg1;
-        coop_info_t *coopinfop = (coop_info_t *)arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+	FILE *pidfile = (FILE *)vararg->arg1;
+        coop_info_t *coopinfop = (coop_info_t *)vararg->arg2;
         uint64 offset,idx;
         coopinfop->waker_arg0 = argp->lle.key;
 
@@ -1073,12 +1078,12 @@ find_coop_ww_args(void *arg1, void *arg2)
 
         if (coop_detail_enabled) { /* should always be true ... */
 /*
-                pid_printf ("%44.2f%%    %6.2f%%/%6.2f%%  %8d/%-8d ",  argp->cnt*100.0/coopinfop->total_cnt,
+                pid_printf (pidfile, "%44.2f%%    %6.2f%%/%6.2f%%  %8d/%-8d ",  argp->cnt*100.0/coopinfop->total_cnt,
                                                     coopinfop->scall_slptime*100.0/coopinfop->total_slp_time,
                                                     argp->sleep_time*100.0/coopinfop->total_slp_time,
                                                     argp->cnt,coopinfop->scall_cnt);
 */
-                pid_printf ("               %8d   %6.2f%%   %9.6f                    ",
+                pid_printf (pidfile, "               %8d   %6.2f%%   %9.6f                    ",
                                                 argp->cnt,
                                                 argp->sleep_time*100.0/coopinfop->total_slp_time,
                                                 SECS(argp->sleep_time));
@@ -1096,7 +1101,7 @@ find_coop_ww_args(void *arg1, void *arg2)
                                         syscall_arg_list[widx].args[0].label,
                                         coopinfop->waker_arg0);
                 }
-                pid_printf ("%-36s ",strbuf);
+                pid_printf (pidfile, "%-36s ",strbuf);
                 bzero(strbuf,128);
 
                 if (coopinfop->sleeper_scall == DUMMY_SYSCALL)  {
@@ -1110,7 +1115,7 @@ find_coop_ww_args(void *arg1, void *arg2)
                                                         syscall_arg_list[sidx].args[0].label,
                                                         coopinfop->sleeper_arg0);
                 }
-                pid_printf ("%-36s ",strbuf);
+                pid_printf (pidfile, "%-36s ",strbuf);
                 if (coopinfop->slpfunc && (coopinfop->slpfunc != END_STACK)) {
 			idx = 0;
 			offset = 0;
@@ -1119,13 +1124,13 @@ find_coop_ww_args(void *arg1, void *arg2)
                         	offset = coopinfop->slpfunc - globals->symtable[idx].addr;
 			}
                         if ((idx > 0) && (idx < globals->nsyms-1) && (offset < 0x10000))
-                                pid_printf ("%s+0x%llx  ", globals->symtable[idx].nameptr, offset);
+                                pid_printf (pidfile, "%s+0x%llx  ", globals->symtable[idx].nameptr, offset);
                         else
-                                pid_printf ("PC=0x%llx  ", coopinfop->slpfunc);
+                                pid_printf (pidfile, "PC=0x%llx  ", coopinfop->slpfunc);
                 }
                 else
-                        pid_printf ("%12s","unknown");
-                pid_printf ("\n");
+                        pid_printf (pidfile, "%12s","unknown");
+                pid_printf (pidfile, "\n");
         }
 }
 
@@ -1135,14 +1140,15 @@ int
 find_coop_ww_scall(void *arg1, void *arg2)
 {
         coop_scall_t *scallp = (coop_scall_t *)arg1;
-        coop_info_t *coopinfop = (coop_info_t *)arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+        coop_info_t *coopinfop = (coop_info_t *)vararg->arg2;
 
         coopinfop->waker_scall = scallp->lle.key;
 
 	foreach_hash_entry((void **)scallp->coop_args_hash, ARGS_HSIZE,
 				find_coop_ww_args,
 				coop_sort_args_by_sleep_time,
-				npid, (void *)coopinfop);
+				npid, (void *)vararg);
 }
 
 
@@ -1150,63 +1156,68 @@ int
 find_coop_ss_args(void *arg1, void *arg2)
 {
         coop_scall_arg_t *argp = (coop_scall_arg_t *)arg1;
-        coop_info_t *coopinfop = (coop_info_t *)arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+        coop_info_t *coopinfop = (coop_info_t *)vararg->arg2;
 
         coopinfop->sleeper_arg0  = argp->lle.key;
 
 	foreach_hash_entry((void **)argp->coop_slpfunc_hash, SLP_HSIZE, 
 				find_coop_ss_slpfuncs, 
 				coop_sort_slpfuncs_by_sleep_time,
-				npid, (void *)coopinfop);
+				npid, (void *)vararg);
 }
 
 int
 find_coop_ss_scall(void *arg1, void *arg2)
 {
         coop_scall_t *scallp = (coop_scall_t *)arg1;
-        coop_info_t *coopinfop = (coop_info_t *)arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+        coop_info_t *coopinfop = (coop_info_t *)vararg->arg2;
 
         coopinfop->sleeper_scall = scallp->lle.key;
 
 	foreach_hash_entry((void **)scallp->coop_args_hash, ARGS_HSIZE,
 				find_coop_ss_args,
 				coop_sort_args_by_sleep_time,
-				npid, (void *)coopinfop);
+				npid, (void *)vararg);
 }
 
 int
 find_coop_ws_slpfuncs(void *arg1,  void *arg2)
 {
         coop_slpfunc_t *slpfuncp = (coop_slpfunc_t *)arg1;
-        coop_info_t    *coopinfop = (coop_info_t *)arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+        coop_info_t    *coopinfop = (coop_info_t *)vararg->arg2;
 
         coopinfop->slpfunc = slpfuncp->lle.key;
 
 	foreach_hash_entry((void **)slpfuncp->coop_waker_sc_hash, SYSCALL_HASHSZ,
 				find_coop_ww_scall, 
 				coop_sort_scall_by_sleep_time,
-				npid, (void *)coopinfop);
+				npid, (void *)vararg);
 }
 
 int
 find_coop_ws_args(void *arg1, void *arg2)
 {
         coop_scall_arg_t *argp = (coop_scall_arg_t *)arg1;
-        coop_info_t *coopinfop = (coop_info_t *)arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+        coop_info_t *coopinfop = (coop_info_t *)vararg->arg2;
 
         coopinfop->sleeper_arg0  = argp->lle.key;
 
         foreach_hash_entry((void **)argp->coop_slpfunc_hash, SLP_HSIZE,
 				find_coop_ws_slpfuncs, 
 				coop_sort_slpfuncs_by_sleep_time,
-				npid, (void *)coopinfop);
+				npid, (void *)vararg);
 }
 
 int
 find_coop_ws_scall(void *arg1, void *arg2)
 {
         coop_scall_t *scallp = (coop_scall_t *)arg1;
-        coop_info_t *coopinfop = (coop_info_t *)arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+        coop_info_t *coopinfop = (coop_info_t *)vararg->arg2;
 
         coopinfop->sleeper_scall = scallp->lle.key;
         coopinfop->scall_cnt = scallp->cnt;
@@ -1215,28 +1226,30 @@ find_coop_ws_scall(void *arg1, void *arg2)
 	foreach_hash_entry((void **)scallp->coop_args_hash, ARGS_HSIZE,
 				find_coop_ws_args,
 				coop_sort_args_by_sleep_time,
-				npid, (void *)coopinfop);
+				npid, (void *)vararg);
 }
 
 int
 find_coop_sw_args(void *arg1, void *arg2)
 {
         coop_scall_arg_t *argp = (coop_scall_arg_t *)arg1;
-        coop_info_t *coopinfop = (coop_info_t *)arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+        coop_info_t *coopinfop = (coop_info_t *)vararg->arg2;
 
         coopinfop->waker_arg0 = argp->lle.key;
 
 	foreach_hash_entry((void **)argp->coop_sleeper_scall_hash, SYSCALL_HASHSZ,
 				find_coop_ss_scall, 
 				coop_sort_scall_by_sleep_time,
-				npid, (void *)coopinfop);
+				npid, (void *)vararg);
 }
 
 int
 find_coop_sw_scall(void *arg1, void *arg2)
 {
         coop_scall_t *scallp = (coop_scall_t *)arg1;
-        coop_info_t *coopinfop = (coop_info_t *)arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+        coop_info_t *coopinfop = (coop_info_t *)vararg->arg2;
 
         coopinfop->waker_scall = scallp->lle.key;
         coopinfop->scall_cnt = scallp->cnt;
@@ -1245,7 +1258,7 @@ find_coop_sw_scall(void *arg1, void *arg2)
 	foreach_hash_entry((void **)scallp->coop_args_hash, ARGS_HSIZE,
 				find_coop_sw_args, 
 				coop_sort_args_by_sleep_time,
-				npid, (void *)coopinfop);
+				npid, (void *)vararg);
 }
 
 int
@@ -1301,11 +1314,13 @@ int
 sched_print_setrq_pids(void *arg1, void *arg2)
 {
         setrq_info_t *setrq_infop = (setrq_info_t *)arg1;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+        coop_info_t *coopinfop = (coop_info_t *)vararg->arg2;
+	FILE *pidfile = (FILE *)vararg->arg1;
         pid_info_t *pidp;
         sched_info_t *schedp;
         sched_stats_t *statp;
 
-        coop_info_t *coopinfop = (coop_info_t *)arg2;
 
 	pidp = GET_PIDP(&globals->pid_hash, setrq_infop->PID);
         schedp = (sched_info_t *)find_sched_info(pidp);
@@ -1320,31 +1335,31 @@ sched_print_setrq_pids(void *arg1, void *arg2)
 
 	/* If we're the WAKER, the total sleeptime we're comparing is that of the task we are waking */
 
-        pid_printf ("      %8d   %6d   %6.2f%%   %9.6f",
+        pid_printf (pidfile, "      %8d   %6d   %6.2f%%   %9.6f",
                     (int)setrq_infop->PID,
                     setrq_infop->cnt,
                     setrq_infop->sleep_time*100.0/coopinfop->total_slp_time,
 		    SECS(setrq_infop->sleep_time));
 
         if ((setrq_infop->PID == 0) || ((uint64)setrq_infop->PID == -1)) {
-                pid_printf ("  %s", " ICS ");
+                pid_printf (pidfile, "  %s", " ICS ");
 		coopinfop->waker_is_ICS = 1;
         } else {
-        	if (pidp->cmd) pid_printf ("  %s", pidp->cmd);
+        	if (pidp->cmd) pid_printf (pidfile, "  %s", pidp->cmd);
 		if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
-		if (pidp->thread_cmd) pid_printf ("  (%s)", pidp->thread_cmd);
+		if (pidp->thread_cmd) pid_printf (pidfile, "  (%s)", pidp->thread_cmd);
 		if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 	        coopinfop->waker_is_ICS = 0;
         }
-        pid_printf ("\n");
+        pid_printf (pidfile, "\n");
 
 	foreach_hash_entry((void **)setrq_infop->coop_scall_hash, SYSCALL_HASHSZ,
 					coopinfop->which == SLEEPER ? find_coop_sw_scall : find_coop_ws_scall,
 					coop_sort_scall_by_sleep_time,
-					npid, (void *)coopinfop);
+					npid, (void *)vararg);
 	
 	if (coop_detail_enabled)
-        	pid_printf ("\n");
+        	pid_printf (pidfile, "\n");
 	if (is_alive)
         	setrq_infop->cnt = 0;
         return 0;
@@ -1354,13 +1369,14 @@ int
 print_scd_slp_info(void *arg1,void *arg2)
 {
         scd_waker_info_t *scdwinfop = (scd_waker_info_t *)arg1;
+	FILE *pidfile = (FILE *)arg2;
         uint64 pid;
 
         if (scdwinfop->count == 0) return 0;
 
         pid = scdwinfop->lle.key;
 
-        pid_printf("%s            %6d  %6d          %11.6f %10.6f %10.6f  \n", tab,
+        pid_printf(pidfile, "%s            %6d  %6d          %11.6f %10.6f %10.6f  \n", tab,
                     pid,
                     scdwinfop->count,
                     SECS(scdwinfop->sleep_time),
@@ -1374,7 +1390,9 @@ int
 print_slp_info(void *arg1, void *arg2)
 {
 	slp_info_t *slpinfop = (slp_info_t *)arg1;
-	sched_stats_t *statsp = (sched_stats_t *)arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+	FILE *pidfile = (FILE *)vararg->arg1;
+	sched_stats_t *statsp = (sched_stats_t *)vararg->arg2;
 	sched_info_t *gschedp;
 	uint64 idx;
 
@@ -1385,7 +1403,7 @@ print_slp_info(void *arg1, void *arg2)
 	if (idx > globals->nsyms-1) idx = UNKNOWN_SYMIDX;
 
 	if (gschedp && statsp == &gschedp->sched_stats) {
-            pid_printf("%s%8d %6.2f%% %10.4f %6.2f%% %10.3f %10.3f %s\n", tab, 
+            pid_printf(pidfile, "%s%8d %6.2f%% %10.4f %6.2f%% %10.3f %10.3f %s\n", tab, 
                     slpinfop->count,
                     (slpinfop->count * 100.0) / statsp->C_sleep_cnt,
                     SECS(slpinfop->sleep_time),
@@ -1394,7 +1412,7 @@ print_slp_info(void *arg1, void *arg2)
                     MSECS(slpinfop->max_time),
 		    idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr);
 	} else if (statsp != NULL) {
-            pid_printf("%s%8d %6.2f%% %10.4f %6.2f%% %9.2f%% %10.3f %10.3f  %s\n", tab, 
+            pid_printf(pidfile, "%s%8d %6.2f%% %10.4f %6.2f%% %9.2f%% %10.3f %10.3f  %s\n", tab, 
                     slpinfop->count,
                     (slpinfop->count * 100.0) / statsp->C_sleep_cnt,
                     SECS(slpinfop->sleep_time),
@@ -1404,7 +1422,7 @@ print_slp_info(void *arg1, void *arg2)
                     MSECS(slpinfop->max_time),
 		    idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr);
          } else {
-             pid_printf("%s      Sleep Func    %6d          %11.6f %10.6f %10.6f  %s\n", tab,
+             pid_printf(pidfile, "%s      Sleep Func    %6d          %11.6f %10.6f %10.6f  %s\n", tab,
                     slpinfop->count,
                     SECS(slpinfop->sleep_time),
                     SECS(slpinfop->sleep_time / slpinfop->count),
@@ -1412,11 +1430,11 @@ print_slp_info(void *arg1, void *arg2)
 		    idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr);
 
                     if (IS_LIKI && slpinfop->scd_wpid_hash) {
-                        pid_printf("%s       Waker PID  \n",tab);
+                        pid_printf(pidfile, "%s       Waker PID  \n",tab);
                         foreach_hash_entry_l((void **)slpinfop->scd_wpid_hash,
                                                 WPID_HSIZE,
                                                 print_scd_slp_info,
-                                                slp_scd_sort_by_time, 0, NULL);
+                                                slp_scd_sort_by_time, 0, pidfile);
                     }
 
         }
@@ -1455,10 +1473,12 @@ print_slp_info_csv(void *arg1, void *arg2)
 }
 
 int
-print_stktrc_info(void *p1, void *p2)
+print_stktrc_info(void *arg1, void *arg2)
 {
-	stktrc_info_t *stktrcp = (stktrc_info_t *)p1;
-	print_stktrc_args_t *print_stktrc_args = (print_stktrc_args_t *)p2;
+	stktrc_info_t *stktrcp = (stktrc_info_t *)arg1;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+	FILE *pidfile = (FILE *)vararg->arg1;
+	print_stktrc_args_t *print_stktrc_args = (print_stktrc_args_t *)vararg->arg2;
 	sched_info_t *schedp;
 	pid_info_t *pidp;
 	vtxt_preg_t *pregp;
@@ -1519,9 +1539,9 @@ print_stktrc_info(void *p1, void *p2)
 	if (schedp) {
         	wpct = ((float)stktrcp->slptime *100.0)/(schedp->sched_stats.T_sleep_time);
         	avg = MSECS(stktrcp->slptime)/stktrcp->cnt;
-        	pid_printf("%s%8d %6.2f %9.3f ",tab, stktrcp->cnt, wpct, avg); 
+        	pid_printf(pidfile, "%s%8d %6.2f %9.3f ",tab, stktrcp->cnt, wpct, avg); 
 	} else {
-		pid_printf("%s%8d ", tab, stktrcp->cnt);
+		pid_printf(pidfile, "%s%8d ", tab, stktrcp->cnt);
 	}	
 
         for (i=0;i<stktrcp->stklen; i++) {
@@ -1529,15 +1549,15 @@ print_stktrc_info(void *p1, void *p2)
 		if (key == 0ll)  continue;
 
 		if (key == STACK_CONTEXT_USER) {
-			pid_printf ("  |");
+			pid_printf (pidfile, "  |");
 		} else if ((globals->symtable) && (key < globals->nsyms-1)) {
 			if (globals->symtable[key].nameptr) {
-				pid_printf ("  %s", globals->symtable[key].nameptr);
+				pid_printf (pidfile, "  %s", globals->symtable[key].nameptr);
 			} else {
-				pid_printf ("  %p", globals->symtable[key].addr);
+				pid_printf (pidfile, "  %p", globals->symtable[key].addr);
 			}
 		} else if (key == UNKNOWN_SYMIDX) {
-			pid_printf ("  unknown");
+			pid_printf (pidfile, "  unknown");
 	        } else if (stktrcp->pidp) {
                         pidp = stktrcp->pidp;
                         if (pidp->PID != pidp->tgid) {
@@ -1546,33 +1566,34 @@ print_stktrc_info(void *p1, void *p2)
 
                         if (pregp = find_vtext_preg(pidp, key)) {
                                 if (sym = symlookup(pregp, key, &offset)) {
-                                	pid_printf ("  %s", dmangle(sym));
+                                	pid_printf (pidfile, "  %s", dmangle(sym));
                                 } else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
-                                	pid_printf ("  %s", dmangle(sym));
+                                	pid_printf (pidfile, "  %s", dmangle(sym));
 				} else {
-                                	pid_printf ("  0x%llx", sym);
+                                	pid_printf (pidfile, "  0x%llx", sym);
 				}
                         } else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
-                                pid_printf ("  %s", dmangle(sym));
+                                pid_printf (pidfile, "  %s", dmangle(sym));
                         } else {
-                                pid_printf ("  0x%llx", key);
+                                pid_printf (pidfile, "  0x%llx", key);
                         }
                 } else {
-                        pid_printf ("  0x%llx", key);
+                        pid_printf (pidfile, "  0x%llx", key);
                 }
         }
 	BLACK_FONT;
-        pid_printf("\n");
+        pid_printf(pidfile, "\n");
         return 0;
 
 }
 
 void
-sleep_report(void *arg1, void *arg2, int (*sort_func)(const void *, const void *), void *v)
+sleep_report(void *arg1, void *arg2, int (*sort_func)(const void *, const void *), FILE *pidfile)
 {
 	slp_info_t	**slp_hash = arg1;
         sched_info_t    *schedp = (sched_info_t *)arg2;
         sched_stats_t   *statsp;
+	var_arg_t	vararg;
         int             i;
 
 
@@ -1580,49 +1601,55 @@ sleep_report(void *arg1, void *arg2, int (*sort_func)(const void *, const void *
 
 	statsp = &schedp->sched_stats;
 
-        pid_printf ("%sKernel Functions calling sleep()", tab);
-	if (nsym && (nsym != 0x7fffffff)) pid_printf (" - Top %d Functions", nsym);
-	pid_printf ("\n");
+        pid_printf (pidfile, "%sKernel Functions calling sleep()", tab);
+	if (nsym && (nsym != 0x7fffffff)) pid_printf (pidfile, " - Top %d Functions", nsym);
+	pid_printf (pidfile, "\n");
 
 	if (globals->schedp == schedp) {
-		pid_printf ("%s   Count     Pct    SlpTime    Slp%%   Msec/Slp   MaxMsecs  Func\n", tab);
+		pid_printf (pidfile, "%s   Count     Pct    SlpTime    Slp%%   Msec/Slp   MaxMsecs  Func\n", tab);
 	} else { 
-		pid_printf ("%s   Count     Pct    SlpTime    Slp%% TotalTime%%   Msec/Slp   MaxMsecs  Func\n", tab);
+		pid_printf (pidfile, "%s   Count     Pct    SlpTime    Slp%% TotalTime%%   Msec/Slp   MaxMsecs  Func\n", tab);
 	}	
-	foreach_hash_entry_l((void **)slp_hash, SLP_HSIZE, print_slp_info, sort_func, nsym, statsp);
+	vararg.arg1 = pidfile;
+	vararg.arg2 = statsp;
+	foreach_hash_entry_l((void **)slp_hash, SLP_HSIZE, print_slp_info, sort_func, nsym, &vararg);
 
 }
 
 void
-stktrc_report(void *arg1, void *arg2, int (*sort_func)(const void *, const void *), void *v)
+stktrc_report(void *arg1, void *arg2, int (*sort_func)(const void *, const void *), FILE *pidfile)
 {
 	stktrc_info_t	**stktrc_hash = arg1;
         sched_info_t    *schedp = (sched_info_t *)arg2;
 	print_stktrc_args_t print_stktrc_args;
+	var_arg_t	vararg;
 
 	print_stktrc_args.schedp = schedp;
 	print_stktrc_args.warnflag = 0;
 
 	if (schedp) {
-		pid_printf("\n%sProcess Sleep stack traces (sort by %% of total wait time)", tab);
+		pid_printf(pidfile, "\n%sProcess Sleep stack traces (sort by %% of total wait time)", tab);
 	} else {
-		pid_printf("\n%sProcess RunQ stack traces (sort by count)", tab);
+		pid_printf(pidfile, "\n%sProcess RunQ stack traces (sort by count)", tab);
 	}
 		
-	if (nsym && (nsym != 0x7fffffff)) pid_printf (" - Top %d stack traces", nsym);
-	pid_printf("\n");
+	if (nsym && (nsym != 0x7fffffff)) pid_printf (pidfile, " - Top %d stack traces", nsym);
+	pid_printf(pidfile, "\n");
 
-        pid_printf("%s   count%s Stack trace\n", tab, schedp ? "    wpct      avg" : " ");
-        if (schedp) pid_printf("%s              %%     msecs\n", tab);
-        pid_printf("%s===============================================================\n",tab);
+        pid_printf(pidfile, "%s   count%s Stack trace\n", tab, schedp ? "    wpct      avg" : " ");
+        if (schedp) pid_printf(pidfile, "%s              %%     msecs\n", tab);
+        pid_printf(pidfile, "%s===============================================================\n",tab);
 
-        foreach_hash_entry((void **)stktrc_hash, STKTRC_HSIZE, print_stktrc_info, sort_func, nsym, (void *)&print_stktrc_args);
+	vararg.arg1 = pidfile;
+	vararg.arg2 = &print_stktrc_args;
+        foreach_hash_entry((void **)stktrc_hash, STKTRC_HSIZE, print_stktrc_info, sort_func, nsym, (void *)&vararg);
 }
 
 int
 wait_scallwakers_json(void *arg1,void *arg2)
 {
         scd_waker_info_t *scdwinfop = (scd_waker_info_t *)arg1;
+	FILE *pid_jsonfile = (FILE *)arg2;
         uint64 pid;
         char waker[128];
         char waker_link[128];
@@ -1643,10 +1670,15 @@ int
 wait_scallsym_json(void *arg1, void *arg2)
 {
         slp_info_t *slpinfop = (slp_info_t *)arg1;
-        sched_stats_t *statsp = (sched_stats_t *)arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+	sched_stats_t *statsp = (sched_stats_t *)vararg->arg1;
+        FILE *pid_jsonfile = (FILE *)vararg->arg2;
+	char *json_detail = (char *)vararg->arg3;
+        /* sched_stats_t *statsp = (sched_stats_t *)arg2; */
         uint64 idx;
         char *symb_p = NULL;
         char *c_p;
+	char json_temp[1024];
 
         if (slpinfop->count == 0) return 0;
 
@@ -1692,7 +1724,7 @@ wait_scallsym_json(void *arg1, void *arg2)
                 foreach_hash_entry_l((void **)slpinfop->scd_wpid_hash,
                         WPID_HSIZE,
                         wait_scallwakers_json,
-                        slp_scd_sort_by_time, 0, NULL);
+                        slp_scd_sort_by_time, 0, pid_jsonfile);
                 NULL_OBJ_PRINT;
                 END_KIDS_PRINT;
         }
@@ -1700,16 +1732,18 @@ wait_scallsym_json(void *arg1, void *arg2)
         return 0;
 }
 
-
-
 int
 print_slp_info_json(void *arg1, void *arg2)
 {
         slp_info_t *slpinfop = (slp_info_t *)arg1;
-        sched_stats_t *statsp = (sched_stats_t *)arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+        sched_stats_t *statsp = (sched_stats_t *)vararg->arg1;
+	FILE *pid_jsonfile = (FILE *)vararg->arg2;
+	char *json_detail = (char *)vararg->arg3;
         uint64 idx;
         char *symb_p = NULL;
         char *c_p;
+	char json_temp[1024];
 
         if (slpinfop->count == 0) return 0;
 
@@ -1744,20 +1778,21 @@ print_slp_info_json(void *arg1, void *arg2)
 }
 
 void
-wait_summary_json(void *arg1, void *arg2, int (*sort_func)(const void *, const void *))
+wait_summary_json(void *arg1, void *arg2, int (*sort_func)(const void *, const void *), FILE *pid_jsonfile, char *json_detail)
 {
         slp_info_t      **slp_hash = arg1;
         sched_info_t    *schedp = (sched_info_t *)arg2;
         sched_stats_t   *statsp;
         int             i;
+	var_arg_t vararg;
+	char 		json_temp[1024];
 
 
         if (slp_hash == NULL) return;
+
         bzero(json_detail,8192);
         statsp = &schedp->sched_stats;
 
-        bzero(json_temp, 4096);
-        bzero(json_detail, 8192);
         sprintf(json_temp, "\\n%sKernel Functions calling sleep()", tab);
         strcat(json_detail,json_temp);
         if (nsym && (nsym != 0x7fffffff)) {
@@ -1768,7 +1803,10 @@ wait_summary_json(void *arg1, void *arg2, int (*sort_func)(const void *, const v
         sprintf(json_temp, "\\n%s   Count     Pct    SlpTime    Slp%% TotalTime%%   Msec/Slp   MaxMsecs  Func\\n", tab);
         strcat(json_detail,json_temp);
 
-        foreach_hash_entry_l((void **)slp_hash, SLP_HSIZE, print_slp_info_json, sort_func, nsym, statsp);
+	vararg.arg1 = statsp;
+	vararg.arg2 = pid_jsonfile;
+	vararg.arg3 = &json_detail[0];
+        foreach_hash_entry_l((void **)slp_hash, SLP_HSIZE, print_slp_info_json, sort_func, nsym, &vararg);
 
 }
 
@@ -1776,10 +1814,13 @@ int
 runq_scall_json(void *arg1, void *arg2)
 {
         syscall_info_t *syscallp = arg1;
-        pid_info_t      *pidp = arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+        FILE *pid_jsonfile = (FILE *)vararg->arg2;
+	char *json_detail = (char *)vararg->arg3;
         syscall_stats_t *statp = &syscallp->stats;
         sched_stats_t *sstatp = &syscallp->sched_stats;
         short *syscall_index;
+	char json_temp[1024];
 
         if ((statp->count == 0) || (sstatp->T_sys_time == 0)) return 0;
 
@@ -1843,10 +1884,13 @@ int
 runsys_scall_json(void *arg1, void *arg2)
 {
         syscall_info_t *syscallp = arg1;
-        pid_info_t      *pidp = arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+        FILE *pid_jsonfile = (FILE *)vararg->arg2;
+	char *json_detail = (char *)vararg->arg3;
         syscall_stats_t *statp = &syscallp->stats;
         sched_stats_t *sstatp = &syscallp->sched_stats;
         short  *syscall_index;
+	char json_temp[1024];
 
         if ((statp->count == 0) || (sstatp->T_sys_time == 0)) return 0;
 
@@ -1907,15 +1951,17 @@ runsys_scall_json(void *arg1, void *arg2)
         return 0;
 }
 
-
 int
 wait_scall_json(void *arg1, void *arg2)
 {
         syscall_info_t *syscallp = arg1;
-        pid_info_t      *pidp = arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+	FILE *pid_jsonfile = (FILE *)vararg->arg2;
+	char *json_detail = (char *)vararg->arg3;
+        short  *syscall_index;
         syscall_stats_t *statp = &syscallp->stats;
         sched_stats_t *sstatp = &syscallp->sched_stats;
-        short  *syscall_index;
+	char json_temp[1024];
 
         if ((statp->count == 0) || (sstatp->T_sleep_time == 0)) return 0;
 
@@ -1971,10 +2017,10 @@ wait_scall_json(void *arg1, void *arg2)
 
         if (IS_LIKI && syscallp->slp_hash) {
                 ADD_KIDS_PRINT;
-                                foreach_hash_entry_l((void **)syscallp->slp_hash,
-                                                SLP_HSIZE,
-                                                wait_scallsym_json,
-                                                slp_sort_by_time, 0, NULL);
+                foreach_hash_entry_l((void **)syscallp->slp_hash,
+                        SLP_HSIZE,
+                        wait_scallsym_json,
+                        slp_sort_by_time, 0, vararg);
                 NULL_OBJ_PRINT;
                 END_KIDS_PRINT;
         }
@@ -1985,14 +2031,17 @@ wait_scall_json(void *arg1, void *arg2)
 }
 
 void
-pid_scall_json(pid_info_t *pidp, int type, sched_stats_t *statsp) {
-	/* if ((pidp->syscall_cnt == 0) && (statsp->uflt_sleep_cnt == 0)) return; */
+pid_scall_json(pid_info_t *pidp, int type, sched_stats_t *statsp, var_arg_t *vararg) {
 
+	FILE *pid_jsonfile = (FILE *)vararg->arg2;
+	char *json_detail = (char *)vararg->arg3;
+
+	/* if ((pidp->syscall_cnt == 0) && (statsp->uflt_sleep_cnt == 0)) return; */
         switch (type) {
             case JSRUNQ:
                 START_OBJ_PRINT("Usr preempt", SECS(statsp->T_runq_usrpri_time), (statsp->C_runq_usrpri_cnt), JSRUNQ, 0, "");
 		ENDCURR_OBJ_PRINT;
-                foreach_hash_entry((void **)pidp->scallhash, SYSCALL_HASHSZ, runq_scall_json, syscall_sort_by_time, 0, pidp);
+                foreach_hash_entry((void **)pidp->scallhash, SYSCALL_HASHSZ, runq_scall_json, syscall_sort_by_time, 0, vararg);
                 NULL_OBJ_PRINT;
                 break;
 /*          case JSRUNNING_USER:
@@ -2000,18 +2049,18 @@ pid_scall_json(pid_info_t *pidp, int type, sched_stats_t *statsp) {
                 break;
 */
             case JSRUNNING_SYS:
-                foreach_hash_entry((void **)pidp->scallhash, SYSCALL_HASHSZ, runsys_scall_json, syscall_sort_by_time, 0, pidp);
+                foreach_hash_entry((void **)pidp->scallhash, SYSCALL_HASHSZ, runsys_scall_json, syscall_sort_by_time, 0, vararg);
                 NULL_OBJ_PRINT;
                 break;
             case JSWAITING:
 		START_OBJ_PRINT("No_scall/Fault/Trap", SECS(statsp->T_uflt_sleep_time), statsp->C_uflt_sleep_cnt, JSWAITING, json_detail, "");
 		    ADD_KIDS_PRINT;
-		    foreach_hash_entry_l((void **)pidp->user_slp_hash, SLP_HSIZE, wait_scallsym_json, slp_sort_by_time, 0, NULL);
+		    foreach_hash_entry_l((void **)pidp->user_slp_hash, SLP_HSIZE, wait_scallsym_json, slp_sort_by_time, 0, vararg);
 		    NULL_OBJ_PRINT;
 		    END_KIDS_PRINT;
 		ENDCURR_OBJ_PRINT;
 
-                foreach_hash_entry((void **)pidp->scallhash, SYSCALL_HASHSZ, wait_scall_json, syscall_sort_by_time, 0, pidp);
+                foreach_hash_entry((void **)pidp->scallhash, SYSCALL_HASHSZ, wait_scall_json, syscall_sort_by_time, 0, vararg);
                 NULL_OBJ_PRINT;
                 break;
             default:
@@ -2020,8 +2069,9 @@ pid_scall_json(pid_info_t *pidp, int type, sched_stats_t *statsp) {
 }
 
 void
-runq_summary_json(sched_stats_t *statp)
+runq_summary_json(sched_stats_t *statp, char *json_detail)
 {
+	char json_temp[1024];
 
         bzero(json_detail,8192);
         sprintf(json_temp, "\\n    ******** PID RUNQ LATENCY REPORT ********\\n");
@@ -2047,9 +2097,10 @@ runq_summary_json(sched_stats_t *statp)
 }
 
 void
-running_summary_json(sched_stats_t *statp)
+running_summary_json(sched_stats_t *statp, char *json_detail)
 {
 	uint64 total_time;
+	char json_temp[1024];
         bzero(json_detail,8192);
 	statp->T_irq_time = statp->T_hardirq_user_time + statp->T_hardirq_sys_time +
                    statp->T_hardirq_user_time + statp->T_hardirq_sys_time;
@@ -2076,7 +2127,7 @@ running_summary_json(sched_stats_t *statp)
 
 
 void
-pid_json_print_summary(pid_info_t *pidp, sched_stats_t *statp)
+pid_json_print_summary(FILE *pid_jsonfile, pid_info_t *pidp, sched_stats_t *statp)
 {
 
         char json_pidname[128];
@@ -2084,6 +2135,14 @@ pid_json_print_summary(pid_info_t *pidp, sched_stats_t *statp)
         uint64  total_time;
         pid_info_t *ppidp, *tgidp;
         int print_irq_stats = 0;
+	char json_detail[8192];
+	char json_temp[4096];
+	var_arg_t vararg;
+
+
+	vararg.arg1 = NULL;
+	vararg.arg2 = pid_jsonfile;
+	vararg.arg3 = &json_detail[0];
 
 	statp->T_irq_time = statp->T_hardirq_user_time + statp->T_hardirq_sys_time +
 		   statp->T_softirq_user_time + statp->T_softirq_sys_time;
@@ -2182,34 +2241,33 @@ pid_json_print_summary(pid_info_t *pidp, sched_stats_t *statp)
         ** For JSON format rules/details see http://www.json.org
         */
 
-
-          if (schedp->rqh) runq_summary_json(statp);
+          if (schedp->rqh) runq_summary_json(statp, json_detail);
           START_OBJ_PRINT("RUNQ", SECS(statp->T_runq_time), statp->C_switch_cnt, JSRUNQ, json_detail, "");
           ADD_KIDS_PRINT;
-            pid_scall_json(pidp, JSRUNQ, statp);
+            pid_scall_json(pidp, JSRUNQ, statp, &vararg);
           END_KIDS_PRINT;
           ENDCURR_OBJ_PRINT;
 
-          running_summary_json(statp);
+          running_summary_json(statp, &json_detail[0]);
           START_OBJ_PRINT("RUNNING", SECS(statp->T_run_time), statp->C_preempt_cnt, JSRUNNING, json_detail, "");
           ADD_KIDS_PRINT;
             START_OBJ_PRINT("Userspace", SECS(statp->T_user_time), statp->C_preempt_cnt, JSRUNNING, json_detail, "");
             ADD_KIDS_PRINT;
-              pid_scall_json(pidp, JSRUNNING_USER, statp);
+              pid_scall_json(pidp, JSRUNNING_USER, statp, &vararg);
             END_KIDS_PRINT;
             ENDCURR_OBJ_PRINT;
             START_OBJ_PRINT("System", SECS(statp->T_sys_time), statp->C_preempt_cnt, JSRUNNING, json_detail, "");
             ADD_KIDS_PRINT;
-              pid_scall_json(pidp, JSRUNNING_SYS, statp);
+              pid_scall_json(pidp, JSRUNNING_SYS, statp, &vararg);
             END_KIDS_PRINT;
             ENDLAST_OBJ_PRINT;
           END_KIDS_PRINT;
           ENDCURR_OBJ_PRINT;
 
-	  if (pidp->slp_hash || pidp->user_slp_hash) wait_summary_json(pidp->slp_hash, schedp, slp_sort_by_time);
+	  if (pidp->slp_hash || pidp->user_slp_hash) wait_summary_json(pidp->slp_hash, schedp, slp_sort_by_time, pid_jsonfile, &json_detail[0]);
 	  START_OBJ_PRINT("WAITING", SECS(statp->T_sleep_time), statp->C_sleep_cnt, JSWAITING, json_detail, "");
           ADD_KIDS_PRINT;
-            pid_scall_json(pidp, JSWAITING, statp);
+            pid_scall_json(pidp, JSWAITING, statp, &vararg);
           END_KIDS_PRINT;
           ENDLAST_OBJ_PRINT;
 
@@ -2218,20 +2276,20 @@ pid_json_print_summary(pid_info_t *pidp, sched_stats_t *statp)
 }
 
 void 
-print_runq_latency_report(sched_info_t *schedp)
+print_runq_latency_report(sched_info_t *schedp, FILE *pidfile)
 {
 	sched_stats_t *statp = &schedp->sched_stats;
 
-        pid_printf("\n%s******** PID RUNQ LATENCY REPORT ********\n", tab);
-        pid_printf ("%sRunQTime   : %9.6f  RunQCnt   : %9d   AvRunQTime : %9.6f\n",  tab,
+        pid_printf(pidfile, "\n%s******** PID RUNQ LATENCY REPORT ********\n", tab);
+        pid_printf (pidfile, "%sRunQTime   : %9.6f  RunQCnt   : %9d   AvRunQTime : %9.6f\n",  tab,
                 SECS(statp->T_runq_time),
 		statp->C_runq_cnt,
 		statp->C_runq_cnt ? SECS(statp->T_runq_time / statp->C_runq_cnt) : 0.0);
-	pid_printf ("%sRunQPri    : %9.6f  RunQPriCt : %9d   AvRunQPri  : %9.6f\n", tab,
+	pid_printf (pidfile, "%sRunQPri    : %9.6f  RunQPriCt : %9d   AvRunQPri  : %9.6f\n", tab,
 		SECS(statp->T_runq_pri_time),
 		statp->C_runq_pri_cnt,
 		statp->C_runq_pri_cnt ? SECS(statp->T_runq_pri_time / statp->C_runq_pri_cnt) : 0.0);
-	pid_printf ("%sRunQIdle   : %9.6f  RunQIdleCt: %9d   AvRunQIdle : %9.6f\n", tab,
+	pid_printf (pidfile, "%sRunQIdle   : %9.6f  RunQIdleCt: %9d   AvRunQIdle : %9.6f\n", tab,
 		SECS(statp->T_runq_idle_time),
 		statp->C_runq_idle_cnt,
 		statp->C_runq_idle_cnt ? SECS(statp->T_runq_idle_time / statp->C_runq_idle_cnt) : 0.0);
@@ -2240,7 +2298,7 @@ print_runq_latency_report(sched_info_t *schedp)
 }
 
 void
-print_runq_histogram(sched_info_t *schedp)
+print_runq_histogram(sched_info_t *schedp, FILE *pidfile)
 {
         int i, j, avg;
         runq_info_t *rqinfop;
@@ -2249,8 +2307,8 @@ print_runq_histogram(sched_info_t *schedp)
         if (schedp->rqh == NULL)
                 return;
 
-        pid_printf("\n    runq latency in Usecs\n");
-        pid_printf("    cpu    <5     <10    <20    <50    <100   <500   <1000  <2000  <10000 <20000 >20000\n");
+        pid_printf(pidfile, "\n    runq latency in Usecs\n");
+        pid_printf(pidfile, "    cpu    <5     <10    <20    <50    <100   <500   <1000  <2000  <10000 <20000 >20000\n");
 
         for (i=0;i<MAXCPUS;i++) {
                 rqinfop = (runq_info_t *)find_entry((lle_t **)schedp->rqh, i, CPU_HASH(i));
@@ -2258,14 +2316,14 @@ print_runq_histogram(sched_info_t *schedp)
                 if (rqinfop == NULL) continue;
 		if (rqinfop->cnt == 0) continue;
 
-                pid_printf ("    %-3d  :", i);
+                pid_printf (pidfile, "    %-3d  :", i);
                 for (j = 0; j < RUNQ_NBUCKETS; j++) {
-                        pid_printf(" %-6d", rqinfop->rqhist[j]);
+                        pid_printf(pidfile, " %-6d", rqinfop->rqhist[j]);
                 }
-                pid_printf ("\n");
+                pid_printf (pidfile, "\n");
 
         }
-        pid_printf("\n    runq latency in Usecs\n    cpu   Avg.      Max       Total_time  Total_cnt  Migrations  NODE_migr_in  NODE_migr_out\n");
+        pid_printf(pidfile, "\n    runq latency in Usecs\n    cpu   Avg.      Max       Total_time  Total_cnt  Migrations  NODE_migr_in  NODE_migr_out\n");
 
         for (i=0;i<MAXCPUS;i++) {
                 rqinfop = (runq_info_t *)find_entry((lle_t **)schedp->rqh, i, CPU_HASH(i));
@@ -2277,7 +2335,7 @@ print_runq_histogram(sched_info_t *schedp)
                 else
                         continue;
 
-                pid_printf("    %-3d   %-9d %-9lld %-11lld %-10d %-11d %-13d %-14d\n",
+                pid_printf(pidfile, "    %-3d   %-9d %-9lld %-11lld %-10d %-11d %-13d %-14d\n",
                                 i,
                                 avg,
                                 rqinfop->max_time,
@@ -2292,7 +2350,7 @@ print_runq_histogram(sched_info_t *schedp)
 }
 
 void
-msr_report(pid_info_t *pidp, void *v)
+msr_report(pid_info_t *pidp, FILE *pidfile)
 {
 	sched_info_t *schedp = pidp->schedp;
 	unsigned long *msrptr;
@@ -2302,9 +2360,9 @@ msr_report(pid_info_t *pidp, void *v)
 
 	if (msrptr[0] == 0) return;
 
-	pid_printf ("\n    ******** CPU MSR REPORT *******\n");
-	pid_printf ("        LLC_ref   LLC_hits  LLC_hit%%     Instrs     Cycles      CPI   Avg_MHz  SMI_cnt\n");
-	pid_printf ("     %9lldk %9lldk %8.2f%% %9lldm %9lldm %8.2f   %7.2f     %4lld\n",
+	pid_printf (pidfile, "\n    ******** CPU MSR REPORT *******\n");
+	pid_printf (pidfile, "        LLC_ref   LLC_hits  LLC_hit%%     Instrs     Cycles      CPI   Avg_MHz  SMI_cnt\n");
+	pid_printf (pidfile, "     %9lldk %9lldk %8.2f%% %9lldm %9lldm %8.2f   %7.2f     %4lld\n",
 			msrptr[LLC_REF]/1000, (msrptr[LLC_REF]-msrptr[LLC_MISSES])/1000,
 			(msrptr[LLC_REF]-msrptr[LLC_MISSES])*100.0 / msrptr[LLC_REF],
 			msrptr[RET_INSTR]/1000000, msrptr[CYC_NOHALT_CORE]/1000000,
@@ -2315,7 +2373,7 @@ msr_report(pid_info_t *pidp, void *v)
 
 
 int
-sched_report(void *arg1, void *v)
+sched_report(void *arg1, FILE *pidfile, FILE *pid_jsonfile, FILE *pid_wtree_jsonfile)
 {
 	pid_info_t *pidp = arg1;
         sched_info_t *schedp = pidp->schedp;
@@ -2326,9 +2384,10 @@ sched_report(void *arg1, void *v)
         char temp[4096];
         char detail[8192];
         char json_pidname[128];
+	var_arg_t vararg;
 
         coop_info_t coopinfo;
-        if (schedp == NULL) {
+        if ((schedp == NULL) || (schedp && (schedp->cpu == -1))) {
 		csv_printf(pid_csvfile, ",IDLE,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0,0,0,0,0,0,0,0");
                 if (pid_jsonfile) { 
 			fclose(pid_jsonfile);
@@ -2339,9 +2398,9 @@ sched_report(void *arg1, void *v)
         bzero(&coopinfo,sizeof(coop_info_t));
 	coopinfo.rep_pidp =  pidp;
 
-	cpuinfop = FIND_CPUP(globals->cpu_hash, schedp->cpu);
-
 	if (debug) printf ("sched_report: 0x%llx\n", schedp);
+
+	cpuinfop = FIND_CPUP(globals->cpu_hash, schedp->cpu);
 
         statp = &schedp->sched_stats;
 	statp->T_irq_time = statp->T_hardirq_user_time + statp->T_hardirq_sys_time + 
@@ -2350,58 +2409,58 @@ sched_report(void *arg1, void *v)
 
 	print_irq_stats = statp->C_softirq_cnt + statp->C_hardirq_cnt;
 
-        pid_printf ("\n%s********* SCHEDULER ACTIVITY REPORT ********\n", tab);
+        pid_printf (pidfile, "\n%s********* SCHEDULER ACTIVITY REPORT ********\n", tab);
 
-        pid_printf ("%sRunTime    : %9.6f  SysTime   : %9.6f   UserTime   : %9.6f\n",  tab,
+        pid_printf (pidfile, "%sRunTime    : %9.6f  SysTime   : %9.6f   UserTime   : %9.6f\n",  tab,
                 SECS(statp->T_run_time),
                 SECS(statp->T_sys_time),
                 SECS(statp->T_user_time));
 	if (STEAL_ON) 
-		pid_printf ("%sStealTime  : %9.6f\n",  tab,
+		pid_printf (pidfile, "%sStealTime  : %9.6f\n",  tab,
                 	SECS(statp->T_stealtime));
-        pid_printf ("%sSleepTime  : %9.6f  Sleep Cnt : %9d   Wakeup Cnt : %9d\n", tab,
+        pid_printf (pidfile, "%sSleepTime  : %9.6f  Sleep Cnt : %9d   Wakeup Cnt : %9d\n", tab,
                 SECS(statp->T_sleep_time),
                 statp->C_sleep_cnt,
                 statp->C_wakeup_cnt);
-        pid_printf ("%sRunQTime   : %9.6f  Switch Cnt: %9d   PreemptCnt : %9d\n",  tab,
+        pid_printf (pidfile, "%sRunQTime   : %9.6f  Switch Cnt: %9d   PreemptCnt : %9d\n",  tab,
                 SECS(statp->T_runq_time),
                 statp->C_switch_cnt,
                 statp->C_preempt_cnt);
 	if (print_irq_stats > 0) {
-	    pid_printf ("%sHardIRQ    : %9.6f  HardIRQ-S : %9.6f    HardIRQ-U : %9.6f\n", tab,
+	    pid_printf (pidfile, "%sHardIRQ    : %9.6f  HardIRQ-S : %9.6f    HardIRQ-U : %9.6f\n", tab,
 		SECS(statp->T_hardirq_user_time + statp->T_hardirq_sys_time),
 		SECS(statp->T_hardirq_sys_time),
 		SECS(statp->T_hardirq_user_time));	
-	    pid_printf ("%sSoftIRQ    : %9.6f  SoftIRQ-S : %9.6f    SoftIRQ-U : %9.6f\n", tab,
+	    pid_printf (pidfile, "%sSoftIRQ    : %9.6f  SoftIRQ-S : %9.6f    SoftIRQ-U : %9.6f\n", tab,
 		SECS(statp->T_softirq_user_time + statp->T_softirq_sys_time),
 		SECS(statp->T_softirq_sys_time),
 		SECS(statp->T_softirq_user_time));
 	}
-        pid_printf ("%sLast CPU   : %9d  CPU Migrs : %9d   NODE Migrs : %9d\n", tab,
+        pid_printf (pidfile, "%sLast CPU   : %9d  CPU Migrs : %9d   NODE Migrs : %9d\n", tab,
                 schedp->cpu,
                 schedp->cpu_migrations,
 		schedp->ldom_migrations);
         if (IS_LIKI) {
-		pid_printf ("%sPolicy     : %-12s", tab, sched_policy_name[schedp->policy]);
+		pid_printf (pidfile, "%sPolicy     : %-12s", tab, sched_policy_name[schedp->policy]);
 		if (IS_LIKI_V2_PLUS) {
-			pid_printf ("     vss :  %8lld          rss :  %8lld", pidp->vss, pidp->rss);
+			pid_printf (pidfile, "     vss :  %8lld          rss :  %8lld", pidp->vss, pidp->rss);
 		}
-		pid_printf ("\n");
+		pid_printf (pidfile, "\n");
 	}
 
 	if (total_time) {
-		pid_printf ("\n%sbusy    : %9.2f%%\n", tab, (statp->T_run_time*100.0) / total_time );
-		pid_printf ("%s  sys   : %9.2f%%\n", tab, (statp->T_sys_time*100.0) / total_time );
-		pid_printf ("%s  user  : %9.2f%%\n", tab, (statp->T_user_time*100.0) / total_time );
+		pid_printf (pidfile, "\n%sbusy    : %9.2f%%\n", tab, (statp->T_run_time*100.0) / total_time );
+		pid_printf (pidfile, "%s  sys   : %9.2f%%\n", tab, (statp->T_sys_time*100.0) / total_time );
+		pid_printf (pidfile, "%s  user  : %9.2f%%\n", tab, (statp->T_user_time*100.0) / total_time );
 		if (STEAL_ON) {
-			pid_printf ("%s  steal : %9.2f%%\n", tab, (statp->T_stealtime*100.0) / total_time );
+			pid_printf (pidfile, "%s  steal : %9.2f%%\n", tab, (statp->T_stealtime*100.0) / total_time );
 		}
 		if (print_irq_stats > 0) {
-		    pid_printf ("%s  irq   : %9.2f%%\n", tab, 
+		    pid_printf (pidfile, "%s  irq   : %9.2f%%\n", tab, 
 			(statp->T_irq_time * 100.0) / total_time);
 		}
-		pid_printf ("%srunQ    : %9.2f%%\n", tab, (statp->T_runq_time*100.0) / total_time );
-		pid_printf ("%ssleep   : %9.2f%%\n", tab, (statp->T_sleep_time*100.0) / total_time );
+		pid_printf (pidfile, "%srunQ    : %9.2f%%\n", tab, (statp->T_runq_time*100.0) / total_time );
+		pid_printf (pidfile, "%ssleep   : %9.2f%%\n", tab, (statp->T_sleep_time*100.0) / total_time );
 	}
 
 	csv_printf(pid_csvfile, ",%s,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%d,%d,%d,%d,%7.6f,%d,%d,%d,%d,%d,%d",
@@ -2425,71 +2484,75 @@ sched_report(void *arg1, void *v)
 		pidp->vss,
 		pidp->rss);
 
-	if (msr_flag) msr_report(pidp, NULL);
+	if (msr_flag) msr_report(pidp, pidfile);
 
         if (pid_jsonfile) {
-                pid_json_print_summary(pidp, statp);
+                pid_json_print_summary(pid_jsonfile, pidp, statp);
         }
 
 	if (pid_wtree_jsonfile) {
-                wtree_build(pidp);
+                wtree_build(pidp, pid_wtree_jsonfile);
         }
 
-	print_runq_latency_report(schedp);
+	print_runq_latency_report(schedp, pidfile);
 	if (runq_histogram) {
-		print_runq_histogram(schedp);
+		print_runq_histogram(schedp, pidfile);
 	}
 
         if (npid) {
-		pid_printf ("\n%s******** COOPERATING/COMPETING TASKS REPORT ********\n", tab);
+		pid_printf (pidfile, "\n%s******** COOPERATING/COMPETING TASKS REPORT ********\n", tab);
                 if (npid == ALL) {
-                        pid_printf ("\n%sTasks woken up by this task\n", tab);
+                        pid_printf (pidfile, "\n%sTasks woken up by this task\n", tab);
                 } else {
-                        pid_printf ("\n%sTasks woken up by this task (Top %d)\n", tab, npid);
+                        pid_printf (pidfile, "\n%sTasks woken up by this task (Top %d)\n", tab, npid);
                 }
                 coopinfo.elf = pidp->elf;
 
-                pid_printf ("%s       PID    Count   SlpPcnt     Slptime  Command ", tab);
+                pid_printf (pidfile, "%s       PID    Count   SlpPcnt     Slptime  Command ", tab);
                 if (coop_detail_enabled) 
-			pid_printf ("          WakerSyscall+arg0                    SleeperSyscall+arg0                Sleep function\n");
-		pid_printf ("\n");
+			pid_printf (pidfile, "          WakerSyscall+arg0                    SleeperSyscall+arg0                Sleep function\n");
+		pid_printf (pidfile, "\n");
 
                 if (schedp->sched_stats.C_wakeup_cnt != 0) {
                         coopinfo.which = WAKER;
                         coopinfo.cnt = schedp->sched_stats.C_wakeup_cnt;
+			vararg.arg1 = pidfile;
+			vararg.arg2 = &coopinfo;
                         foreach_hash_entry((void **)schedp->setrq_tgt_hash, WPID_HSIZE,
-                                        sched_print_setrq_pids, setrq_sort_by_sleep_time, npid, (void *)&coopinfo);
+                                        sched_print_setrq_pids, setrq_sort_by_sleep_time, npid, (void *)&vararg);
                 } else {
-                        pid_printf ("%s    None\n", tab);
+                        pid_printf (pidfile, "%s    None\n", tab);
                 }
 
                 if (npid == ALL) {
-                        pid_printf ("\n%sTasks that have woken up this task\n", tab);
+                        pid_printf (pidfile, "\n%sTasks that have woken up this task\n", tab);
                 } else  {
-                        pid_printf ("\n%sTasks that have woken up this task(Top %d)\n", tab, npid);
+                        pid_printf (pidfile, "\n%sTasks that have woken up this task(Top %d)\n", tab, npid);
                 }
 
-                pid_printf ("%s       PID    Count   SlpPcnt     Slptime  Command ", tab);
+                pid_printf (pidfile, "%s       PID    Count   SlpPcnt     Slptime  Command ", tab);
                 if (coop_detail_enabled) 
-			pid_printf ("          WakerSyscall+arg0                    SleeperSyscall+arg0                Sleep function\n");
-                pid_printf ("\n");
+			pid_printf (pidfile, "          WakerSyscall+arg0                    SleeperSyscall+arg0                Sleep function\n");
+                pid_printf (pidfile, "\n");
 
                 if (schedp->sched_stats.C_setrq_cnt != 0) {
                         coopinfo.which = SLEEPER;
                         coopinfo.cnt = schedp->sched_stats.C_setrq_cnt;
                         coopinfo.total_slp_time = statp->T_sleep_time;
+			vararg.arg1 = pidfile;
+			vararg.arg2 = &coopinfo;
                         foreach_hash_entry((void **)schedp->setrq_src_hash, WPID_HSIZE,
-                                        sched_print_setrq_pids, setrq_sort_by_sleep_time, npid, (void *)&coopinfo);
+                                        sched_print_setrq_pids, setrq_sort_by_sleep_time, npid, (void *)&vararg);
                 } else {
-                        pid_printf ("%s    None\n", tab);
+                        pid_printf (pidfile, "%s    None\n", tab);
                 }
         }
 
         if (pidp->slp_hash) {
-        	pid_printf ("\n%s******** SLEEP REPORT ********\n\n", tab);
-        	sleep_report(pidp->slp_hash, schedp, slp_sort_by_time, v);
-        	if (pidp->stktrc_hash) stktrc_report(pidp->stktrc_hash, schedp, stktrc_sort_by_slptime, v);
-        	if (pidp->runq_stktrc_hash) stktrc_report(pidp->runq_stktrc_hash, NULL, stktrc_sort_by_cnt, v);
+        	pid_printf (pidfile, "\n%s******** SLEEP REPORT ********\n\n", tab);
+        	sleep_report(pidp->slp_hash, schedp, slp_sort_by_time, pidfile);
+        	if (pidp->stktrc_hash) stktrc_report(pidp->stktrc_hash, schedp, stktrc_sort_by_slptime, pidfile);
+        	if (pidp->runq_stktrc_hash) stktrc_report(pidp->runq_stktrc_hash, NULL, stktrc_sort_by_cnt, pidfile);
 	}
 }
 

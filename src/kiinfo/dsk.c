@@ -267,7 +267,7 @@ clear_wwn_iostats(void *arg1, void *arg2)
 }
 
 int
-print_dev_iostats(void *arg1, char *devstr, char *devname, char *devpath, char *mapname, uint64 wwn) 
+print_dev_iostats(void *arg1, char *devstr, char *devname, char *devpath, char *mapname, uint64 wwn, FILE *pidfile) 
 {
 	iostats_t *statp = (iostats_t *)arg1;
 
@@ -278,7 +278,7 @@ print_dev_iostats(void *arg1, char *devstr, char *devname, char *devpath, char *
 	char target[20];
 	
 	for (rw = IO_READ; rw <= IO_TOTAL; rw++) {
-		pid_printf ("%s  %10s", tab, devstr);
+		pid_printf (pidfile, "%s  %10s", tab, devstr);
 		csv_printf(dsk_csvfile,"%-10s,%10s", devname, devstr ? devstr : " ");
 		csv_printf(dsk_csvfile,",%-16s", devpath ? devpath : " ");
 		csv_printf(dsk_csvfile,",%-33s", mapname ? mapname : " ");
@@ -305,12 +305,12 @@ print_dev_iostats(void *arg1, char *devstr, char *devname, char *devpath, char *
 		}
 
 		switch(rw) {
-		case IO_READ: pid_printf("%3s", "r"); csv_printf(dsk_csvfile,",Read "); break;
-		case IO_WRITE: pid_printf("%3s", "w"); csv_printf(dsk_csvfile,",Write"); break;
-		case IO_TOTAL: pid_printf("%3s", "t"); csv_printf(dsk_csvfile,",Total"); break;
+		case IO_READ: pid_printf (pidfile, "%3s", "r"); csv_printf(dsk_csvfile,",Read "); break;
+		case IO_WRITE: pid_printf (pidfile, "%3s", "w"); csv_printf(dsk_csvfile,",Write"); break;
+		case IO_TOTAL: pid_printf (pidfile, "%3s", "t"); csv_printf(dsk_csvfile,",Total"); break;
 		}			
 
-		pid_printf (" %6.2f %7.2f %6.0f %6.0f %5ld %8.2f %8.2f %6d %6d %6d %6d %6d %7.1f %7.1f",
+		pid_printf (pidfile, " %6.2f %7.2f %6.0f %6.0f %5ld %8.2f %8.2f %6d %6d %6d %6d %6d %7.1f %7.1f",
 			avqlen,
 			avinflt,
 			statp[rw].compl_cnt / secs,
@@ -326,8 +326,8 @@ print_dev_iostats(void *arg1, char *devstr, char *devname, char *devpath, char *
 			MSECS(statp[rw].max_iowait),
 			MSECS(statp[rw].max_ioserv));
 		if (statp[rw].abort_cnt) 
-			pid_printf ("  Aborted: %5d",statp[rw].abort_cnt);
-		pid_printf("\n");
+			pid_printf (pidfile, "  Aborted: %5d",statp[rw].abort_cnt);
+		pid_printf (pidfile, "\n");
 
 		csv_printf (dsk_csvfile, ",%7.2f,%7.2f,%6.0f,%6.0f,%5ld,%9.3f,%9.3f,%6d,%6d,%6d,%6d,%6d,%6d,%8.2f,%8.2f\n",
 			avqlen,
@@ -379,7 +379,7 @@ print_iostats_totals(void *arg1, void *arg2, void *arg3)
 			(*warnflagp) |= WARNF_AVSERV;
 		}	
 
-                pid_printf ("%8.2f ", avserv);
+                printf ("%8.2f ", avserv);
 		BLACK_FONT;
 
                 i--;
@@ -390,6 +390,7 @@ int
 print_mpath_iostats(void *arg1, void *arg2)
 {
 	mpath_info_t *mpath_infop = (mpath_info_t *)arg1;
+	FILE *pidfile = (FILE *)arg2;
 	iostats_t *statp;
 	char devstr[16];
 	int cpu;
@@ -399,7 +400,7 @@ print_mpath_iostats(void *arg1, void *arg2)
 	if (statp[IOTOT].compl_cnt == 0) return 0;
 
 	sprintf (devstr, "cpu%lld  \0", cpu);
-	print_dev_iostats(statp, devstr, NULL, NULL, NULL, 0);
+	print_dev_iostats(statp, devstr, NULL, NULL, NULL, 0, pidfile);
 	return 0;
 }
 
@@ -438,17 +439,8 @@ print_pid_iosum(void *arg1, void *arg2)
 	tstatp = &pidp->iostats[IO_TOTAL];
 	if (tstatp->compl_cnt == 0) return 0;
 
-	rstatp = &pidp->iostats[IO_READ];
-	wstatp = &pidp->iostats[IO_WRITE];
-
 	SPAN_GREY;
-	dock_printf ("%8d %8.0f %8.0f %9.1f %9.3f ",
-		tstatp->compl_cnt,
-		rstatp->compl_cnt / secs,
-		wstatp->compl_cnt / secs,
-		((rstatp->sect_xfrd + wstatp->sect_xfrd)/2.0) / secs,
-		MSECS(tstatp->cum_ioserv / tstatp->compl_cnt),
-		MSECS(tstatp->cum_ioserv / tstatp->compl_cnt));
+	print_iostats_totals (globals, &pidp->iostats[0], NULL);
 
 	if (dockfile) {
 		dock_printf ("%8d", pidp->PID);
@@ -479,23 +471,14 @@ print_pid_miosum(void *arg1, void *arg2)
 	docker_info_t *dockerp;
 	
 	if (pidp == NULL) return 0;
-	
+
 	tstatp = &pidp->miostats[IO_TOTAL];
 	if (tstatp->compl_cnt == 0) return 0;
 
-	rstatp = &pidp->miostats[IO_READ];
-	wstatp = &pidp->miostats[IO_WRITE];
-
 	SPAN_GREY;
-	printf ("%8d %8.0f %8.0f %9.1f %9.3f ",
-		tstatp->compl_cnt,
-		rstatp->compl_cnt / secs,
-		wstatp->compl_cnt / secs,
-		((rstatp->sect_xfrd + wstatp->sect_xfrd)/2.0) / secs,
-		MSECS(tstatp->cum_ioserv / tstatp->compl_cnt),
-		MSECS(tstatp->cum_ioserv / tstatp->compl_cnt));
-
+	print_iostats_totals (globals, &pidp->miostats[0], NULL);
 	PID_URL_FIELD8_R(pidp->PID);
+
 	dockerp = pidp->dockerp;
 	if (pidp->cmd) printf ("  %s", pidp->cmd);
 	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
@@ -509,33 +492,36 @@ print_pid_miosum(void *arg1, void *arg2)
 	return 0;
 }
 
+#if 0
 void
 print_iosum_detail(iostats_t *statsp)
 {
-	pid_printf ("        Cnt   : %6d   Total KB: %9.1f    ElpTime: %9.5f\n",
+	pid_printf (pidfile, "        Cnt   : %6d   Total KB: %9.1f    ElpTime: %9.6f\n",
 		statsp->compl_cnt,
 		statsp->sect_xfrd / 2.0,
 		SECS(statsp->cum_ioserv + statsp->cum_iowait));
-	pid_printf ("        Rate  : %6.1f   KB/sec  : %9.1f    AvServ : %9.5f\n",
+	pid_printf (pidfile, "        Rate  : %6.1f   KB/sec  : %9.1f    AvServ : %9.6f\n",
 		(statsp->compl_cnt * 1.0) / secs,
 		(statsp->sect_xfrd / 2.0) / secs,
 		SECS(statsp->cum_ioserv / (statsp->compl_cnt * 1.0)));
-	pid_printf ("        Errs:   %6d   AvgSz   : %9.1f    AvWait : %9.5f\n", 
+	pid_printf (pidfile, "        Errs:   %6d   AvgSz   : %9.1f    AvWait : %9.6f\n", 
 		statsp->error_cnt,
 		(statsp->sect_xfrd / 2.0) / (statsp->compl_cnt * 1.0),
 		SECS(statsp->cum_iowait / (statsp->compl_cnt * 1.0)));
-	pid_printf ("        Requeue :     %5d   MaxQlen :     %5d\n",
+	pid_printf (pidfile, "        Requeue :     %5d   MaxQlen :     %5d\n",
 		statsp->requeue_cnt,
 		statsp->max_qlen);
 	if (statsp->abort_cnt) 
-		pid_printf ("        Aborted :     %5d\n", statsp->abort_cnt);
+		pid_printf (pidfile, "        Aborted :     %5d\n", statsp->abort_cnt);
 }
+#endif
 
 
 int
-print_pid_iototals(void *arg1)
+print_pid_iototals(void *arg1, void *arg2)
 {
 	iostats_t *iostats = (iostats_t *)arg1;
+	FILE *pidfile = (FILE *)arg2;
 	iostats_t *rstatp, *wstatp, *tstatp;
 	
 	tstatp = &iostats[IO_TOTAL];
@@ -544,21 +530,11 @@ print_pid_iototals(void *arg1)
 	rstatp = &iostats[IO_READ];
 	wstatp = &iostats[IO_WRITE];
 
-	pid_printf ("\n    Totals:\n", tab);
+	pid_printf (pidfile, "\n%s    device   rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+	print_dev_iostats(rstatp, "All    ", NULL, NULL, NULL, 0, pidfile);
 
-	if (rstatp->compl_cnt !=0) {
-		pid_printf ("      Physical Reads:\n");
-		print_iosum_detail(rstatp);
-	}
-
-	if (wstatp->compl_cnt !=0) {
-		pid_printf ("      Physical Writes:\n");
-		print_iosum_detail(wstatp);
-	}
-
-	pid_printf ("\n");
+	pid_printf (pidfile, "\n");
 			
-
 	return 0;
 }
 int
@@ -614,6 +590,7 @@ int
 dsk_print_dev_iostats(void *arg1, void *arg2)
 {
 	dev_info_t *devinfop = (dev_info_t *)arg1;
+	FILE *pidfile = (FILE *)arg2;
 	dev_info_t *gdevinfop, *mdevinfop;
 	iostats_t *statp;
 	uint64 dev;
@@ -628,11 +605,11 @@ dsk_print_dev_iostats(void *arg1, void *arg2)
 	statp = &devinfop->iostats[0];
         gdevinfop = GET_DEVP(DEVHASHP(globals,dev),dev);
 
-	pid_printf ("%s0x%08llx", tab, dev);
+	pid_printf (pidfile, "%s0x%08llx", tab, dev);
 	if (devinfop->mapname) { 
-		pid_printf ("   /dev/mapper/%s  ->", devinfop->mapname);
+		pid_printf (pidfile, "   /dev/mapper/%s  ->", devinfop->mapname);
 	} else if (gdevinfop->mapname) {
-		pid_printf ("   /dev/mapper/%s  ->", gdevinfop->mapname);
+		pid_printf (pidfile, "   /dev/mapper/%s  ->", gdevinfop->mapname);
 	} 
 
 	devname = "unkn";
@@ -642,33 +619,33 @@ dsk_print_dev_iostats(void *arg1, void *arg2)
 		devname = gdevinfop->devname;
 	} 
 
-	pid_printf ("  /dev/%s", devname);
+	pid_printf (pidfile, "  /dev/%s", devname);
 
 	if (gdevinfop->devpath != NO_HBA) {
 		devpath = gdevinfop->devpath;
 		sprintf (devpath_str, "%d:%d:%d:%d", FCPATH1(devpath), FCPATH2(devpath), FCPATH3(devpath), FCPATH4(devpath));
-		pid_printf ("  (HW path: %s)", devpath_str);
+		pid_printf (pidfile, "  (HW path: %s)", devpath_str);
 	}
 
 	mdevinfop = gdevinfop->mdevinfop;
 	if (mdevinfop && mdevinfop->devname) {
-		pid_printf ("   (mpath device: /dev/mapper/%s)", mdevinfop->mapname);
+		pid_printf (pidfile, "   (mpath device: /dev/mapper/%s)", mdevinfop->mapname);
 	} else {
 		devpath_str[0] = 0;
 	}
 
 	if (gdevinfop->pathname) {
-		pid_printf ("  (pathname: %s)", gdevinfop->pathname);
+		pid_printf (pidfile, "  (pathname: %s)", gdevinfop->pathname);
 	}
 		
-	pid_printf ("\n");
+	pid_printf (pidfile, "\n");
 
 	sprintf(devstr, "0x%08x", dev);
-	print_dev_iostats(statp, devstr, devname, &devpath_str[0], mdevinfop ? mdevinfop->mapname : NULL, gdevinfop->wwn);
+	print_dev_iostats(statp, devstr, devname, &devpath_str[0], mdevinfop ? mdevinfop->mapname : NULL, gdevinfop->wwn, pidfile);
 
 	if (dsk_mpath_flag) {
 		foreach_hash_entry((void **)devinfop->mpath_hash, MPATH_HSIZE, calc_mpath_iototals, NULL, 0, NULL);
-		foreach_hash_entry((void **)devinfop->mpath_hash, MPATH_HSIZE, print_mpath_iostats, mpath_sort_by_cpu, 0, NULL);
+		foreach_hash_entry((void **)devinfop->mpath_hash, MPATH_HSIZE, print_mpath_iostats, mpath_sort_by_cpu, 0, pidfile);
 	}
 
 	return 0;
@@ -694,7 +671,7 @@ dsk_print_fc_iostats(void *arg1, void *arg2)
 
 	printf ("%s%-8s\n", tab, devpath_str);
 
-	print_dev_iostats(statp, devpath_str, NULL, NULL, NULL, 0);
+	print_dev_iostats(statp, devpath_str, NULL, NULL, NULL, 0, NULL);
 
 	return 0;
 }
@@ -719,11 +696,12 @@ dsk_print_wwn_iostats(void *arg1, void *arg2)
 
 	printf ("%s%-18s\n", tab, wwnpath_str);
 
-	print_dev_iostats(statp, wwnpath_str, NULL, NULL, NULL, 0);
+	print_dev_iostats(statp, wwnpath_str, NULL, NULL, NULL, 0, NULL);
 
 	return 0;
 }
 
+#if 0
 int
 print_dev_iostats_total(void *arg1, void *arg2)
 {
@@ -739,9 +717,9 @@ print_dev_iostats_total(void *arg1, void *arg2)
 
 	dev = devinfop->lle.key;
         if (devinfop->devname) {
-		pid_printf ("%s%10s", tab, devinfop->devname);
+		pid_printf (pidfile, "%s%10s", tab, devinfop->devname);
 	} else {
-		pid_printf ("%s0x%08x", tab, dev);
+		pid_printf (pidfile, "%s0x%08x", tab, dev);
 	}
 
 	avwait = avserv = avqlen = 0.0;
@@ -765,36 +743,37 @@ print_dev_iostats_total(void *arg1, void *arg2)
 
         if (avserv > 30.0) {
                 RED_FONT;
-                pid_printf (" %7.2f", avserv);
+                pid_printf (pidfile, " %7.2f", avserv);
                 BLACK_FONT;
         } else {
-                pid_printf (" %7.2f", avserv);
+                pid_printf (pidfile, " %7.2f", avserv);
         }
 
         if (statp[IOTOT].requeue_cnt) {
-                pid_printf (" requeue: ");
+                pid_printf (pidfile, " requeue: ");
                 RED_FONT;
-                pid_printf ("%d", statp[IOTOT].requeue_cnt);
+                pid_printf (pidfile, "%d", statp[IOTOT].requeue_cnt);
                 BLACK_FONT;
         }
 
 	if (statp[IOTOT].barrier_cnt) {
-		pid_printf (" barriers: ");
+		pid_printf (pidfile, " barriers: ");
 		RED_FONT;
-		pid_printf ("%d", statp[IOTOT].barrier_cnt);
+		pid_printf (pidfile, "%d", statp[IOTOT].barrier_cnt);
 		BLACK_FONT;
 	}
 
 	if (statp[IOTOT].abort_cnt) {
-		pid_printf (" Aborted: ");
+		pid_printf (pidfile, " Aborted: ");
 		RED_FONT;
-		pid_printf ("%d", statp[IOTOT].abort_cnt);
+		pid_printf (pidfile, "%d", statp[IOTOT].abort_cnt);
 		BLACK_FONT;
 	}
 
-        pid_printf ("\n");
+        pid_printf (pidfile, "\n");
         return 0;
 }
+#endif
 
 int 
 print_io_histogram(void *arg1, void *arg2)
@@ -1032,7 +1011,7 @@ dsk_print_report()
 	
 	if (globals->wwnhash) {
 		printf ("\nTarget WWN Statistics\n");
-		printf ("\n%s       FC Target WWN     rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+		printf ("\n%s    FC Target WWN    rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
 		
 		foreach_hash_entry((void **)globals->wwnhash, WWN_HSIZE, dsk_print_wwn_iostats, wwn_sort_by_wwn, 0, NULL); 
 	}
@@ -1044,7 +1023,7 @@ dsk_print_report()
                 if (cpuinfop = FIND_CPUP(globals->cpu_hash, i)) {
                         sprintf(cpustr, "cpu=%d", i);
                         calc_io_totals(&cpuinfop->iostats[0], NULL);
-                        print_dev_iostats(&cpuinfop->iostats[0], cpustr, NULL, NULL, NULL, 0);
+                        print_dev_iostats(&cpuinfop->iostats[0], cpustr, NULL, NULL, NULL, 0, NULL);
                         bzero(&cpuinfop->iostats[0], sizeof(iostats_t)*3);
                 }
             }
@@ -1061,9 +1040,10 @@ dsk_print_report()
 			printf ("\nTop %d Tasks sorted by Multipath I/O\n\n", npid);
 		}
 
-	        BOLD ("     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process\n");
-		BOLD ("==============================================================================\n");
-		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_miosum,  pid_sort_by_miocnt, npid, 0);
+		BOLD ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
+		BOLD ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv      PID  Process\n");
+
+		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_miosum,  pid_sort_by_miocnt, npid, NULL);
 
 		if (npid==ALL) {
 			printf ("\nAll tasks sorted by physical I/O\n\n");
@@ -1071,10 +1051,10 @@ dsk_print_report()
 			printf ("\nTop %d Tasks sorted by physical I/O\n\n", npid);
 		}
 
-	        BOLD ("     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process\n");
-		BOLD ("==============================================================================\n");
+		BOLD ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
+		BOLD ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv      PID  Process\n");
 
-		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_iosum,  pid_sort_by_iocnt, npid, 0);
+		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_iosum,  pid_sort_by_iocnt, npid, NULL);
 	}
 	printf ("\n");
 	dsk_csvfile = tmp; 

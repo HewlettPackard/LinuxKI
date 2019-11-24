@@ -81,11 +81,8 @@ char ts_begin_marker[64];
 char ts_end_marker[64];
 
 FILE *dockfile = NULL;
-FILE *pidfile = NULL;
-FILE *pid_jsonfile = NULL;
-FILE *pid_wtree_jsonfile = NULL;
+FILE *kipid_file = NULL;
 FILE *node_csvfile = NULL;
-FILE *pid_timeline_csvfile = NULL;
 FILE *pid_csvfile = NULL;
 FILE *dsk_csvfile = NULL;
 FILE *prof_csvfile = NULL;

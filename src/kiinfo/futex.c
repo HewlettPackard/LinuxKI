@@ -154,7 +154,7 @@ futex_print_pids_detail(void *arg1, void *arg2)
 #endif
 	printf ("\n");
 
-        if (fpidp->n_othererr) pid_printf("%s    %-27s %7d\n\n",tab,"Other Errors", fpidp->n_othererr);
+        if (fpidp->n_othererr) printf ("%s    %-27s %7d\n\n",tab,"Other Errors", fpidp->n_othererr);
         return 0;
 }
 
@@ -180,13 +180,15 @@ int
 futex_print_ops_detail(void *arg1, void *arg2)
 {
         futex_op_t      *fopsp = arg1;
-        gbl_futex_info_t *gfp = arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+	FILE *pidfile = (FILE *)vararg->arg1;
+        gbl_futex_info_t *gfp = (gbl_futex_info_t *)vararg->arg2;
         pid_info_t      *wpidp;
 	int		pid_cnt = 0;
 
 	if (fopsp->cnt == 0) return 0;
 
-        pid_printf("%s  %-29s %7d %7d %10d   %7.2f %11.3f %11.6f %11.6f  ",tab, 
+        pid_printf (pidfile, "%s  %-29s %7d %7d %10d   %7.2f %11.3f %11.6f %11.6f  ",tab, 
                         (fopsp->lle.key & FUTEX_PRIVATE_FLAG) ? futex_privopcode_name[fopsp->lle.key & FUTEX_CMD_MASK] : futex_opcode_name[fopsp->lle.key & FUTEX_CMD_MASK],
                         fopsp->cnt,
                         fopsp->n_eagain,
@@ -197,7 +199,7 @@ futex_print_ops_detail(void *arg1, void *arg2)
                         SECS(fopsp->max_time));
 
 	if (fopsp->pids_hash) {
-		pid_printf("\n");
+		pid_printf (pidfile, "\n");
 		foreach_hash_entry((void **)fopsp->pids_hash,FUTEXPID_HSIZE,
                         (int (*)(void *, void *))hash_count_entries,
                         NULL, 0, &pid_cnt);
@@ -209,22 +211,23 @@ futex_print_ops_detail(void *arg1, void *arg2)
 		}
 	} else if ((uint32)fopsp->max_waker > 0) {
 	       	wpidp = GET_PIDP(&globals->pid_hash, fopsp->max_waker);
-                PID_URL_FIELD8_2(fopsp->max_waker);
+                pid_printf(pidfile, "%-8d", (int)fopsp->max_waker);
+                /* PID_URL_FIELD8_2(fopsp->max_waker); */
 
-		if (wpidp->cmd) pid_printf (" %s", wpidp->cmd);
+		if (wpidp->cmd) pid_printf (pidfile, " %s", wpidp->cmd);
 		if (wpidp->hcmd) printf (" {%s}", wpidp->hcmd);
-		if (wpidp->thread_cmd) pid_printf (" (%s)", wpidp->thread_cmd);
+		if (wpidp->thread_cmd) pid_printf (pidfile, " (%s)", wpidp->thread_cmd);
 		if (wpidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(wpidp->dockerp))->ID);
-		pid_printf ("\n");
+		pid_printf (pidfile, "\n");
 	} else if (fopsp->max_waker == -1) {
-		pid_printf ("ICS\n");
+		pid_printf (pidfile, "ICS\n");
 	} else {
-		pid_printf ("\n");
+		pid_printf (pidfile, "\n");
 	}
 		
-        if (fopsp->n_othererr) pid_printf("    %-27s %7d\n","Other Errors", fopsp->n_othererr);
+        if (fopsp->n_othererr) pid_printf (pidfile, "    %-27s %7d\n","Other Errors", fopsp->n_othererr);
 	if (npid && pid_cnt && fopsp->pids_hash)  {
-		pid_printf("    Total PID count = %d (Top %d listed)\n", pid_cnt, MIN(pid_cnt, npid));
+		pid_printf (pidfile, "    Total PID count = %d (Top %d listed)\n", pid_cnt, MIN(pid_cnt, npid));
 	}
 
         return 0;
@@ -300,6 +303,7 @@ futex_print_detail(void *arg1, void *arg2)
 	pid_info_t              *pidp;
 	int			pid_cnt = 0;
 	pid_info_t		*wpidp;
+	var_arg_t		vararg;
 
 	if (gfp->cnt == 0) return 0;
 
@@ -345,9 +349,11 @@ futex_print_detail(void *arg1, void *arg2)
                         futex_dupsort_by_cnt, nfutex, NULL);
         }
 
+	vararg.arg1 = NULL;
+	vararg.arg2 = gfp;
 	foreach_hash_entry((void **)gfp->ops_hash,FUTEXOP_HSIZE,
                         (int (*)(void *, void *))futex_print_ops_detail,
-                        futexops_sort_by_op, 0, gfp);
+                        futexops_sort_by_op, 0, &vararg);
 
 	return 0;
 }

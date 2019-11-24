@@ -1380,7 +1380,7 @@ csv_printf(FILE *file, const char *format, ...)
 {
 	va_list ap;
 
-	if (file)  {
+	if ((hthr == 0) && file)  {
 		va_start(ap, format);
 		vfprintf(file, format, ap);
 	}
@@ -1390,12 +1390,14 @@ csv_printf(FILE *file, const char *format, ...)
 
 
 int
-pid_printf(const char *format, ...)
+pid_printf(FILE *pidfile, const char *format, ...)
 {
 	va_list ap;
 
-	va_start(ap, format);
-	vprintf(format, ap);
+	if (hthr == 0) {	
+		va_start(ap, format);
+		vprintf(format, ap);
+	}
 	if (pidfile)  {
 		va_start(ap, format);
 		vfprintf(pidfile, format, ap);
@@ -2031,7 +2033,7 @@ for_each_file(char *dir, char *expr1, char *expr2, uint64 traverse)
 }
 
 void 
-print_ip_port (void *arg1, int be2le)
+print_ip_port (void *arg1, int be2le, FILE *pidfile)
 {
 	struct sockaddr_in *sock = (struct sockaddr_in *)arg1;
 	uint64 key;
@@ -2042,23 +2044,23 @@ print_ip_port (void *arg1, int be2le)
 	/*
 	if (getnameinfo((struct sockaddr *)sock, sizeof(struct sockaddr_in), 
 	    host, 64, serv, 64, NI_NUMERICHOST | NI_NUMERICSERV) == 0) {
-		pid_printf("%s:%s", host, serv);
+		pid_printf (pidfile, "%s:%s", host, serv);
 		return;
 	}
 	*/
 
 	port = be2le ? BE2LE(sock->sin_port) : sock->sin_port;
 	key = SOCK_KEY(sock->sin_addr.s_addr, port);
-	pid_printf("%d.%d.%d.%d",
+	pid_printf (pidfile, "%d.%d.%d.%d",
 		SOCK_IP1(key),
 		SOCK_IP2(key),
 		SOCK_IP3(key),
 		SOCK_IP4(key));
-	if (port) pid_printf(":%d", SOCK_PORT(key));
+	if (port) pid_printf (pidfile, ":%d", SOCK_PORT(key));
 }
 
 void 
-print_ip_port_v6 (void *arg1, int be2le)
+print_ip_port_v6 (void *arg1, int be2le, FILE *pidfile)
 {
 	struct sockaddr_in6 *sock = (struct sockaddr_in6 *)arg1;
 	uint32 port;
@@ -2076,7 +2078,7 @@ print_ip_port_v6 (void *arg1, int be2le)
 	/* this does not work like I hoped it would!
 	if (getnameinfo((struct sockaddr *)sock, sizeof(struct sockaddr_in6), 
 	    host, 64, serv, 64, NI_NUMERICHOST | NI_NUMERICSERV) == 0) {
-		pid_printf("%s:%s", host, serv);
+		pid_printf (pidfile, "%s:%s", host, serv);
 		return;
 	}
 	*/
@@ -2093,26 +2095,26 @@ print_ip_port_v6 (void *arg1, int be2le)
 	
 	if (i == 8) {
 		/* if addr is empty, then just print the port num and return */
-		pid_printf("[::]");
-		if (port) pid_printf(":%d", port);
+		pid_printf (pidfile, "[::]");
+		if (port) pid_printf (pidfile, ":%d", port);
 		return;
 	}
 
 	if ((i == 6) || ((i == 5) && (sock->sin6_addr.s6_addr16[i] == 0xffff))) {
 		/* if first 5 elements are zero, and 6th is 0xffff, assume an IPv4 addr */
-		pid_printf("%d.%d.%d.%d", 
+		pid_printf (pidfile, "%d.%d.%d.%d", 
 			sock->sin6_addr.s6_addr[12],
 			sock->sin6_addr.s6_addr[13],
 			sock->sin6_addr.s6_addr[14],
 			sock->sin6_addr.s6_addr[15]);
-		if (port) pid_printf(":%d", port);
+		if (port) pid_printf (pidfile, ":%d", port);
 		return;
 	}
 
-	pid_printf("[");
-	if (skip == FALSE) pid_printf ("::");
+	pid_printf (pidfile, "[");
+	if (skip == FALSE) pid_printf (pidfile, "::");
 	/* print the first element */
-	pid_printf("%x", BE2LE(sock->sin6_addr.s6_addr16[i]));
+	pid_printf (pidfile, "%x", BE2LE(sock->sin6_addr.s6_addr16[i]));
 	i++;
 
 	while (i < 8) {
@@ -2121,7 +2123,7 @@ print_ip_port_v6 (void *arg1, int be2le)
 				if (sock->sin6_addr.s6_addr16[i] == 0) {
 					i++;
 				} else {
-					pid_printf(":");
+					pid_printf (pidfile, ":");
 					skip = FALSE;
 					break;
 				}
@@ -2129,12 +2131,12 @@ print_ip_port_v6 (void *arg1, int be2le)
 		}	
 		
 		if (i < 8) {
-			pid_printf(":%x", BE2LE(sock->sin6_addr.s6_addr16[i]));
+			pid_printf (pidfile, ":%x", BE2LE(sock->sin6_addr.s6_addr16[i]));
 			i++;
 		}
 	}
-	pid_printf("]");
-	if (port) pid_printf(":%d", port);
+	pid_printf (pidfile, "]");
+	if (port) pid_printf (pidfile, ":%d", port);
 }
 
 void 

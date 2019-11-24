@@ -169,6 +169,7 @@ int file_print_fdata(void *arg1, void *arg2)
         fdata_info_t *fdatap = (fdata_info_t *)arg1;
         uint64 *scallflagp = (uint64 *)arg2;
         char    typebuf[40];
+	var_arg_t vararg;
 
         if (fdatap->stats.syscall_cnt == 0) return 0;
 
@@ -205,10 +206,12 @@ int file_print_fdata(void *arg1, void *arg2)
 
         if (scallflagp && *scallflagp) {
                 printf("%sSystem Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n", tab);
+			vararg.arg1 = NULL;
+			vararg.arg2 = NULL;
                         foreach_hash_entry((void **)fdatap->syscallp, SYSCALL_HASHSZ,
                                         (int (*)(void *, void *))print_syscall_info,
                                         (int (*)()) syscall_sort_by_time,
-                                        0, arg2);
+                                        0, &vararg);
         }
 
         return 0;

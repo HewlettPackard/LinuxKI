@@ -17,6 +17,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <string.h>
 #include <sys/errno.h>
 #include <sys/types.h>
+#include <pthread.h>
+#include <unistd.h>
 #include "ki_tool.h"
 #include "liki.h"
 #include "globals.h"
@@ -24,6 +26,97 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "hash.h"
 
 #define UNKNOWN_WCHAN 0x11335577ull
+
+extern int hthr;
+
+static pthread_mutex_t hash_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t  master, worker;
+static pthread_t *wtids;
+struct hash_work_struct {
+                int (*work_func)(void *, void *);
+                void *work_arg;
+		void **hash_table;
+		int hsize;
+                int start;
+                int end;
+                int active_cnt;
+                int done;
+} hash_work;
+
+void *
+hash_worker_thread(void *arg1)
+{
+        char first_time = TRUE;
+        int start, end;
+	int (*work_func)(void *, void *);
+	void *work_arg;
+	void **hash_table;
+	int hsize;
+
+        while (1) {
+                pthread_mutex_lock(&hash_mutex);
+                if (first_time == FALSE) {
+                        hash_work.active_cnt--;
+                        if ((hash_work.active_cnt == 0) && hash_work.done==TRUE) {
+                                pthread_cond_signal(&master);
+                        }
+                }
+                while (hash_work.work_func == NULL)
+                        pthread_cond_wait(&worker, &hash_mutex);
+
+                start = hash_work.start;
+                end = hash_work.end;
+                work_func = hash_work.work_func;
+                work_arg = hash_work.work_arg;
+		hash_table = hash_work.hash_table;
+		hsize = hash_work.hsize;
+                hash_work.work_func = NULL;
+                pthread_cond_signal(&master);
+                pthread_mutex_unlock(&hash_mutex);
+
+                foreach_hash_entry_N((void **)hash_table, hsize, work_func, NULL, 0, work_arg, start, end);
+                first_time = FALSE;
+        }
+}
+
+int
+hash_start_worker_threads()
+{
+        int i;
+        int err;
+	long ncpus;
+
+	/* limit number of threads to the number of CPU cores */
+	if ((ncpus = sysconf(_SC_NPROCESSORS_ONLN)) > 0) {
+		if (hthr > ncpus) hthr = ncpus;
+	}
+
+        /* allocate the wtids array.   There is no need to FREE this */
+        if ((wtids = (pthread_t *)malloc(sizeof(pthread_t) * hthr)) == NULL) {
+                fprintf (stderr, "Unable to allocate wtids array, errno=%d\n", errno);
+                fprintf (stderr, "Continuing w/o VIS worker threads\n");
+                hthr = 0;
+                return 0;
+        }
+
+        hash_work.start = 0;
+        hash_work.end = 0;
+	hash_work.work_func = NULL;
+	hash_work.work_arg = NULL;
+
+        for (i=0; i < hthr; i++) {
+                if (err = pthread_create(&wtids[i], NULL, hash_worker_thread, (void *) NULL)!= 0) {
+                        fprintf (stderr, "Failed to create hash_worker_thread[%d], errno=%d\n", i, err);
+                        hthr = i;
+                }
+
+                /* Use as many worker threads as created */
+        }
+
+        return hthr;
+}
+
+
 
 /*
 **  similar to find_hash_entry, but also creates hash table if it does not exist
@@ -331,6 +424,83 @@ foreach_hash_entry(void **arg, int hsize, int (*work_func)(void *, void *), int 
 
 	FREE(tmpsort);
 }
+
+void
+foreach_hash_entry_N(void **arg, int hsize, int (*work_func)(void *, void *), int (*sort_func)(const void *, const void *), int32 cnt, void *work_arg, int start, int end) 
+{
+	lle_t **hashptr = (lle_t **)arg;
+	lle_t *entryptr;
+	int i;
+
+	if (hashptr == NULL) return;
+
+	if (end > hsize) end = hsize;
+
+	for (i=start; i < end; i++) {
+		entryptr = hashptr[i];
+		while (entryptr != NULL) {
+			work_func((void *)entryptr, work_arg);
+
+			entryptr = (void *)entryptr->next;
+		}
+	}
+}
+
+void
+foreach_hash_entry_mt(void **arg, int hsize, int (*work_func)(void *, void *), int (*sort_func)(const void *, const void *), int32 cnt, void *work_arg) 
+{
+	lle_t **hashptr = (lle_t **)arg;
+	int start, end, i, hcnt;
+	
+	if (hashptr == NULL) return;
+
+	if (hthr == 0) {
+		foreach_hash_entry(arg, hsize, work_func, sort_func, cnt, work_arg);
+		return;
+	}
+
+	hcnt = hsize / hthr;
+
+        hash_work.active_cnt = 0;
+        hash_work.done = FALSE;
+        hash_work.end = 0;
+        hash_work.start = 0;
+        hash_work.work_func = NULL;
+        hash_work.work_arg = work_arg;
+	hash_work.hash_table = arg;
+	hash_work.hsize = hsize;
+
+        for (start = 0; start < hsize; start += hcnt) {
+
+                pthread_mutex_lock(&hash_mutex);
+                while (hash_work.work_func != NULL)
+                        pthread_cond_wait(&master, &hash_mutex);
+
+                hash_work.start = start;
+                hash_work.end = start+hcnt-1;
+                hash_work.active_cnt++;
+                hash_work.work_func = work_func;
+                hash_work.work_arg = work_arg;
+
+                /* fprintf (stderr, "m active_cnt: %d, start: %d, end: %d\n",
+                        hash_work.active_cnt, hash_work.start, hash_work.end); */
+
+                pthread_cond_signal(&worker);
+                pthread_mutex_unlock(&hash_mutex);
+        }
+
+        /* make sure worker threads are done */
+        pthread_mutex_lock(&hash_mutex);
+        hash_work.done = TRUE;
+        while (hash_work.active_cnt)  {
+                /* fprintf (stderr, "m active_cnt: %d\n",
+                        hash_work.active_cnt, hash_work.start, hash_work.end); */
+                pthread_cond_wait(&master, &hash_mutex);
+        }
+
+        pthread_mutex_unlock(&hash_mutex);
+}
+
 
 /*
 ** This is special function that allows the "unknown" function to be listed at the bottom

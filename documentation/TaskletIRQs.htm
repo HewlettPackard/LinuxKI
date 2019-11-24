@@ -1,0 +1,352 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:"Segoe UI";
+	panose-1:2 11 5 2 4 2 4 2 2 3;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-link:"Balloon Text Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	font-size:9.0pt;
+	font-family:"Segoe UI",sans-serif;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+span.BalloonTextChar
+	{mso-style-name:"Balloon Text Char";
+	mso-style-link:"Balloon Text";
+	font-family:"Segoe UI",sans-serif;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:107%;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:.5in .5in .5in .5in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-GB>
+
+<div class=WordSection1>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;vertical-align:
+top'><b><i><span lang=EN-US style='font-size:12.0pt;font-family:"Arial",sans-serif;
+color:black'>LinuxKI Warning</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>ksoftirqd using 100% CPU on RHEL
+7.1 and 7.2</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>03/01/2016</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Problem</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>The
+ksoftirq daemon may be observed using high amounts of CPU after upgrading to
+RHEL 7.1 or RHEL 7.2.</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Investigation</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>The LinuxKI
+Toolset was used to collect additional detail about the softirqs by adding the
+irq subsystem as part of the KI dump&nbsp;collection scripts <span
+style='color:black'>(</span></span><span lang=EN-US style='font-size:10.0pt;
+font-family:"Courier New";color:black'>runki -s irq</span><span lang=EN-US
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'> or </span><span
+lang=EN-US style='font-size:10.0pt;font-family:"Courier New";color:black'>runki
+-e all</span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>).&nbsp;&nbsp;&nbsp; Analysis of the KI data, specifically the
+CPU/RunQ Analysis </span><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif'>Report (kiinfo -kirunq) shows <span style='color:black'>CPU
+0 spending a lot of time processing softirqs:</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>Global CPU Counters</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:9.0pt;font-family:"Courier New";color:black'>cpu
+node&nbsp;&nbsp;&nbsp;&nbsp; Total
+Busy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+sys&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+usr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; idle&nbsp; hardirq_sys
+hardirq_user hardirq_idle&nbsp; softirq_sys <span style='background:white'>softirq_user</span>
+softirq_idle<br>
+&nbsp; <span style='background:yellow'>0 [ 0] :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 100.00%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.00%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+27.32%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.00%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.00%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.00%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.00%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.00%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+72.68%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.00%<br>
+</span>&nbsp; 1 [ 0] :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+29.42%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+27.75%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1.00%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+69.29%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.07%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.00%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.11%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.59%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.01%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1.17%<br>
+&nbsp; 2 [ 0] :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3.13%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1.64%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1.43%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+96.50%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.01%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.01%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.03%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.02%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.03%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.34%<br>
+&nbsp; 3 [ 0] :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3.92%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1.55%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2.30%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+95.67%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.01%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.01%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.03%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.02%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.03%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.38%<br>
+&nbsp; 4 [ 0] :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+12.57%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5.43%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+7.09%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+87.16%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.00%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.00%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.03%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.02%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.02%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.24%<br>
+&nbsp; 5 [ 0] :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3.68%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2.24%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1.34%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+94.51%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.01%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.01%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.35%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.07%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.03%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.45%<br>
+Total&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+25.42%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.44%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6.74%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+73.89%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.01%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.00%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.09%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.12%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+12.11%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.60%</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Further
+analysis of the CPU/Runq Analysis Report shows that the TASKLET softirq is the
+primary cause of the high CPU usage:</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:9.0pt;font-family:"Courier New";color:black'>Soft
+IRQ events<br>
+===============<br>
+IRQ
+Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Count&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ElpTime<br>
+<span style='background:yellow'>&nbsp; 6
+TASKLET&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+66396240&nbsp;&nbsp;&nbsp; 14.497936</span><br>
+&nbsp; 3
+NET_RX&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+175353&nbsp;&nbsp;&nbsp;&nbsp; 0.659607<br>
+&nbsp; 4
+BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+41437&nbsp;&nbsp;&nbsp;&nbsp; 0.214926<br>
+&nbsp; 1
+TIMER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+28060&nbsp;&nbsp;&nbsp;&nbsp; 0.010501<br>
+&nbsp; 7
+SCHED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+566&nbsp;&nbsp;&nbsp;&nbsp; 0.002296<br>
+&nbsp; 9
+RCU&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+526&nbsp;&nbsp;&nbsp;&nbsp; 0.000309<br>
+&nbsp; 8
+HRTIMER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+131&nbsp;&nbsp;&nbsp;&nbsp; 0.000159<br>
+&nbsp; 2
+NET_TX&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+18&nbsp;&nbsp;&nbsp;&nbsp; 0.000046<br>
+&nbsp;&nbsp;&nbsp;
+Total:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 66642331&nbsp;&nbsp;&nbsp;
+15.385780</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>This
+is likely due to a defect in the ioatdma module in RHEL 7.1 and RHEL 7.2.&nbsp;&nbsp;&nbsp;
+For more information, please review the following RedHat document:</span></p>
+
+<p class=MsoListParagraph style='text-indent:-.25in;line-height:11.25pt;
+vertical-align:top'><span lang=EN-US style='font-size:10.0pt;font-family:Symbol;
+color:black'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><u><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:#003366'><a href="https://access.redhat.com/solutions/1409393"><span
+style='color:#003366'>RHEL 7.1-ksoftirqd thread reports high CPU utilization
+due to bug in ioatdma driver</span></a></span></u></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Solution</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>To
+resolve the issue, please upgrade the RHEL version to one of the following:</span></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='color:black;line-height:11.25pt;vertical-align:
+     top'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Red
+     Hat Enterprise Linux 7.1 : Upgrade to kernel-3.10.0-229.14.1.el7 from
+     RHSA-2015-1778 or later </span></li>
+</ul>
+
+<p class=MsoListParagraph style='text-indent:-.25in'><span lang=EN-US
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US style='font-size:10.0pt;line-height:107%;
+font-family:"Arial",sans-serif;color:black'>Red Hat Enterprise Linux 7.2 :
+Upgrade to kernel-3.10.0-327.el7 from RHSA-2015-2152</span></p>
+
+<p class=MsoNormal><b><span lang=EN-US style='font-size:10.0pt;line-height:
+107%;font-family:"Arial",sans-serif'>Special Note for Mellanox drivers</span></b></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:10.0pt;line-height:107%;
+font-family:"Arial",sans-serif'>TASKLET IRQs may be triggered by other drivers
+other than ioatdma as well.   </span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:10.0pt;line-height:107%;
+font-family:"Arial",sans-serif'>The Mellanox drivers have been identified as
+scheduling TASKLET IRQs rather than NET_RX IRQs to complete the interrupt
+processing.   Below is an example where the TASKLET IRQ is occurring after each
+Mellanox hard IRQ:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>   
+0.020819 cpu=17 pid=0 tgid=0 irq_handler_entry irq=119 name=mlx4-comp-0@pci:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>   
+0.020820 cpu=17 pid=0 tgid=0 irq_handler_exit irq=119 ret=handled irqtm=  
+0.000001</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>   
+0.020820 cpu=17 pid=0 tgid=0 softirq_entry vec=6 action=TASKLET</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>   
+0.020821 cpu=17 pid=0 tgid=0 softirq_exit vec=6 action=TASKLET irqtm=  
+0.000001</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>   
+0.020848 cpu=17 pid=0 tgid=0 irq_handler_entry irq=119 name=mlx4-comp-0@pci:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>   
+0.020849 cpu=17 pid=0 tgid=0 irq_handler_exit irq=119 ret=handled irqtm=  
+0.000001</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>   
+0.020849 cpu=17 pid=0 tgid=0 softirq_entry vec=6 action=TASKLET</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>   
+0.020851 cpu=17 pid=0 tgid=0 softirq_exit vec=6 action=TASKLET irqtm=  
+0.000002</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+lang=EN-US style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+lang=EN-US style='font-size:10.0pt;line-height:107%;font-family:"Arial",sans-serif'>The
+above is normal and no action is necessary.</span></p>
+
+</div>
+
+</body>
+
+</html>

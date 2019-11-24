@@ -987,6 +987,7 @@ kp_hc_kernfuncs()			/* Section 1.4.3 */
         hcinfop = globals->hcinfop;
         print_pc_args.hcinfop = hcinfop;
         print_pc_args.warnflagp = &warnflag;
+	print_pc_args.pidfile = NULL;
 
 	if (hcinfop && hcinfop->total && hcinfop->pc_hash) {
         	BOLD("   Count     Pct  Function \n");
@@ -1035,6 +1036,7 @@ kp_hc_stktraces()			/* Section 1.4.4 */
         hcinfop = globals->hcinfop;
         print_pc_args.hcinfop = hcinfop;
         print_pc_args.warnflagp = &warnflag;
+	print_pc_args.pidfile = NULL;
 	if (hcinfop && hcinfop->total && hcinfop->pc_hash) {
         	BOLD("   Count     Pct  Stack trace\n");
         	foreach_hash_entry((void **)hcinfop->hc_stktrc_hash, STKTRC_HSIZE, hc_print_stktrc, stktrc_sort_by_cnt, 50, (void *)&print_pc_args);
@@ -1241,6 +1243,7 @@ kp_freq_swtch_funcs()          		/* Section 2.1.1 */
         uint64  warnflag = 0;
         int warn_indx;
         sched_info_t *schedp = globals->schedp;
+	var_arg_t vararg;
 
         ORANGE_TABLE;
         TEXT("\n");
@@ -1260,7 +1263,9 @@ kp_freq_swtch_funcs()          		/* Section 2.1.1 */
 
         lineno=1;
         BOLD("   Count     Pct    SlpTime  SlpPct   Msec/Slp   MaxMsecs  Func\n");
-	foreach_hash_entry_l((void **)globals->slp_hash, SLP_HSIZE, print_slp_info, slp_sort_by_count, 30, &schedp->sched_stats);
+	vararg.arg1 = NULL;
+	vararg.arg2 = &schedp->sched_stats;
+	foreach_hash_entry_l((void **)globals->slp_hash, SLP_HSIZE, print_slp_info, slp_sort_by_count, 30, &vararg);
         TEXT("\n");
 }
 
@@ -1269,6 +1274,7 @@ kp_freq_swtch_stktrc()          	/* Section 2.1.2 */
 {
         int warn_indx;
 	print_stktrc_args_t print_stktrc_args;
+	var_arg_t vararg;
 
         ORANGE_TABLE;
         TEXT("\n");
@@ -1288,13 +1294,16 @@ kp_freq_swtch_stktrc()          	/* Section 2.1.2 */
 
         print_stktrc_args.schedp = globals->schedp;
 	print_stktrc_args.warnflag = 0;
+	
+	vararg.arg1 = NULL;
+	vararg.arg2 = &print_stktrc_args;
 
         lineno=1;
 
         BOLD("   count   wpct       avg   Stack trace\n");
         BOLD("              %%     msecs              \n");
         BOLD("============================================================\n");
-        foreach_hash_entry((void **)globals->stktrc_hash, STKTRC_HSIZE, print_stktrc_info, stktrc_sort_by_cnt, 30, (void *)&print_stktrc_args);
+        foreach_hash_entry((void **)globals->stktrc_hash, STKTRC_HSIZE, print_stktrc_info, stktrc_sort_by_cnt, 30, (void *)&vararg);
 
 	if (print_stktrc_args.warnflag & WARNF_MIGRATE_PAGES) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_MIGRATE_PAGES, _LNK_2_1_2);
@@ -1371,7 +1380,7 @@ kp_print_sleep_pids(void *arg1, void *arg2)
 
         nsym=5;
 
-        sleep_report((void *)pidp->slp_hash, pidp->schedp, slp_sort_by_time, arg2);
+        sleep_report((void *)pidp->slp_hash, pidp->schedp, slp_sort_by_time, NULL);
 
         return 0;
 }
@@ -1635,6 +1644,7 @@ int
 kp_fdata_syscalls(void *arg1, void *arg2)
 {
         fdata_info_t *fdatap = (fdata_info_t *)arg1;
+	var_arg_t vararg;
 
         if (fdatap->stats.syscall_cnt == 0)
                 return 0;
@@ -1654,9 +1664,11 @@ kp_fdata_syscalls(void *arg1, void *arg2)
 
         BOLD("System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n");
 
+	vararg.arg1 = NULL;
+	vararg.arg2 = NULL;
         foreach_hash_entry((void **)fdatap->syscallp, SYSCALL_HASHSZ,
                                 (int (*)(void *, void *))print_syscall_info,
-                                (int (*)())syscall_sort_by_cnt, 10, arg2);
+                                (int (*)())syscall_sort_by_cnt, 10, &vararg);
 
         return 0;
 }
@@ -1747,16 +1759,16 @@ kp_dev_entries(void *arg1, void *arg2)
 	print_iostats_totals(globals, &devinfop->iostats[0], arg2);
 
 	if (statsp[IOTOT].barrier_cnt) {
-               	pid_printf (" barriers: ");
+               	printf (" barriers: ");
                	RED_FONT;
-               	pid_printf ("%d", statsp[IOTOT].barrier_cnt);
+               	printf ("%d", statsp[IOTOT].barrier_cnt);
                	BLACK_FONT;
 	}
 
 	if (statsp[IOTOT].requeue_cnt) {
-                pid_printf (" requeue: ");
+                printf (" requeue: ");
                 RED_FONT;
-                pid_printf ("%d", statsp[IOTOT].requeue_cnt);
+                printf ("%d", statsp[IOTOT].requeue_cnt);
                 BLACK_FONT;
         }
 
@@ -2117,7 +2129,7 @@ kp_fc_entries(void *arg1, void *arg2)
 	}
 
 	if (statsp[IOTOT].requeue_cnt) {
-                pid_printf (" requeue: ");
+                printf (" requeue: ");
                 RED_FONT;
                 printf ("%d", statsp[IOTOT].requeue_cnt);
                 BLACK_FONT;
@@ -2176,7 +2188,7 @@ kp_wwn_entries(void *arg1, void *arg2)
 	}
 
 	if (statsp[IOTOT].requeue_cnt) {
-                pid_printf (" requeue: ");
+                printf (" requeue: ");
                 RED_FONT;
                 printf ("%d", statsp[IOTOT].requeue_cnt);
                 BLACK_FONT;
@@ -2226,8 +2238,8 @@ kp_perpid_mdev_totals()			/* Section 4.6 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-        BOLD ("     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process\n");
-        BOLD ("==============================================================================\n");
+	BOLD ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
+	BOLD ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv      PID  Process\n");
 
         foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_miosum,  pid_sort_by_miocnt, 10, NULL);
 	CSV_FIELD("kipid", "[CSV]");
@@ -2249,8 +2261,8 @@ kp_perpid_dev_totals()			/* Section 4.7 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-        BOLD ("     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process\n");
-        BOLD ("==============================================================================\n");
+	BOLD ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
+	BOLD ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv      PID  Process\n");
 
         foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_iosum,  pid_sort_by_iocnt, 10, NULL);
 	CSV_FIELD("kipid", "[CSV]");

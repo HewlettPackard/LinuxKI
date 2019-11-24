@@ -545,7 +545,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define FIND_REQP(hash, key) (futex_reque_t *)find_entry((lle_t **)hash, key, FUTEX_HASH(key))
 #define FUTEX_KEY(tgid, uaddr) ((uaddr & 0xffffffffff) | ((uint64)tgid << 40))
 #define FUTEX_TGID(key) ((key & 0xffffff0000000000) >> 40)
-#define FUTEX_HSIZE 0x100
+#define FUTEX_HSIZE 0x400
 #define FUTEX_HASH(key)  ((key & (key >> 32)) % FUTEX_HSIZE)
 #define GFUTEX_HSIZE 0x4000
 #define GFUTEX_HASH(key)  ((key & (key >> 32)) % GFUTEX_HSIZE)
@@ -570,7 +570,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #define WTREE_HSIZE 0x20
 #define WTREE_HASH(key) (int)0
-/* #define WTREE_HASH(key) (int)(key & (WTREE_HSIZE-1)) */
+/* #define WTREE_HASH(key) (int)(key & (WTREE_HSIZE-1))  */
 
 
 /*
@@ -660,8 +660,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define PTHG_HASHSZ 0x100
 #define PTHG_HASH(key)  (((key >> 9) & (key >> 32)) % PTHG_HASHSZ)
 
-#define PID_HASHSZ 0x1000
-#define PID_HASH(pid) (((pid+1) & 0x7fffffff) % PID_HASHSZ)
+#define PID_HASHSZ 0x4000
+#define PID_HASH(pid) ((((pid+1) + ((pid+1) << 10)) & 0x7fffffff) % PID_HASHSZ)
 
 #define DOCKER_HASHSZ 0x100
 #define DOCKER_HASH(id)  (id % DOCKER_HASHSZ)
@@ -764,14 +764,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define SLEEPER        0x0002
 
 #define MAX_THREAD_LIST 128 /* max number of woken threads we'll follow up within a single syscall by the waker */
-#define SETRQ_HSIZE 0x20
+#define SETRQ_HSIZE 0x40
 #define ARGS_HSIZE  0x20
 #define SEC_ARGS_HSIZE  0x20
 #define ARGS_HMASK (ARGS_HSIZE - 1)
 #define SEC_ARGS_HMASK (SEC_ARGS_HSIZE - 1)
 #define ARGS_HASH(key)  (((key >> 8) ^ key) & ARGS_HMASK)
 #define SEC_ARGS_HASH(key)  (((key >> 8) ^ key) & SEC_ARGS_HMASK)
-#define WCH_HSIZE 0x20
+#define WCH_HSIZE 0x40
 #define WCH_HMASK (WCH_HSIZE - 1)
 #define WCH_HASH(key) ((key >> 9) & WCH_HMASK)
 
@@ -917,6 +917,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARNF_HUGETLB_FAULT		0x4ull
 #define WARNF_KSTAT_IRQS		0x8ull
 #define WARNF_PCC_CPUFREQ		0x10ull
+
+typedef struct var_arg_struct {
+        void *arg1;
+        void *arg2;
+	void *arg3;
+} var_arg_t;
 
 typedef struct warnmsg_entry{
 	char *msg;
@@ -1096,6 +1102,7 @@ typedef struct print_stktrc_info_args {
 } print_stktrc_args_t;
 
 typedef struct print_pc_info_args {
+	FILE 		*pidfile;
 	struct hc_info	*hcinfop;
 	uint64		*warnflagp;
 } print_pc_args_t;
@@ -2210,8 +2217,6 @@ extern char line[];		/* used for HTML processing */
 extern int  lineno;		/* used for GREY line processing (HTML) and cursors */
 extern int  col;		/* used for cursors */
 extern uint64 warn0;
-extern char json_temp[];
-extern char json_detail[];
 
 extern uint64 idle_pc;
 extern uint64 ogetblk_pc;

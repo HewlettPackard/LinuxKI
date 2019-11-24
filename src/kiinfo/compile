@@ -1,1 +1,0 @@
-gcc -g -O2 -lc -lrt -Wformat=0 -o kiinfo *.c -D__LIKI_RTMERGE -D_GNU_SOURCE -lpthread -lncurses

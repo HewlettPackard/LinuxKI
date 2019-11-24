@@ -146,13 +146,13 @@ socket_print_info(sd_stats_t *statsp, struct sockaddr_in6 *lsock, struct sockadd
 
 	if (lsock) {
 		printf ("L=");
-		print_ip_port_v6(lsock, 0);
+		print_ip_port_v6(lsock, 0, NULL);
 		if (rsock) printf (" ");
 	}
 	
 	if (rsock) {
 		printf ("R=");
-		print_ip_port_v6(rsock, 0);
+		print_ip_port_v6(rsock, 0, NULL);
 	}
 
 	if (cluster_flag) {
@@ -166,6 +166,7 @@ socket_print_info(sd_stats_t *statsp, struct sockaddr_in6 *lsock, struct sockadd
 int
 socket_print_detail(sd_stats_t *statsp, void **syscallp, struct sockaddr_in6 *lsock, struct sockaddr_in6 *rsock, uint64 *scallflagp)
 {
+	var_arg_t vararg;
 
         if (scallflagp == NULL) return 0;
         if (*scallflagp == 0) return 0;
@@ -173,13 +174,13 @@ socket_print_detail(sd_stats_t *statsp, void **syscallp, struct sockaddr_in6 *ls
 	printf("\n");
 	if (lsock) {
 		BOLD ("L=");
-		print_ip_port_v6(lsock, 0);
+		print_ip_port_v6(lsock, 0, NULL);
 		if (rsock) BOLD (" -> ");
 	}
 	
 	if (rsock) {
 		BOLD ("R=");
-		print_ip_port_v6(rsock, 0);
+		print_ip_port_v6(rsock, 0, NULL);
 	}
 
         CAPTION_GREY;
@@ -195,10 +196,12 @@ socket_print_detail(sd_stats_t *statsp, void **syscallp, struct sockaddr_in6 *ls
 
         if (scallflagp && *scallflagp) {
                 BOLD("System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n");
+			vararg.arg1 = NULL;
+			vararg.arg2 = NULL;
                         foreach_hash_entry((void **)syscallp, SYSCALL_HASHSZ,
                                         (int (*)(void *, void *))print_syscall_info,
                                         (int (*)()) syscall_sort_by_time,
-                                        0, scallflagp);
+                                        0, &vararg);
 		TEXT("\n");
         }
 	return 0;

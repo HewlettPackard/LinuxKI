@@ -1389,6 +1389,7 @@ print_pidhc_window()
 	pid_info_t *pidp;
 	hc_info_t *hcinfop;
 	int nlines;
+	print_pc_args_t print_pc_args;
 
 	pidp = GET_PIDP(&globals->pid_hash, curpid);	
 	if (is_alive) { 
@@ -1409,11 +1410,14 @@ print_pidhc_window()
 
 	nlines = LINES_AVAIL / 2;
 	hcinfop = pidp->hcinfop;
+	print_pc_args.hcinfop = hcinfop;
+	print_pc_args.warnflagp = NULL;
+	print_pc_args.pidfile = NULL;
 	if (IS_LIKI && hcinfop && hcinfop->pc_hash) {
 		mvprintw (lineno++, 0, "---- Top Hardclock Functions ----");
 	        mvprintw (lineno++, 0, "   Count     Pct  State  Function");
 		nlines = LINES_AVAIL / 2;
-        	foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc, pc_sort_by_count, nlines, (void *)hcinfop);
+        	foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc, pc_sort_by_count, nlines, (void *)&print_pc_args);
 	}
 
 	if (IS_LIKI && (LINES_AVAIL > 3) && hcinfop &&  hcinfop->hc_stktrc_hash ) {
@@ -1621,6 +1625,7 @@ print_pid_window()
 	iostats_t *iostatp;
 	int i;
 	int nlines;
+	print_pc_args_t print_pc_args;
 
 	pidp = GET_PIDP(&globals->pid_hash, curpid);	
 	schedp = pidp->schedp;
@@ -1641,6 +1646,9 @@ print_pid_window()
 		live_print_msr_stats(&schedp->sched_stats, 0);
 
 	hcinfop = pidp->hcinfop;
+	print_pc_args.hcinfop = hcinfop;
+	print_pc_args.warnflagp = NULL;
+	print_pc_args.pidfile = NULL;
 	if (!IS_LIKI) {
 		lineno++;
 		mvprintw(lineno++, 0, "*** No Hardclock Traces with Ftrace ***");
@@ -1649,7 +1657,7 @@ print_pid_window()
 		mvprintw (lineno++, 0, "------------------------- Top Hardclock Functions ---------------------------");
 	        mvprintw (lineno++, 0, "   Count     Pct  State  Function");
 		(LINES_AVAIL > 13) ? (nlines=5) : (nlines=1);
-        	foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc, pc_sort_by_count, nlines, (void *)hcinfop);
+        	foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc, pc_sort_by_count, nlines, (void *)&print_pc_args);
 	}
 
 	if (!IS_LIKI) {
@@ -2250,6 +2258,7 @@ print_select_cpu_window()
 	sched_info_t *cschedp;
 	sched_stats_t *cstatp;
 	uint64 cpu_total_time;
+	print_pc_args_t print_pc_args;
 	int nsym=1;
 	int irqtype;
 	int irqheader_lineno;
@@ -2289,10 +2298,13 @@ print_select_cpu_window()
 
 	lineno++;
 	hcinfop = cpuinfop->hcinfop;
+	print_pc_args.hcinfop = hcinfop;
+	print_pc_args.warnflagp = NULL;
+	print_pc_args.pidfile = NULL;
 	if (hcinfop && hcinfop->pc_hash) {
 		mvprintw (lineno++, 0, "------------------------- Top Hardclock Functions ---------------------------");
 	        mvprintw (lineno++, 0, "   Count     Pct  State  Function");
-        	foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc, pc_sort_by_count, 5, (void *)hcinfop);
+        	foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc, pc_sort_by_count, 5, (void *)&print_pc_args);
 	}
 
 	if ((LINES_AVAIL > 3) && hcinfop &&  hcinfop->hc_stktrc_hash ) {
@@ -3031,6 +3043,10 @@ print_hc_window()
 {
 	int nlines;
 	hc_info_t *hcinfop = globals->hcinfop;
+	print_pc_args_t print_pc_args;
+	print_pc_args.hcinfop = hcinfop;
+	print_pc_args.warnflagp = NULL;
+	print_pc_args.pidfile = NULL;
 
 	print_global_header();	
 	lineno++;
@@ -3060,7 +3076,7 @@ print_hc_window()
 	if ((hcinfop->pc_hash) && (LINES_AVAIL > 3)) {
 		mvprintw(lineno++, col, "------------- Top Kernel Functions -------------");
 		mvprintw(lineno++, col, "   Count     Pct  State  Function");
-		foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc, pc_sort_by_count, nlines-2, (void *)hcinfop);
+		foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc, pc_sort_by_count, nlines-2, (void *)&print_pc_args);
 	}
 
 	nlines = LINES_AVAIL/2;

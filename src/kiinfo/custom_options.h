@@ -37,6 +37,7 @@ uint64 itime = 0;
 int   vpct = (uint32)0x3;
 int   vdepth = (uint32)0x1;
 int   vint =   (uint32)100;
+int   hthr =   (uint32)0;
 int   kilive = 0;
 char *edusfname=NULL;
 char *jstackfname=NULL;
@@ -260,8 +261,6 @@ Kidsk(init_t *init, arg_t *arg)
 			jstackfname = prop->p_value.s;
                 } else if (strcmp("csv", prop->p_name) == 0) {
                         SET(CSV_FLAG);
-		} else if (strcmp("vis", prop->p_name) == 0) {
-			SET(VIS_FLAG);
                 } else if (strcmp("kitrace", prop->p_name) == 0) {
                         SET(KITRACE_FLAG);
 		} else if (strcmp("abstime", prop->p_name) == 0) {
@@ -374,8 +373,6 @@ Kipid(init_t *init, arg_t *arg)
 			CLEAR_STAT(FUTEX_STATS);
                 } else if (strcmp("mangle", prop->p_name) == 0) {
                         SET(MANGLE_FLAG);
-                } else if (strcmp("vis", prop->p_name) == 0) {
-                        SET(VIS_FLAG);
 		} else if (strcmp("vpct", prop->p_name) == 0) {
                         vpct = (uint32)prop->p_value.i;
                 } else if (strcmp("vdepth", prop->p_name) == 0) {
@@ -929,6 +926,8 @@ Kiall(init_t *init, arg_t *arg)
 	tool_init_func = kiall_init_func; 
 	npid=20;
 	top=20;
+	hthr=0;
+	long ncpus = sysconf(_SC_NPROCESSORS_ONLN);
 
 	SET(SCHED_FLAG | KPARSE_FLAG | KPARSE_FULL_FLAG | SYSENTER_FLAG | SYSARGS_FLAG |
 	    SCDETAIL_FLAG | SCALL_FLAG | KPTREE_FLAG | FUTEX_FLAG | FILE_FLAG | CACHE_FLAG |
@@ -957,6 +956,12 @@ Kiall(init_t *init, arg_t *arg)
 			vdepth = (uint32)prop->p_value.i;
 		} else if (strcmp("vint", prop->p_name) == 0) {
 			vint = (uint32)prop->p_value.i;
+		} else if (strcmp("hthr", prop->p_name) == 0) {
+			if ((prop->p_value.i == 0) || (prop->p_value.i > ncpus)) {
+				hthr = ncpus;
+			} else {
+				hthr = prop->p_value.i;
+			}
 		} else if (strcmp("edus", prop->p_name) == 0) {
 			edusfname = prop->p_value.s;
 		} else if (strcmp("jstack", prop->p_name) == 0) {
@@ -967,6 +972,7 @@ Kiall(init_t *init, arg_t *arg)
 	    }
 	}
 
+	/* limit number of threads to the number of CPU cores */
 	rqwait = 0x7fffffff; 
 	rqcnt  = 0x7fffffff;  
 	nfutex=10;
@@ -1356,6 +1362,7 @@ flag_t kiall_flags[] = {
   { "vpct",        "vpct",    FA_ALL, FT_OPT | FT_HIDDEN, "i"},
   { "vdepth",      "vdepth",  FA_ALL, FT_OPT | FT_HIDDEN, "i"},
   { "vint",        "vint",    FA_ALL, FT_OPT | FT_HIDDEN, "i"},
+  { "hthr",  "num_threads",    FA_ALL, FT_OPT | FT_HIDDEN, "i"},
   { "edus",        "filename", FA_ALL, FT_REG, "s"},
   { "jstack",      "filename", FA_ALL, FT_REG, "s"},
   { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },

@@ -19,8 +19,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <sys/time.h>
 #include <sys/errno.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <linux/kdev_t.h>
 #include <err.h>
+
 #include "ki_tool.h"
 #include "liki.h"
 #include "developers.h"
@@ -39,10 +42,8 @@ int  wtree_build_tree_tgt(void *, void *);
 int  wtree_build_tree_tgt_src(void *, void *);
 int  wtree_build_tree_src_tgt(void *, void *);
 
-
 #define MAX_WTREE_DEPTH 1
 #define MIN_WTREE_PCT 0.01
-
 
 void
 vis_kiall_init()
@@ -219,7 +220,7 @@ vis_kipid_init()
 
 
 
-int
+static inline int
 unwanted_pid(pid_info_t *pidp)
 {
 	/* We treat the ICS special.  Its node is added after all others */
@@ -257,7 +258,9 @@ int
 wtree_build_tree_src_tgt(void *arg0, void *arg1)
 {
         setrq_info_t *tgt_setrqp = (setrq_info_t *)arg0;
-        wait_tree_ptrs_t *wtp = (wait_tree_ptrs_t *) arg1;
+	var_arg_t *vararg = (var_arg_t *)arg1;
+        wait_tree_ptrs_t *wtp = (wait_tree_ptrs_t *)vararg->arg1;
+	FILE *pid_wtree_jsonfile = (FILE *)vararg->arg2;
         pid_info_t   *rpidp = wtp->root_pidp;
         pid_info_t   *cpidp = wtp->curr_pidp;
         pid_info_t   *tgt_pidp;
@@ -268,7 +271,7 @@ wtree_build_tree_src_tgt(void *arg0, void *arg1)
         sched_info_t *rpid_schedp;
         int link_depth = wtp->depth;
 
-        tgt_pidp = GET_PIDP(&globals->pid_hash, tgt_setrqp->lle.key);
+        tgt_pidp = GET_PIDP(&globals->pid_hash, tgt_setrqp->PID);
         tgt_schedp = tgt_pidp->schedp;
 	rpid_schedp = rpidp->schedp;
 
@@ -278,7 +281,7 @@ wtree_build_tree_src_tgt(void *arg0, void *arg1)
                 return 0;
         }
         src_treep = GET_WTREEP(&rpid_schedp->wtree_hash, cpidp->PID);
-        tgt_treep = GET_WTREEP(&rpid_schedp->wtree_hash, tgt_setrqp->lle.key);
+        tgt_treep = GET_WTREEP(&rpid_schedp->wtree_hash, tgt_setrqp->PID);
 
         /*
         ** As we look at the list of who we woke, we should only have to deal with two cases.  One is a
@@ -335,7 +338,9 @@ int
 wtree_build_tree_src(void *arg0, void *arg1)
 {
         setrq_info_t *src_setrqp = (setrq_info_t *)arg0;
-	wait_tree_ptrs_t *wtp = (wait_tree_ptrs_t *)arg1;
+	var_arg_t *vararg = (var_arg_t *)arg1;
+	wait_tree_ptrs_t *wtp = (wait_tree_ptrs_t *)vararg->arg1;
+	FILE *pid_wtree_jsonfile = (FILE *)vararg->arg2;
 	pid_info_t   *rpidp = wtp->root_pidp;
         pid_info_t   *cpidp = wtp->curr_pidp;
         pid_info_t   *src_pidp;
@@ -348,7 +353,7 @@ wtree_build_tree_src(void *arg0, void *arg1)
         
 	int link_depth = wtp->depth;
 
-        src_pidp = GET_PIDP(&globals->pid_hash, src_setrqp->lle.key);
+        src_pidp = GET_PIDP(&globals->pid_hash, src_setrqp->PID);
         src_schedp = src_pidp->schedp;
 	rpid_schedp = rpidp->schedp;
 	cpid_schedp = cpidp->schedp;
@@ -358,7 +363,7 @@ wtree_build_tree_src(void *arg0, void *arg1)
         if ((!cpid_schedp->sched_stats.T_sleep_time) || (src_setrqp->sleep_time/(cpid_schedp->sched_stats.T_sleep_time*1.0) < vpct*0.01))
                 return 0;
 	tgt_treep = GET_WTREEP(&rpid_schedp->wtree_hash, cpidp->PID);
-        src_treep = GET_WTREEP(&rpid_schedp->wtree_hash, src_setrqp->lle.key);
+        src_treep = GET_WTREEP(&rpid_schedp->wtree_hash, src_setrqp->PID);
 
         /*
         ** If we're heading up to a higher level than this current one, the Ddepth on the node we're on
@@ -371,7 +376,9 @@ wtree_build_tree_src(void *arg0, void *arg1)
 	    if (src_treep->Ddepth < wtp->depth) {
                 wtp->curr_pidp = src_pidp;
                 foreach_hash_entry((void **)src_schedp->setrq_src_hash, WPID_HSIZE,
-                                        wtree_build_tree_src, setrq_sort_by_sleep_time, npid, (void *)wtp);
+                                        wtree_build_tree_src, setrq_sort_by_sleep_time, npid, (void *)vararg); 
+                /* foreach_hash_entry((void **)src_schedp->setrq_src_hash, WPID_HSIZE,
+                                        wtree_build_tree_src, NULL, npid, (void *)vararg); */
                 wtp->curr_pidp = cpidp;
 		if ((src_treep->Ddepth == 0) || (tgt_treep->Ddepth == 0))
                         fprintf(stderr,"Depth = 0 in path 3 src=%d tgt=%d wtp_depth=%d\n",src_treep->Ddepth, tgt_treep->Ddepth, wtp->depth);
@@ -449,7 +456,9 @@ wtree_build_tree_src(void *arg0, void *arg1)
 
         wtp->curr_pidp = src_pidp;
         foreach_hash_entry((void **)src_schedp->setrq_tgt_hash, WPID_HSIZE,
-                                        wtree_build_tree_src_tgt, setrq_sort_by_sleep_time, npid, (void *)wtp);
+                                        wtree_build_tree_src_tgt, setrq_sort_by_sleep_time, npid, (void *)vararg);
+        /* foreach_hash_entry((void **)src_schedp->setrq_tgt_hash, WPID_HSIZE,
+                                        wtree_build_tree_src_tgt, NULL, npid, (void *)vararg); */
         wtp->curr_pidp = cpidp;
 	if ((src_treep->Ddepth == 0) || (tgt_treep->Ddepth == 0))
                         fprintf(stderr,"Depth = 0 in path 6 src=%d tgt=%d wtp_depth=%d\n",src_treep->Ddepth, tgt_treep->Ddepth, wtp->depth);
@@ -462,7 +471,9 @@ int
 wtree_build_tree_tgt_src(void *arg0, void *arg1)
 {
         setrq_info_t *src_setrqp = (setrq_info_t *)arg0;
-        wait_tree_ptrs_t *wtp = (wait_tree_ptrs_t *) arg1;
+	var_arg_t *vararg = (var_arg_t *)arg1;
+        wait_tree_ptrs_t *wtp = (wait_tree_ptrs_t *)vararg->arg1;
+	FILE *pid_wtree_jsonfile = (FILE *)vararg->arg2;
         pid_info_t   *rpidp = wtp->root_pidp;
         pid_info_t   *cpidp = wtp->curr_pidp;
         pid_info_t   *src_pidp;
@@ -473,7 +484,7 @@ wtree_build_tree_tgt_src(void *arg0, void *arg1)
 	sched_info_t *rpid_schedp;
         int link_depth = wtp->depth;
 
-        src_pidp = GET_PIDP(&globals->pid_hash, src_setrqp->lle.key);
+        src_pidp = GET_PIDP(&globals->pid_hash, src_setrqp->PID);
         src_schedp = src_pidp->schedp;
         rpid_schedp = rpidp->schedp;
 
@@ -483,7 +494,7 @@ wtree_build_tree_tgt_src(void *arg0, void *arg1)
                 return 0;
         }
         tgt_treep = GET_WTREEP(&rpid_schedp->wtree_hash, cpidp->PID);
-        src_treep = GET_WTREEP(&rpid_schedp->wtree_hash, src_setrqp->lle.key);
+        src_treep = GET_WTREEP(&rpid_schedp->wtree_hash, src_setrqp->PID);
 
 	/*
 	** As we look at the list of who woke us, we should only have to deal with two cases.  One is a
@@ -540,7 +551,9 @@ int
 wtree_build_tree_tgt(void *arg0, void *arg1)
 {
 	setrq_info_t *tgt_setrqp = (setrq_info_t *)arg0;
-	wait_tree_ptrs_t *wtp = (wait_tree_ptrs_t *) arg1;
+	var_arg_t *vararg = (var_arg_t *)arg1;
+	wait_tree_ptrs_t *wtp = (wait_tree_ptrs_t *)vararg->arg1;
+	FILE *pid_wtree_jsonfile = (FILE *)vararg->arg2;
 	pid_info_t   *rpidp = wtp->root_pidp;
 	pid_info_t   *cpidp = wtp->curr_pidp;
 	pid_info_t   *tgt_pidp;
@@ -551,7 +564,7 @@ wtree_build_tree_tgt(void *arg0, void *arg1)
 	sched_info_t *rpid_schedp;
 	int link_depth = wtp->depth;
 
-	tgt_pidp = GET_PIDP(&globals->pid_hash, tgt_setrqp->lle.key);
+	tgt_pidp = GET_PIDP(&globals->pid_hash, tgt_setrqp->PID);
 	tgt_schedp = tgt_pidp->schedp;
         rpid_schedp = rpidp->schedp; 
 
@@ -561,7 +574,7 @@ wtree_build_tree_tgt(void *arg0, void *arg1)
 		return 0;
 	}
 	src_treep = GET_WTREEP(&rpid_schedp->wtree_hash, cpidp->PID);
-        tgt_treep = GET_WTREEP(&rpid_schedp->wtree_hash, tgt_setrqp->lle.key);
+        tgt_treep = GET_WTREEP(&rpid_schedp->wtree_hash, tgt_setrqp->PID);
 
 
 	/* 
@@ -575,7 +588,9 @@ wtree_build_tree_tgt(void *arg0, void *arg1)
             if (tgt_treep->Ddepth < wtp->depth) {
                 wtp->curr_pidp = tgt_pidp;
                 foreach_hash_entry((void **)tgt_schedp->setrq_tgt_hash, WPID_HSIZE,
-                                        wtree_build_tree_tgt, setrq_sort_by_sleep_time, npid, (void *)wtp);
+                                        wtree_build_tree_tgt, setrq_sort_by_sleep_time, npid, (void *)vararg);
+                /* foreach_hash_entry((void **)tgt_schedp->setrq_tgt_hash, WPID_HSIZE,
+                                        wtree_build_tree_tgt, NULL, npid, (void *)vararg); */
                 wtp->curr_pidp = cpidp;
 		if ((src_treep->Ddepth == 0) || (tgt_treep->Ddepth == 0))
                         fprintf(stderr,"Depth = 0 in path 9 src=%d tgt=%d wtp_depth=%d\n",src_treep->Ddepth, tgt_treep->Ddepth, wtp->depth);
@@ -666,7 +681,9 @@ wtree_build_tree_tgt(void *arg0, void *arg1)
 
 	wtp->curr_pidp = tgt_pidp;
         foreach_hash_entry((void **)tgt_schedp->setrq_src_hash, WPID_HSIZE,
-                                        wtree_build_tree_tgt_src, setrq_sort_by_sleep_time, npid, (void *)wtp);
+                                        wtree_build_tree_tgt_src, setrq_sort_by_sleep_time, npid, (void *)vararg);
+        /* foreach_hash_entry((void **)tgt_schedp->setrq_src_hash, WPID_HSIZE,
+                                        wtree_build_tree_tgt_src, NULL, npid, (void *)vararg); */
 	wtp->curr_pidp = cpidp;
 	if ((src_treep->Ddepth == 0) || (tgt_treep->Ddepth == 0))
                         fprintf(stderr,"Depth = 0 in path 12 src=%d tgt=%d wtp_depth=%d\n",src_treep->Ddepth, tgt_treep->Ddepth, wtp->depth);
@@ -678,10 +695,13 @@ int
 wtree_build_nodelist(void *arg0, void *arg1)
 {
         wait_tree_nodes_t *wtnp = (wait_tree_nodes_t *)arg0;
-        wait_tree_ptrs_t *wtp = (wait_tree_ptrs_t *) arg1;
+	var_arg_t *vararg = (var_arg_t *)arg1;
+        wait_tree_ptrs_t *wtp = (wait_tree_ptrs_t *)vararg->arg1;
+	FILE *pid_wtree_jsonfile = (FILE *)vararg->arg2;
+
 	char *shortnamep;
         if (!wtnp->name) {
-                fprintf(stderr,"Empty wtnp entry pid=%d\n", wtnp->lle.key);
+                fprintf(stderr,"Empty wtnp entry pid=%d\n", wtnp->PID);
 		return 0;
 	}
 	sched_stats_t *statsp = (sched_stats_t *)wtnp->infop;
@@ -690,7 +710,7 @@ wtree_build_nodelist(void *arg0, void *arg1)
 		shortnamep = strrchr(wtnp->name,'/')+1;
 
 	fprintf(pid_wtree_jsonfile,"{\"name\":\"PID %d\",\"cmd\":\"%s\", \"thr_cmd\":\"%s\",\"type\":%d, \"run\":%7.1f, \"runq\":%7.1f, \"sleep_time\":%7.1f, \"waitedfor\":%7.1f, \"depth\":%d, \"wlink\":\"../../VIS/%d/pid_detail.html\"},\n",
-                wtnp->lle.key,
+                wtnp->PID,
                 shortnamep,
                 wtnp->thr_name,
 		wtnp->type,
@@ -699,16 +719,17 @@ wtree_build_nodelist(void *arg0, void *arg1)
 		MSECS(statsp->T_sleep_time),
                 MSECS(statsp->T_total_waited4_time),
 		wtnp->Ddepth,
-		wtnp->lle.key);
+		wtnp->PID);
 	return 0;
 }
 
 void
-wtree_build(pid_info_t *pidp)
+wtree_build(pid_info_t *pidp, FILE *pid_wtree_jsonfile)
 {
 	sched_info_t *schedp;
 	setrq_info_t *setrqp;
 	setrq_info_t *ics_setrqp;
+	var_arg_t vararg;
 	int   i,depth=0;
 
 	wait_tree_ptrs_t wtree_ptrs;
@@ -735,13 +756,19 @@ wtree_build(pid_info_t *pidp)
 
 	fprintf(pid_wtree_jsonfile,"{\n\"links\":[\n");
 
+	vararg.arg1 = (void *)&wtree_ptrs;
+	vararg.arg2 = pid_wtree_jsonfile;
     	for( wtree_ptrs.depth = 2; wtree_ptrs.depth <= vdepth+1; wtree_ptrs.depth++) {
         	wtree_ptrs.curr_pidp = pidp;
 		foreach_hash_entry((void **)schedp->setrq_tgt_hash, WPID_HSIZE,
-                                        wtree_build_tree_tgt, setrq_sort_by_sleep_time, npid, (void *)&wtree_ptrs);
+                                        wtree_build_tree_tgt, setrq_sort_by_sleep_time, npid, (void *)&vararg); 
+		/* foreach_hash_entry((void **)schedp->setrq_tgt_hash, WPID_HSIZE,
+                                        wtree_build_tree_tgt, NULL, npid, (void *)&vararg); */
 		wtree_ptrs.curr_pidp = pidp;
 		foreach_hash_entry((void **)schedp->setrq_src_hash, WPID_HSIZE,
-                                        wtree_build_tree_src, setrq_sort_by_sleep_time, npid, (void *)&wtree_ptrs);
+                                        wtree_build_tree_src, setrq_sort_by_sleep_time, npid, (void *)&vararg);
+		/* foreach_hash_entry((void **)schedp->setrq_src_hash, WPID_HSIZE, 
+                                        wtree_build_tree_src, NULL, npid, (void *)&vararg); */
         }
 
 	/* We add the link to the ICS waker last so we can terminate the line w/o the comma... */
@@ -757,8 +784,9 @@ wtree_build(pid_info_t *pidp)
 	/* now build or add on the 'nodes' portion of the JSON file. */
 
         fprintf(pid_wtree_jsonfile,"\"nodes\":[\n");
+
 	foreach_hash_entry((void **)schedp->wtree_hash, WTREE_HSIZE,
-                                        wtree_build_nodelist, NULL, 0x7fffffff, (void *)&wtree_ptrs);
+                                        wtree_build_nodelist, NULL, 0x7fffffff, (void *)&vararg);
 
 	/* Similar to the last 'links' line above, we add the ICS node information */
 
@@ -1032,6 +1060,9 @@ int
 print_task_tlinedata(void *arg1, void *arg2)
 {
 	pid_info_t *pidp = (pid_info_t *)arg1;
+	int pid_timeline_csv_fd = -1;
+	char pid_timeline_buffer[1024];
+
 	if (pidp == NULL) return 0;
 
 	if (!vis) return 0;
@@ -1064,8 +1095,8 @@ print_task_tlinedata(void *arg1, void *arg2)
 		return 0;
 	}
 
-        if ((pid_timeline_csvfile = fopen(pidtl_fname, "a")) == NULL) {
-                fprintf (stderr, "Unable to open PID file %s for append, errno %d\n", pidtl_fname, errno);
+        if ((pid_timeline_csv_fd = open(pidtl_fname, O_CREAT | O_WRONLY | O_APPEND, 0777)) < 0) {
+                fprintf (stderr, "Unable to open PID Timeline CSV %s for append, errno %d\n", pidtl_fname, pid_timeline_csv_fd);
                 fprintf (stderr, "  Continuing without PID output\n");
 		CLEAR(VIS_FLAG);
 		return 0;
@@ -1083,10 +1114,12 @@ print_task_tlinedata(void *arg1, void *arg2)
 	if (statp->T_run_time && statp->C_switch_cnt)
 		run_per_csw = SECS((statp->T_run_time * 1.0) / statp->C_switch_cnt);
 
-	if (add_hdr)
-		fprintf(pid_timeline_csvfile, "hostname,timestamp,subdir,server_id,interval,start,end,pid,syscalls,runtime,systime,usertime,runqtime,sleeptime,irqtime,totaltime,stealtime,switch_cnt,sleep_cnt,preempt_cnt,wakeup_cnt,run_per_csw,migr,nodemigr,totalio,readio,writeio\n");
+	if (add_hdr) {
+		sprintf(pid_timeline_buffer, "hostname,timestamp,subdir,server_id,interval,start,end,pid,syscalls,runtime,systime,usertime,runqtime,sleeptime,irqtime,totaltime,stealtime,switch_cnt,sleep_cnt,preempt_cnt,wakeup_cnt,run_per_csw,migr,nodemigr,totalio,readio,writeio\n");
+		write (pid_timeline_csv_fd, pid_timeline_buffer, strlen(pid_timeline_buffer));
+	}
 
-	fprintf(pid_timeline_csvfile, "%s,%s,%s,%d,%d,%.06f,%.06f,%d,%d,",
+	sprintf(pid_timeline_buffer, "%s,%s,%s,%d,%d,%.06f,%.06f,%d,%d,",
                 globals->hostname,
 		timestamp,
                 globals->subdir,
@@ -1096,8 +1129,9 @@ print_task_tlinedata(void *arg1, void *arg2)
                 SECS(interval_end - start_time),	
 		(int)pidp->PID,
 		pidp->syscall_cnt);
+	write (pid_timeline_csv_fd, pid_timeline_buffer, strlen(pid_timeline_buffer));
 
-        fprintf(pid_timeline_csvfile, "%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%d,%d,%d,%d,%7.6f,%d,%d,%d,%d,%d\n",
+        sprintf(pid_timeline_buffer, "%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%d,%d,%d,%d,%7.6f,%d,%d,%d,%d,%d\n",
                 SECS(statp->T_run_time),
                 SECS(statp->T_sys_time),
                 SECS(statp->T_user_time),
@@ -1116,15 +1150,15 @@ print_task_tlinedata(void *arg1, void *arg2)
 		rstatp->compl_cnt + wstatp->compl_cnt,
 		rstatp->compl_cnt,
 		wstatp->compl_cnt);
+	write (pid_timeline_csv_fd, pid_timeline_buffer, strlen(pid_timeline_buffer));
 	
-	fflush(pid_timeline_csvfile);
-	fclose(pid_timeline_csvfile);
+	close(pid_timeline_csv_fd);
 }
 
 int
 print_vis_task_interval_data()
 {
-	 foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_task_tlinedata, NULL, 0, NULL);
+	foreach_hash_entry_mt((void **)globals->pid_hash, PID_HASHSZ, print_task_tlinedata, NULL, 0, NULL);
 }
 
 void

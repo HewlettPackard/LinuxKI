@@ -1587,10 +1587,10 @@ print_varargs_exit(syscall_exit_t *rec_ptr)
 
 				printf ("%cfamily=INET", fsep);
 				if ((sock_type > 0) && (sock_type < 11)) printf ("%ctype=%s", fsep, socktype_name_index[sock_type]);
-				printf ("%cL=", fsep); print_ip_port (addr, 1);
+				printf ("%cL=", fsep); print_ip_port (addr, 1, NULL);
 				if ((sock_type==0) || (sock_type != SOCK_DGRAM)) {
 					addr++;
-					printf ("%cR=", fsep); print_ip_port (addr, 1);
+					printf ("%cR=", fsep); print_ip_port (addr, 1, NULL);
 				}
 			} else if (addr->sin_family == AF_REGFILE) {
 				faddr = (fileaddr_t *)addr;
@@ -1606,10 +1606,10 @@ print_varargs_exit(syscall_exit_t *rec_ptr)
 				printf ("%cfamily=INET6", fsep);
 				addr6 = (struct sockaddr_in6 *)addr; 
 				if ((sock_type > 0) && (sock_type < 11)) printf ("%ctype=%s", fsep, socktype_name_index[sock_type]);
-				printf ("%cL=", fsep); print_ip_port_v6 (addr6, 1);
+				printf ("%cL=", fsep); print_ip_port_v6 (addr6, 1, NULL);
 				if ((sock_type==0) || (sock_type != SOCK_DGRAM)) {
 					addr6++;
-					printf ("%cR=", fsep); print_ip_port_v6 (addr6, 1);
+					printf ("%cR=", fsep); print_ip_port_v6 (addr6, 1, NULL);
 				}
 			}
 

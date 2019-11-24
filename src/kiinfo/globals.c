@@ -67,9 +67,6 @@ int col=0;
 char line[2048];
 int font_color;
 
-char json_temp[4096];
-char json_detail[8192];
-
 uint64 dsk_io_sizes[NBUCKETS-1]={ 2, 5, 10, 15, 30, 50, 100, 150, 200};
 
 char *socktype_name_index[11] = {

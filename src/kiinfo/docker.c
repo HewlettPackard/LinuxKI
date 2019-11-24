@@ -417,6 +417,8 @@ print_docker_detail(void *arg1, void *arg2)
 
 	dock_printf ("\nTop Tasks sorted by physical IO\n");
 	dock_printf ("     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process\n");
+	dock_printf ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
+	dock_printf ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    PID    Process\n");
         foreach_hash_entry((void **)dockerp->dkpid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_dkpid_iosum,
                            (int (*)()) dkpid_sort_by_iocnt,

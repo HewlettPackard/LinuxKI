@@ -1,0 +1,994 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Helvetica;
+	panose-1:2 11 6 4 2 2 2 2 2 4;}
+@font-face
+	{font-family:Courier;
+	panose-1:2 7 4 9 2 2 5 2 4 4;}
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:Consolas;
+	panose-1:2 11 6 9 2 2 4 3 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:107%;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:.5in .5in .5in .5in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-GB>
+
+<div class=WordSection1>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><i><span style='font-size:14.0pt;font-family:"Arial",sans-serif;
+background:white'>LinuxKI Warning</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+background:white'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+background:white'>High kworker&nbsp;CPU usage when using software RAID (md
+driver) with barrier writes</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>05/10/2018</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><i><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>updated 09/19/2019</span></i></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal;background:white'><span style='font-size:
+9.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Problem</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Linux server experiences severe performance degradation after
+upgrading from RHEL 6.8 to RHEL 7.4 with extremely high System CPU usage.&nbsp;
+&nbsp; Thousands of kworker daemon tasks are observed to be active on the
+system.&nbsp; &nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Background</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+background:white'>When using Linux Software RAID, also known as Multiple Device
+(md) driver, hundreds or even thousands of kworker daemon tasks may be
+active.&nbsp; &nbsp;&nbsp;The kworker daemon tasks may only take a small amount
+of CPU time each, but cumulatively, it can be dominating the CPU usage.&nbsp;
+&nbsp;&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+background:white'>There have been several changes to Linux over the past few
+years&nbsp;which contributes to the issue:</span></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='color:black;line-height:normal;background:white'><span
+     style='font-size:10.0pt;font-family:"Arial",sans-serif'>The Multiple Device
+     (md) driver was re-written in&nbsp;Linux version&nbsp;2.6.37&nbsp; &nbsp;</span></li>
+ <li class=MsoNormal style='color:black;line-height:normal;background:white'><span
+     style='font-size:10.0pt;font-family:"Arial",sans-serif'>Pool workqueues
+     were introduced in Linux version 3.9</span></li>
+ <li class=MsoNormal style='color:black;line-height:normal;background:white'><span
+     style='font-size:10.0pt;font-family:"Arial",sans-serif'>The Asynchronous
+     IO completions started using workqueues in Linux version 3.12.</span></li>
+</ul>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>The issue is caused by performing a lot of asynchronous IO activity
+with barrier writes.&nbsp; &nbsp;In this case, the system was using Oracle on
+ext4 filesystems, and the Oracle DB writer processes periodically flush the
+dirty data from the SGA cache asynchronously to disk.&nbsp; &nbsp; &nbsp; While
+the customer was using a disk array with a non-volatile cache, the disk array
+advertised as &quot;write cache enabled&quot;.&nbsp; &nbsp;&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>kernel: sd 3:0:0:6: [sdbc] Write cache: enabled, read cache:
+enabled, doesn't support DPO or FUA</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>kernel: sd 3:0:1:6: [sded] Write cache: enabled, read cache:
+enabled, doesn't support DPO or FUA</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>...</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>As a result, each asynchronous IO would need to go through the
+barrier write flush code by queuing an item on the workqueue, which is handled
+by the kworker threads.   When an asynchronous IO completion request is placed
+in the kworker queue, and no idle kworker is present, a new kworker is created
+and there is no limitation with respect to the number of kworker processes that
+can be created.  During periods of heavy asynchronous write activity, many
+kworker tasks are created to handle the asynchronous IO.   However, only a
+single task can be performing a barrier write at any given time, so a lock is
+obtained and the other kworker tasks trying to perform barrier writes will go
+to sleep.     When the barrier write flush is complete and the lock is
+released, ALL of the sleeping kworker tasks are woken up at once.   This
+creates a &quot;thundering herd&quot; condition with massive wakeups, but only
+a single kworker tasks will obtain the lock and perform the barrier write
+flush, and the remaining tasks will go back to sleep.  </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>The combination of the large number of kworker tasks doing
+asynchronous IO and barrier writes along the &quot;thundering herd&quot; during
+the wakeups when each barrier write flush is complete, causes the situation
+described here.  </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Workaround</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>The issue can be solved by simply mounting the
+ext4&nbsp;filesystem with the&nbsp;<b>nobarrier</b>&nbsp;or&nbsp;<b>barrier=0</b>&nbsp;options..&nbsp;
+&nbsp;Barriers can be disabled online using the remount option on the mount
+command.&nbsp; &nbsp;For example:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:7.5pt;line-height:normal;background:
+white'><span style='font-size:9.0pt;font-family:Courier;color:black'># mount -o
+remount,nobarrier /dev/mapper/vg_PROCDB-lv_LVOL1</span><span style='font-size:
+9.0pt;font-family:"Cambria Math",serif;color:black'>​</span></p>
+
+<p class=MsoNormal style='margin-bottom:7.5pt;line-height:normal;background:
+white'><span style='font-family:"Arial",sans-serif;color:black'>Note that for
+RHEL 7.6 and above, the nobarrier mount option will not prevent the
+issue.&nbsp; &nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:7.5pt;line-height:normal;background:
+white'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Solution</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+background:white'>The fix for this bug is released in&nbsp;RHEL 7.7&nbsp;and
+back-ported to&nbsp;RHEL 7.6.z,&nbsp;7.5.z,&nbsp;7.4.z&nbsp;through following
+errata updates. Please update the system to below or later version of kernel
+which contains the fix for this bug.</span></p>
+
+<ul style='margin-top:0in' type=disc>
+ <li class=MsoNormal style='color:#252525;line-height:18.0pt;background:white'><b><span
+     style='font-size:9.0pt;font-family:"Arial",sans-serif'>RHEL 7.7</span></b><span
+     style='font-size:9.0pt;font-family:"Arial",sans-serif'>,&nbsp;</span><span
+     style='font-size:9.0pt;font-family:Consolas;color:#0066CC;background:whitesmoke'><a
+     href="https://access.redhat.com/errata/RHSA-2019:2029" target="_blank"><span
+     style='color:#0066CC;text-decoration:none'>kernel-3.10.0-1062.el7</span></a></span></li>
+ <li class=MsoNormal style='color:#252525;line-height:18.0pt;background:white'><b><span
+     style='font-size:9.0pt;font-family:"Arial",sans-serif'>RHEL 7.6.z</span></b><span
+     style='font-size:9.0pt;font-family:"Arial",sans-serif'>,&nbsp;</span><span
+     style='font-size:9.0pt;font-family:Consolas;color:#0066CC;background:whitesmoke'><a
+     href="https://access.redhat.com/errata/RHSA-2019:1873" target="_blank"><span
+     style='color:#0066CC;text-decoration:none'>kernel-3.10.0-957.27.2.el7</span></a></span></li>
+ <li class=MsoNormal style='color:#252525;line-height:18.0pt;background:white'><b><span
+     style='font-size:9.0pt;font-family:"Arial",sans-serif'>RHEL 7.5.z</span></b><span
+     style='font-size:9.0pt;font-family:"Arial",sans-serif'>,&nbsp;</span><span
+     style='font-size:9.0pt;font-family:Consolas;color:#0066CC;background:whitesmoke'><a
+     href="https://access.redhat.com/errata/RHSA-2019:2566" target="_blank"><span
+     style='color:#0066CC;text-decoration:none'>kernel-3.10.0-862.41.1.el7</span></a></span></li>
+ <li class=MsoNormal style='color:#252525;line-height:18.0pt;background:white'><b><span
+     style='font-size:9.0pt;font-family:"Arial",sans-serif'>RHEL 7.4.z</span></b><span
+     style='font-size:9.0pt;font-family:"Arial",sans-serif'>,&nbsp;</span><span
+     style='font-size:9.0pt;font-family:Consolas;color:#0066CC;background:whitesmoke'><a
+     href="https://access.redhat.com/errata/RHSA-2019:1946" target="_blank"><span
+     style='color:#0066CC;text-decoration:none'>kernel-3.10.0-693.55.1.el7</span></a></span></li>
+</ul>
+
+<p class=MsoNormal style='margin-bottom:7.5pt;line-height:normal;background:
+white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>See
+also:&nbsp;</span><u><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:#333333'><a href="https://access.redhat.com/solutions/3463001"
+target="_blank"><span style='color:#333333'>https://access.redhat.com/solutions/3463001</span></a></span></u></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>​LinuxKI analysis</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Just because there are busy kworker tasks does not mean the
+problem is related to the md driver and barrier writes.&nbsp; &nbsp; &nbsp;You
+need to verify what the kworker tasks are doing.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>There are several pieces of evidence of this issue if you are
+looking at LinuxKI data.&nbsp; &nbsp;First, you will see very high System CPU
+usage:</span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+background:white'>​</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#8CFF8C;border-collapse:collapse'>
+ <tr>
+  <td style='padding:1.5pt 2.25pt 1.5pt 2.25pt'>
+  <p class=MsoNormal style='margin-bottom:3.0pt;line-height:normal'><b><span
+  style='font-size:14.0pt;font-family:Courier'>1.1 Global CPU Usage Counters</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:Courier'>[Next
+  Subsection]---[Prev Section][Next Section][Table of Contents]</span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:9.0pt;font-family:Courier;
+color:black'>    nCPU          sys%        user%        idle%</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>      32        <span style='background:yellow'>79.28%</span>       
+4.65%       16.07%</span><span style='font-size:9.0pt;font-family:"Cambria Math",serif;
+color:black'>​</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>If you look at top task using System CPU, you will notice many
+kworker tasks are active:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#FFD1A4;border-collapse:collapse'>
+ <tr>
+  <td style='padding:1.5pt 2.25pt 1.5pt 2.25pt'>
+  <p class=MsoNormal style='margin-bottom:3.0pt;line-height:normal'><b><span
+  style='font-size:14.0pt;font-family:Courier'>1.2.2 Top Tasks sorted by System
+  Time</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:Courier'>[Prev
+  Subsection]---[Prev Section][Next Section][Tale of Contents]</span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:10.0pt;font-family:Courier;
+color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:9.0pt;font-family:Courier;
+color:black'>   PID      RunTime     SysTime    UserTime    RunqTime   SleepTime 
+Command</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>216</span><u><span style='font-size:9.0pt;font-family:"Arial",sans-serif;
+color:black'>​</span></u><span style='font-size:9.0pt;font-family:Courier;
+color:black'>52      1.813469    1.813469    0.000000    4.211941   13.972077 
+[kworker/11:454]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>11358      1.677357    1.677357    0.000000    6.802955  
+11.472718  [kworker/14:138]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>19260      1.406427    1.406427    0.000000    3.600795    7.728546 
+[kworker/12:378]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>18162      1.221970    1.221970    0.000000    3.565585  
+14.015645  [kworker/12:142]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>993        1.199573    1.199573    0.000000    5.389577  
+13.412018  [kworker/11:348]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>10250      1.643234    1.187685    0.455549    4.559319   13.799077 
+/usr/sbin/collectd</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>29885      1.158838    1.158838    0.000000    1.254615  
+17.583030  kworker/19:120</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>11722      1.129394    1.129394    0.000000    6.487080  
+12.384572  [kworker/2:310]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>147</span><span style='font-size:9.0pt;font-family:"Cambria Math",serif;
+color:black'>​</span><span style='font-size:9.0pt;font-family:Courier;
+color:black'>92      1.045221    1.045221    0.000000    6.217245   12.738561 
+[kworker/11:226]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>7539       0.982143    0.982143    0.000000    4.240434  
+14.779052  [kworker/30:312]</span><span style='font-size:9.0pt;font-family:
+"Cambria Math",serif;color:black'>​</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>But sure to verify what the kworker threads are doing.&nbsp;
+&nbsp; Examining PID 21652, the process is seen sleeping in md_flush_request()
+and most of the CPU time is spent in raid1_make_request().    Also notice the
+presence of the blkdev_issue_flush() function in the stack traces, which is
+related to barrier writes:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>PID 21652&nbsp; [kworker/11:454]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; PPID 2&nbsp; [kthreadd]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; ********* SCHEDULER ACTIVITY REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; RunTime&nbsp; &nbsp; :&nbsp; 1.813469&nbsp;
+SysTime&nbsp; &nbsp;:&nbsp; 1.813469&nbsp; &nbsp;UserTime&nbsp; &nbsp;:&nbsp;
+0.000000</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; SleepTime&nbsp; : 13.972077&nbsp; Sleep Cnt :&nbsp;
+&nbsp; &nbsp; 1324&nbsp; &nbsp;Wakeup Cnt :&nbsp; &nbsp; &nbsp; &nbsp; 12</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; RunQTime&nbsp; &nbsp;:&nbsp; 4.211941&nbsp; Switch
+Cnt:&nbsp; &nbsp; &nbsp; 1324&nbsp; &nbsp;PreemptCnt :&nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp;0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; Last CPU&nbsp; &nbsp;:&nbsp; &nbsp; &nbsp; &nbsp;
+11&nbsp; CPU Migrs :&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;0&nbsp; &nbsp;NODE Migrs
+:&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; Policy&nbsp; &nbsp; &nbsp;: SCHED_NORMAL&nbsp;
+&nbsp; &nbsp;vss :&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;0&nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; rss :&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; busy&nbsp; &nbsp; :&nbsp; &nbsp; &nbsp; 9.07%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; sys&nbsp; &nbsp;:&nbsp; &nbsp; &nbsp; 9.07%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; user&nbsp; :&nbsp; &nbsp; &nbsp; 0.00%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; runQ&nbsp; &nbsp; :&nbsp; &nbsp; &nbsp;21.06%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; sleep&nbsp; &nbsp;:&nbsp; &nbsp; &nbsp;69.87%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; ******** PID RUNQ LATENCY REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; RunQTime&nbsp; &nbsp;:&nbsp; 4.211941&nbsp;
+RunQCnt&nbsp; &nbsp;:&nbsp; &nbsp; &nbsp; 1325&nbsp; &nbsp;AvRunQTime :&nbsp;
+0.003179</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; RunQPri&nbsp; &nbsp; :&nbsp; 4.211114&nbsp;
+RunQPriCt :&nbsp; &nbsp; &nbsp; &nbsp;890&nbsp; &nbsp;AvRunQPri&nbsp; :&nbsp;
+0.004732</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; RunQIdle&nbsp; &nbsp;:&nbsp; 0.000827&nbsp;
+RunQIdleCt:&nbsp; &nbsp; &nbsp; &nbsp;435&nbsp; &nbsp;AvRunQIdle :&nbsp;
+0.000002</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; ******** COOPERATING/COMPETING TASKS REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; Tasks woken up by this task (Top 10)</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;PID&nbsp; &nbsp;
+Count&nbsp; &nbsp;SlpPcnt&nbsp; &nbsp; &nbsp;Slptime&nbsp; Command&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 7186&nbsp; &nbsp; &nbsp; &nbsp;
+9&nbsp; &nbsp; 28.55%&nbsp; &nbsp; 3.598721&nbsp; [kworker/11:281]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;15561&nbsp; &nbsp; &nbsp; &nbsp;
+3&nbsp; &nbsp; &nbsp;7.21%&nbsp; &nbsp; 1.098352&nbsp; [kworker/11:314]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; Tasks that have woken up this task(Top 10)</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;PID&nbsp; &nbsp;
+Count&nbsp; &nbsp;SlpPcnt&nbsp; &nbsp; &nbsp;Slptime&nbsp; Command&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;30655&nbsp; &nbsp; &nbsp;
+&nbsp;11&nbsp; &nbsp; &nbsp;1.84%&nbsp; &nbsp; 0.257643&nbsp; [kworker/0:125]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 8016&nbsp; &nbsp; &nbsp;
+&nbsp;10&nbsp; &nbsp; &nbsp;1.75%&nbsp; &nbsp; 0.244698&nbsp; [kworker/0:251]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 4347&nbsp; &nbsp; &nbsp;
+&nbsp;11&nbsp; &nbsp; &nbsp;1.68%&nbsp; &nbsp; 0.235160&nbsp; [kworker/0:64]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;19331&nbsp; &nbsp; &nbsp;
+&nbsp;39&nbsp; &nbsp; &nbsp;1.61%&nbsp; &nbsp; 0.225015&nbsp; kworker/28:57</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;16835&nbsp; &nbsp; &nbsp;
+&nbsp;22&nbsp; &nbsp; &nbsp;1.40%&nbsp; &nbsp; 0.194965&nbsp; kworker/14:366</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;13440&nbsp; &nbsp; &nbsp;
+&nbsp;45&nbsp; &nbsp; &nbsp;1.27%&nbsp; &nbsp; 0.177227&nbsp; [kworker/26:111]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 3039&nbsp; &nbsp; &nbsp;
+&nbsp;28&nbsp; &nbsp; &nbsp;1.26%&nbsp; &nbsp; 0.175952&nbsp; [kworker/26:249]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;18482&nbsp; &nbsp; &nbsp;
+&nbsp;38&nbsp; &nbsp; &nbsp;1.08%&nbsp; &nbsp; 0.150882&nbsp; [kworker/26:187]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;30902&nbsp; &nbsp; &nbsp; &nbsp;
+6&nbsp; &nbsp; &nbsp;1.03%&nbsp; &nbsp; 0.143421&nbsp; [kworker/0:249]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;26436&nbsp; &nbsp; &nbsp; &nbsp;
+6&nbsp; &nbsp; &nbsp;1.00%&nbsp; &nbsp; 0.139811&nbsp; [kworker/0:46]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; ******** SLEEP REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; Kernel Functions calling sleep() - Top 20 Functions</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp;Count&nbsp; &nbsp; &nbsp;Pct&nbsp; &nbsp;
+SlpTime&nbsp;&nbsp;  Slp%
+TotalTime%&nbsp;&nbsp;Msec/Slp&nbsp;&nbsp;MaxMsecs&nbsp; Func</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; 1324 100.00%&nbsp; &nbsp; 13.9721
+100.00%&nbsp; &nbsp; &nbsp;69.87%&nbsp;&nbsp; &nbsp;10.553&nbsp;&nbsp;
+&nbsp;56.204&nbsp; <span style='background:yellow'>md_flush_request</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; Process Sleep stack traces (sort by % of total wait
+time) - Top 20 stack traces</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp;count&nbsp; &nbsp; wpct&nbsp; &nbsp;
+&nbsp; avg Stack trace</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+%&nbsp; &nbsp; &nbsp;msecs</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp;
+===============================================================</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; 1324 100.00&nbsp; &nbsp; 10.553&nbsp;
+&nbsp;<span style='background:yellow'>md_flush_request</span>&nbsp;
+raid1_make_request&nbsp; </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>md_make_request&nbsp; generic_make_request&nbsp; submit_bio&nbsp; <span
+style='background:yellow'>blkdev_issue_flush</span>&nbsp; ext4_sync_file&nbsp;
+generic_write_sync&nbsp; dio_complete&nbsp; dio_aio_complete_work&nbsp;
+process_one_work&nbsp; </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>worker_thread&nbsp; kthread&nbsp; ret_from_fork</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; ******** CPU ACTIVITY REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; The percentages below reflect the percentage&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; of the Thread's total RunTime spent in either</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; User code or System code&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; RunTime:&nbsp; &nbsp;1.8135</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; Count&nbsp; &nbsp; USER&nbsp; &nbsp;
+&nbsp;SYS&nbsp; &nbsp; INTR</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; 207&nbsp; &nbsp; &nbsp; &nbsp;0&nbsp;
+&nbsp; &nbsp;207&nbsp; &nbsp; &nbsp; &nbsp;0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;0.00%
+100.00%&nbsp; &nbsp;0.00%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; HARDCLOCK entries</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp;Count&nbsp; &nbsp; &nbsp;Pct&nbsp;
+State&nbsp; Function</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;207 100.00%&nbsp; SYS&nbsp;
+&nbsp; raid1_make_request</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp;Count&nbsp; &nbsp; &nbsp;Pct&nbsp;
+HARDCLOCK Stack trace</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp;============================================================</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>         </span><span style='font-size:9.0pt;font-family:Courier;
+background:white'>207 100.00%&nbsp; </span><span style='font-size:9.0pt;
+font-family:Courier;background:yellow'>raid1_make_request</span><span
+style='font-size:9.0pt;font-family:Courier;background:white'>&nbsp;
+md_make_request&nbsp;generic_make_request&nbsp; </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+background:white'>submit_bio&nbsp; </span><span style='font-size:9.0pt;
+font-family:Courier;background:yellow'>blkdev_issue_flush</span><span
+style='font-size:9.0pt;font-family:Courier;background:white'>&nbsp;
+ext4_sync_file&nbsp; generic_write_sync&nbsp; dio_complete&nbsp; </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+background:white'>dio_aio_complete_work&nbsp; process_one_work&nbsp;
+worker_thread&nbsp; kthread&nbsp; ret_from_fork</span><span style='font-size:
+9.0pt;font-family:"Cambria Math",serif;background:white'>​</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:#E7E6E6'><span style='font-size:9.0pt;font-family:Courier;
+background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+background:white'>Finally, you will also notice that the kworker tasks are also
+implicated in the thundering herd behavior:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#8CFF8C;border-collapse:collapse'>
+ <tr>
+  <td style='padding:0in 0in 0in 0in'>
+  <p class=MsoNormal style='margin-bottom:3.0pt;line-height:normal'><b><span
+  style='font-size:14.0pt;font-family:Courier'>1.5 Thundering Herd Detection</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><u><span style='font-size:9.0pt;font-family:Courier;color:#333333'><a
+  href="http://gse-rose-st068.us.hpecorp.net/work/mcr/jans/sded-odb-p106/0502_1201/kp.0502_1201.html#subsection1.4"
+  target="_blank"><span style='color:#333333'>[Prev Subsection]</span></a><a
+  href="http://gse-rose-st068.us.hpecorp.net/work/mcr/jans/sded-odb-p106/0502_1201/kp.0502_1201.html#Section1"
+  target="_blank"><span style='color:#333333'>---[Prev Section]</span></a><a
+  href="http://gse-rose-st068.us.hpecorp.net/work/mcr/jans/sded-odb-p106/0502_1201/kp.0502_1201.html#Section2"
+  target="_blank"><span style='color:#333333'>[Next Section]</span></a><a
+  href="http://gse-rose-st068.us.hpecorp.net/work/mcr/jans/sded-odb-p106/0502_1201/kp.0502_1201.html#TOC"
+  target="_blank"><span style='color:#333333'>[Table of Contents]</span></a></span></u></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:9.0pt;font-family:Courier;
+color:black'>PID       Wakeups MaxWakeups    Count     TimeStamp  cmd</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>30709       19882       4177        1     19.529395 
+[kworker/0:174]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>19922        7551       4177        1     19.186141 
+[kworker/1:169]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>8947         8132       4176        1     19.216084 
+[kworker/0:346]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>9482        28554       4176        4     19.241448 
+[kworker/0:466]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>9542        15703       4176        1     19.935973 
+[kworker/0:513]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>30653       24052       4176        2     19.447927 
+[kworker/0:123]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>30722        8119       4176        1     19.614231 
+[kworker/0:187]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>30731        8118       4176        1     19.582855 
+[kworker/0:196]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>30957       28526       4176        4     19.639270 
+[kworker/0:304]</span><span style='font-size:9.0pt;font-family:"Cambria Math",serif;
+color:black'>​</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>LinuxKI version 5.4 has been enhanced to detect this behavior when
+looking at the Global Kernel sleep stacktraces:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#FFD1A4;border-collapse:collapse'>
+ <tr>
+  <td style='padding:1.5pt 2.25pt 1.5pt 2.25pt'>
+  <p class=MsoNormal style='margin-bottom:3.0pt;line-height:normal'><b><span
+  style='font-size:14.0pt;font-family:Courier'>2.1.2 Global Kernel sleep
+  stacktraces (SWITCH)</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><span style='font-size:9.0pt;font-family:Courier'>[Prev
+  Subsection][Next Subsection]---[Prev Section][Next Section][Table of
+  Contents]</span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:9.0pt;font-family:Courier;
+color:black'>   count   wpct       avg   Stack trace</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:9.0pt;font-family:Courier;
+color:black'>              %     msecs              </span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:9.0pt;font-family:Courier;
+color:black'>============================================================</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:#CC0000'>10576576  89.93    10.168   md_flush_request 
+raid1_make_request  md_make_request  generic_make_request  submit_bio 
+blkdev_issue_flush  ext4_sync_file  generic_write_sync  dio_complete 
+dio_aio_complete_work  process_one_work  worker_thread  kthread  ret_from_fork</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>   64840   0.40     7.293   futex_wait_queue_me  futex_wait 
+do_futex  sys_futex  tracesys</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>   15600   1.30    99.420   worker_thread  kthread  ret_from_fork</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>   14094   0.51    43.649   cpu_buf_read.part.17  cpu_buf_read 
+vfs_read  sys_read  tracesys</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>   11449   0.13    13.472   kthread_worker_fn  kthread 
+ret_from_fork</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>    7250   0.02     2.588   poll_schedule_timeout  do_sys_poll 
+sys_poll  system_call_fastpath</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>                :                              :    </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><a name=warncheck1></a><span style='font-size:9.0pt;
+font-family:Courier;color:red'>Warning: High wait time in md_flush(), suspect
+barrier writes to MD device [INFO][Next]</span><span style='font-size:9.0pt;
+font-family:"Cambria Math",serif;color:red'>​</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>For more information</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>For additional information on barrier writes and other impact, see
+following Performance Article:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><u><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:#333333'><a
+href="https://hpe.sharepoint.com/sites/B1/EG/GPE/LinuxTechInfo/Lists/Performance%20Articles/Item/displayifs.aspx?List=6c4fdf83-dfc6-4556-a410-6cc86df92437&amp;ID=6"
+target="_blank"><span style='color:#333333'>Performance impact of barrier
+writes on Oracle DB writers using Oracle ASM</span><span style='color:#333333;
+font-weight:normal'>​</span></a></span></u></b></p>
+
+</div>
+
+</body>
+
+</html>

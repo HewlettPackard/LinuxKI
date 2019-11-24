@@ -211,6 +211,7 @@ kiall_init_func(void *v)
 	**/
 
 	if (vis) vis_kiall_init();
+        if (hthr) hash_start_worker_threads();
 }
 
 int
@@ -456,8 +457,10 @@ kiall_print_report(void *v)
 	char fname[30];
 	char html_flag = HTML;
 	int vis_set = 0;
+	int hthr_save = hthr;
         parse_cstates();
 
+	hthr = 0;   /* disable multi-threading for now */
 	if (IS_LIKI) foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, load_perpid_mapfile, NULL, 0, NULL);
 	kparse_print_report(v);
 	printf ("\nTotal time captured (secs): %3.2f\n", globals->total_secs);
@@ -494,25 +497,47 @@ kiall_print_report(void *v)
 	}
 
 	CLEAR(ORACLE_FLAG);
+
+
+	hthr = hthr_save;   /* enable multi-threading  */
 	sprintf(fname, "kipid.%s.txt", timestamp);
+
+
 	if (freopen(fname, "w", stdout) == NULL) {
 		fprintf (stderr, "Unable to rename stdout to %s (errno: %d)\n", fname, errno);
 		return 0;
 	}
+
         printf("Command line: %s -kipid scdetail,nsym=20,npid=10,pidtree,csv -ts %s\n\n", cmdstr, timestamp);
-        printf ("%s (%s)\n\n", tool_name, tool_version);
+        printf("%s (%s)\n\n", tool_name, tool_version);
 	parse_uname(1);
 	nsym=20;
 	npid=10;
 	pid_csvfile = open_csv_file("kipid", 1);
 	if (html_flag) SET(PIDTREE_FLAG);
+
 	pid_print_report(v);
-	printf ("\nTotal time captured (secs): %3.2f\n", globals->total_secs);
+
+	/* we call pid_print_report a 2nd time if parallel threads are 
+	   used, as the kipid.*.txt and kipid.*.csv are not created in
+	   the multi-threaded case.   So we turn off the VIS, COOP, and HTML
+	   flags to produce just the *.txt file and the csv file.
+	*/
+	CLEAR(VIS_FLAG);	
+	CLEAR(COOP_DETAIL_ENABLED);
+	CLEAR_STAT(COOP_STATS);
+	HTML = 0;
+	if (hthr) {
+		hthr = 0; 	/* disable mulithreaded processing */
+		pid_print_report(v);
+	}
+
+	printf("\nTotal time captured (secs): %3.2f\n", globals->total_secs);
 	print_cpu_buf_info();
 	close_csv_file(pid_csvfile);
 	CLEAR(PIDTREE_FLAG);
-
 	CLEAR_STAT(PERCPU_STATS);
+
 	sprintf(fname, "kidsk.%s.txt", timestamp);
 	if (freopen(fname, "w", stdout) == NULL) {
 		fprintf (stderr, "Unable to rename stdout to %s (errno: %d)\n", fname, errno);

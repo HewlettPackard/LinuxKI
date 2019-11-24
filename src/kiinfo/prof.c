@@ -217,7 +217,9 @@ int
 hc_print_pc(void *arg1, void *arg2)
 {
 	pc_info_t *pcinfop = (pc_info_t *)arg1;
-	hc_info_t *hcinfop = (hc_info_t *)arg2;
+	print_pc_args_t *print_pc_args = (print_pc_args_t *)arg2;
+	FILE *pidfile = print_pc_args->pidfile;
+	hc_info_t *hcinfop = print_pc_args->hcinfop;
 
 	uint64 key;
 	char *sym = NULL; 
@@ -257,13 +259,13 @@ hc_print_pc(void *arg1, void *arg2)
 				sym ? dmangle(sym) : "UNKNOWN");
 		if (symfile) printw (" [%s]", symfile);
 	} else {
-		pid_printf ("%s%8d %6.2f%%  %-6s %s", tab, 
+		pid_printf (pidfile, "%s%8d %6.2f%%  %-6s %s", tab, 
 				pcinfop->count, 
 				(pcinfop->count*100.0) / hcinfop->total, 
 				cpustate_name_index[pcinfop->state],
 				sym ? dmangle(sym) : "UNKNOWN");
-		if (symfile) pid_printf (" [%s]", symfile);
-		pid_printf ("\n");
+		if (symfile) pid_printf (pidfile, " [%s]", symfile);
+		pid_printf (pidfile, "\n");
 	}
 
 	BLACK_FONT;
@@ -278,6 +280,7 @@ hc_print_pc2(void *arg1, void *arg2)
 	pc_info_t *pcinfop = (pc_info_t *)arg1;
 	print_pc_args_t *print_pc_args = (print_pc_args_t *)arg2;
 	hc_info_t *hcinfop = print_pc_args->hcinfop;
+	FILE *pidfile = print_pc_args->pidfile;
 	uint64 key;
 	char *sym = NULL; 
 	char *symfile = NULL;
@@ -325,13 +328,13 @@ hc_print_pc2(void *arg1, void *arg2)
 	}
 		
 	if (sym == NULL) {
-		pid_printf ("%s%8d %6.2f%%  %-6s 0x%llx", tab, 
+		printf ("%s%8d %6.2f%%  %-6s 0x%llx", tab, 
 				pcinfop->count, 
 				(pcinfop->count*100.0) / hcinfop->total, 
 				cpustate_name_index[pcinfop->state],
 				key);
 	} else {
-		pid_printf ("%s%8d %6.2f%%  %-6s %s", tab, 
+		printf ("%s%8d %6.2f%%  %-6s %s", tab, 
 				pcinfop->count, 
 				(pcinfop->count*100.0) / hcinfop->total, 
 				cpustate_name_index[pcinfop->state],
@@ -339,8 +342,8 @@ hc_print_pc2(void *arg1, void *arg2)
 	}
 	BLACK_FONT;
 
-	if (symfile) pid_printf (" [%s]", symfile);
-	pid_printf ("\n");
+	if (symfile) printf (" [%s]", symfile);
+	printf ("\n");
 
 	if ((lineno & 0x1) == 0) _SPAN;
 	lineno++;
@@ -358,7 +361,9 @@ int
 hc_print_pc_sys(void *arg1, void *arg2)
 {
 	pc_info_t *pcinfop = (pc_info_t *)arg1;
-	hc_info_t *hcinfop = (hc_info_t *)arg2;
+	print_pc_args_t *print_pc_args = (print_pc_args_t *)arg2;
+	FILE *pidfile = print_pc_args->pidfile;
+	hc_info_t *hcinfop = print_pc_args->hcinfop;
 	uint64 idx;
 	
 
@@ -366,13 +371,13 @@ hc_print_pc_sys(void *arg1, void *arg2)
 
 	SPAN_GREY;
 	if ((pcinfop->state == HC_USER) || (idx > globals->nsyms))  {
-		pid_printf ("%s%8d %6.2f%%  %-6s %s\n", tab, 
+		pid_printf (pidfile, "%s%8d %6.2f%%  %-6s %s\n", tab, 
 					pcinfop->count, 
 					(pcinfop->count*100.0) / hcinfop->total, 
 					cpustate_name_index[pcinfop->state], 
 					"UNKNOWN");
 	} else {
-		pid_printf ("%s%8d %6.2f%%  %-6s %s\n", tab, 
+		pid_printf (pidfile, "%s%8d %6.2f%%  %-6s %s\n", tab, 
 					pcinfop->count, 
 					(pcinfop->count*100.0) / hcinfop->total, 
 					cpustate_name_index[pcinfop->state], 
@@ -386,6 +391,7 @@ hc_print_stktrc(void *p1, void *p2)
 	stktrc_info_t *stktrcp = (stktrc_info_t *)p1;
 	print_pc_args_t *print_pc_args = (print_pc_args_t *)p2;
 	hc_info_t *hcinfop = print_pc_args->hcinfop;
+	FILE *pidfile = print_pc_args->pidfile;
 	pid_info_t *pidp;
 	vtxt_preg_t *pregp;
         float avg, wpct;
@@ -403,16 +409,16 @@ hc_print_stktrc(void *p1, void *p2)
 	if (stktrcp->cnt == 0) return 0;
 
 	wpct = ((float)stktrcp->cnt *100.0)/(hcinfop->total);
-        pid_printf("%s%8d %6.2f%%",tab, stktrcp->cnt, wpct);
+        pid_printf (pidfile, "%s%8d %6.2f%%",tab, stktrcp->cnt, wpct);
         for (i=0;i<stktrcp->stklen; i++) {
                 key = stktrcp->stklle.key[i];
 
 		if (key == STACK_CONTEXT_KERNEL) {
 			continue;
 		} else if (key == STACK_CONTEXT_USER) {
-			pid_printf ("  |");
+			pid_printf (pidfile, "  |");
 		} else if (key == UNKNOWN_SYMIDX) {
-			pid_printf ("  unknown");
+			pid_printf (pidfile, "  unknown");
 		} else if ((globals->symtable) && (key < globals->nsyms-1)) {
 			if (kparse_flag && print_pc_args->warnflagp) {
 				if (stktrcp->cnt >= 250) { 
@@ -444,7 +450,7 @@ hc_print_stktrc(void *p1, void *p2)
 					*print_pc_args->warnflagp |= WARNF_PCC_CPUFREQ;
 				}
 			}
-			pid_printf ("  %s", globals->symtable[key].nameptr);
+			pid_printf (pidfile, "  %s", globals->symtable[key].nameptr);
 			BLACK_FONT;
 		} else if (stktrcp->pidp) {
 			pidp = stktrcp->pidp;
@@ -454,22 +460,22 @@ hc_print_stktrc(void *p1, void *p2)
 
 			if (pregp = find_vtext_preg(pidp, key)) {
 				if (sym = symlookup(pregp, key, &offset)) {
-					pid_printf ("  %s", dmangle(sym));
+					pid_printf (pidfile, "  %s", dmangle(sym));
 				} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
-					pid_printf ("  %s", dmangle(sym));
+					pid_printf (pidfile, "  %s", dmangle(sym));
 				} else {
-					pid_printf ("  0x%llx", key);
+					pid_printf (pidfile, "  0x%llx", key);
 				}
 			} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
-				pid_printf ("  %s", dmangle(sym));
+				pid_printf (pidfile, "  %s", dmangle(sym));
 			} else {
-				pid_printf ("  0x%llx", key);
+				pid_printf (pidfile, "  0x%llx", key);
 			}
 		} else {
-			pid_printf ("  0x%llx", key);
+			pid_printf (pidfile, "  0x%llx", key);
 		}
         }
-        pid_printf("\n");
+        pid_printf (pidfile, "\n");
 
 }
 
@@ -537,6 +543,7 @@ prof_print_percpu_symbols(uint32 count)
 
 		print_pc_args.hcinfop = hcinfop;
 		print_pc_args.warnflagp = NULL;
+		print_pc_args.pidfile = NULL;
 
                 printf("\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
                 printf("Kernel Functions for CPU  %d \n",i);
@@ -546,7 +553,7 @@ prof_print_percpu_symbols(uint32 count)
                 printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
 
                 lineno=0;
-                foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc_sys, pc_sort_by_count, nsym, (void *)hcinfop);
+                foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc_sys, pc_sort_by_count, nsym, (void *)&print_pc_args);
 
                 printf("\nnon-idle CPU %d  HARDCLOCK STACK TRACES (sort by count):\n\n",i);
                 printf("   Count     Pct  Stack trace\n");
@@ -611,6 +618,7 @@ int print_pid_symbols(void *arg1, void *arg2)
 
         lineno++;
 	print_pc_args.hcinfop = hcinfop;
+	print_pc_args.pidfile = NULL;
         foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc2, pc_sort_by_count, 5, &print_pc_args);
 
 	if (print_pc_args.warnflagp && ((*print_pc_args.warnflagp) & WARNF_HAS_JOURNAL)) {
@@ -671,6 +679,7 @@ prof_print_report(int ptype)
 
 	print_pc_args.hcinfop = hcinfop;
 	print_pc_args.warnflagp = NULL;
+	print_pc_args.pidfile = NULL;
 
 	tab=tab0;
 	lineno = 1;
@@ -687,7 +696,7 @@ prof_print_report(int ptype)
         printf("Kernel Functions executed during profile \n");
         printf("   Count     Pct  State  Function\n");
         printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
-        foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc_sys, pc_sort_by_count, nsym, (void *)hcinfop);
+        foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc_sys, pc_sort_by_count, nsym, (void *)&print_pc_args);
 
         printf("\nnon-idle GLOBAL HARDCLOCK STACK TRACES (sort by count):\n\n");
         printf("   Count     Pct  Stack trace\n");

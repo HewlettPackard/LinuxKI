@@ -811,7 +811,7 @@ add_oracle_sid(pid_info_t *pidp)
 {
         char sid_name[20];
         int  i, len;
-        int  oraproc_idx;
+        int  oraproc_idx=0;
         char *startp, *endp;
         sid_pid_t *sidpidp;
 
@@ -826,7 +826,9 @@ add_oracle_sid(pid_info_t *pidp)
                 return;
 	}
 
-        if (strncmp((char *)pidp->cmd, "ora", 3) != 0) {
+        if ((strncmp((char *)pidp->cmd, "ora", 3) != 0) || 
+            (strncmp((char *)pidp->cmd, "oraagent", 8) == 0) ||
+            (strncmp((char *)pidp->cmd, "orarootagent", 12) == 0)) {
                 pidp->ora_sid = -1;
                 pidp->ora_proc = -1;
                 return;
@@ -874,8 +876,11 @@ add_oracle_sid(pid_info_t *pidp)
                         return ;
                 }
                 /* no match.  Need new SID entry */
-		sprintf (sid_table[next_sid].sid_name, "%19s", sid_name);
-		sid_table[next_sid].sid_name[19] = 0;
+        /* XXX printf ("add_oracle_sid_3(): %s %s\n", pidp->cmd, sid_name); */
+		sprintf (sid_table[next_sid].sid_name, "%-19s", sid_name);
+		len = strlen(sid_name);
+		if (len > 19) len = 19;
+		sid_table[next_sid].sid_name[len] = 0;
                 next_sid++;
         }
 

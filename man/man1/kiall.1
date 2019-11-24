@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad
-.TH kiall 1 "5.10 - September 20, 2019" version "5.10"
+.TH kiall 1 "6.0 - November 25, 2019" version "6.0"
 .SH NAME
 kiall  -  LinuxKI trace dump post-processing script
 
@@ -37,15 +37,16 @@ The -f option for kiall can be used to search for LinuxKI data in directory tree
 .SH OPTIONS
 
     -h              Help
-    -l              lite collection
-    -m              Skip MW processing
-    -r              restore into created subdir - <host>/<MMDD_HHMM>
-    -f              Find KI files in pwd and any directories below
-    -c              Cluster-wide processing
-    -x              Generate kparse text format instead of html format
-    -M		    Leave C++ function names mangled
-    -V              Use Visualization options where possible in reports
-    -t <timestamp>  Only runs KI reports bundle with matching timestamp
+    -l               lite collection
+    -m               Skip MW processing
+    -r               restore into created subdir - <host>/<MMDD_HHMM>
+    -f               Find KI files in pwd and any directories below
+    -c               Cluster-wide processing
+    -x               Generate kparse text format instead of html format
+    -M		     Leave C++ function names mangled
+    -V               Use Visualization options where possible in reports
+    -n <num_threads> When visualization used, number of parallel threads for processing
+    -t <timestamp>   Only runs KI reports bundle with matching timestamp
 
 .SH AUTHOR
 Mark C. Ray <mark.ray@hpe.com>

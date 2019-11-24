@@ -20,6 +20,8 @@ extern lle_t	*find_entry (lle_t **, uint64, int);
 extern lle_t	*add_entry_head (lle_t **, uint64, int);
 extern void 	*find_add_info (void **, int);
 extern void	foreach_hash_entry(void **, int, int (*funct1)(void *, void*), int (*funct2)(const void *, const void *), int32, void *) ;
+extern void	foreach_hash_entry_mt(void **, int, int (*funct1)(void *, void*), int (*funct2)(const void *, const void *), int32, void *) ;
+extern void	foreach_hash_entry_N(void **, int, int (*funct1)(void *, void*), int (*funct2)(const void *, const void *), int32, void *, int, int) ;
 extern void     foreach_hash_entry_l(void **, int, int (*funct1)(void *, void*), int (*funct2)(const void *, const void *), int32, void *) ;
 extern int 	hash_count_entries (void *, void *);
 extern uint64 	doobsHash(void *, uint32, uint32);
@@ -34,3 +36,6 @@ extern lle2_t	*find_remove_hash_entry2 (lle2_t ***, int, uint64, uint64, int, in
 
 extern void	free_hash_chain(lle_t *);
 extern void	free_hash_table(lle_t ***, int);
+
+int 		hash_start_worker_threads();
+

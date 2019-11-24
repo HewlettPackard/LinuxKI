@@ -311,7 +311,7 @@ track_submit_ios2(syscall_enter_t *rec_ptr)
 
 
 void
-cpu_report(pid_info_t *pidp, void *v)
+cpu_report(pid_info_t *pidp, FILE *pidfile)
 {
 	hc_info_t *hcinfop;
 	print_pc_args_t print_pc_args;
@@ -325,6 +325,7 @@ cpu_report(pid_info_t *pidp, void *v)
 	hcinfop = pidp->hcinfop;
         print_pc_args.hcinfop = hcinfop;
         print_pc_args.warnflagp = NULL;
+	print_pc_args.pidfile = pidfile;
 
 	runtime = sched_get_runtime(pidp);
 
@@ -334,39 +335,39 @@ cpu_report(pid_info_t *pidp, void *v)
 			hcinfop->cpustate[HC_INTR]);
 
 
-        pid_printf ("\n    ******** CPU ACTIVITY REPORT ********\n");
-        pid_printf ("    The percentages below reflect the percentage \n");
-        pid_printf ("    of the Thread's total RunTime spent in either\n");
-        pid_printf ("    User code or System code \n");
+        pid_printf (pidfile, "\n    ******** CPU ACTIVITY REPORT ********\n");
+        pid_printf (pidfile, "    The percentages below reflect the percentage \n");
+        pid_printf (pidfile, "    of the Thread's total RunTime spent in either\n");
+        pid_printf (pidfile, "    User code or System code \n");
 
-        pid_printf ("    RunTime: %8.4f\n\n", SECS(runtime));
+        pid_printf (pidfile, "    RunTime: %8.4f\n\n", SECS(runtime));
 
         if (hcinfop->total == 0) {
-                pid_printf ("    No CPU activity detected for this process during the sampling interval\n");
+                pid_printf (pidfile, "    No CPU activity detected for this process during the sampling interval\n");
                 return;
         }
 
-        pid_printf ("      Count    USER     SYS    INTR\n");
-        pid_printf ("    %7d %7d %7d %7d\n", hcinfop->total, 
+        pid_printf (pidfile, "      Count    USER     SYS    INTR\n");
+        pid_printf (pidfile, "    %7d %7d %7d %7d\n", hcinfop->total, 
 						hcinfop->cpustate[HC_USER], 
 						hcinfop->cpustate[HC_SYS],
 						hcinfop->cpustate[HC_INTR]);
-	pid_printf ("             %6.2f%% %6.2f%% %6.2f%%\n",
+	pid_printf (pidfile, "             %6.2f%% %6.2f%% %6.2f%%\n",
 						hcinfop->cpustate[HC_USER]*100.0/hcinfop->total, 
 					    	hcinfop->cpustate[HC_SYS]*100.0/hcinfop->total,
 					    	hcinfop->cpustate[HC_INTR]*100.0/hcinfop->total);
 
-        pid_printf ("\n    HARDCLOCK entries\n");
+        pid_printf (pidfile, "\n    HARDCLOCK entries\n");
 
         if (hcinfop->pc_hash==NULL) return;
 
-        pid_printf ("       Count     Pct  State  Function\n");
-        foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc, pc_sort_by_count, nsym, (void *)hcinfop);  
+        pid_printf (pidfile, "       Count     Pct  State  Function\n");
+        foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc, pc_sort_by_count, nsym, (void *)&print_pc_args);  
 
         if (hcinfop->hc_stktrc_hash==NULL) return;
 
-        pid_printf("\n       Count     Pct  HARDCLOCK Stack trace\n", tab);
-        pid_printf("       ============================================================\n", tab);
+        pid_printf (pidfile, "\n       Count     Pct  HARDCLOCK Stack trace\n", tab);
+        pid_printf (pidfile, "       ============================================================\n", tab);
         foreach_hash_entry((void **)hcinfop->hc_stktrc_hash, STKTRC_HSIZE, hc_print_stktrc, stktrc_sort_by_cnt, nsym, (void *)&print_pc_args);
 	
 }
@@ -375,11 +376,12 @@ int
 print_futex_info(void *arg1, void *arg2)
 {
         pid_futex_info_t *pfutexp = arg1;
-        pid_info_t       *pidp    = arg2;
+        FILE *pidfile = arg2;
+	var_arg_t vararg;
 
 	if (pfutexp->cnt == 0) return 0;
 
-        pid_printf("%s0x%-29llx %7d   %26s %11.6f %11.6f %11.6f\n", tab,
+        pid_printf (pidfile, "%s0x%-29llx %7d   %26s %11.6f %11.6f %11.6f\n", tab,
                         pfutexp->addr,
                         pfutexp->cnt,
                         "-",
@@ -387,12 +389,14 @@ print_futex_info(void *arg1, void *arg2)
                         SECS(pfutexp->total_time)/pfutexp->cnt,
                         SECS(pfutexp->max_time));
 
-        foreach_hash_entry((void **)pfutexp->ops_hash, FUTEXOP_HSIZE, futex_print_ops_detail, futexops_sort_by_op, 0, pidp);
+	vararg.arg1 = pidfile;
+	vararg.arg2 = NULL;
+        foreach_hash_entry((void **)pfutexp->ops_hash, FUTEXOP_HSIZE, futex_print_ops_detail, futexops_sort_by_op, 0, &vararg);
         return 0;
 }
 
 void
-pid_futex_report(pid_info_t *pidp, void *v) {
+pid_futex_report(pid_info_t *pidp, FILE *pidfile) {
 
 	int futex_cnt = 0;
         
@@ -401,13 +405,13 @@ pid_futex_report(pid_info_t *pidp, void *v) {
         foreach_hash_entry((void **)pidp->futex_hash, FUTEX_HSIZE, hash_count_entries, NULL, 0, &futex_cnt);
 
 	if (futex_cnt) {
-		pid_printf ("\n\n%s******** FUTEX REPORT ********\n", tab);
-		pid_printf ("%sTop Futex Addrs by elapsed time\n", tab, nfutex);
-		pid_printf("%sTotal Futex count = %d (Top %d listed)\n", tab, futex_cnt, MIN(futex_cnt, nfutex));
+		pid_printf (pidfile, "\n\n%s******** FUTEX REPORT ********\n", tab);
+		pid_printf (pidfile, "%sTop Futex Addrs by elapsed time\n", tab, nfutex);
+		pid_printf (pidfile, "%sTotal Futex count = %d (Top %d listed)\n", tab, futex_cnt, MIN(futex_cnt, nfutex));
 
-		pid_printf ("\n%sMutex Addr                        Count  EAGAIN  ETIMEDOUT  AvRetVal     ElpTime         Avg         Max   Max_Waker\n", tab);
+		pid_printf (pidfile, "\n%sMutex Addr                        Count  EAGAIN  ETIMEDOUT  AvRetVal     ElpTime         Avg         Max   Max_Waker\n", tab);
 
-		foreach_hash_entry((void **)pidp->futex_hash, FUTEX_HSIZE, print_futex_info, futex_sort_by_time, nfutex, NULL);
+		foreach_hash_entry((void **)pidp->futex_hash, FUTEX_HSIZE, print_futex_info, futex_sort_by_time, nfutex, pidfile);
 	}
         return;
 }
@@ -416,18 +420,21 @@ int
 print_syscall_info(void *arg1, void *arg2)
 {
 	syscall_info_t *syscallp = arg1;
-	pid_info_t	*pidp = arg2;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+	FILE *pidfile = (FILE *)vararg->arg1;
+	pid_info_t	*pidp = (pid_info_t *)vararg->arg2;
 	syscall_stats_t *statp = &syscallp->stats;
 	sched_stats_t *sstatp = &syscallp->sched_stats;
 	short  *syscall_index;
 	iov_stats_t *iovstatp;
+	var_arg_t lvararg;
 	uint64 tot_cnt;
 
 	if (statp->count == 0) return 0;
 
 	syscall_index = (SYSCALL_MODE(syscallp->lle.key) == ELF32) ? globals->syscall_index_32 : globals->syscall_index_64;
 	 
-	pid_printf ("%s%-18s%8d %8.1f %11.6f %10.6f %10.6f %7d", tab,
+	pid_printf (pidfile, "%s%-18s%8d %8.1f %11.6f %10.6f %10.6f %7d", tab,
 		syscall_arg_list[syscall_index[SYSCALL_NO(syscallp->lle.key)]].name,
 		statp->count,
 		statp->count / secs,
@@ -437,16 +444,16 @@ print_syscall_info(void *arg1, void *arg2)
 		statp->errors);
 
 	if (statp->bytes && statp->count)  {
-		pid_printf (" %7lld %8.1f",
+		pid_printf (pidfile, " %7lld %8.1f",
 			(statp->bytes) / MAX((statp->count - statp->errors), statp->count),
 			(statp->bytes) / (secs * 1024.0));
 	}
 
-	pid_printf ("\n");
+	pid_printf (pidfile, "\n");
 
 	if (scdetail_flag) {
  		if (sstatp->T_sleep_time && sstatp->C_sleep_cnt) {
-			pid_printf ("%s   %-15s%8d %8.1f %11.6f %10.6f\n", tab,
+			pid_printf (pidfile, "%s   %-15s%8d %8.1f %11.6f %10.6f\n", tab,
 				"SLEEP",
 				sstatp->C_sleep_cnt,
 				sstatp->C_sleep_cnt/secs,
@@ -455,20 +462,22 @@ print_syscall_info(void *arg1, void *arg2)
 
 
 			if (IS_LIKI && syscallp->slp_hash) {
+				lvararg.arg1 = pidfile;
+				lvararg.arg2 = NULL;
 				foreach_hash_entry_l((void **)syscallp->slp_hash,
 						SLP_HSIZE,
 						print_slp_info,
-						slp_sort_by_time, 0, NULL);
+						slp_sort_by_time, 0, &lvararg);
 			}
 		}
 	
 		if (sstatp->T_runq_time)
-			pid_printf ("%s   %-15s                  %11.6f\n",  tab,
+			pid_printf (pidfile, "%s   %-15s                  %11.6f\n",  tab,
 				"RUNQ",
 				SECS(sstatp->T_runq_time));
 
 		if (sstatp->T_run_time &&  (sstatp->T_run_time != statp->total_time) )
-			pid_printf ("%s   %-15s                  %11.6f\n",  tab,
+			pid_printf (pidfile, "%s   %-15s                  %11.6f\n",  tab,
 				"CPU",
 				SECS(sstatp->T_run_time));
 	}
@@ -477,7 +486,7 @@ print_syscall_info(void *arg1, void *arg2)
 		iovstatp = syscallp->iov_stats;
 		tot_cnt = iovstatp->rd_cnt + iovstatp->wr_cnt;
 		if (iovstatp->rd_cnt) 
-			pid_printf ("%s   %-15s%8d %8.1f %11s %10.6f %10.6f %7s %7lld %8.1f\n", tab,
+			pid_printf (pidfile, "%s   %-15s%8d %8.1f %11s %10.6f %10.6f %7s %7lld %8.1f\n", tab,
 					"AIO Reads",
 					iovstatp->rd_cnt,
 					iovstatp->rd_cnt/secs,
@@ -488,12 +497,11 @@ print_syscall_info(void *arg1, void *arg2)
 					iovstatp->rd_bytes / iovstatp->rd_cnt,
 					(iovstatp->rd_bytes) / (secs * 1024.0));
 		if (iovstatp->wr_cnt) 
-			pid_printf ("%s   %-15s%8d %8.1f %11s %10.6f %10.6f %7s %7lld %8.1f\n", tab,
+			pid_printf (pidfile, "%s   %-15s%8d %8.1f %11s %10.6f %10.6f %7s %7lld %8.1f\n", tab,
 					"AIO Writes",
 					iovstatp->wr_cnt,
 					iovstatp->wr_cnt/secs,
-					" ",/* SECS(iovstatp->rd_time), */
-					SECS(iovstatp->wr_time),
+					" ",/* SECS(iovstatp->wr_time), */
 					SECS(iovstatp->wr_time / iovstatp->wr_cnt),
 					SECS(iovstatp->wr_max_time),
 					" ",
@@ -505,13 +513,16 @@ print_syscall_info(void *arg1, void *arg2)
 }
 
 void 
-pid_syscall_report(pid_info_t *pidp, void *v) { 
+pid_syscall_report(pid_info_t *pidp, FILE *pidfile) { 
+	var_arg_t vararg;
 	if (pidp->syscall_cnt == 0) return;
 
-	pid_printf ("\n%s******** SYSTEM CALL REPORT ********\n", tab);
-	pid_printf ("%sSystem Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n", tab);
+	pid_printf (pidfile, "\n%s******** SYSTEM CALL REPORT ********\n", tab);
+	pid_printf (pidfile, "%sSystem Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n", tab);
 
-	foreach_hash_entry((void **)pidp->scallhash, SYSCALL_HASHSZ, print_syscall_info, syscall_sort_by_time, 0, pidp);
+	vararg.arg1 = pidfile;
+	vararg.arg2 = pidp;
+	foreach_hash_entry((void **)pidp->scallhash, SYSCALL_HASHSZ, print_syscall_info, syscall_sort_by_time, 0, &vararg);
 
 	return;
 }
@@ -520,58 +531,60 @@ int
 print_fd_info(void *arg1, void *arg2)
 {
 	fd_info_t *fdinfop = arg1, *tfdinfop;
-	pid_info_t *pidp = arg2, *tgidp;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+	FILE *pidfile = (FILE *)vararg->arg1;
+	pid_info_t *pidp = (pid_info_t *)vararg->arg2, *tgidp;
 	fdata_info_t *fdatap, *tfdatap;
 	struct sockaddr_in6 *lsock, *rsock;
 	
 	if (fdinfop->stats.syscall_cnt == 0) 
 		return 0;
 
-	pid_printf ("%sFD: %d", tab, fdinfop->FD);
+	pid_printf (pidfile, "%sFD: %d", tab, fdinfop->FD);
 
 	if (fdinfop->lsock) {
 		lsock = fdinfop->lsock;
 		rsock = fdinfop->rsock;
-		pid_printf (" %s    ", (fdinfop->ftype == F_IPv4) ? "IPv4" : "IPv6");
+		pid_printf (pidfile, " %s    ", (fdinfop->ftype == F_IPv4) ? "IPv4" : "IPv6");
 		if (fdinfop->node == TCP_NODE) {
-			pid_printf (" TCP ");
+			pid_printf (pidfile, " TCP ");
 		} else if (fdinfop->node == UDP_NODE) {
-			pid_printf (" UDP ");
+			pid_printf (pidfile, " UDP ");
 		} else {
-			pid_printf (" UKN ");
+			pid_printf (pidfile, " UKN ");
 		}
-	 	print_ip_port_v6(fdinfop->lsock, 0);	
+	 	print_ip_port_v6(fdinfop->lsock, 0, pidfile);	
 		if (fdinfop->node == TCP_NODE) {
-			pid_printf ("->");
-	 		print_ip_port_v6(fdinfop->rsock, 0);	
-			pid_printf (" (ESTABLISHED)");
+			pid_printf (pidfile, "->");
+	 		print_ip_port_v6(fdinfop->rsock, 0, pidfile);	
+			pid_printf (pidfile, " (ESTABLISHED)");
 		}
 	} else if (fdinfop->ftype) {
-		pid_printf (" %-8s", ftype_name_index[fdinfop->ftype]);
+		pid_printf (pidfile, " %-8s", ftype_name_index[fdinfop->ftype]);
 		if ((fdinfop->ftype == F_IPv4) || (fdinfop->ftype == F_IPv6)) {
 			if (fdinfop->node == TCP_NODE) {
-				pid_printf (" TCP");
+				pid_printf (pidfile, " TCP");
 			} else if (fdinfop->node == UDP_NODE) {
-				pid_printf (" UDP");
+				pid_printf (pidfile, " UDP");
 			} else {
-				pid_printf (" UKN");
+				pid_printf (pidfile, " UKN");
 			}
 		} else if (fdinfop->ftype == F_unix) {
-			pid_printf (" %u", fdinfop->node);	
+			pid_printf (pidfile, " %u", fdinfop->node);	
 		} else {	
-			pid_printf (" dev: 0x%x", fdinfop->dev);
+			pid_printf (pidfile, " dev: 0x%x", fdinfop->dev);
 		} 
 		fdatap = (fdata_info_t *)find_entry((lle_t **)globals->fdata_hash, 
 						FDATA_KEY(fdinfop->dev, fdinfop->node),
 						FDATA_HASH(fdinfop->dev, fdinfop->node));
 		if (fdatap && fdatap->fnameptr) {
-			pid_printf (" %s", fdatap->fnameptr);
+			pid_printf (pidfile, " %s", fdatap->fnameptr);
 		} else {
 			if (fdinfop->fnamep) {
-				pid_printf (" %s", fdinfop->fnamep);
-				if (fdinfop->multiple_fnames) pid_printf (" (multiple)");
+				pid_printf (pidfile, " %s", fdinfop->fnamep);
+				if (fdinfop->multiple_fnames) pid_printf (pidfile, " (multiple)");
 			} else {
-				pid_printf ("     - filename not found");
+				pid_printf (pidfile, "     - filename not found");
 			}
 		}
 	} else if (pidp->tgid) {
@@ -579,70 +592,75 @@ print_fd_info(void *arg1, void *arg2)
 		tgidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
 		tfdinfop = (fd_info_t *)find_entry((lle_t **)tgidp->fdhash, fdinfop->FD, FD_HASH(fdinfop->FD));
 		if (tfdinfop) {
-			pid_printf (" %-8s", ftype_name_index[tfdinfop->ftype]);
+			pid_printf (pidfile, " %-8s", ftype_name_index[tfdinfop->ftype]);
 			if ((tfdinfop->ftype == F_IPv4) || (tfdinfop->ftype == F_IPv6)) {
 				if (tfdinfop->node == TCP_NODE) {
-					pid_printf (" TCP");
+					pid_printf (pidfile, " TCP");
 				} else if (tfdinfop->node == UDP_NODE) {
-					pid_printf (" UDP");
+					pid_printf (pidfile, " UDP");
 				} else {
-					pid_printf (" UKN");
+					pid_printf (pidfile, " UKN");
 				}
 			} else if (tfdinfop->ftype == F_unix) {
-				pid_printf (" %d", tfdinfop->node);	
+				pid_printf (pidfile, " %d", tfdinfop->node);	
 			} else {	
-				pid_printf (" dev: 0x%x", tfdinfop->dev);
+				pid_printf (pidfile, " dev: 0x%x", tfdinfop->dev);
 			} 
 	
                 	tfdatap = (fdata_info_t *)find_entry((lle_t **)globals->fdata_hash,
                                                 FDATA_KEY(tfdinfop->dev, tfdinfop->node),
                                                 FDATA_HASH(tfdinfop->dev, tfdinfop->node));
                 	if (tfdatap && tfdatap->fnameptr) {
-                        	pid_printf (" %s", tfdatap->fnameptr);
-				if (tfdinfop->multiple_fnames) pid_printf (" (multiple)");
+                        	pid_printf (pidfile, " %s", tfdatap->fnameptr);
+				if (tfdinfop->multiple_fnames) pid_printf (pidfile, " (multiple)");
                 	} else if (tfdinfop->fnamep) {
-				pid_printf (" %s", tfdinfop->fnamep);
-				if (tfdinfop->multiple_fnames) pid_printf (" (multiple)");
+				pid_printf (pidfile, " %s", tfdinfop->fnamep);
+				if (tfdinfop->multiple_fnames) pid_printf (pidfile, " (multiple)");
 			} else {
-				pid_printf ("     - filename not found");
+				pid_printf (pidfile, "     - filename not found");
                 	}
 		} else {
 			if (fdinfop->fnamep) {
-				pid_printf (" %s", fdinfop->fnamep);
-				if (fdinfop->multiple_fnames) pid_printf (" (multiple)");
+				pid_printf (pidfile, " %s", fdinfop->fnamep);
+				if (fdinfop->multiple_fnames) pid_printf (pidfile, " (multiple)");
 			} else {
-				pid_printf ("     - filename not found");
+				pid_printf (pidfile, "     - filename not found");
 			}
 		}
 	} else {
 		if (fdinfop->fnamep) {
-			pid_printf (" %s", fdinfop->fnamep);
-			if (fdinfop->multiple_fnames) pid_printf (" (multiple)");
+			pid_printf (pidfile, " %s", fdinfop->fnamep);
+			if (fdinfop->multiple_fnames) pid_printf (pidfile, " (multiple)");
 		} else {
-			pid_printf ("     - filename not found");
+			pid_printf (pidfile, "     - filename not found");
 		}
 	}
 
-	pid_printf("\n");
+	pid_printf (pidfile, "\n");
 	
-	pid_printf ("%sSystem Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n", tab);
-	foreach_hash_entry((void **)fdinfop->syscallp, SYSCALL_HASHSZ, print_syscall_info, syscall_sort_by_time, 0, pidp);
-	pid_printf ("\n");
+	pid_printf (pidfile, "%sSystem Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n", tab);
+	foreach_hash_entry((void **)fdinfop->syscallp, SYSCALL_HASHSZ, print_syscall_info, syscall_sort_by_time, 0, vararg);
+	pid_printf (pidfile, "\n");
 
 }
 
 void 
-pid_fd_report(pid_info_t *pidp, void *v) { 
+pid_fd_report(pid_info_t *pidp, FILE *pidfile) { 
+
+	var_arg_t vararg;
 	if (pidp->fdhash == NULL)  {
 		return;
 	}
 
-	pid_printf ("\n%s******** FILE ACTIVITY REPORT ********\n", tab);
+	pid_printf (pidfile, "\n%s******** FILE ACTIVITY REPORT ********\n", tab);
 
 	if (is_alive) foreach_hash_entry(pidp->fdhash, FD_HSIZE, get_filename, NULL, 0, pidp);
+
+	vararg.arg1 = pidfile;
+	vararg.arg2 = pidp;
 	foreach_hash_entry((void **)pidp->fdhash, FD_HSIZE, print_fd_info,
 				fd_sort_by_time,
-				0, pidp);
+				0, &vararg);
 
 	return;
 }
@@ -675,6 +693,7 @@ int
 print_pgcache_info(void *arg1, void *arg2)
 {
 	pgcache_t *pgcachep = (pgcache_t *)arg1;
+	FILE *pidfile = (FILE *)arg2;
 	fdata_info_t *fdatap;
 	uint64 dev;
 	uint64 node;
@@ -697,7 +716,7 @@ print_pgcache_info(void *arg1, void *arg2)
 		fnameptr = fdatap->fnameptr;
 	}
 
-        pid_printf ("%s%8d %8d  0x%08llx %10d %8s  %s\n", tab,
+        pid_printf (pidfile, "%s%8d %8d  0x%08llx %10d %8s  %s\n", tab,
                         pgcachep->cache_insert_cnt,
                         pgcachep->cache_evict_cnt,
                         dev,
@@ -709,48 +728,48 @@ print_pgcache_info(void *arg1, void *arg2)
 }
 
 void 
-pid_cache_report(pid_info_t *pidp, void *v) {
+pid_cache_report(pid_info_t *pidp, FILE *pidfile) {
 	if ((pidp->cache_insert_cnt + pidp->cache_evict_cnt) == 0) {
 		return;
 	}
 
-	pid_printf ("\n%s******** PAGE CACHE REPORT ********\n", tab);
-	pid_printf("%s Inserts   Evicts         dev       node     type  Filename\n", tab);
+	pid_printf (pidfile, "\n%s******** PAGE CACHE REPORT ********\n", tab);
+	pid_printf (pidfile, "%s Inserts   Evicts         dev       node     type  Filename\n", tab);
 	foreach_hash_entry((void **)pidp->pgcache_hash, PGCACHE_HASHSZ, print_pgcache_info,
 				pgcache_sort_by_cnt,
-				0, NULL);
+				0, pidfile);
 }
 
 void 
-pid_sock_report(pid_info_t *pidp, void *v) { 
+pid_sock_report(pid_info_t *pidp, FILE *pidfile) { 
 
 	csv_printf(pid_csvfile,",%3.1f,%2.1f,%2.1f,%2.1f", pidp->netstats.rd_cnt/secs, (pidp->netstats.rd_bytes/secs)/1024,
 	                                                  pidp->netstats.wr_cnt/secs, (pidp->netstats.wr_bytes/secs)/1024);
 }
 
 void 
-pid_dsk_report(pid_info_t *pidp, void *v) 
+pid_dsk_report(pid_info_t *pidp, FILE *pidfile) 
 { 
 	calc_pid_iototals(pidp, NULL);
 
 	if (pid_csvfile) print_pid_iototals_csv(pidp);
 
 	if (pidp->iostats[IO_TOTAL].compl_cnt) {
-		pid_printf ("\n    ******** PHYSICAL DEVICE REPORT ********\n");
-		pid_printf ("%s    device   rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+		pid_printf (pidfile, "\n    ******** PHYSICAL DEVICE REPORT ********\n");
+		pid_printf (pidfile, "%s    device   rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
 		foreach_hash_entry((void **)pidp->devhash, DEV_HSIZE, calc_dev_totals, NULL, 0, NULL);
-		foreach_hash_entry((void **)pidp->devhash, DEV_HSIZE, dsk_print_dev_iostats, dev_sort_by_dev, 0, NULL);
+		foreach_hash_entry((void **)pidp->devhash, DEV_HSIZE, dsk_print_dev_iostats, dev_sort_by_dev, 0, pidfile);
 
-		print_pid_iototals(&pidp->iostats[0]);
+		print_pid_iototals(&pidp->iostats[0], pidfile);
 	} 
 
 	if (pidp->miostats[IO_TOTAL].compl_cnt) {
-		pid_printf ("\n    ******** DEVICE-MAPPER REPORT ********\n");
-		pid_printf ("%s    device   rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+		pid_printf (pidfile, "\n    ******** DEVICE-MAPPER REPORT ********\n");
+		pid_printf (pidfile, "%s    device   rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
 		foreach_hash_entry((void **)pidp->mdevhash, DEV_HSIZE, calc_dev_totals, NULL, 0, NULL);
-		foreach_hash_entry((void **)pidp->mdevhash, DEV_HSIZE, dsk_print_dev_iostats, dev_sort_by_dev, 0, NULL);
+		foreach_hash_entry((void **)pidp->mdevhash, DEV_HSIZE, dsk_print_dev_iostats, dev_sort_by_dev, 0, pidfile);
 
-		print_pid_iototals(&pidp->miostats[0]);
+		print_pid_iototals(&pidp->miostats[0], pidfile);
 	}
 }
 
@@ -776,6 +795,9 @@ pid_report(void *arg1, void *v)
 	docker_info_t *dockerp;
 	unsigned long *msrptr;
 	int ret;
+	FILE *pid_jsonfile;
+	FILE *pid_wtree_jsonfile;
+	FILE *pidfile;
 
 	dockerp = pidp->dockerp;
 	if (pidp->num_tr_recs == 0) return 0;
@@ -786,6 +808,8 @@ pid_report(void *arg1, void *v)
                 return 0;
 
 	load_perpid_objfile_and_shlibs(pidp); 
+
+	/* fprintf (stderr, "pid_report() PID=%d\n", pidp->PID); */
 
         if (pidtree) {
                 sprintf (pid_fname, "PIDS/%d", (int)pidp->PID);
@@ -866,22 +890,22 @@ pid_report(void *arg1, void *v)
         }
 
 
-	pid_printf ("\nPID %d  %s", (int)pidp->PID, (char *)pidp->cmd);
-	if (pidp->hcmd) pid_printf ("  {%s}", pidp->hcmd);
-	if (pidp->thread_cmd) pid_printf ("  (%s)", pidp->thread_cmd);
+	pid_printf (pidfile, "\nPID %d  %s", (int)pidp->PID, (char *)pidp->cmd);
+	if (pidp->hcmd) pid_printf (pidfile, "  {%s}", pidp->hcmd);
+	if (pidp->thread_cmd) pid_printf (pidfile, "  (%s)", pidp->thread_cmd);
 
-	pid_printf ("\n");
+	pid_printf (pidfile, "\n");
 	
 	if (pidp->ppid) {
 		ppidp = GET_PIDP(&globals->pid_hash, pidp->ppid);
-		pid_printf ("  PPID %d  %s\n", ppidp->PID, (char *)ppidp->cmd);
+		pid_printf (pidfile, "  PPID %d  %s\n", ppidp->PID, (char *)ppidp->cmd);
 	}
 	if (pidp->tgid && (pidp->tgid != pidp->PID)) {
 		tgidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
-		pid_printf ("  TGID %d  %s\n", tgidp->PID, (char *)tgidp->cmd);
+		pid_printf (pidfile, "  TGID %d  %s\n", tgidp->PID, (char *)tgidp->cmd);
 	}
 	if (pidp->nlwp > 1) {
-		pid_printf ("    NLWP: %d\n", pidp->nlwp);
+		pid_printf (pidfile, "    NLWP: %d\n", pidp->nlwp);
 	}
 
 	if (dockerp) {
@@ -900,14 +924,14 @@ pid_report(void *arg1, void *v)
 	
 
 	tab=tab4;
-	if (sched_flag) sched_report(pidp, v);
-	if (hc_flag) cpu_report(pidp, v);
-	if (scall_flag) pid_syscall_report(pidp, v);
-	if (file_flag) pid_fd_report(pidp, v);
-	if (pgcache_flag) pid_cache_report(pidp, v);
-	if (futex_flag) pid_futex_report(pidp, v);
-	if (sock_flag) pid_sock_report(pidp, v);
-	if (dsk_flag) pid_dsk_report(pidp, v);
+	if (sched_flag) sched_report(pidp, pidfile, pid_jsonfile, pid_wtree_jsonfile);
+	if (hc_flag) cpu_report(pidp, pidfile);
+	if (scall_flag) pid_syscall_report(pidp, pidfile);
+	if (file_flag) pid_fd_report(pidp, pidfile);
+	if (pgcache_flag) pid_cache_report(pidp, pidfile);
+	if (futex_flag) pid_futex_report(pidp, pidfile);
+	if (sock_flag) pid_sock_report(pidp, pidfile);
+	if (dsk_flag) pid_dsk_report(pidp, pidfile);
 
 	if (msr_flag && pidp->schedp) 	{
 		schedp = pidp->schedp;
@@ -921,7 +945,7 @@ pid_report(void *arg1, void *v)
                                 msrptr[SMI_CNT]);
 	}
 
-	printf ("\n---------------------------------------------------------------------------------------------\n");
+	if (hthr == 0) printf ("\n---------------------------------------------------------------------------------------------\n");
 
 	if (pidfile) {
 		fclose(pidfile);
@@ -935,7 +959,10 @@ pid_report(void *arg1, void *v)
                 fclose(pid_wtree_jsonfile);
                 pid_wtree_jsonfile = NULL;
         }
+
 	csv_printf (pid_csvfile, "\n");
+
+	/* fprintf (stderr, "pid_report() PID=%d - completed\n", pidp->PID);  */
 
 	return 0;
 }
@@ -1030,7 +1057,7 @@ pid_print_report(void *v)
 		if (msr_flag)  csv_printf(pid_csvfile,",LLC_Ref,LLC_Hits,LLC_hit%%,Instrs,Cycles,CPI,Avg MHz,SMI Count");
 		csv_printf(pid_csvfile,"\n");
 
-        	foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
+        	foreach_hash_entry_mt((void **)globals->pid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))pid_report,
                            (int (*)()) pid_sort_by_trace_recs,
                            0, v);

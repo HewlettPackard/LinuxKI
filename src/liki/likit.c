@@ -18,7 +18,7 @@
  *
  * likit.c	LInux Kernel Instrumentation
  *
- *		v5.10
+ *		v6.0
  *		colin.honess@gmail.com
  *		mark.ray@hpe.com
  *		pokilfoyle@gmail.com
@@ -562,7 +562,12 @@ STATIC struct stacktrace_ops unwind_ops = {
 
 #endif // CONFIG_ARM64
 
-DEFINE_PER_CPU(struct perf_callchain_entry, liki_callchains);
+struct liki_callchain_entry {
+	unsigned long	nr;
+	unsigned long	ip[MAX_STACK_DEPTH];
+};
+
+DEFINE_PER_CPU(struct liki_callchain_entry, liki_callchains);
 
 #ifdef CONFIG_X86_64
 
@@ -572,7 +577,7 @@ liki_fetch_kern_caller_regs(struct pt_regs *regs)
 	/* Derived from perf_arch_fetch_caller_regs() */
 	memset(regs, 0, sizeof(struct pt_regs));
        	regs->ip = (unsigned long)__builtin_return_address(0);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,18,0)
 	asm volatile(_ASM_MOV "%%" _ASM_BP ", %0\n"
 			: "=m" ((regs)->bp)
 			:: "memory" );
@@ -613,10 +618,10 @@ liki_copy_from_user(void *to, const void __user *from, unsigned long n)
 #endif
 }
 
-inline struct perf_callchain_entry *
+inline struct liki_callchain_entry *
 liki_stack_unwind(struct pt_regs *regs, int skip, int *start)
 {
-	struct perf_callchain_entry	*callchain;
+	struct liki_callchain_entry	*callchain;
 	struct pt_regs			local_regs;
 	const void __user	*fp;
 	struct stack_frame	frame;
@@ -648,7 +653,7 @@ liki_stack_unwind(struct pt_regs *regs, int skip, int *start)
 	}
 
 	*start = 0;
-	callchain = (struct perf_callchain_entry *)&get_cpu_var(liki_callchains);
+	callchain = (struct liki_callchain_entry *)&get_cpu_var(liki_callchains);
 	callchain->nr = 0;
 
 	if (!user_mode(regs)) {
@@ -715,17 +720,17 @@ struct frame_tail {
         unsigned long lr;
 } __attribute__((packed));
 
-inline struct perf_callchain_entry *
+inline struct liki_callchain_entry *
 liki_stack_unwind(struct pt_regs *regs, int skip, int *start)
 {
-	struct perf_callchain_entry	*callchain;
+	struct liki_callchain_entry	*callchain;
 	struct stack_trace		st;
 	struct frame_tail __user *fp;
 	struct frame_tail buftail;
 	unsigned long err;
 	
 	*start = 0;
-	callchain = (struct perf_callchain_entry *)&get_cpu_var(liki_callchains);
+	callchain = (struct liki_callchain_entry *)&get_cpu_var(liki_callchains);
 	callchain->nr = 0;
 
 	/* if regs == NULL, then this is a sched_switch or similar and we are in kernel mode */
@@ -2289,7 +2294,7 @@ sched_switch_trace(RXUNUSED struct rq *rq, struct task_struct *p, struct task_st
 	unsigned int			msr_idx=0;
 #endif
 	register unsigned long 		irqtmp, softirqtmp, stealtmp;
-	struct perf_callchain_entry	*callchain = NULL;
+	struct liki_callchain_entry	*callchain = NULL;
 	int				first_entry = 0;
 	TRACE_COMMON_DECLS;
 
@@ -2536,7 +2541,7 @@ sched_migrate_task_trace(RXUNUSED struct task_struct *p, unsigned int new_cpu)
 	sched_migrate_task_t		*t;
 	unsigned int			sz, stksz;
 	unsigned int			first_entry = 0;
-	struct perf_callchain_entry	*callchain;
+	struct liki_callchain_entry	*callchain;
 	TRACE_COMMON_DECLS;
 
 	if (unlikely(tracing_state == TRACING_DISABLED))
@@ -2979,7 +2984,7 @@ mm_page_alloc_trace(RXUNUSED struct page *page, unsigned int order, unsigned int
 	mm_page_alloc_t	*t;
 	unsigned int			sz, stksz;
 	unsigned int			first_entry = 0;
-	struct perf_callchain_entry	*callchain;
+	struct liki_callchain_entry	*callchain;
 	TRACE_COMMON_DECLS;
 
 	if (unlikely(tracing_state == TRACING_DISABLED))
@@ -3043,7 +3048,7 @@ mm_page_free_trace(RXUNUSED struct page *page, unsigned int order )
 	mm_page_free_t	*t;
 	unsigned int			sz, stksz;
 	unsigned int			first_entry = 0;
-	struct perf_callchain_entry	*callchain;
+	struct liki_callchain_entry	*callchain;
 	TRACE_COMMON_DECLS;
 
 	if (unlikely(tracing_state == TRACING_DISABLED))
@@ -3179,7 +3184,7 @@ page_cache_evict_trace(RXUNUSED struct page *page)
 {
 	cache_evict_t			*t;
 	unsigned int			sz, stksz;
-	struct perf_callchain_entry	*callchain = NULL;
+	struct liki_callchain_entry	*callchain = NULL;
 	int				first_entry = 0;
 	TRACE_COMMON_DECLS;
 
@@ -4615,7 +4620,7 @@ hardclock_trace(struct pt_regs *regs)
 	unsigned long			time;
 	unsigned int			sz, stksz;
 	int				first_entry = 0;
-	struct perf_callchain_entry	*callchain = NULL;
+	struct liki_callchain_entry	*callchain = NULL;
 	int				preempt_cnt;
 	TRACE_COMMON_DECLS;
 

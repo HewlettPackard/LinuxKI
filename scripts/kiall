@@ -43,6 +43,7 @@
 # version 5.1   06/14/2017   Added Copyright
 # version 5.2   06/20/2017   Moved copyright after shell designation
 # version 5.4   05/10/2018   Added -M option to leave C++ names mangled
+# version 6.0   11/25/2019   Added -n num_threads to kiall -V for parallel processing
 # 
 # DESCRIPTION:
 #  
@@ -78,8 +79,10 @@
 #   -x        Generate the kparse report as a .txt file instead of an .html file
 #
 #   -V	      Add visualization options (vis,vpct,vdepth) to kiall, kparse, kipid
+#
+#   -P [num_threads]  Added parallelization for visualization processing
 #   
-#  -t <timestamp>  Only runs KI reports on a single KItrace collection.
+#   -t <timestamp>  Only runs KI reports on a single KItrace collection.
 # 
 #
 # NOTE:  
@@ -100,23 +103,26 @@ cflag=0
 fflag=0
 mangle=""
 domwa=1
+hthr=""
 lite=0
 dotxt=0
 dovis=0
 
 help()
 {
-    printf "Usage: %s: [-l] [-m] [-r] [-f] [-c] [-x] [-M] [-V] [-t timestamp]\n" "$0"
-	printf "            -h               Help\n"
-	printf "            -l               Lite version - bypasses some options\n" 
-	printf "            -m               Do not process collectl or MWA data\n"
-	printf "            -r               restore into created subdir - <host>/<MMDD_HHMM> \n"
-	printf "            -f               Find KI files in pwd and any directories below\n"
-	printf "            -c               Cluster-wide processing\n"
-	printf "            -x               Generate Kparse text format instead of html format\n"
-	printf "            -M               Leave C++ function names mangled\n"
-	printf "            -V               Use visualization options where possible in reports\n"
-	printf "            -t <timestamp>   Only process KI budle with matching timestamp\n"
+    printf "Usage: %s: [-l] [-m] [-r] [-f] [-c] [-x] [-M] [-V] [-P num_threads] [-t timestamp]\n" "$0"
+	printf "       -h               Help\n"
+	printf "       -l               Lite version - bypasses some options\n" 
+	printf "       -m               Do not process collectl or MWA data\n"
+	printf "       -r               restore into created subdir - <host>/<MMDD_HHMM> \n"
+	printf "       -f               Find KI files in pwd and any directories below\n"
+	printf "       -c               Cluster-wide processing\n"
+	printf "       -x               Generate Kparse text format instead of html format\n"
+	printf "       -M               Leave C++ function names mangled\n"
+	printf "       -V               Use visualization options where possible in reports\n"
+	printf "       -P <num_threads> Number of parallel threads for Visualization processing\n"
+	printf "			default=0 - Use 1 thread per logical core\n"
+	printf "       -t <timestamp>   Only process KI budle with matching timestamp\n"
 }
 
 getnodename()
@@ -263,8 +269,8 @@ process_V()
 	oracle=",oracle"
     fi
 
-    echo $DIR/kiinfo -kiall csv,vis,vpct=1,vdepth=3$oracle$mangle -html -ts $tag
-    ( $DIR/kiinfo -kiall csv,vis,vpct=1,vdepth=3$oracle$mangle -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
+    echo $DIR/kiinfo -kiall csv,vis,vpct=1,vdepth=3$hthr$oracle$mangle -html -ts $tag
+    ( $DIR/kiinfo -kiall csv,vis,vpct=1,vdepth=3$hthr$oracle$mangle -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
 
     echo Generating symlinks to $EVDIR for visualization charts
 
@@ -457,27 +463,76 @@ process_f()
     done
 }
 
-
-
-while getopts t:rcfmxVMlh optname
-do
-	case $optname in
-		h)	help
-			exit 1;;
-		t) 	intag="$OPTARG";;
-		r)	rflag=1;;
-		c)	cflag=1;;
-		f)	fflag=1;;
-                m)      domwa=0;;
-		x)	dotxt=1;;
-		V)	dovis=1;;
-		M)      mangle=",mangle";;
-                l)      lite=1;;
+while [ "`echo $1 | cut -c1`" = "-" ] ; do
+	str=$2
+	case "$1" in
+		-h)	help
+			exit 1
+			;;
+		-t)	if [[ -z $str ]]; then
+				echo "Invalid timestamp for -t option"
+				help
+				exit 2
+			else
+				if [[ ${str:0:1}  == "-" ]]; then
+					echo "Invalid timestamp for -t option"
+					help
+					exit 2
+				else
+					intag="$2"
+				fi
+			fi	
+			shift 2
+			;;
+		-r)	rflag=1
+			shift 1
+			;;
+		-c)	cflag=1
+			shift 1
+			;;
+		-f)	fflag=1
+			shift 1
+			;;
+		-m)	domwa=0
+			shift 1
+			;;
+		-x)	dotxt=1
+			shift 1
+			;;
+		-V)	dovis=1
+			shift 1
+			;;
+		-M)	mangle=",mangle"
+			shift 1
+			;;
+		-l)	lite=1
+			shift 1
+			;;
 		?)	help
-			exit 2;;
+			exit 1
+			;;
+		-P)
+			str=$2
+			if [[ -z $str ]]; then
+				hthr=",hthr=0"
+				shift 1
+			else
+				if [[ ${str:0:1}  == "-" ]]; then
+					hthr=",hthr=0"
+					shift 1
+				else
+					hthr=",hthr=$2"
+					shift 2
+				fi
+			fi
+			;;
+		*) 	echo "Invalid Option $1"
+			help
+			exit 2
+			;;
 	esac
 done
-
+			
 if [ $rflag -eq 1 -a $cflag -eq 1 ] ; then
     echo "ERROR: Cannot use both -r and -c options"
     exit 9

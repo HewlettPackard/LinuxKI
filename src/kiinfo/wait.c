@@ -211,6 +211,7 @@ print_global_swtch_stktraces()
 {
 	sched_info_t *gschedp;
 	print_stktrc_args_t print_stktrc_args;
+	var_arg_t vararg;
 
         if (globals->stktrc_hash == NULL) return;
 	gschedp = (sched_info_t *)find_add_info((void **)&globals->schedp, sizeof(sched_info_t));
@@ -218,11 +219,13 @@ print_global_swtch_stktraces()
 	print_stktrc_args.schedp = gschedp;
 	print_stktrc_args.warnflag = 0;
 
+	vararg.arg1 = NULL;
+	vararg.arg2 = &print_stktrc_args;
         printf("\nGlobals switch stack traces (sort by count):\n");
         printf("   count   wpct       avg   Stack trace\n");
         printf("              %%     msecs              \n");
         printf("============================================================\n");
-        foreach_hash_entry((void **)globals->stktrc_hash, STKTRC_HSIZE, print_stktrc_info, stktrc_sort_by_cnt, nsym, (void *)&print_stktrc_args);
+        foreach_hash_entry((void **)globals->stktrc_hash, STKTRC_HSIZE, print_stktrc_info, stktrc_sort_by_cnt, nsym, (void *)&vararg);
 }
 
 int
@@ -330,7 +333,7 @@ print_pid_sleeps (void *arg1, void *arg2)
 		sched_policy_name[schedp->policy]);
 
 	if (pidp->slp_hash) {
-		sleep_report(pidp->slp_hash, schedp, slp_sort_by_count, arg2);
+		sleep_report(pidp->slp_hash, schedp, slp_sort_by_count, NULL);
 	}
 
 	return 0;

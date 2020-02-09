@@ -1263,6 +1263,8 @@ do
 	ethtool -k $INTFC >> ethtool.$tag 2>&1
 	ethtool -c $INTFC >> ethtool.$tag 2>&1
 	ethtool -S $INTFC >> ethtool.$tag 2>&1
+	ethtool -g $INTFC >> ethtool.$tag 2>&1
+	ethtool -l $INTFC >> ethtool.$tag 2>&1
 done
 cat /proc/net/bonding/bond* > bonds.$tag 2>&1
 cat /proc/interrupts	> interrupts.$tag 2>&1

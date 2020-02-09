@@ -2,3 +2,9 @@ archive
 *.tgz
 modules
 aarch64
+src/kiinfo.win
+src/kiinfo/kiinfo.aarch64
+src/kiinfo/kiinfo.rhel8
+src/kiinfo/kiinfo.sles15
+src/kiinfo/kiinfo.x86_64
+.gitignore

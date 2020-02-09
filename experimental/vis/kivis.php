@@ -13,13 +13,17 @@ textarea {
 <?php
 	// Set up variables
 
-	$type = $_GET['type'];
-	$pid = $_GET['pid'];
-	$start = $_GET['start'];
-	$end = $_GET['end'];
-        $io_time = $_GET['iotime'];
+	$type = htmlentities($_GET['type']);
+	$pid = number_format($_GET['pid']);
+	$start = number_format($_GET['start'],6);
+	$end = number_format($_GET['end'],6);
+        $io_time = number_format($_GET['iotime'],6);
 	$cwd = shell_exec("pwd");
-	$ts = $_GET['ts'];
+	$ts = htmlentities($_GET['ts']);
+        if ((strlen($ts) != 9) || !(preg_match("/^[0-9][0-9][0-9][0-9]+\_[0-9][0-9][0-9][0-9]+/", $ts))) {
+                exit ("Invalid Timestamp $tag <br>");
+        }
+
 
 	// Generate the data to be displayed in the formatted textarea
 

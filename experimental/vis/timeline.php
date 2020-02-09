@@ -6,12 +6,26 @@
 
 	// The echo comments below only appear if the redirect at the bottom fails ...so they are a debug out as well.
 
-	echo "Running for time sub-range  Start - " . $_GET['start'] . " End - " . $_GET['end'] . "<br>";
-	echo "Reports will be placed in " . $_GET['path'] . "/tl_temp  directory <br>";
+	// truncate the timestamps down to 1e-6
+	$start = number_format($_GET['start'],6);
+	$end   = number_format($_GET['end'],6);
+
+	echo "Running for time sub-range  Start - " . $start . " End - " . $end . "<br>";
+
+        $path = htmlentities($_GET['path']);
+        if (preg_match("/[\>\<,;'|\$()\[\]]/", $path)) {
+                exit ("Invalid directory path $path <br>");
+        }
+	echo "Reports will be placed in " . $path . "/tl_temp  directory <br>";
 
 	// We coerce the path variables we need, the tag timestamp, the temp dir name, etc.
-	$tag = $_GET['timestamp'];
-	if ( !chdir( $_GET['path'] ) ) 
+
+	$tag = htmlentities($_GET['timestamp']);	
+        if ((strlen($tag) != 9) || !(preg_match("/^[0-9][0-9][0-9][0-9]+\_[0-9][0-9][0-9][0-9]+/", $tag))) {
+                exit ("Invalid Timestamp $tag <br>");
+        }
+
+	if ( !chdir( $path ) ) 
 		exit("Could not cd to source data dir.  Check the path in the .csv file. <br>");
 	
 	if ( $_GET['cleanup'] )
@@ -23,10 +37,6 @@
 
 
 
-	// truncate the timestamps down to 1e-6
-
-	$start = number_format($_GET['start'],6);
-	$end   = number_format($_GET['end'],6);
  	if ( !mkdir ("tl_temp/$start-$end") )
 		echo "Could not create time subrange dir. It may already exist, or check dir permissions. <br>";
 
@@ -35,10 +45,10 @@
 	// Building the tl_temp dir and appending it to the pathname passed in
 
 
-	echo "Path passed in is: " .  $_GET['path']  . "<br>";
+	echo "Path passed in is: " .  $path  . "<br>";
 	$tl_datadir = "tl_temp/$start-$end";
 	echo "TL data dir is:  $tl_datadir <br>";
-	$fullpath = $_GET['path'] . '/' . $tl_datadir;
+	$fullpath = $path . '/' . $tl_datadir;
 	echo "relative path for temp data is : $fullpath <br>";
 	echo "Timestamp used is $tag <br>";
 
@@ -48,8 +58,8 @@
 
 	// The ascii ki.$tag report is needed for many different vis charts...let's just generate it once
 
-	shell_exec ( "cp /opt/linuxki/experimental/vis/timeline* " . $_GET['path']);
-	shell_exec ( "cp /opt/linuxki/experimental/vis/*.sh " . $_GET['path']);
+	shell_exec ( "cp /opt/linuxki/experimental/vis/timeline* " . $path);
+	shell_exec ( "cp /opt/linuxki/experimental/vis/*.sh " . $path);
 	shell_exec ( "/opt/linuxki/kiinfo -kitrace -ts " . $tag . " -starttime " . $start . " -endtime " . $end . " > " . $tl_datadir  . "/ki." . $tag . " 2>&1");
         shell_exec ( "cd " . $tl_datadir . "; ln -s /opt/linuxki/experimental/D3 D3");
 	

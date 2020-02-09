@@ -11,8 +11,10 @@ textarea {
 </head>
 <body>
 <?php
-        $io_time = $_GET['iotime'];
-        shell_exec ( "./kitrc_extract.sh " . $_GET['start'] . "  " . $_GET['end']);
+        $io_time = number_format($_GET['iotime'],6);
+	$start = number_format($_GET['start'],6);
+	$end = number_format($_GET['end'],6);
+        shell_exec ( "./kitrc_extract.sh " . $start . "  " . $end);
         $filename = "./kitrc.txt";
         $fh = fopen($filename, "r") or die("Could not open file!");
         $data = fread($fh, filesize($filename)) or die("Could not read file!");

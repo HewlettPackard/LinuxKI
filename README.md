@@ -76,9 +76,9 @@ The following documentation provides a brief overview for downloading and instal
 ### Download
 Pre-packaged RPM and DEB files are available on the [Releases Page](https://github.com/HewlettPackard/LinuxKI/releases).
 
-### Prerquisites
+### Prerequisites
 
-There are no manadatory pre-requisites.   LinuxKI should install and run on most Linux systems from 2.6.32 through 4.12.8.  
+There are no mandatory pre-requisites.   LinuxKI should install and run on most Linux systems from 2.6.32 through 4.12.8.  
 
 However, if you would like to use the LiKI tracing mechanism (perferred method), you will need the following packages installed to compile the LiKI module from source code:
 
@@ -148,4 +148,4 @@ After data collection, a default set of reports can be generated as follows:
 
     $ kiall -r         # -r option creates a nodename/timestamp directory structure
     
-Most of the generated reports are text based and can be viewed with a standed editor or text viewer.
+Most of the generated reports are text based and can be viewed with a standard editor or text viewer.

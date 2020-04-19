@@ -367,7 +367,7 @@ print_iostats_totals(void *arg1, void *arg2, void *arg3)
         	avserv = iostatsp->cum_ioserv/MAX(iostatsp->compl_cnt,1) / 1000000.0;
 		avinflt = (iostatsp->cum_async_inflight + iostatsp->cum_sync_inflight) / (MAX(iostatsp->issue_cnt,1) * 1.0);
 
-		printf ("%7.0f %7.0f %7d %7.2f %8.2f ",
+		dock_printf ("%7.0f %7.0f %7d %7.2f %8.2f ",
                         iostatsp->compl_cnt/serverp->total_secs,
                         (iostatsp->sect_xfrd/2048)/serverp->total_secs,
                         (iostatsp->sect_xfrd/2)/MAX(iostatsp->compl_cnt,1),
@@ -379,7 +379,7 @@ print_iostats_totals(void *arg1, void *arg2, void *arg3)
 			(*warnflagp) |= WARNF_AVSERV;
 		}	
 
-                printf ("%8.2f ", avserv);
+                dock_printf ("%8.2f ", avserv);
 		BLACK_FONT;
 
                 i--;

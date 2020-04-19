@@ -23,6 +23,15 @@
 	#include <sys/socket.h>
 #endif
 
+#if __KERNEL__ 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,5,0)
+#define TIMESPEC timespec64
+#else
+#define TIMESPEC timespec
+#endif
+#else
+#define TIMESPEC timespec
+#endif
 
 /* TRACE_VERSION should always be odd in LiKI. kiinfo uses the lowest order
  * bit to determine whether the trace data comes from LiKI or ftrace.
@@ -200,7 +209,7 @@ typedef struct info_trace {
 
 typedef struct walltime_trace {
 	COMMON_FIELDS;
-	struct timespec	walltime;
+	struct TIMESPEC	walltime;
 } walltime_t;
 
 /* The startup_trace record supercedes the walltime trace, extending
@@ -224,7 +233,7 @@ typedef struct walltime_trace {
 
 typedef struct startup_trace {
 	COMMON_FIELDS;
-	struct timespec	walltime;
+	struct TIMESPEC	walltime;
 	unsigned long	tracemask;
 	unsigned long	enabled_features;
 } startup_t;

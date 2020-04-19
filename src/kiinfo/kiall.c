@@ -480,7 +480,7 @@ kiall_print_report(void *v)
 			return 0;
 		}
 
-        	printf("Command line: %s -kipid oracle,scdetail,nsym=20,npid=10,pidtree,csv -ts %s\n\n", cmdstr, timestamp);
+        	printf("Command line: %s -kipid oracle,nsym=20,npid=10,pidtree,csv -ts %s\n\n", cmdstr, timestamp);
         	printf ("%s (%s)\n\n", tool_name, tool_version);
 		parse_uname(1);
 		nsym=20;
@@ -508,7 +508,7 @@ kiall_print_report(void *v)
 		return 0;
 	}
 
-        printf("Command line: %s -kipid scdetail,nsym=20,npid=10,pidtree,csv -ts %s\n\n", cmdstr, timestamp);
+        printf("Command line: %s -kipid nsym=20,npid=10,pidtree,csv -ts %s\n\n", cmdstr, timestamp);
         printf("%s (%s)\n\n", tool_name, tool_version);
 	parse_uname(1);
 	nsym=20;
@@ -606,7 +606,7 @@ kiall_print_report(void *v)
 		fprintf (stderr, "Unable to rename stdout to %s (errno: %d)\n", fname, errno);
 		return 0;
 	}
-        printf("Command line: %s -kifile nfile=30,scdetail,csv -ts %s\n\n", cmdstr, timestamp);
+        printf("Command line: %s -kifile nfile=30,csv -ts %s\n\n", cmdstr, timestamp);
         printf ("%s (%s)\n\n", tool_name, tool_version);
 	parse_uname(1);
 	nfile=30;
@@ -621,7 +621,7 @@ kiall_print_report(void *v)
 		fprintf (stderr, "Unable to rename stdout to %s (errno: %d)\n", fname, errno);
 		return 0;
 	}
-        printf("Command line: %s -kisock nsock=30,scdetail -ts %s\n\n", cmdstr, timestamp);
+        printf("Command line: %s -kisock nsock=30 -ts %s\n\n", cmdstr, timestamp);
         printf ("%s (%s)\n\n", tool_name, tool_version);
 	parse_uname(1);
 	nfile=30;

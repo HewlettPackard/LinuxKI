@@ -43,7 +43,8 @@
 # version 5.1   06/14/2017   Added Copyright
 # version 5.2   06/20/2017   Moved copyright after shell designation
 # version 5.4   05/10/2018   Added -M option to leave C++ names mangled
-# version 6.0   11/25/2019   Added -n num_threads to kiall -V for parallel processing
+# version 6.0   11/25/2019   Added -P num_threads to kiall -V for parallel processing
+# version 6.1   04/20/2020   Added -B to collect block frequency statistics for Kparse reports (this takes more time)
 # 
 # DESCRIPTION:
 #  
@@ -55,7 +56,7 @@
 # 
 # USAGE: 
 #
-#   kiall [-r] [-c] [-m] [-l] [-x] [-V] [-t timestamp] 
+#   kiall [-l] [-m] [-r] [-f] [-c] [-x] [-M] [-B] [-V] [-P num_threads] [-t timestamp]
 #   
 # OPTIONS:
 #  
@@ -73,10 +74,13 @@
 #
 #   -m        Skip MW processing.   
 #
-#   -M	      Do not demangle C++ function names
-#
 #   -l        lite collection 
+#
 #   -x        Generate the kparse report as a .txt file instead of an .html file
+#
+#   -M        Leave C++ function names mangled
+#
+#   -B        Do not report Disk Block Frequency stats in Kparse output
 #
 #   -V	      Add visualization options (vis,vpct,vdepth) to kiall, kparse, kipid
 #
@@ -102,6 +106,7 @@ rflag=0
 cflag=0
 fflag=0
 mangle=""
+blkfrq=""
 domwa=1
 hthr=""
 lite=0
@@ -110,7 +115,7 @@ dovis=0
 
 help()
 {
-    printf "Usage: %s: [-l] [-m] [-r] [-f] [-c] [-x] [-M] [-V] [-P num_threads] [-t timestamp]\n" "$0"
+    printf "Usage: %s: [-l] [-m] [-r] [-f] [-c] [-x] [-M] [-B] [-V] [-P num_threads] [-t timestamp]\n" "$0"
 	printf "       -h               Help\n"
 	printf "       -l               Lite version - bypasses some options\n" 
 	printf "       -m               Do not process collectl or MWA data\n"
@@ -119,6 +124,7 @@ help()
 	printf "       -c               Cluster-wide processing\n"
 	printf "       -x               Generate Kparse text format instead of html format\n"
 	printf "       -M               Leave C++ function names mangled\n"
+	printf "       -B               Do not report Disk Block Frequency stats in Kparse output\n"
 	printf "       -V               Use visualization options where possible in reports\n"
 	printf "       -P <num_threads> Number of parallel threads for Visualization processing\n"
 	printf "			default=0 - Use 1 thread per logical core\n"
@@ -251,14 +257,14 @@ process_ki()
 
     if [ $dotxt -eq 0 ] ; then
         if [ $dovis -eq 0 ] ; then
-	    echo $DIR/kiinfo -kiall csv$oracle$mangle -html -ts $tag
-            ( $DIR/kiinfo -kiall csv$oracle$mangle -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
+	    echo $DIR/kiinfo -kiall csv$oracle$mangle$blkfrq -html -ts $tag
+            ( $DIR/kiinfo -kiall csv$oracle$mangle$blkfrq -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
 	else
 	    process_V
 	fi
     else
-        echo $DIR/kiinfo -kiall csv$oracle$mangle -ts $tag
-        ( $DIR/kiinfo -kiall csv$oracle$mangle -ts $tag ; touch -r ki.bin.*$tag kp.$tag.txt)
+        echo $DIR/kiinfo -kiall csv$oracle$mangle$blkfrq -ts $tag
+        ( $DIR/kiinfo -kiall csv$oracle$mangle$blkfrq -ts $tag ; touch -r ki.bin.*$tag kp.$tag.txt)
     fi
 }
 
@@ -269,8 +275,8 @@ process_V()
 	oracle=",oracle"
     fi
 
-    echo $DIR/kiinfo -kiall csv,vis,vpct=1,vdepth=3$hthr$oracle$mangle -html -ts $tag
-    ( $DIR/kiinfo -kiall csv,vis,vpct=1,vdepth=3$hthr$oracle$mangle -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
+    echo $DIR/kiinfo -kiall csv,vis,vpct=1,vdepth=3$hthr$oracle$mangle$blkfrq -html -ts $tag
+    ( $DIR/kiinfo -kiall csv,vis,vpct=1,vdepth=3$hthr$oracle$mangle$blkfrq -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
 
     echo Generating symlinks to $EVDIR for visualization charts
 
@@ -503,6 +509,9 @@ while [ "`echo $1 | cut -c1`" = "-" ] ; do
 			shift 1
 			;;
 		-M)	mangle=",mangle"
+			shift 1
+			;;
+		-B)	blkfrq=",blkfrq"
 			shift 1
 			;;
 		-l)	lite=1

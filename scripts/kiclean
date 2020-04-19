@@ -22,7 +22,7 @@
 # version 4.0  11/25/2015  Updated copyright
 # version 4.1  01/26/2016  Added -v option for Visualization files/dirs cleanup.
 # version 5.1  06/07/2017  Added Copyright notice       
-# version 5.1  06/20/2017  Moved Copyright notice after shell designation
+# version 5.2  06/20/2017  Moved Copyright notice after shell designation
 #
 # DESCRIPTION:
 # 
@@ -65,7 +65,7 @@ help()
     printf "Usage: %s: [-r] [-f] [-p] [-v]\n" "$0"
         printf "            -h               Help\n"
         printf "            -r               Recursively traverse sudirs looking for KI data to archive\n"
-	printf "	    -p		     Remove PIDS subdirectory\n"
+	printf "	    -p		     Remove PIDS and CIDS subdirectoriesy\n"
 	printf "	    -v		     Remove VIS  subdirectory & rel. sh/php/html files\n"
         printf "            -f               Force remove misc/tmp files\n"
 }
@@ -145,6 +145,7 @@ clean_pwd()
 	rm -f *.$tag.csv
 	if [ $pflag -eq 1 ] ; then
 	    rm -rf PIDS
+	    rm -rf CIDS
 	fi
 	if [ $vflag -eq 1 ] ; then
 	    rm -Rf VIS D3 tl_temp
@@ -152,7 +153,7 @@ clean_pwd()
 	    rm -f $(ls *.html | grep -v kp)
 	fi
 
-    	for file in `ls 2>/dev/null | egrep -v '\.txt|\.gz|\.tgz|\.html|^doc|^4000|^PIDS|^VIS|^statsp|^MW|^misc|^comment'`
+    	for file in `ls 2>/dev/null | egrep -v '\.txt|\.gz|\.tgz|\.html|^doc|^4000|^CIDS|^PIDS|^VIS|^statsp|^MW|^misc|^comment'`
     	do
             if [ $file == !p4.* ] ; then
                 continue
@@ -170,7 +171,7 @@ clean_pwd()
 
 recursive_clean()
 {
-	for SUBDIR in `find . -type d | grep -v PIDS | grep -v MW | grep -v VIS | grep -v "objdump"`
+	for SUBDIR in `find . -type d | grep -v CIDS | grep -v PIDS | grep -v MW | grep -v VIS | grep -v "objdump"`
 	do
 		cd $SUBDIR
     		ls ki.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9] >/dev/null 2>&1

@@ -83,9 +83,15 @@ ifeq ($(hostdistro),rhel) # Red Hat Enterprise Linux (RHEL)
    else ifneq (,$(findstring 7.,$(hostversion)))
       #RHEL 7 (3.10)
       EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
-   else ifneq (,$(findstring 8.,$(hostversion)))
-      #RHEL 8 (4.18)
+   else ifneq (,$(findstring 8.0,$(hostversion)))
+      #RHEL 8.0 (4.18)
       EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+   else ifneq (,$(findstring 8.1,$(hostversion)))
+      #RHEL 8.11(4.18)
+      EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+   else ifneq (,$(findstring 8.,$(hostversion)))
+      #RHEL 8.2 and later (4.18)
+      EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
    endif
 else ifeq ($(hostdistro),centos) #  Centos
    ifneq (,$(findstring 6.,$(hostversion)))
@@ -142,8 +148,13 @@ else ifeq ($(hostdistro),fedora)
    #FEDORA 
    EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
 else ifeq ($(hostdistro),ubuntu)
-   #UBUNTU 12.04, 12.10 (3.5)
-   EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
+    ifneq (,$(findstring 18,$(hostversion)))
+	#UBUNTU 18.X
+        EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+    else
+   	#UBUNTU 12.04, 12.10 (3.5)
+        EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
+    endif
 else ifeq ($(hostdistro),l4tm)
    #L4TM
    EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=11 -DOTHER_STACK_SKIP=3

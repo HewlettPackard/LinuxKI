@@ -370,6 +370,9 @@ update_slp_info(void *arg1, void *arg2, int old_state, int new_state, uint64 del
 
         key = convert_pc_to_key(pidp->last_stktrc[0]);
 
+	/* this means no kernel stack was collected */
+	if (key == STACK_CONTEXT_USER) return;
+
         slpinfop = GET_SLPINFOP(slp_hash, key);
         slpinfop->count++;
         slpinfop->sleep_time += delta;

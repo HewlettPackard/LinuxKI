@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad
-.TH kiall 1 "6.0 - November 25, 2019" version "6.0"
+.TH kiall 1 "6.1 - April 20, 2020" version "6.1"
 .SH NAME
 kiall  -  LinuxKI trace dump post-processing script
 
@@ -36,16 +36,17 @@ The -f option for kiall can be used to search for LinuxKI data in directory tree
 
 .SH OPTIONS
 
-    -h              Help
+    -h               Help
     -l               lite collection
     -m               Skip MW processing
     -r               restore into created subdir - <host>/<MMDD_HHMM>
     -f               Find KI files in pwd and any directories below
     -c               Cluster-wide processing
     -x               Generate kparse text format instead of html format
-    -M		     Leave C++ function names mangled
+    -M               Leave C++ function names mangled
+    -B               Add Disk Block Frequency stats to Kparse report
     -V               Use Visualization options where possible in reports
-    -n <num_threads> When visualization used, number of parallel threads for processing
+    -P <num_threads> When visualization used, number of parallel threads for processing
     -t <timestamp>   Only runs KI reports bundle with matching timestamp
 
 .SH AUTHOR
@@ -59,4 +60,3 @@ kiinfo-kidock(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1)
 kivis-build(1) kivis-start(1) kivis-stop(1)
 
 https://github.com/HewlettPackard/LinuxKI/wiki
-

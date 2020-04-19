@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad
-.TH kiinfo 1 "6.0 - November 25, 2019" version "6.0"
+.TH kiinfo 1 "6.1 - April 20, 2020" version "6.1"
 .SH NAME
 kiinfo  -  LinuxKI data collection and analysis engine
 
@@ -36,7 +36,7 @@ Used when analyzing LinuxKI dumps.   Timestamp is from ki.all.<timestamp>.tgz fi
 Report only data after the start time.   Only used with KI dumps (-ts option)
 .RE
 
-.B \-start | \-starttime <time_in_secs)
+.B \-end | \-endtime <time_in_secs)
 .RS 
 Report only data before the end time.   Only used with KI dumps (-ts option)
 .RE
@@ -91,49 +91,48 @@ KI ASCII trace format tool. See kiinfo-kitrace(1).
 
 .B \-kipid [FLAGS]
 .RS 
-KI PID Analysis Tool. See kiinfo-kipid(1).
+KI PID Analysis Report. See kiinfo-kipid(1).
 .RE
 
 .B \-kiprof [FLAGS]
 .RS 
-KI CPU Profling Tool. See kiinfo-kiprof(1)
+KI CPU Profiling Report. See kiinfo-kiprof(1)
 .RE
 
 .B \-kidsk [FLAGS]
 .RS 
-KI Disk Analysis Tool. See kiinfo-kidsk(1).
+KI Disk Analysis Report. See kiinfo-kidsk(1).
 .RE
 
 .B \-kirunq [FLAGS]
 .RS 
-KI CPU and RunQ Analysis Tool. See kiinfo-kirunq(1).
+KI CPU/RUNQ Analysis Report. See kiinfo-kirunq(1).
 .RE
 
 .B \-kiwait [FLAGS]
 .RS 
-KI Kernel Wait Function Analysis Tool. See kiinfo-kiwait(1).
+KI Wait Event Analysis Report. See kiinfo-kiwait(1).
 .RE
 
 .B \-kifile [FLAGS]
 .RS 
-KI File Analysis Tool. See kiinfo-kifile(1).
-.RE
-
-.B \-kifutex [FLAGS]
-.RS 
-KI Futex Analysis Tool. See kiinfo-kifute(1).
+KI File Activity Report. See kiinfo-kifile(1).
 .RE
 
 .B \-kisock [FLAGS]
 .RS 
-KI Network Socket Activity Tool. See kiinfo-kisock(1).
+KI Network Socket Activity eeport. See kiinfo-kisock(1).
+.RE
+
+.B \-kifutex [FLAGS]
+.RS 
+KI Futex Activity Report. See kiinfo-kifute(1).
 .RE
 
 .B \-kidock [FLAGS]
 .RS 
-KI Docker Activity Tool. See kiinfo-kidock(1).
+KI Docker Activity Report. See kiinfo-kidock(1).
 .RE
-
 
 .B \-kiall [FLAGS]
 .RS 

@@ -414,8 +414,10 @@ kparse_print_report(void *v)
 	kp_wwn_totals();				/* Section 4.5 */
 	kp_perpid_mdev_totals();			/* Section 4.6 */
 	kp_perpid_dev_totals();				/* Section 4.7 */
-        kp_dskblk_read();          		        /* Section 4.8 */
-        kp_dskblk_write();      		        /* Section 4.9 */
+	if (dskblk_stats) {
+        	kp_dskblk_read();  		        /* Section 4.8 */
+        	kp_dskblk_write();			/* Section 4.9 */
+	}
 
 	kp_network();					/* Section 5.0 */
 	kp_ipip();					/* Section 5.1 */
@@ -458,7 +460,6 @@ kparse_print_report(void *v)
 	}
 	kp_warnings_report();    			/* Section 10.0 */
 	globals->next_warning=0;
-
 	return 0;
 }
 

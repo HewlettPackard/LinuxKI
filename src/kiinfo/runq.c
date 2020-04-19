@@ -165,7 +165,7 @@ print_perldom_stats(uint64 *warnflagp)
 	    if (gstatp->T_irq_time) BOLD ("  hardirq_sys hardirq_user hardirq_idle  softirq_sys softirq_user softirq_idle");
 	    if (msr_flag) BOLD ("  LLC_hit%%    CPI   Avg_MHz  SMI_cnt");
 	    /* if (msr_flag) BOLD ("        MIPS"); */
-	    printf("\n");
+	    NL;
 
             for (i=0;i<MAXLDOMS;i++) {
                 if (ldominfop = FIND_LDOMP(globals->ldom_hash, i)) {
@@ -200,7 +200,7 @@ print_perldom_stats(uint64 *warnflagp)
 				printf ("   %9.2f",  (msrptr[RET_INSTR]/1000000)/globals->total_secs);
 			}
 			*/ 
-                        printf ("\n");
+			NL;
                 }
             }
 
@@ -231,14 +231,14 @@ print_perldom_stats(uint64 *warnflagp)
 	    }
 	*/
 
-	    printf("\n\n");
+	    NL; NL;
 	}
 
 	BOLD ("node  ncpu     Total Busy          sys          usr         idle");
 	if (gstatp->T_irq_time) BOLD ("  hardirq_sys hardirq_user hardirq idle  softirq_sys softirq_user softirq_idle");
 	if (msr_flag) BOLD ("  LLC_hit%%    CPI   Avg_MHz  SMI_cnt");
 	/* if (msr_flag) BOLD ("        MIPS"); */
-	printf("\n");
+	NL; 
 
         for (i=0;i<MAXLDOMS;i++) {
                 if (ldominfop = FIND_LDOMP(globals->ldom_hash, i)) {
@@ -280,7 +280,7 @@ print_perldom_stats(uint64 *warnflagp)
 				printf ("   %9.2f",  (msrptr[RET_INSTR]/1000000)/globals->total_secs);
 	   		}
 			*/
-                        printf ("\n");
+			NL;
                 }
         }
 
@@ -316,7 +316,7 @@ print_perldom_stats(uint64 *warnflagp)
 	}
 	*/
 
-	printf("\n");
+	NL;
         return;
 }
 
@@ -338,7 +338,7 @@ print_percpu_runq_histogram()
                                 ldrq[cpuinfop->ldom].rqhist[j] += rqinfop->rqhist[j];
                                 printf(" %6d", rqinfop->rqhist[j]);
                         }
-                        printf ("\n");
+			NL;
                 }
 	}
 }
@@ -373,7 +373,7 @@ print_percpu_runq_stats()
 
         tt = tc = 0;
 
-        printf(" cpu       Avg       Max  Total_time  Total_cnt  Migrations  NODE_migr_in  NODE_migr_out\n");
+        printf(" cpu       Avg       Max  Total_time  Total_cnt  Migrations  NODE_migr_in  NODE_migr_out"); NL;
         for (i=0;i<MAXCPUS;i++) {
                 if ((cpuinfop = FIND_CPUP(globals->cpu_hash, i)) &&
                     (schedp = (sched_info_t *)cpuinfop->schedp) &&
@@ -381,7 +381,7 @@ print_percpu_runq_stats()
 
                         printf(" %3d ", i);
 			print_runq_stats(rqinfop, NULL);
-			printf("\n");
+			NL;
 
                         ldom = cpuinfop->ldom;
                         tt+=rqinfop->total_time;
@@ -400,7 +400,8 @@ print_percpu_runq_stats()
                 }
         }
         total_avg = ((tt * 1.0)/tc);
-        printf("\nTOTAL_AVG = %-9.1f usecs runq latency per context switch \n",total_avg);
+	NL;
+        printf("TOTAL_AVG = %-9.1f usecs runq latency per context switch",total_avg); NL;
         /* fprintf (stderr, "\nTOTAL_AVG = %-9.1f usecs runq latency per context switch \n",total_avg); */
 }
 
@@ -551,7 +552,7 @@ print_global_cpu_stats(void *arg1, void *arg2)
 		} 
 		if (red_font) RED_FONT;
 	}
-	
+
 	if (cluster_flag) { 
 		SERVER_URL_FIELD16(serverp);
 	}
@@ -586,8 +587,7 @@ print_global_cpu_stats(void *arg1, void *arg2)
 	*/
 
 	BLACK_FONT;
-	printf("\n");
-	TEXT("\n");
+	NL;
 }
 
 void
@@ -604,15 +604,13 @@ print_percpu_stats(uint64 *warnflagp)
 	gstatp = &gschedp->sched_stats;
   	total_time = gstatp->T_total_time;
 
-	TEXT("\n");
 	if (!kparse_flag) { 
-	/* if (1) { */
             BOLD ("%scpu node          Total          sys         user         idle", tab);
 	    if (gstatp->T_irq_time) BOLD ("  hardirq_sys hardirq_user hardirq_idle  softirq_sys softirq_user softirq_idle");
 	    if (STEAL_ON) BOLD ("    stealbusy    stealidle");
 	    if (msr_flag) BOLD ("  LLC_hit%%    CPI   Avg_MHz  SMI_cnt");
 		/* if (msr_flag) BOLD ("        MIPS"); */
-	    printf("\n");
+	    NL;
 
             for (i=0;i<MAXCPUS;i++) {
                 if (cpuinfop = FIND_CPUP(globals->cpu_hash, i)) {
@@ -654,7 +652,7 @@ print_percpu_stats(uint64 *warnflagp)
 			}
 			*/
 
-			printf ("\n");
+			NL; 
                 }
             }
 
@@ -681,14 +679,13 @@ print_percpu_stats(uint64 *warnflagp)
 						msrptr[REF_CLK_FREQ] ? globals->clk_mhz * (msrptr[ACT_CLK_FREQ]*1.0 / msrptr[REF_CLK_FREQ]) : 0.0,
                      				gstatp->msr_last[SMI_CNT]);
 	    }
-	/*
-	    if (msr_flag) {
-		printf ("   %9.2f",  (msrptr[RET_INSTR]/1000000)/globals->total_secs);
-	    }
-	*/
+	    /*
+	    	if (msr_flag) {
+		    printf ("   %9.2f",  (msrptr[RET_INSTR]/1000000)/globals->total_secs);
+	    	}
+	    */
 
-	    printf ("\n\n");
-	    TEXT("\n");
+	    NL; NLt; 
 	}
 
 	BOLD("cpu node     Total Busy          sys          usr         idle");
@@ -696,7 +693,7 @@ print_percpu_stats(uint64 *warnflagp)
 	if (STEAL_ON) BOLD ("    stealbusy    stealidle");
 	if (msr_flag) BOLD ("  LLC_hit%%    CPI   Avg_MHz  SMI_cnt");
 	/* if (msr_flag) BOLD ("        MIPS"); */
-	printf("\n");
+	NL;
 	
         for (i=0;i<MAXCPUS;i++) {
                 if (cpuinfop = FIND_CPUP(globals->cpu_hash, i)) {
@@ -748,7 +745,7 @@ print_percpu_stats(uint64 *warnflagp)
 			*/
 
 			BLACK_FONT;
-			printf ("\n");
+			NL;
                 }
         }
 
@@ -783,8 +780,7 @@ print_percpu_stats(uint64 *warnflagp)
 	}
 	*/
 
-	printf("\n");
-	TEXT("\n");
+	NL;
         return ;
 }
 
@@ -824,9 +820,8 @@ print_HT_report()
         cpu_info_t *cpu1infop, *cpu2infop;
         uint64 HT_total_time, total_double_idle=0, total_lcpu1_busy=0, total_lcpu2_busy=0, total_double_busy=0;
 
-	TEXT("\n");
 	if (!kparse_flag) {
-            BOLD ("%s     PCPU     double idle   lcpu1 busy   lcpu2 busy  double busy\n", tab);
+            BOLD ("%s     PCPU     double idle   lcpu1 busy   lcpu2 busy  double busy", tab); NL;
             for (i = 0; i < MAXCPUS; i++) {
                 pcpuinfop = FIND_PCPUP(globals->pcpu_hash, i);
                 if (pcpuinfop) {
@@ -835,18 +830,19 @@ print_HT_report()
                         cpu1infop = FIND_CPUP(globals->cpu_hash, lcpu1);
                         cpu2infop = FIND_CPUP(globals->cpu_hash, lcpu2);
 
-                        printf ("%s  [%3d %3d]: %12.6f %12.6f %12.6f %12.6f\n", tab,
+                        printf ("%s  [%3d %3d]: %12.6f %12.6f %12.6f %12.6f", tab,
                                 lcpu1, lcpu2,
                                 SECS(pcpuinfop->idle_time),
                                 SECS(cpu1infop->lcpu_busy),
                                 SECS(cpu2infop->lcpu_busy),
                                 SECS(pcpuinfop->busy_time));
+			NL;
                 }
             }
+	    NL;
 	}
 
-	TEXT("\n");
-        BOLD("%s     PCPU     double idle   lcpu1 busy   lcpu2 busy  double busy\n", tab);
+        BOLD("%s     PCPU     double idle   lcpu1 busy   lcpu2 busy  double busy", tab); NL;
         for (i = 0; i < MAXCPUS; i++) {
                 pcpuinfop = FIND_PCPUP(globals->pcpu_hash, i);
                 if (pcpuinfop) {
@@ -863,21 +859,22 @@ print_HT_report()
 				pcpuinfop->idle_time = globals->total_secs;
 			}
 
-                        printf ("%s  [%3d %3d]: %11.1f%% %11.1f%% %11.1f%% %11.1f%%\n", tab,
+                        printf ("%s  [%3d %3d]: %11.1f%% %11.1f%% %11.1f%% %11.1f%%", tab,
                                 pcpuinfop->lcpu1, pcpuinfop->lcpu2,
                                 (pcpuinfop->idle_time * 100.0) / HT_total_time,
                                 (cpu1infop->lcpu_busy * 100.0) / HT_total_time,
                                 (cpu2infop->lcpu_busy * 100.0) / HT_total_time,
                                 (pcpuinfop->busy_time * 100.0) / HT_total_time);
+			NL;
                 }
         }
 
-        BOLD ("%s  Total      %11.1f%% %11.1f%% %11.1f%% %11.1f%%\n", tab,
+        BOLD ("%s  Total      %11.1f%% %11.1f%% %11.1f%% %11.1f%%", tab,
                 globals->ht_total_time ? (globals->ht_double_idle * 100.0) / globals->ht_total_time : 0,
                 globals->ht_total_time ? (globals->ht_lcpu1_busy * 100.0) / globals->ht_total_time : 0,
                 globals->ht_total_time ? (globals->ht_lcpu2_busy * 100.0) / globals->ht_total_time : 0,
                 globals->ht_total_time ? (globals->ht_double_busy * 100.0) / globals->ht_total_time : 0);
-	TEXT("\n");
+	NL;
 }
 
 void
@@ -888,9 +885,10 @@ print_HT_DBDI_histogram()
 	cpu_info_t *cpuinfop;
         uint64 HT_total_time;
 
-        printf("\n%sSystem-Wide Double-Busy Double-Idle CPU Time Histogram\n", tab);
-        printf("%sIdle time in Usecs\n", tab);
-        printf("%s     PCPU        <10    <20    <50    <100   <250   <500   <750  <1000  <1250  <1500  <2000  <3000  <5000 <10000 <20000 >20000\n", tab);
+	NL;
+        printf("%sSystem-Wide Double-Busy Double-Idle CPU Time Histogram", tab); NL;
+        printf("%sIdle time in Usecs", tab); NL;
+        printf("%s     PCPU        <10    <20    <50    <100   <250   <500   <750  <1000  <1250  <1500  <2000  <3000  <5000 <10000 <20000 >20000", tab); NL;
         for (i = 0; i < MAXCPUS; i++) {
                 pcpuinfop = FIND_PCPUP(globals->pcpu_hash, i);
                 if (pcpuinfop) {
@@ -898,12 +896,13 @@ print_HT_DBDI_histogram()
                         for (j = 0; j < IDLE_TIME_NBUCKETS; j++) {
                                 printf(" %6lld", pcpuinfop->sys_DBDI_hist[j]);
                         }
-                        printf ("\n");
+			NL;
                 }
         }
 
-        printf("\n%sLocality-Wide Double-Busy Double-Idle CPU Time Histogram\n", tab);
-        printf("%sIdle time in Usecs\n", tab);
+	NL;
+        printf("%sLocality-Wide Double-Busy Double-Idle CPU Time Histogram\n", tab); NL;
+        printf("%sIdle time in Usecs", tab); NL;
         printf("%s     PCPU  NODE      <10    <20    <50    <100   <250   <500   <750  <1000  <1250  <1500  <2000  <3000  <5000 <10000 <20000 >20000\n", tab);
         for (i = 0; i < MAXCPUS; i++) {
                 pcpuinfop = FIND_PCPUP(globals->pcpu_hash, i);
@@ -913,7 +912,7 @@ print_HT_DBDI_histogram()
                         for (j = 0; j < IDLE_TIME_NBUCKETS; j++) {
                                 printf(" %6lld", pcpuinfop->ldom_DBDI_hist[j]);
                         }
-                        printf ("\n");
+                        NL;
                 }
         }
 }
@@ -1287,7 +1286,7 @@ print_wakeup_pids(void *arg1, void *arg2)
         if (pidp->thread_cmd) printf ("  (%s)", pidp->thread_cmd);
 	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
         if (cluster_flag) { SPACE; SERVER_URL_FIELD_BRACKETS(globals) }
-        printf ("\n");
+	NL;
 
         return 0;
 }
@@ -1403,7 +1402,7 @@ print_slp_info(void *arg1, void *arg2)
 	if (idx > globals->nsyms-1) idx = UNKNOWN_SYMIDX;
 
 	if (gschedp && statsp == &gschedp->sched_stats) {
-            pid_printf(pidfile, "%s%8d %6.2f%% %10.4f %6.2f%% %10.3f %10.3f %s\n", tab, 
+            pid_printf(pidfile, "%s%8d %6.2f%% %10.4f %6.2f%% %10.3f %10.3f %s", tab, 
                     slpinfop->count,
                     (slpinfop->count * 100.0) / statsp->C_sleep_cnt,
                     SECS(slpinfop->sleep_time),
@@ -1411,8 +1410,9 @@ print_slp_info(void *arg1, void *arg2)
                     MSECS(slpinfop->sleep_time / slpinfop->count),
                     MSECS(slpinfop->max_time),
 		    idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr);
+	    PNL;
 	} else if (statsp != NULL) {
-            pid_printf(pidfile, "%s%8d %6.2f%% %10.4f %6.2f%% %9.2f%% %10.3f %10.3f  %s\n", tab, 
+            pid_printf(pidfile, "%s%8d %6.2f%% %10.4f %6.2f%% %9.2f%% %10.3f %10.3f  %s", tab, 
                     slpinfop->count,
                     (slpinfop->count * 100.0) / statsp->C_sleep_cnt,
                     SECS(slpinfop->sleep_time),
@@ -1421,21 +1421,23 @@ print_slp_info(void *arg1, void *arg2)
                     MSECS(slpinfop->sleep_time / slpinfop->count),
                     MSECS(slpinfop->max_time),
 		    idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr);
+	    PNL;
          } else {
-             pid_printf(pidfile, "%s      Sleep Func    %6d          %11.6f %10.6f %10.6f  %s\n", tab,
+             pid_printf(pidfile, "%s      Sleep Func    %6d          %11.6f %10.6f %10.6f  %s", tab,
                     slpinfop->count,
                     SECS(slpinfop->sleep_time),
                     SECS(slpinfop->sleep_time / slpinfop->count),
                     SECS(slpinfop->max_time),
 		    idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr);
+	    PNL;
 
-                    if (IS_LIKI && slpinfop->scd_wpid_hash) {
-                        pid_printf(pidfile, "%s       Waker PID  \n",tab);
-                        foreach_hash_entry_l((void **)slpinfop->scd_wpid_hash,
-                                                WPID_HSIZE,
-                                                print_scd_slp_info,
-                                                slp_scd_sort_by_time, 0, pidfile);
-                    }
+            if (IS_LIKI && slpinfop->scd_wpid_hash) {
+                pid_printf(pidfile, "%s       Waker PID  ",tab); PNL;
+                foreach_hash_entry_l((void **)slpinfop->scd_wpid_hash,
+                                        WPID_HSIZE,
+                                        print_scd_slp_info,
+                                        slp_scd_sort_by_time, 0, pidfile);
+            }
 
         }
 
@@ -1582,7 +1584,7 @@ print_stktrc_info(void *arg1, void *arg2)
                 }
         }
 	BLACK_FONT;
-        pid_printf(pidfile, "\n");
+        PNL;
         return 0;
 
 }
@@ -1603,12 +1605,14 @@ sleep_report(void *arg1, void *arg2, int (*sort_func)(const void *, const void *
 
         pid_printf (pidfile, "%sKernel Functions calling sleep()", tab);
 	if (nsym && (nsym != 0x7fffffff)) pid_printf (pidfile, " - Top %d Functions", nsym);
-	pid_printf (pidfile, "\n");
+	PNL;
 
 	if (globals->schedp == schedp) {
-		pid_printf (pidfile, "%s   Count     Pct    SlpTime    Slp%%   Msec/Slp   MaxMsecs  Func\n", tab);
+		pid_printf (pidfile, "%s   Count     Pct    SlpTime    Slp%%   Msec/Slp   MaxMsecs  Func", tab);
+		PNL;
 	} else { 
-		pid_printf (pidfile, "%s   Count     Pct    SlpTime    Slp%% TotalTime%%   Msec/Slp   MaxMsecs  Func\n", tab);
+		pid_printf (pidfile, "%s   Count     Pct    SlpTime    Slp%% TotalTime%%   Msec/Slp   MaxMsecs  Func", tab); 
+		PNL;
 	}	
 	vararg.arg1 = pidfile;
 	vararg.arg2 = statsp;
@@ -2307,8 +2311,9 @@ print_runq_histogram(sched_info_t *schedp, FILE *pidfile)
         if (schedp->rqh == NULL)
                 return;
 
-        pid_printf(pidfile, "\n    runq latency in Usecs\n");
-        pid_printf(pidfile, "    cpu    <5     <10    <20    <50    <100   <500   <1000  <2000  <10000 <20000 >20000\n");
+	PNL;
+        pid_printf(pidfile, "    runq latency in Usecs"); PNL;
+        pid_printf(pidfile, "    cpu    <5     <10    <20    <50    <100   <500   <1000  <2000  <10000 <20000 >20000"); PNL;
 
         for (i=0;i<MAXCPUS;i++) {
                 rqinfop = (runq_info_t *)find_entry((lle_t **)schedp->rqh, i, CPU_HASH(i));
@@ -2320,10 +2325,12 @@ print_runq_histogram(sched_info_t *schedp, FILE *pidfile)
                 for (j = 0; j < RUNQ_NBUCKETS; j++) {
                         pid_printf(pidfile, " %-6d", rqinfop->rqhist[j]);
                 }
-                pid_printf (pidfile, "\n");
+                PNL;
 
         }
-        pid_printf(pidfile, "\n    runq latency in Usecs\n    cpu   Avg.      Max       Total_time  Total_cnt  Migrations  NODE_migr_in  NODE_migr_out\n");
+	PNL;
+        pid_printf(pidfile, "    runq latency in Usecs"); PNL; 
+        pid_printf(pidfile, "    cpu   Avg.      Max       Total_time  Total_cnt  Migrations  NODE_migr_in  NODE_migr_out"); PNL;
 
         for (i=0;i<MAXCPUS;i++) {
                 rqinfop = (runq_info_t *)find_entry((lle_t **)schedp->rqh, i, CPU_HASH(i));
@@ -2335,7 +2342,7 @@ print_runq_histogram(sched_info_t *schedp, FILE *pidfile)
                 else
                         continue;
 
-                pid_printf(pidfile, "    %-3d   %-9d %-9lld %-11lld %-10d %-11d %-13d %-14d\n",
+                pid_printf(pidfile, "    %-3d   %-9d %-9lld %-11lld %-10d %-11d %-13d %-14d",
                                 i,
                                 avg,
                                 rqinfop->max_time,
@@ -2344,6 +2351,7 @@ print_runq_histogram(sched_info_t *schedp, FILE *pidfile)
                                 rqinfop->migrations,
                                 rqinfop->ldom_migrations_in,
                                 rqinfop->ldom_migrations_out);
+		PNL;
 
                 if (is_alive) bzero((char *)rqinfop+sizeof(lle_t), sizeof(runq_info_t) - sizeof(lle_t));
 	}
@@ -2580,12 +2588,11 @@ print_cstate_stats(uint64 *warnflagp)
 	uint64		cstate_total_time=0;
 	int warn_cnt = 0;
 
-	TEXT("\n");
 	BOLD("cpu node    Events");
 	for (j=1; j<=max_cstate;j++) {
 		BOLD("   Cstate%d", j);
 	}
-	BOLD ("  freq_changes    freq_hi   freq_low\n");
+	BOLD ("  freq_changes    freq_hi   freq_low"); NL;
 
 	for (i=0;i<MAXCPUS;i++) {
 		if (cpuinfop = FIND_CPUP(globals->cpu_hash, i)) {
@@ -2624,7 +2631,7 @@ print_cstate_stats(uint64 *warnflagp)
 					}
 				}
 #endif
-				printf ("\n");
+				NL;
 			}
 		}
 	}
@@ -2648,8 +2655,9 @@ print_hardirq_entry(void *arg1, void *arg2)
 	} else {
 		printf ("%3d %-16s", irq, " ");
 	}
-	printf (" %8d %12.6f %12.6f\n", irqentryp->count, SECS(irqentryp->total_time), 
+	printf (" %8d %12.6f %12.6f", irqentryp->count, SECS(irqentryp->total_time), 
 					(SECS(irqentryp->total_time) / irqentryp->count)*1000000.0);
+	NL;
 }
 
 int 
@@ -2674,10 +2682,11 @@ print_softirq_entry(void *arg1, void *arg2)
 		} 
 	}
 
-	printf ("%3d %-16s %8d %12.6f %12.3f\n", irq, softirq_name[irq], 
+	printf ("%3d %-16s %8d %12.6f %12.3f", irq, softirq_name[irq], 
 					irqentryp->count,
 					SECS(irqentryp->total_time),
 					(SECS(irqentryp->total_time) / irqentryp->count)*1000000.0);
+	NL;
 
 	BLACK_FONT;
 
@@ -2696,14 +2705,14 @@ print_percpu_irq_stats(int irqtype)
 		if (cpuinfop = FIND_CPUP(globals->cpu_hash, i)) {
 			irqinfop = (irqtype == HARDIRQ) ? cpuinfop->irqp : cpuinfop->softirqp;
 			if (irqinfop) {
-				TEXT("\n");
 				CAPTION_GREY;
-				BOLD ("CPU %3d      Events: %8d  ElpTime: %9.6f\n", i, irqinfop->count, SECS(irqinfop->total_time));
+				BOLD ("CPU %3d      Events: %8d  ElpTime: %9.6f", i, irqinfop->count, SECS(irqinfop->total_time)); 
 				_CAPTION;
-				BOLD ("IRQ Name                Count      ElpTime    Avg(usec)\n");
+				BOLD ("IRQ Name                Count      ElpTime    Avg(usec)"); NL;
 				foreach_hash_entry((void **)irqinfop->irq_entry_hash, IRQ_HSIZE,
 							irqtype == HARDIRQ ? print_hardirq_entry : print_softirq_entry,
 				 			irq_sort_by_time, 0, NULL);
+				NLt;
 			}
 		}
 	}
@@ -2718,10 +2727,10 @@ print_global_hardirq_stats(void *arg1)
 
 	if (irqinfop == NULL) return;
 
-	BOLD ("IRQ Name                Count      ElpTime    Avg(usec)\n");
+	BOLD ("IRQ Name                Count      ElpTime    Avg(usec)"); NL;
 	foreach_hash_entry((void **)irqinfop->irq_entry_hash, IRQ_HSIZE,
 					print_hardirq_entry, irq_sort_by_time, 0, NULL);
-	printf ("    Total:           %8d %12.6f\n", irqinfop->count, SECS(irqinfop->total_time));
+	printf ("    Total:           %8d %12.6f", irqinfop->count, SECS(irqinfop->total_time)); NL;
 	return;
 }
 
@@ -2733,10 +2742,10 @@ print_global_softirq_stats(void *arg1)
 
 	if (irqinfop == NULL) return;
 
-	BOLD ("IRQ Name                Count      ElpTime    Avg(usec)\n");
+	BOLD ("IRQ Name                Count      ElpTime    Avg(usec)"); NL;
 	foreach_hash_entry((void **)irqinfop->irq_entry_hash, IRQ_HSIZE,
 					print_softirq_entry, irq_sort_by_time, 0, warnflagp);
-	printf ("    Total:           %8d %12.6f\n", irqinfop->count, SECS(irqinfop->total_time));
+	printf ("    Total:           %8d %12.6f", irqinfop->count, SECS(irqinfop->total_time)); NL;
 	return;
 }
 
@@ -2774,7 +2783,7 @@ print_pid_runtime_summary(void *arg1, void *arg2)
 
         if (cluster_flag && dockfile == NULL) { SPACE; SERVER_URL_FIELD_BRACKETS(globals) }
 
-        dock_printf ("\n");
+	DNL;
 
         return 0;
 
@@ -2807,7 +2816,7 @@ print_pid_stealtime_summary(void *arg1, void *arg2)
 	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
         if (cluster_flag) { SPACE; SERVER_URL_FIELD_BRACKETS(globals) }
 
-        printf ("\n");
+        NL;
 
         return 0;
 
@@ -2816,7 +2825,7 @@ print_pid_stealtime_summary(void *arg1, void *arg2)
 int 
 print_systime_pids(uint64 *warnflagp)
 {
-	BOLD ("    PID       RunTime      SysTime     UserTime     RunqTime    SleepTime  Command\n");
+	BOLD ("    PID       RunTime      SysTime     UserTime     RunqTime    SleepTime  Command"); NL;
 	foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_pid_runtime_summary,
                            (int (*)()) pid_sort_by_systime,
@@ -2826,7 +2835,7 @@ print_systime_pids(uint64 *warnflagp)
 int
 print_runtime_pids(uint64 *warnflagp)
 {
-	BOLD ("    PID       RunTime      SysTime     UserTime     RunqTime    SleepTime  Command\n");
+	BOLD ("    PID       RunTime      SysTime     UserTime     RunqTime    SleepTime  Command"); NL;
 	foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_pid_runtime_summary,
                            (int (*)()) pid_sort_by_runtime,
@@ -2836,7 +2845,7 @@ print_runtime_pids(uint64 *warnflagp)
 int 
 print_runq_pids(uint64 *warnflagp)
 {
-	BOLD ("    PID       RunTime      SysTime     UserTime     RunqTime    SleepTime  Command\n");
+	BOLD ("    PID       RunTime      SysTime     UserTime     RunqTime    SleepTime  Command"); NL;
 	foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_pid_runtime_summary,
                            (int (*)()) pid_sort_by_runqtime,
@@ -2846,11 +2855,12 @@ print_runq_pids(uint64 *warnflagp)
 int 
 print_stealtime_pids(uint64 *warnflagp)
 {
-	BOLD ("    PID       RunTime      SysTime     UserTime     RunqTime    StealTime Command\n");
+	BOLD ("    PID       RunTime      SysTime     UserTime     RunqTime    StealTime Command"); NL;
 	foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_pid_stealtime_summary,
                            (int (*)()) pid_sort_by_stealtime,
                            npid, warnflagp);
+	NLt;
 }
 
 void

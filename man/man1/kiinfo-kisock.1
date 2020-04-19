@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad l
-.TH kiinfo-kisock 1 "6.0 - November 25, 2019" version "6.0"
+.TH kiinfo-kisock 1 "6.1 - April 20, 2020" version "6.1"
 .SH NAME
 kiinfo  -  LinuxKI data collection and analysis engine
 
@@ -28,24 +28,14 @@ Provide help information for kisock flags
 Limit reports sections to Top <nsock> sockets
 .RE
 
-.B scdetail
-.RS
-Produce additional detail information on each system call
-.RE
-
-.B sysignore=<file>
-.RS
-Specify file of system calls to ignore when tracing (live tracing only)
-.RE
-
-.B csv
-.RS
-Create CSV report kisock.*.csv
-.RE
-
 .B kitrace
 .RS
 Include formatted ASCII trace records prior to the standard report
+.RE
+
+.B nosysenter
+.RS
+Do not print syscall entry records when using kitrace flag
 .RE
 
 .B abstime
@@ -58,20 +48,30 @@ Print absolute time (seconds since boot) for each record
 Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
 .RE
 
-.B nosysenter
+.B epochtime
 .RS
-Do not print syscall entry records when using kitrace flag
+Print time in seconds since the epoch (Jan 1, 1970)
+.RE
+
+.B sysignore=<filename>
+.RS
+Do not trace system calls listed in the <filename>.  This can reduce trace data by eliminating frequently called system calls, such as getrusage(), ctime(), etc.
+.RE
+
+.B csv
+.RS
+Create CSV report kisock.*.csv
 .RE
 
 .SH EXAMPLES
 
 1) Create a File Report and reporting on top 5 sockets: 
 
-.B $ kiinfo -kisock nsock=5,scdetail -ts 0204_0643
+.B $ kiinfo -kisock nsock=5 -ts 0204_0643
 
 .SH SAMPLE OUTPUT
 
- Command line: kiinfo -kisock nsock=5,scdetail -ts 0204_0643
+ Command line: kiinfo -kisock nsock=5 -ts 0204_0643
 
  kiinfo (5.3)
 

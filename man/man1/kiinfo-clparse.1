@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad l
-.TH kiinfo-clparse 1 "6.0 - November 25, 2019" version "6.0"
+.TH kiinfo-clparse 1 "6.1 - April 20, 2020" version "6.1"
 .SH NAME
 kiinfo  -  LinuxKI data collection and analysis engine
 
@@ -25,7 +25,7 @@ See kiinfo(1).
 Provide help information for clparse flags
 .RE
 
-.B top
+.B top=<num>
 .RS
 Only list the top <num> items in each section.  Default is 20.
 .RE
@@ -33,6 +33,11 @@ Only list the top <num> items in each section.  Default is 20.
 .B nooracle
 .RS
 Do not print the Oracle section of the clparse report.
+.RE
+
+.B nofutex
+.RS
+Do not collect futex statistics
 .RE
 
 .B mangle

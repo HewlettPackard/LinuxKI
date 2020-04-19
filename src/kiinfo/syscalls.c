@@ -1709,8 +1709,9 @@ print_sys_enter_rec(void *a, void *p)
         PRINT_SYSCALL(pidp, rec_ptr->syscallno);
         printf ("%c[%d]%centry", fsep, rec_ptr->syscallno, fsep);
         print_syscall_args(pidp, rec_ptr->syscallno, &rec_ptr->args[0]);
-        if (rec_ptr->reclen > sizeof(syscall_enter_t) && pidp->elf == ELF64) {
+        if (rec_ptr->reclen > sizeof(syscall_enter_t)) {
                 /* Need to code for poll() and other arguments, only works for 64 bit processes */
+		pidp->elf = ELF64;
                 print_varargs_enter(rec_ptr);
         }
         printf ("\n");
@@ -1742,8 +1743,9 @@ print_sys_exit_rec(void *a, void *p)
 			printf ("%csyscallbeg=%12.06f", fsep, SECS(syscallbegtm));
                 print_syscall_args(pidp, rec_ptr->syscallno, &pidp->last_syscall_args[0]);
                 /* printf (" reclen: %d, size: %d, elf: %d", rec_ptr->reclen, sizeof(syscall_exit_t), pidp->elf);  */
-                if (rec_ptr->reclen > sizeof(syscall_exit_t) && pidp->elf == ELF64) {
+                if (rec_ptr->reclen > sizeof(syscall_exit_t)) {
                         /* Need to code for poll() and other arguments, only works for 64 bit processes */
+			pidp->elf = ELF64;
                         print_varargs_exit(rec_ptr);
                 }
         } else {

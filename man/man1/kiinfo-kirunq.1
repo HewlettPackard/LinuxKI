@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad l
-.TH kiinfo-kirunq 1 "6.0 - November 25, 2019" version "6.0"
+.TH kiinfo-kirunq 1 "6.1 - April 20, 2020" version "6.1"
 .SH NAME
 kiinfo  -  LinuxKI data collection and analysis engine
 
@@ -28,6 +28,11 @@ Provide help information for kirunq flags
 Report Top PIDs using CPU, System CPU, and waiting on  the CPU RunQ (default 10)
 .RE
 
+.B msr
+.RS
+Collect adanced CPU statistics such as LLC Hit%, CPI, average CPU frequency, and SMI count
+.RE
+
 .B rqpid
 .RS
 Pid to monitor for runq delay detailed reporting (requires rqdetail be set)
@@ -36,6 +41,41 @@ Pid to monitor for runq delay detailed reporting (requires rqdetail be set)
 .B rqwait=<usecs>
 .RS
 Runq wait in usecs that triggers delay warning one-liner 
+.RE
+
+.B kitrace
+.RS
+Include formatted ASCII trace records prior to the standard report
+.RE
+
+.B abstime
+.RS
+Print absolute time (seconds since boot) for each record
+.RE
+
+.B fmttime
+.RS
+Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
+.RE
+
+.B epochtime
+.RS
+Print time in seconds since the epoch (Jan 1, 1970)
+.RE
+
+.B subsys=<subsys>
+.RS
+Enable tracing only for certain subsystems.  Valid subsystems include: power, scsi, block, sched, syscalls, irq.
+.RE
+
+.B edus=<filename>
+.RS
+Specify output of "db2pd -edus" to get DB2 thread names.
+.RE
+
+.B jstack=<filename>
+.RS
+Jstack output file to use (default jstack.<timestamp>)
 .RE
 
 .B events=[default | all | <kitool> | event]
@@ -56,34 +96,9 @@ Trace events to be traced
 \fB<event>\fR - Trace a specific event.
 .RE
 
-.B subsys=<subsys>
-.RS
-Enable tracing only for certain subsystems.  Valid subsystems include: power, scsi, block, sched, syscalls, irq.
-.RE
-
-.B edus=<edus_file>
-.RS
-Specify output of "db2pd -edus" to get DB2 thread names.
-.RE
-
 .B csv
 .RS
 Create CSV report kidsk.*.csv
-.RE
-
-.B kitrace
-.RS
-Include formatted ASCII trace records prior to the standard report
-.RE
-
-.B abstime
-.RS
-Print absolute time (seconds since boot) for each record
-.RE
-
-.B fmttime
-.RS
-Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
 .RE
 
 .SH EXAMPLES

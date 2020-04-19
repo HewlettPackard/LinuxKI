@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad l
-.TH kiinfo-kiprof 1 "6.0 - November 25, 2019" version "6.0"
+.TH kiinfo-kiprof 1 "6.1 - April 20, 2020" version "6.1"
 .SH NAME
 kiinfo  -  LinuxKI data collection and analysis engine
 
@@ -81,14 +81,24 @@ Print absolute time (seconds since boot) for each record
 Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
 .RE
 
+.B epochtime
+.RS
+Print time in seconds since the epoch (Jan 1, 1970)
+.RE
+
 .B objfile=<filename>
 .RS
 For runki data collections, use objfile binary to perform symbol table lookups 
 .RE
 
-.B edus=<edus_file>
+.B edus=<filename>
 .RS
 Specify output of "db2pd -edus" to get DB2 thread names.
+.RE
+
+.B jstack=<filename>
+.RS
+Jstack output file to use (default jstack.<timestamp>)
 .RE
 
 .SH EXAMPLES

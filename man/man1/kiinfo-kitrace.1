@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad l
-.TH kiinfo-kitrace 1 "6.0 - November 25, 2019" version "6.0"
+.TH kiinfo-kitrace 1 "6.1 - April 20, 2020" version "6.1"
 .SH NAME
 kiinfo  -  LinuxKI data collection and analysis engine
 
@@ -53,16 +53,6 @@ Do not print system call entry record
 Do not format system call arguments
 .RE
 
-.B printcmd
-.RS
-Print command with trace record (ftrace only)
-.RE
-
-.B objfile=<filename>
-.RS
-For runki data collections, use objfile binary to perform symbol table lookups 
-.RE
-
 .B nomapper
 .RS
 Do not print trace records for mapper devices (multipath, lvm)
@@ -71,6 +61,25 @@ Do not print trace records for mapper devices (multipath, lvm)
 .B nomarker
 .RS
 Do not print trace records for mapper devices (multipath, lvm)
+.RE
+
+.B mangle
+.RS
+Leave C++ function names mangled
+
+.B msr
+.RS
+Collect adanced CPU statistics such as LLC Hit%, CPI, average CPU frequency, and SMI count
+.RE
+
+.B printcmd
+.RS
+Print command with trace record (ftrace only)
+.RE
+
+.B seqcnt
+.RS
+Print seqcnt in trace records (LiKI on only)
 .RE
 
 .B abstime
@@ -83,9 +92,9 @@ Print absolute time (seconds since boot) for each record
 Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
 .RE
 
-.B seqcnt
+.B epochtime
 .RS
-Print seqcnt in trace records (LiKI on only)
+Print time in seconds since the epoch (Jan 1, 1970)
 .RE
 
 .B events=[default | all | <kitool> | event]
@@ -111,19 +120,24 @@ Trace events to be traced
 Enable tracing only for certain subsystems.  Valid subsystems include: power, scsi, block, sched, syscalls, irq.
 .RE
 
-.B sysignore=<ignore_filee>
+.B sysignore=<filename>
 .RS
-Do not trace system calls listed in the <ignore_file>. This can reduce trace data by eliminating frequently called system calls, such as getrusage(),gettimeofday(), time(), etc...
+Do not trace system calls listed in the <filename>.  This can reduce trace data by eliminating frequently called system calls, such as getrusage(), ctime(), etc.
 .RE
 
-.B edus=<edus_file>
+.B objfile=<filename>
+.RS
+For runki data collections, use objfile binary to perform symbol table lookups 
+.RE
+
+.B edus=<filename>
 .RS
 Specify output of "db2pd -edus" to get DB2 thread names.
 .RE
 
-.B msr
+.B csv
 .RS
-Collect adanced CPU statistics such as LLC Hit%, CPI, average CPU frequency, and SMI count
+Create CSV report ki.*.csv
 .RE
 
 .SH EXAMPLES

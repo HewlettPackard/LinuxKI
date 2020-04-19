@@ -1047,7 +1047,7 @@ parse_jstack()
 	char *nidptr, *thrptr, *qptr, *cptr;
 	
 	if (jstackfname) {
-		sprintf(fname, "%s", edusfname);
+		sprintf(fname, "%s", jstackfname);
 	} else {
 		sprintf(fname, "jstack.%s", timestamp);
 	}
@@ -1894,7 +1894,7 @@ parse_docker_ps()
 	char *strptr;
 	uint64 offset;
 	uint64 id;
-        char name[64];
+        char name[512];
 	docker_info_t *dockerp;
 	int ret;
 
@@ -1938,6 +1938,8 @@ parse_docker_ps()
 	if (is_alive) {
 		unlink(fname);	
 	}
+
+	return;
 }
 
 uint64 get_container_id(char *str) {

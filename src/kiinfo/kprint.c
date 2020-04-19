@@ -89,7 +89,7 @@ print_cmdline()
 
 		if (strstr(input_str, "numa=off")) {
                 	warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_NUMA_OFF, _LNK_0_1_0);
-                	kp_warning(globals->warnings, warn_indx, _LNK_0_1_0); T("\n");
+                	kp_warning(globals->warnings, warn_indx, _LNK_0_1_0); NL;
 		}
 
                 rtnptr = fgets((char *)&input_str, 511, f);
@@ -115,8 +115,8 @@ print_mem_info()
 	}
 	
         if ( (f = fopen(fname,"r")) == NULL) {
-                printf ("Unable to open file %s, errno %d\n", fname,  errno);
-                printf ("Continuing without memory info.\n");
+                fprintf (stderr, "Unable to open file %s, errno %d\n", fname,  errno);
+                fprintf (stderr, "Continuing without memory info.\n");
                 return;
         }
 
@@ -139,10 +139,11 @@ print_mem_info()
                 rtnptr = fgets((char *)&input_str, 127, f);
         }
 
-	printf ("HugePages: %7d  %9d  %9d\n",
+	printf ("HugePages: %7d  %9d  %9d",
 		hp_total, hp_total - hp_free, hp_free);
-	printf ("Hugepagesize : %7d kb\n", hp_pagesize);
-	printf ("AnonHugePages: %7d kb\n", hp_anon_kb);
+	NL;
+	printf ("Hugepagesize : %7d kb", hp_pagesize); NL;
+	printf ("AnonHugePages: %7d kb", hp_anon_kb); NL;
 
 	fclose (f);
 }
@@ -155,28 +156,28 @@ kp_sys_summary ()
 	if (debug) printf ("kp_sys_summary\n");
 	
 	HR;
-	ITALIC_U("basic system info"); printf("\n");
+	ITALIC_U("basic system info"); NL;
 	if (globals->VM_guest) {
-		BOLD("Virtual Machine Guest\n");
+		BOLD("Virtual Machine Guest"); NL;
 	}
-	BOLD("Number of CPUs   : %d\n", globals->ncpu);
-	if (globals->HT_enabled)  BOLD("Number of LCPUs  : %d\n", globals->nlcpu);
-	if (globals->nldom > 0)   BOLD("Number of NODEs  : %d\n", globals->nldom);
-	if (globals->SNC_enabled) BOLD("Sub-NUMA Cluster enabled\n");
+	BOLD("Number of CPUs   : %d", globals->ncpu); NL;
+	if (globals->HT_enabled)  BOLD("Number of LCPUs  : %d", globals->nlcpu); NL;
+	if (globals->nldom > 0)   BOLD("Number of NODEs  : %d", globals->nldom); NL;
+	if (globals->SNC_enabled) BOLD("Sub-NUMA Cluster enabled"); NL;
 
-	T("\n");
+	NL;
 	print_cmdline();
-	T("\n");
+	NL;
 	print_mem_info(); 		
 
-	T("\n");
+	NL;
 	ANM(_LNK_0_2_0);
-	BOLD("Side-Channel Attack (Spectre/Meltdown) Mitigations:\n");
+	BOLD("Side-Channel Attack (Spectre/Meltdown) Mitigations:"); NL;
 	parse_scavuln(1);
 
 	if (globals->scavuln == SCA_MITIGATED) {
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SCA_VULN, _LNK_0_2_0);
-                kp_warning(globals->warnings, warn_indx, _LNK_0_2_0); T("\n");
+                kp_warning(globals->warnings, warn_indx, _LNK_0_2_0); NL;
         }
 }
 
@@ -185,11 +186,11 @@ void kp_toc()
 	hc_info_t *hcinfop = globals->hcinfop;
 	HR;
 	BLUE_TABLE;
-	TEXT("\n");
 	ANM(_LNK_TOC);
 	HEAD3(_MSG_TOC);
 	_TABLE;
 
+	NLt;
  	UL; LI; RED_FONT; T(_MSG_LINK); T(" "); ARFx(SPF(line,"%s%d", _LNK_WARN, 0), _MSG_NEXT_NOTE); BLACK_FONT; _UL; NLt;
 	T(_MSG_LINK_INFO); NLt;
 
@@ -286,7 +287,10 @@ void kp_toc()
 	    LI; ARF(_LNK_4_5, _MSG_4_5); NLt;
 	    LI; ARF(_LNK_4_6, _MSG_4_6); NLt;
 	    LI; ARF(_LNK_4_7, _MSG_4_7); NLt;
-	    LI; ARF(_LNK_4_8, _MSG_4_8); NLt;
+	    if (dskblk_stats) {
+		LI; ARF(_LNK_4_8, _MSG_4_8); NLt;
+	    	LI; ARF(_LNK_4_9, _MSG_4_9); NLt;
+	    }
 	  _UL;
 
 	  LI; ARF(_LNK_5_0, _MSG_5_0); NLt;
@@ -346,17 +350,16 @@ void kp_toc()
 void
 kp_whats_it_doing()			/* Section 1.0 */
 {
-	HR; T("\n");
+	HR;
 	BLUE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_0);
-        HEAD2(_MSG_1_0); T("\n");
+        HEAD2(_MSG_1_0);
         FONT_SIZE(-1);
         ARFx(_LNK_2_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-        /* printf ("%s\n", _MSG_1_0_KEY); */
+	PRE;
 
 	return;
 }
@@ -368,9 +371,8 @@ kp_global_cpu()				/* Section 1.1 */
         int warn_indx;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_1);
-        HEAD3(_MSG_1_1); T("\n");
+        HEAD3(_MSG_1_1);
         FONT_SIZE(-1);
         ARFx(_LNK_1_1_1,"[Next Subsection]");
         ARFx(_LNK_1_0,"---[Prev Section]");
@@ -383,12 +385,12 @@ kp_global_cpu()				/* Section 1.1 */
 	if (gbl_irq_time) BOLD("  hardirq_sys hardirq_user hardirq idle  softirq_sys softirq_user softirq_idle");
 	if (STEAL_ON) BOLD("   stealbusy%%   stealidle%%");
 	if (msr_flag) BOLD ("  LLC_hit%%    CPI   Avg_MHz  SMI_cnt");
-	printf ("\n");
+	NL;
 
 	print_global_cpu_stats(globals, &warnflag);
         if (warnflag & WARNF_CPU_BOTTLENECK) {
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_CPU_BOTTLENECK, _LNK_1_1);
-                kp_warning(globals->warnings, warn_indx, _LNK_1_1); T("\n");
+                kp_warning(globals->warnings, warn_indx, _LNK_1_1); NL;
         }
 
 	return;
@@ -401,7 +403,6 @@ kp_per_cpu_usage()			/* Section 1.1.1 */
         int warn_indx;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_1_1);
         HEAD3(_MSG_1_1_1);
         FONT_SIZE(-1);
@@ -427,7 +428,7 @@ kp_per_cpu_usage()			/* Section 1.1.1 */
 
 	if (warnflag & WARNF_STEALTIME) {
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_STEALTIME, _LNK_1_1_1);
-                kp_warning(globals->warnings, warn_indx, _LNK_1_1_1); T("\n");
+                kp_warning(globals->warnings, warn_indx, _LNK_1_1_1); NL;
         }
 		
 	return;
@@ -440,7 +441,6 @@ kp_per_ldom_usage()			/* Section 1.1.2 */
         int warn_indx;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_1_2);
         HEAD3(_MSG_1_1_2);
         FONT_SIZE(-1);
@@ -467,7 +467,6 @@ void kp_power_report()			/* Section 1.1.3 */
         int warn_indx=0;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_1_3);
         HEAD3(_MSG_1_1_3);
         FONT_SIZE(-1);
@@ -485,7 +484,6 @@ void kp_power_report()			/* Section 1.1.3 */
         ARFx(_LNK_2_0,"[Next Section]"); 
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
-        TEXT("\n");
 
 	if (globals->powerp) {
 		print_cstate_stats(&warnflag);
@@ -493,10 +491,10 @@ void kp_power_report()			/* Section 1.1.3 */
 
 		if (warnflag & WARNF_POWER) {
                 	warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_POWER, _LNK_1_1_3);
-                	kp_warning(globals->warnings, warn_indx, _LNK_1_1_3); T("\n");
+                	kp_warning(globals->warnings, warn_indx, _LNK_1_1_3); NL;
 		}
 	} else { 
-		BOLD("No Power Events Captured\n");
+		BOLD("No Power Events Captured"); NL;
 	}
 }
 
@@ -507,7 +505,6 @@ kp_HT_usage()				/* Section 1.1.4 */
         int warn_indx;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_1_4);
         HEAD3(_MSG_1_1_4);
         FONT_SIZE(-1);
@@ -533,9 +530,8 @@ kp_busy_pids()				/* Section 1.2 */
 {
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_2);
-        HEAD3(_MSG_1_2); T("\n");
+        HEAD3(_MSG_1_2); 
         FONT_SIZE(-1);
         ARFx(_LNK_1_1,"[Prev Subsection]");
         ARFx(_LNK_1_2_1,"[Next Subsection]");
@@ -552,7 +548,6 @@ kp_top_pids_runtime()			/* Section 1.2.1 */
         int warn_indx;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_2_1);
         HEAD3(_MSG_1_2_1);
         FONT_SIZE(-1);
@@ -562,7 +557,6 @@ kp_top_pids_runtime()			/* Section 1.2.1 */
         ARFx(_LNK_2_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
-        TEXT("\n");
 
 	npid=10;
         print_runtime_pids(&warnflag);
@@ -575,7 +569,6 @@ void
 kp_top_pids_systime()			/* Section 1.2.2 */
 {
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_2_2);
         HEAD3(_MSG_1_2_2);
         FONT_SIZE(-1);
@@ -585,7 +578,6 @@ kp_top_pids_systime()			/* Section 1.2.2 */
         ARFx(_LNK_2_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
-        TEXT("\n");
 
 	npid=10;
         print_systime_pids(NULL);
@@ -601,7 +593,6 @@ kp_top_pids_stealtime()			/* Section 1.2.3 */
         int warn_indx;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_2_3);
         HEAD3(_MSG_1_2_3);
         FONT_SIZE(-1);
@@ -610,7 +601,6 @@ kp_top_pids_stealtime()			/* Section 1.2.3 */
         ARFx(_LNK_2_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
-        TEXT("\n");
 
 	npid=10;
         print_stealtime_pids(NULL);
@@ -626,9 +616,8 @@ kp_trace_types()			/* Section 1.3 */
         int warn_indx;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_3);
-        HEAD3(_MSG_1_3); T("\n");
+        HEAD3(_MSG_1_3);
         FONT_SIZE(-1);
         ARFx(_LNK_1_2,"[Prev Subsection]");
         ARFx(_LNK_1_3_1,"[Next Subsection]");
@@ -699,7 +688,7 @@ kp_trc_type (void *arg1, void *arg2)
 
         }
         if ((lineno & 0x1) == 0) _SPAN;
-        T("\n");
+        NL;
 
         lineno++;
 
@@ -714,7 +703,6 @@ kp_global_trace_types()			/* Section 1.3.1 */
 	int		warn_indx;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_3_1);
         HEAD3(_MSG_1_3_1);
         FONT_SIZE(-1);
@@ -725,17 +713,17 @@ kp_global_trace_types()			/* Section 1.3.1 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-        BOLD("Freq     Percent  Trace_type                    64bit    ElapsedT       Max       Ave    Errors\n");
+        BOLD("Freq     Percent  Trace_type                    64bit    ElapsedT       Max       Ave    Errors"); NL;
 
         trctyp_arg.total_recs = globals->total_traces;
         trctyp_arg.warnflag = 0ull;
         foreach_hash_entry((void **)globals->trc_hash, TRC_HASHSZ, kp_trc_type, trc_sort_by_count, 30, &trctyp_arg);
-        printf ("Total Traces %d\n", globals->total_traces);
+        printf ("Total Traces %d", globals->total_traces); NL;
 
 	/* Warn if processes do excessive SEMGET calls */
 	if (trctyp_arg.warnflag & WARNF_SEMGET) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SEMGET, _LNK_1_3_1);
-		kp_warning(globals->warnings, warn_indx, _LNK_1_3_1); T("\n");
+		kp_warning(globals->warnings, warn_indx, _LNK_1_3_1); NL;
 	}
 
 }
@@ -755,7 +743,7 @@ kp_pid_freq(void *arg1, void *arg2)
 	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
 	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
-	printf ("\n");
+	NL;
 
         if ((lineno & 0x1) == 0) _SPAN;
         lineno++;
@@ -770,7 +758,6 @@ kp_top_pid_trace_counts()		/* Section 1.3.2 */
         int warn_indx;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_3_2);
         HEAD3(_MSG_1_3_2);
         FONT_SIZE(-1);
@@ -785,7 +772,7 @@ kp_top_pid_trace_counts()		/* Section 1.3.2 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-        BOLD("PID         Frequency     Command\n");
+        BOLD("PID         Frequency     Command"); NL;
         foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, kp_pid_freq, pid_sort_by_trace_recs, 20, &warnflag);
 
 }
@@ -799,7 +786,6 @@ kp_pid_traces(void *arg1, void *arg2)
         uint64  warnflag = 0;
         int warn_indx;
 
-        TEXT("\n");
         CAPTION_GREY;
         BOLD("Analyzing Pid: ");
         PID_URL_FIELD8(pidp->PID);
@@ -812,8 +798,7 @@ kp_pid_traces(void *arg1, void *arg2)
 	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
         _CAPTION;
 
-        TEXT("\n");
-        BOLD("Freq     Percent  Trace_type                    64bit    ElapsedT       Max       Ave    Errors\n");
+        BOLD("Freq     Percent  Trace_type                    64bit    ElapsedT       Max       Ave    Errors"); NL;
 
         lineno=0;
 
@@ -837,7 +822,6 @@ kp_top_pid_trace_types()		/* Section 1.3.3 */
         int warn_indx;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_3_3);
         HEAD3(_MSG_1_3_3);
         FONT_SIZE(-1);
@@ -853,13 +837,13 @@ kp_top_pid_trace_types()		/* Section 1.3.3 */
 	/* Warn if SAP disp+work processes do excessive SEMGET calls */
 	if (trctyp_arg.warnflag & WARNF_SEMGET) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SEMGET, _LNK_1_3_3);
-		kp_warning(globals->warnings, warn_indx, _LNK_1_3_3); T("\n");
+		kp_warning(globals->warnings, warn_indx, _LNK_1_3_3); NL;
 	}
 
 	/* Warn if oracle processes do excessive poll() calls */
 	if (trctyp_arg.warnflag & WARNF_ORACLE_POLL) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_ORACLE_POLL, _LNK_1_3_3);
-		kp_warning(globals->warnings, warn_indx, _LNK_1_3_3); T("\n");
+		kp_warning(globals->warnings, warn_indx, _LNK_1_3_3); NL;
 	}
 
 
@@ -871,7 +855,6 @@ kp_hardclocks()				/* Section 1.4 */
 	hc_info_t *hcinfop = globals->hcinfop;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_4);
         HEAD3(_MSG_1_4);
         FONT_SIZE(-1);
@@ -892,9 +875,9 @@ kp_hardclocks()				/* Section 1.4 */
         TEXTx("\n");
 
         if (hcinfop && hcinfop->total) {
-        	printf("%s\n", _MSG_1_4_INFO);
+        	printf("%s", _MSG_1_4_INFO); NL;
 	} else {
-		BOLD ("No Hardclock Entries Found\n");
+		BOLD ("No Hardclock Entries Found"); NL;
 	}
 }
 
@@ -904,7 +887,6 @@ kp_cpustates()				/* Section 1.4.1 */
         hc_info_t *hcinfop;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_4_1);
         HEAD3(_MSG_1_4_1);
         FONT_SIZE(-1);
@@ -914,16 +896,15 @@ kp_cpustates()				/* Section 1.4.1 */
         ARFx(_LNK_2_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
-        TEXT("\n");
 
         hcinfop = globals->hcinfop;
 
 	if (hcinfop && hcinfop->total && hcinfop->pc_hash) {
-		BOLD ("  Count   USER%%    SYS%%   INTR%%   IDLE%%\n");
+		BOLD ("  Count   USER%%    SYS%%   INTR%%   IDLE%%"); NL;
 		prof_print_summary(hcinfop);
-		printf ("\n");
+		NL;
 	} else {
-                BOLD("No Hardclock Entries Found\n");
+                BOLD("No Hardclock Entries Found"); NL;
         }
 }
 
@@ -937,7 +918,6 @@ kp_hc_bycpu()		   		/* Section 1.4.2 */
         uint64 total;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_4_2);
         HEAD3(_MSG_1_4_2);
         FONT_SIZE(-1);
@@ -947,15 +927,14 @@ kp_hc_bycpu()		   		/* Section 1.4.2 */
         ARFx(_LNK_2_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
-        TEXT("\n");
 
         hcinfop = globals->hcinfop;
 	if (hcinfop && hcinfop->total && hcinfop->pc_hash) {
 		lineno=0;
-		BOLD ("    CPU   Count   USER%%    SYS%%   INTR%%   IDLE%%\n");
+		BOLD ("    CPU   Count   USER%%    SYS%%   INTR%%   IDLE%%"); NL;
         	prof_print_percpu_summary(hcinfop);
 	} else {
-                BOLD("No Hardclock Entries Found\n");
+                BOLD("No Hardclock Entries Found"); NL;
         }
 }
 
@@ -968,7 +947,6 @@ kp_hc_kernfuncs()			/* Section 1.4.3 */
 	uint64 warnflag = 0;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_4_3);
         HEAD3(_MSG_1_4_3);
         FONT_SIZE(-1);
@@ -982,7 +960,6 @@ kp_hc_kernfuncs()			/* Section 1.4.3 */
         ARFx(_LNK_2_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
-        TEXT("\n");
 
         hcinfop = globals->hcinfop;
         print_pc_args.hcinfop = hcinfop;
@@ -990,21 +967,21 @@ kp_hc_kernfuncs()			/* Section 1.4.3 */
 	print_pc_args.pidfile = NULL;
 
 	if (hcinfop && hcinfop->total && hcinfop->pc_hash) {
-        	BOLD("   Count     Pct  Function \n");
+        	BOLD("   Count     Pct  Function "); NL;
 		lineno=0;
         	foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc2, pc_sort_by_count, 40, (void *)&print_pc_args);
 	} else {
-                BOLD("No Hardclock Entries Found\n");
+                BOLD("No Hardclock Entries Found"); NL;
         }
 
 	if ((*print_pc_args.warnflagp) & WARNF_SEMLOCK) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SEMLOCK, _LNK_1_4_3);
-		kp_warning(globals->warnings, warn_indx, _LNK_1_4_3); T("\n");
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_3); NL;
 	}
 
 	if ((*print_pc_args.warnflagp) & WARNF_SK_BUSY) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SK_BUSY, _LNK_1_4_3);
-		kp_warning(globals->warnings, warn_indx, _LNK_1_4_3); T("\n");
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_3); NL;
 	}
 }
 
@@ -1021,7 +998,6 @@ kp_hc_stktraces()			/* Section 1.4.4 */
 	uint64 warnflag = 0;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_4_4);
         HEAD3(_MSG_1_4_4);
         FONT_SIZE(-1);
@@ -1031,37 +1007,36 @@ kp_hc_stktraces()			/* Section 1.4.4 */
         ARFx(_LNK_2_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
-        TEXT("\n");
 
         hcinfop = globals->hcinfop;
         print_pc_args.hcinfop = hcinfop;
         print_pc_args.warnflagp = &warnflag;
 	print_pc_args.pidfile = NULL;
 	if (hcinfop && hcinfop->total && hcinfop->pc_hash) {
-        	BOLD("   Count     Pct  Stack trace\n");
+        	BOLD("   Count     Pct  Stack trace"); NL;
         	foreach_hash_entry((void **)hcinfop->hc_stktrc_hash, STKTRC_HSIZE, hc_print_stktrc, stktrc_sort_by_cnt, 50, (void *)&print_pc_args);
 	} else {
-                BOLD("No Hardclock Entries Found\n");
+                BOLD("No Hardclock Entries Found"); NL;
         }
 
 	if ((*print_pc_args.warnflagp) & WARNF_SEMLOCK) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SEMLOCK, _LNK_1_4_4);
-		kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); T("\n");
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); NL;
 	}
 
 	if ((*print_pc_args.warnflagp) & WARNF_HUGETLB_FAULT) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_HUGETLB_FAULT, _LNK_1_4_4);
-		kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); T("\n");
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); NL;
 	}
 
 	if ((*print_pc_args.warnflagp) & WARNF_KSTAT_IRQS) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_KSTAT_IRQS, _LNK_1_4_4);
-		kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); T("\n");
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_4);  NL;
 	}
 
 	if ((*print_pc_args.warnflagp) & WARNF_PCC_CPUFREQ) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_PCC_CPUFREQ, _LNK_1_4_4);
-		kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); T("\n");
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); NL;
 	}
 }
 
@@ -1072,7 +1047,6 @@ kp_hc_funcbypid()			/* Section 1.4.5 */
         uint64  total;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_4_5);
         HEAD3(_MSG_1_4_5);
         FONT_SIZE(-1);
@@ -1081,7 +1055,6 @@ kp_hc_funcbypid()			/* Section 1.4.5 */
         ARFx(_LNK_2_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
-        TEXT("\n");
 
         hcinfop = globals->hcinfop;
 	if (hcinfop && hcinfop->total && hcinfop->pc_hash) {
@@ -1091,7 +1064,7 @@ kp_hc_funcbypid()			/* Section 1.4.5 */
                                    pid_sort_by_hc,
                                    5, (void *)&total);
 	} else {
-                BOLD("No Hardclock Entries Found\n");
+                BOLD("No Hardclock Entries Found"); NL;
         }
 }
 
@@ -1102,7 +1075,6 @@ kp_th_detection()			/* Section 1.5 */
         int warn_indx=0;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_5);
         HEAD3(_MSG_1_5);
         FONT_SIZE(-1);
@@ -1114,9 +1086,8 @@ kp_th_detection()			/* Section 1.5 */
         ARFx(_LNK_2_0,"[Next Section]"); 
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
-        TEXT("\n");
 
-        BOLD("PID       Wakeups MaxWakeups    Count     TimeStamp  cmd\n");
+        BOLD("PID       Wakeups MaxWakeups    Count     TimeStamp  cmd"); NL;
         foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_wakeup_pids, pid_sort_by_wakeups, 10, NULL);
 }
 
@@ -1124,7 +1095,6 @@ void
 kp_irq()				/* Section 1.6 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_6);
         HEAD3(_MSG_1_6);
         FONT_SIZE(-1);
@@ -1134,14 +1104,12 @@ kp_irq()				/* Section 1.6 */
         ARFx(_LNK_2_0,"[Next Section]"); 
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
-        TEXT("\n");
 }
 
 void 
 kp_hardirqs()				/* Section 1.6.1 */
 {
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_6_1);
         HEAD3(_MSG_1_6_1);
         FONT_SIZE(-1);
@@ -1151,7 +1119,6 @@ kp_hardirqs()				/* Section 1.6.1 */
         ARFx(_LNK_2_0,"[Next Section]"); 
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
-        TEXT("\n");
 
 	print_global_hardirq_stats(NULL);
 }
@@ -1160,7 +1127,6 @@ void
 kp_hardirqs_by_cpu()			/* Section 1.6.2 */
 {
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_6_2);
         HEAD3(_MSG_1_6_2);
         FONT_SIZE(-1);
@@ -1170,7 +1136,6 @@ kp_hardirqs_by_cpu()			/* Section 1.6.2 */
         ARFx(_LNK_2_0,"[Next Section]"); 
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
-        TEXT("\n");
 
 	print_percpu_irq_stats(HARDIRQ);
 }
@@ -1182,7 +1147,6 @@ kp_softirqs()				/* Section 1.6.3 */
         int warn_indx;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_1_6_3);
         HEAD3(_MSG_1_6_3);
         FONT_SIZE(-1);
@@ -1191,17 +1155,16 @@ kp_softirqs()				/* Section 1.6.3 */
         ARFx(_LNK_2_0,"[Next Section]"); 
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
-        TEXT("\n");
 
 	print_global_softirq_stats(&warnflag);
         if (warnflag & WARNF_TASKLET) {
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_TASKLET, _LNK_1_6_3);
-                kp_warning(globals->warnings, warn_indx, _LNK_1_6_3); T("\n");
+                kp_warning(globals->warnings, warn_indx, _LNK_1_6_3); NL;
 	}
 
         if (warnflag & WARNF_ADD_RANDOM) {
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_ADD_RANDOM, _LNK_1_6_3);
-                kp_warning(globals->warnings, warn_indx, _LNK_1_6_3); T("\n");
+                kp_warning(globals->warnings, warn_indx, _LNK_1_6_3); NL;
 	}
 }
 
@@ -1211,7 +1174,6 @@ kp_whats_it_waiting_for()      		/* Section 2.0 */
 
         HR;
         BLUE_TABLE;
-        TEXT("\n");
         ANM(_LNK_2_0);
         HEAD2(_MSG_2_0);
         FONT_SIZE(-1);
@@ -1225,7 +1187,6 @@ void
 kp_swtch_reports()          		/* Section 2.1 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_2_1);
         HEAD3(_MSG_2_1);
 
@@ -1246,7 +1207,6 @@ kp_freq_swtch_funcs()          		/* Section 2.1.1 */
 	var_arg_t vararg;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_2_1_1);
         HEAD3(_MSG_2_1_1);
 
@@ -1262,11 +1222,10 @@ kp_freq_swtch_funcs()          		/* Section 2.1.1 */
         if (globals->slp_hash == NULL) return;
 
         lineno=1;
-        BOLD("   Count     Pct    SlpTime  SlpPct   Msec/Slp   MaxMsecs  Func\n");
+        BOLD("   Count     Pct    SlpTime  SlpPct   Msec/Slp   MaxMsecs  Func"); NL;
 	vararg.arg1 = NULL;
 	vararg.arg2 = &schedp->sched_stats;
 	foreach_hash_entry_l((void **)globals->slp_hash, SLP_HSIZE, print_slp_info, slp_sort_by_count, 30, &vararg);
-        TEXT("\n");
 }
 
 void
@@ -1277,7 +1236,6 @@ kp_freq_swtch_stktrc()          	/* Section 2.1.2 */
 	var_arg_t vararg;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_2_1_2);
         HEAD3(_MSG_2_1_2);
 
@@ -1300,44 +1258,42 @@ kp_freq_swtch_stktrc()          	/* Section 2.1.2 */
 
         lineno=1;
 
-        BOLD("   count   wpct       avg   Stack trace\n");
-        BOLD("              %%     msecs              \n");
-        BOLD("============================================================\n");
+        BOLD("   count   wpct       avg   Stack trace"); NL;
+        BOLD("              %%     msecs              "); NL;
+        BOLD("============================================================"); NL;
         foreach_hash_entry((void **)globals->stktrc_hash, STKTRC_HSIZE, print_stktrc_info, stktrc_sort_by_cnt, 30, (void *)&vararg);
 
 	if (print_stktrc_args.warnflag & WARNF_MIGRATE_PAGES) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_MIGRATE_PAGES, _LNK_2_1_2);
-		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); T("\n");
+		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); NL;
 	}
 
 	if (print_stktrc_args.warnflag & WARNF_IXGBE_READ) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_IXGBE_READ, _LNK_2_1_2);
-		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); T("\n");
+		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); NL;
 	}
 
 	if (print_stktrc_args.warnflag & WARNF_XFS_DIOREAD) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_XFS_DIOREAD, _LNK_2_1_2);
-		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); T("\n");
+		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); NL;
 	}
 
 	if (print_stktrc_args.warnflag & WARNF_XFS_DIO_ALIGN) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_XFS_DIO_ALIGN, _LNK_2_1_2);
-		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); T("\n");
+		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); NL;
 	}
 
 	if (print_stktrc_args.warnflag & WARNF_MD_FLUSH) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_MD_FLUSH, _LNK_2_1_2);
-		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); T("\n");
+		kp_warning(globals->warnings, warn_indx, _LNK_2_1_2); NL;
 	}
 
-	T("\n");
 }
 
 void
 kp_top_swtch_pids()           		/* Section 2.1.2 */
 {
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_2_1_3);
         HEAD3(_MSG_2_1_3);
 
@@ -1354,7 +1310,7 @@ kp_top_swtch_pids()           		/* Section 2.1.2 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-        BOLD("PID        VolSlp ForceSlp  MigrCnt    SlpTime     AvMsec  Command\n");
+        BOLD("PID        VolSlp ForceSlp  MigrCnt    SlpTime     AvMsec  Command"); NL;
         foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_swtch_summary, pid_sort_by_sleep_cnt, 20, NULL); 
 	CSV_FIELD("kipid", "[CSV]");
 }
@@ -1381,6 +1337,7 @@ kp_print_sleep_pids(void *arg1, void *arg2)
         nsym=5;
 
         sleep_report((void *)pidp->slp_hash, pidp->schedp, slp_sort_by_time, NULL);
+	NLt;
 
         return 0;
 }
@@ -1389,7 +1346,6 @@ void
 kp_top_swtch_pid_funcs()           	/* Section 2.1.4 */
 {
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_2_1_4);
         HEAD3(_MSG_2_1_4);
 
@@ -1409,7 +1365,6 @@ void
 kp_wait_for_cpu()              		/* Section 2.2 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_2_2);
         HEAD3(_MSG_2_2);
 
@@ -1427,7 +1382,6 @@ void
 kp_runq_histogram()			/* Section 2.2.1 */
 {
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_2_2_1);
         HEAD3(_MSG_2_2_1);
         FONT_SIZE(-1);
@@ -1445,7 +1399,6 @@ void
 kp_runq_statistics()			/* Section 2.2.1 */
 {
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_2_2_1);
         HEAD3(_MSG_2_2_1);
         FONT_SIZE(-1);
@@ -1463,7 +1416,6 @@ void
 kp_top_runq_pids()				/* Section 2.2.2 */
 {
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_2_2_2);
         HEAD3(_MSG_2_2_2);
         FONT_SIZE(-1);
@@ -1483,7 +1435,6 @@ void
 kp_futex()				/* Section 2.3 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_2_3);
         HEAD3(_MSG_2_3);
 
@@ -1501,7 +1452,6 @@ void
 kp_futex_summary_by_cnt()                              /* Section 2.3.1 */
 {
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_2_3_1);
         HEAD3(_MSG_2_3_1);
         FONT_SIZE(-1);
@@ -1515,7 +1465,7 @@ kp_futex_summary_by_cnt()                              /* Section 2.3.1 */
         foreach_hash_entry((void **)globals->futex_hash,GFUTEX_HSIZE,
                         (int (*)(void *, void *))hash_count_entries,
                         NULL, 0, &globals->futex_cnt);
-	BOLD("%sTotal Futex count = %d (Top %d listed)\n", tab, globals->futex_cnt, MIN(globals->futex_cnt, nfutex));
+	BOLD("%sTotal Futex count = %d (Top %d listed)", tab, globals->futex_cnt, MIN(globals->futex_cnt, nfutex)); NL; NL;
 	futex_print_report_by_cnt(globals->futex_cnt);
 }
 
@@ -1523,7 +1473,6 @@ void
 kp_futex_summary_by_time()                              /* Section 2.3.2 */
 {
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_2_3_2);
         HEAD3(_MSG_2_3_2);
         FONT_SIZE(-1);
@@ -1534,7 +1483,7 @@ kp_futex_summary_by_time()                              /* Section 2.3.2 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD("%sTotal Futex count = %d (Top %d listed)\n", tab, globals->futex_cnt, MIN(globals->futex_cnt, nfutex));
+	BOLD("%sTotal Futex count = %d (Top %d listed)", tab, globals->futex_cnt, MIN(globals->futex_cnt, nfutex)); NL; NL;
 	futex_print_report_by_time(globals->futex_cnt);
 }
 
@@ -1543,7 +1492,6 @@ kp_file_activity()			/* Section 3.0 */
 {
         HR;
         BLUE_TABLE;
-        TEXT("\n");
         ANM(_LNK_3_0);
         HEAD2(_MSG_3_0);
         FONT_SIZE(-1);
@@ -1557,7 +1505,6 @@ void
 kp_file_ops()				/* Section 3.1 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_3_1);
         HEAD3(_MSG_3_1);
 
@@ -1572,7 +1519,7 @@ kp_file_ops()				/* Section 3.1 */
         lineno = 1;
         tab=tab0;
 
-        BOLD("%sSyscalls   ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
+        BOLD("%sSyscalls   ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename", tab); NL;
         foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata,
                            (int (*)())fdata_sort_by_syscalls,
                            20, NULL);
@@ -1588,7 +1535,6 @@ kp_file_time()				/* Section 3.2 */
         int warn_indx;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_3_2);
         HEAD3(_MSG_3_2);
 
@@ -1603,7 +1549,7 @@ kp_file_time()				/* Section 3.2 */
         lineno = 0;
         tab=tab0;
 
-        BOLD("%sSyscalls   ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
+        BOLD("%sSyscalls   ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename", tab); NL;
         foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata,
                             (int (*)())fdata_sort_by_elptime,
                             20, NULL);
@@ -1615,7 +1561,6 @@ kp_file_errs()				/* Section 3.3 */
 {
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_3_3);
         HEAD3(_MSG_3_3);
 
@@ -1632,7 +1577,7 @@ kp_file_errs()				/* Section 3.3 */
         lineno = 1;
         tab=tab0;
 
-        BOLD("%sSyscalls   ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
+        BOLD("%sSyscalls   ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename", tab); NL;
         foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata_errs,
                            (int (*)())fdata_sort_by_errs,
                            20, NULL);
@@ -1658,11 +1603,10 @@ kp_fdata_syscalls(void *arg1, void *arg2)
 	printf("%d ", fdatap->stats.syscall_cnt);
         BOLD("Fname: ");
         printf("%-60s ", fdatap->fnameptr);
-        TEXT("\n");
 
         _CAPTION;
 
-        BOLD("System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n");
+        BOLD("System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s"); NL;
 
 	vararg.arg1 = NULL;
 	vararg.arg2 = NULL;
@@ -1670,6 +1614,7 @@ kp_fdata_syscalls(void *arg1, void *arg2)
                                 (int (*)(void *, void *))print_syscall_info,
                                 (int (*)())syscall_sort_by_cnt, 10, &vararg);
 
+	NLt;
         return 0;
 }
 
@@ -1678,7 +1623,6 @@ kp_top_files()				/* Section 3.4 */
 {
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_3_4);
         HEAD3(_MSG_3_4);
 
@@ -1688,6 +1632,7 @@ kp_top_files()				/* Section 3.4 */
         ARFx(_LNK_4_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
+
         foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, kp_fdata_syscalls, fdata_sort_by_syscalls, 10, NULL);
 	CSV_FIELD("kifile", "[CSV]");
 
@@ -1698,7 +1643,6 @@ kp_device_report()			/* Section 4.0 */
 {
         HR;
         BLUE_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_0);
         HEAD2(_MSG_4_0);
         FONT_SIZE(-1);
@@ -1772,7 +1716,7 @@ kp_dev_entries(void *arg1, void *arg2)
                 BLACK_FONT;
         }
 
-	printf ("\n");
+	NL;
 
         if ((statsp[IOTOT].barrier_cnt > 20) && (warnflagp != NULL)) {
                 (*warnflagp) |= WARNF_BARRIER;
@@ -1787,7 +1731,6 @@ kp_device_globals()			/* Section 4.1 */
 	struct iostats *tiostatsp, *riostatsp, *wiostatsp;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_1);
         HEAD3(_MSG_4_1);
 
@@ -1798,10 +1741,11 @@ kp_device_globals()			/* Section 4.1 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD("         --------------------  Total  -------------------- --------------------  Write  -------------------- ---------------------  Read  --------------------\n");
-	BOLD("Devices     IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+	BOLD("         --------------------  Total  -------------------- --------------------  Write  -------------------- ---------------------  Read  --------------------"); NL;
+	BOLD("Devices     IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
         printf ("%7d  ", globals->ndevs);
 	print_iostats_totals(globals, &globals->iostats[0], NULL);
+	NLt;
 	return;
 }
 
@@ -1809,7 +1753,6 @@ void
 kp_perdev_reports()			/* Section 4.2.0 */
 { 
 	GREEN_TABLE;
-	TEXT("\n");
 	ANM(_LNK_4_2);
 	HEAD3(_MSG_4_2);
 
@@ -1863,7 +1806,6 @@ kp_active_disks()			/* Section 4.2.1 */
         int warn_indx;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_2_1);
         HEAD3(_MSG_4_2_1);
 
@@ -1878,14 +1820,14 @@ kp_active_disks()			/* Section 4.2.1 */
         tab=tab0;
         lineno=1;
 
-	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
         foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, kp_dev_entries, dev_sort_by_count, 10, &warnflag);
 	CSV_FIELD("kidsk", "[CSV]");
 
         if (warnflag & WARNF_BARRIER) {
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_BARRIER, _LNK_4_2_1);
-                kp_warning(globals->warnings, warn_indx, _LNK_4_2_1); T("\n");
+                kp_warning(globals->warnings, warn_indx, _LNK_4_2_1); NL;
 	}
 }
 
@@ -1896,7 +1838,6 @@ kp_highserv1_disks()			/* Section 4.2.2 */
         int warn_indx;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_2_2);
         HEAD3(_MSG_4_2_2);
 
@@ -1910,14 +1851,14 @@ kp_highserv1_disks()			/* Section 4.2.2 */
 
         tab=tab0;
         lineno=1;
-	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
         foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, kp_dev_entries_over5, dev_sort_by_avserv_over5, 10, &warnflag);
 	CSV_FIELD("kidsk", "[CSV]");
 
         if (warnflag & WARNF_AVSERV) {
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_HIGH_AVSERV, _LNK_4_2_2);
-                kp_warning(globals->warnings, warn_indx, _LNK_4_2_2); T("\n");
+                kp_warning(globals->warnings, warn_indx, _LNK_4_2_2); NL;
 	}
 }
 
@@ -1928,7 +1869,6 @@ kp_highserv2_disks()			/* Section 4.2.3 */
         int warn_indx;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_2_3);
         HEAD3(_MSG_4_2_3);
 
@@ -1942,8 +1882,8 @@ kp_highserv2_disks()			/* Section 4.2.3 */
 
         tab=tab0;
         lineno=1;
-	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
         foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, kp_dev_entries_less5, dev_sort_by_avserv_less5, 10, &warnflag);
 	CSV_FIELD("kidsk", "[CSV]");
 }
@@ -1952,7 +1892,6 @@ void
 kp_highwait_disks()			/* Section 4.2.4 */
 {
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_2_4);
         HEAD3(_MSG_4_2_4);
 
@@ -1966,8 +1905,8 @@ kp_highwait_disks()			/* Section 4.2.4 */
 
         tab=tab0;
         lineno=1;
-	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
         foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, kp_dev_entries, dev_sort_by_avwait, 10, NULL);
 	CSV_FIELD("kidsk", "[CSV]");
 }
@@ -1979,11 +1918,10 @@ kp_requeue_disks()			/* Section 4.2.5 */
         int64 warn_indx;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_2_5);
         HEAD3(_MSG_4_2_5);
-
         FONT_SIZE(-1);
+
         ARFx(_LNK_4_2_4,"[Prev Subsection]");
         ARFx(_LNK_4_2_6,"[Next Subsection]");
         ARFx(_LNK_4_0,"---[Prev Section]");
@@ -1991,14 +1929,13 @@ kp_requeue_disks()			/* Section 4.2.5 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-        tab=tab0;
-        lineno=1;
-	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+
+	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
         foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, kp_dev_requeue_entries, dev_sort_by_requeue, 0, &warnflag);
         if (warnflag & WARNF_REQUEUES) {
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_REQUEUES, _LNK_4_2_5);
-                kp_warning(globals->warnings, warn_indx, _LNK_4_2_5); T("\n");
+                kp_warning(globals->warnings, warn_indx, _LNK_4_2_5); NL;
 	}
 }
 
@@ -2009,7 +1946,6 @@ kp_dsk_histogram()			/* Section 4.2.6 */
         int64 warn_indx;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_2_6);
         HEAD3(_MSG_4_2_6);
 
@@ -2026,7 +1962,7 @@ kp_dsk_histogram()			/* Section 4.2.6 */
         print_io_histogram(globals->iotimes, &warnflag);
         if (warnflag & WARNF_IO_DELAYS) {
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_IO_DELAYS, _LNK_4_2_6);
-                kp_warning(globals->warnings, warn_indx, _LNK_4_2_6); T("\n");
+                kp_warning(globals->warnings, warn_indx, _LNK_4_2_6); NL;
         }
 }
 
@@ -2034,7 +1970,6 @@ void
 kp_mapper_report()			/* Section 4.3.0 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_3);
         HEAD3(_MSG_4_3);
 
@@ -2054,7 +1989,6 @@ kp_active_mapper_devs()			/* Section 4.3.1 */
         int64 warn_indx;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_3_1);
         HEAD3(_MSG_4_3_1);
 
@@ -2066,13 +2000,13 @@ kp_active_mapper_devs()			/* Section 4.3.1 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
         foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, kp_dev_entries, dev_sort_by_count, 10, &warnflag);
 
         if (warnflag & WARNF_MULTIPATH_BUG) {
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_MULTIPATH_BUG, _LNK_4_3_1);
-                kp_warning(globals->warnings, warn_indx, _LNK_4_3_1); T("\n");
+                kp_warning(globals->warnings, warn_indx, _LNK_4_3_1); NL;
         }
 
 	CSV_FIELD("kidsk", "[CSV]");
@@ -2085,7 +2019,6 @@ kp_hiserv_mapper_devs()			/* Section 4.3.2 */
         int64 warn_indx;
 
         ORANGE_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_3_2);
         HEAD3(_MSG_4_3_2);
 
@@ -2098,8 +2031,8 @@ kp_hiserv_mapper_devs()			/* Section 4.3.2 */
 
         tab=tab0;
         lineno=1;
-	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
         foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, kp_dev_entries_over5, dev_sort_by_avserv_over5, 10, NULL);
 	CSV_FIELD("kidsk", "[CSV]");
 }
@@ -2135,7 +2068,7 @@ kp_fc_entries(void *arg1, void *arg2)
                 BLACK_FONT;
         }
 
-	printf ("\n");
+	NL;
 
 }
 
@@ -2143,7 +2076,6 @@ void
 kp_fc_totals()				/* Section 4.4 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_4);
         HEAD3(_MSG_4_4);
 
@@ -2157,8 +2089,8 @@ kp_fc_totals()				/* Section 4.4 */
 
         tab=tab0;
         lineno=1;
-	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
         foreach_hash_entry((void **)globals->fchash, FC_HSIZE, kp_fc_entries, NULL, 0, NULL);
 }
 
@@ -2194,7 +2126,7 @@ kp_wwn_entries(void *arg1, void *arg2)
                 BLACK_FONT;
         }
 
-	printf ("\n");
+	NL;
 
 }
 
@@ -2202,7 +2134,6 @@ void
 kp_wwn_totals()				/* Section 4.5 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_5);
         HEAD3(_MSG_4_5);
 
@@ -2216,8 +2147,8 @@ kp_wwn_totals()				/* Section 4.5 */
 
         tab=tab0;
         lineno=1;
-	BOLD("                    --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-	BOLD("Target WWN             IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+	BOLD("                    --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
+	BOLD("Target WWN             IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
         foreach_hash_entry((void **)globals->wwnhash, WWN_HSIZE, kp_wwn_entries, wwn_sort_by_wwn, 0, NULL);
 }
 
@@ -2226,7 +2157,6 @@ void
 kp_perpid_mdev_totals()			/* Section 4.6 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_6);
         HEAD3(_MSG_4_6);
 
@@ -2238,8 +2168,8 @@ kp_perpid_mdev_totals()			/* Section 4.6 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-	BOLD ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv      PID  Process\n");
+	BOLD ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
+	BOLD ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv      PID  Process"); NL;
 
         foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_miosum,  pid_sort_by_miocnt, 10, NULL);
 	CSV_FIELD("kipid", "[CSV]");
@@ -2249,20 +2179,19 @@ void
 kp_perpid_dev_totals()			/* Section 4.7 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_7);
         HEAD3(_MSG_4_7);
 
         FONT_SIZE(-1);
         ARFx(_LNK_4_6,"[Prev Subsection]");
-        ARFx(_LNK_4_8,"[Next Subsection]");
+        if (dskblk_stats) ARFx(_LNK_4_8,"[Next Subsection]");
         ARFx(_LNK_4_0,"---[Prev Section]");
         ARFx(_LNK_5_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-	BOLD ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv      PID  Process\n");
+	BOLD ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
+	BOLD ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv      PID  Process"); NL;
 
         foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_iosum,  pid_sort_by_iocnt, 10, NULL);
 	CSV_FIELD("kipid", "[CSV]");
@@ -2293,7 +2222,7 @@ kp_blk_read_entry(void *arg1, void *arg2)
 	if (devinfop->devname) printf ("/dev/%s", devinfop->devname);
         if (devinfop->mapname) printf ("    (/dev/mapper/%s)", devinfop->mapname);
 	
-	printf ("\n");
+	NL;
         BLACK_FONT;
 
         return 0;
@@ -2307,7 +2236,6 @@ kp_dskblk_read()			/* Section 4.7 */
         int     warn_indx;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_8);
         HEAD3(_MSG_4_8);
 
@@ -2319,14 +2247,14 @@ kp_dskblk_read()			/* Section 4.7 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
         T(_MSG_4_8_INFO);
-        TEXTx("\n");
 
-        BOLD("Freq    Dev             Block\n");
+	NL;
+        BOLD("Freq    Dev             Block"); NL;
         foreach_hash_entry((void **)globals->dskblk_hash, DSKBLK_HSIZE, kp_blk_read_entry, dskblk_sort_by_rdcnt, 10, &warnflag);
 
         if (warnflag & WARNF_REREADS) {
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_REREADS, _LNK_4_5);
-                kp_warning(globals->warnings, warn_indx, _LNK_4_5); T("\n");
+                kp_warning(globals->warnings, warn_indx, _LNK_4_5); NL;
         }
 
 }
@@ -2354,7 +2282,7 @@ kp_blk_write_entry(void *arg1, void *arg2)
        	if (devinfop->mapname) 
                	printf ("    (/dev/mapper/%s)", devinfop->mapname);
 	
-	printf ("\n");
+	NL;
 
         return 0;
 }
@@ -2363,7 +2291,6 @@ void
 kp_dskblk_write()			/* Section 4.8 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_4_9);
         HEAD3(_MSG_4_9);
 
@@ -2374,7 +2301,7 @@ kp_dskblk_write()			/* Section 4.8 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-        BOLD("Freq    Dev             Block\n");
+        BOLD("Freq    Dev             Block"); NL;
         foreach_hash_entry((void **)globals->dskblk_hash, DSKBLK_HSIZE, kp_blk_write_entry, dskblk_sort_by_wrcnt, 10, NULL);
 
 }
@@ -2384,11 +2311,10 @@ kp_network()
 {
         HR;
         BLUE_TABLE;
-        TEXT("\n");
         ANM(_LNK_5_0);
         HEAD2(_MSG_5_0);
         FONT_SIZE(-1);
-        ARFx(_LNK_4_0,"[Prev Section]"); _A;
+        ARFx(_LNK_4_0,"[Prev Section]");
 	if (IS_LIKI_V2_PLUS)  {
                 ARFx(_LNK_6_0,"[Next Section]");
         } else if (next_sid > 1)  {
@@ -2404,12 +2330,11 @@ void
 kp_ipip()
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_5_1);
         HEAD2(_MSG_5_1);
         FONT_SIZE(-1);
         ARFx(_LNK_5_2,"[Next Subsection]"); 
-        ARFx(_LNK_4_0,"---[Prev Section]"); _A;
+        ARFx(_LNK_4_0,"---[Prev Section]");
 	if (IS_LIKI_V2_PLUS)  {
                 ARFx(_LNK_6_0,"[Next Section]");
         } else if (next_sid > 1)  {
@@ -2420,7 +2345,7 @@ kp_ipip()
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD ("Syscalls      Rd/s      RdKB/s      Wr/s      WrKB/s  Connection\n");
+	BOLD ("Syscalls      Rd/s      RdKB/s      Wr/s      WrKB/s  Connection"); NL;
 	foreach_hash_entry2((void **)globals->ipip_hash, IPIP_HASHSZ, socket_print_ipip,
 			    (int (*)())ipip_sort_by_syscalls, 10, NULL);
 	CSV_FIELD("kisock", "[CSV]");
@@ -2432,13 +2357,12 @@ kp_remoteip()
 	int scallflag=1;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_5_2);
         HEAD2(_MSG_5_2);
         FONT_SIZE(-1);
         ARFx(_LNK_5_1,"[Prev Subsection]"); 
         ARFx(_LNK_5_3,"[Next Subsection]"); 
-        ARFx(_LNK_4_0,"---[Prev Section]"); _A;
+        ARFx(_LNK_4_0,"---[Prev Section]");
 	if (IS_LIKI_V2_PLUS)  {
                 ARFx(_LNK_6_0,"[Next Section]");
         } else if (next_sid > 1)  {
@@ -2460,13 +2384,12 @@ kp_remoteport()
 	int scallflag=1;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_5_3);
         HEAD2(_MSG_5_3);
         FONT_SIZE(-1);
         ARFx(_LNK_5_2,"[Prev Subsection]"); 
         ARFx(_LNK_5_4,"[Next Subsection]"); 
-        ARFx(_LNK_4_0,"---[Prev Section]"); _A;
+        ARFx(_LNK_4_0,"---[Prev Section]");
 	if (IS_LIKI_V2_PLUS)  {
                 ARFx(_LNK_6_0,"[Next Section]");
         } else if (next_sid > 1)  {
@@ -2488,13 +2411,12 @@ kp_localip()
 	int scallflag=1;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_5_4);
         HEAD2(_MSG_5_4);
         FONT_SIZE(-1);
         ARFx(_LNK_5_3,"[Prev Subsection]"); 
         ARFx(_LNK_5_5,"[Next Subsection]"); 
-        ARFx(_LNK_4_0,"---[Prev Section]"); _A;
+        ARFx(_LNK_4_0,"---[Prev Section]");
 	if (IS_LIKI_V2_PLUS)  {
                 ARFx(_LNK_6_0,"[Next Section]");
         } else if (next_sid > 1)  {
@@ -2516,13 +2438,12 @@ kp_localport()
 	int scallflag=1;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_5_5);
         HEAD2(_MSG_5_5);
         FONT_SIZE(-1);
         ARFx(_LNK_5_4,"[Prev Subsection]"); 
         ARFx(_LNK_5_6,"[Next Subsection]"); 
-        ARFx(_LNK_4_0,"---[Prev Section]"); _A;
+        ARFx(_LNK_4_0,"---[Prev Section]"); 
 	if (IS_LIKI_V2_PLUS)  {
                 ARFx(_LNK_6_0,"[Next Section]");
         } else if (next_sid > 1)  {
@@ -2543,12 +2464,11 @@ void
 kp_socket()
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_5_6);
         HEAD2(_MSG_5_6);
         FONT_SIZE(-1);
         ARFx(_LNK_5_5,"[Prev Subsection]"); 
-        ARFx(_LNK_4_0,"---[Prev Section]"); _A;
+        ARFx(_LNK_4_0,"---[Prev Section]"); 
 	if (IS_LIKI_V2_PLUS)  {
                 ARFx(_LNK_6_0,"[Next Section]");
         } else if (next_sid > 1)  {
@@ -2559,7 +2479,7 @@ kp_socket()
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD("Syscalls      Rd/s      RdKB/s      Wr/s      WrKB/s  Connection\n");
+	BOLD("Syscalls      Rd/s      RdKB/s      Wr/s      WrKB/s  Connection"); NL;
         foreach_hash_entry2((void **)globals->sdata_hash, SDATA_HASHSZ, socket_print_sdata,
                            (int (*)())sdata_sort_by_syscalls, 10, NULL);
 	CSV_FIELD("kisock", "[CSV]");
@@ -2570,11 +2490,10 @@ kp_memory()				/* Section 6.0 */
 {
         HR;
         BLUE_TABLE;
-        TEXT("\n");
         ANM(_LNK_6_0);
         HEAD2(_MSG_6_0);
         FONT_SIZE(-1);
-        ARFx(_LNK_5_0,"[Prev Section]"); _A;
+        ARFx(_LNK_5_0,"[Prev Section]"); 
         if (next_sid > 1)  {
                 ARFx(_LNK_7_0,"[Next Section]");
         } else if (globals->docker_hash) { 
@@ -2601,7 +2520,7 @@ kp_pid_memory(void *arg1, void *arg2)
 	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
 	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
-	printf ("\n");
+	NL;
 
         return 0;
 }
@@ -2613,7 +2532,6 @@ kp_rss()				/* Section 6.1 */
         int warn_indx=0;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_6_1);
         HEAD3(_MSG_6_1);
         FONT_SIZE(-1);
@@ -2629,7 +2547,7 @@ kp_rss()				/* Section 6.1 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-        BOLD("     vss      rss      PID Command\n");
+        BOLD("     vss      rss      PID Command"); NL;
         foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, kp_pid_memory, pid_sort_by_rss, 10, &warnflag);
 	CSV_FIELD("kipid", "[CSV]");
 }
@@ -2641,7 +2559,6 @@ kp_vss()				/* Section 6.2 */
         int warn_indx=0;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_6_2);
         HEAD3(_MSG_6_2);
         FONT_SIZE(-1);
@@ -2657,7 +2574,7 @@ kp_vss()				/* Section 6.2 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-        BOLD("     vss      rss      PID Command\n");
+        BOLD("     vss      rss      PID Command"); NL;
         foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, kp_pid_memory, pid_sort_by_vss, 10, &warnflag);
 	CSV_FIELD("kipid", "[CSV]");
 }
@@ -2668,7 +2585,6 @@ kp_oracle()				/* Section 7.0 */
 {
         HR;
         BLUE_TABLE;
-        TEXT("\n");
         ANM(_LNK_7_0);
         HEAD2(_MSG_7_0);
         FONT_SIZE(-1);
@@ -2708,11 +2624,11 @@ kp_print_orastats (int type)
 	}
 
 	if (IS_LIKI && ((type == LGWR) || (type == DBWRITER))) {
-        	BOLD("                                --- CPU STATS ---   ---------- PHYSICAL READS --------   --------- PHYSICAL WRITES --------\n");
-        	BOLD("Instance    Procs  SchedPolicy  RunTime  RunQTime   IO/sec   AvSize   KB/sec    AvServ   IO/sec   AvSize   KB/sec    AvServ\n");
+        	BOLD("                                --- CPU STATS ---   ---------- PHYSICAL READS --------   --------- PHYSICAL WRITES --------"); NL;
+        	BOLD("Instance    Procs  SchedPolicy  RunTime  RunQTime   IO/sec   AvSize   KB/sec    AvServ   IO/sec   AvSize   KB/sec    AvServ"); NL;
 	} else {
-        	BOLD("                   --- CPU STATS ---   ---------- PHYSICAL READS --------   --------- PHYSICAL WRITES --------\n");
-        	BOLD("Instance    Procs  RunTime  RunQTime   IO/sec   AvSize   KB/sec    AvServ   IO/sec   AvSize   KB/sec    AvServ\n");
+        	BOLD("                   --- CPU STATS ---   ---------- PHYSICAL READS --------   --------- PHYSICAL WRITES --------"); NL;
+        	BOLD("Instance    Procs  RunTime  RunQTime   IO/sec   AvSize   KB/sec    AvServ   IO/sec   AvSize   KB/sec    AvServ"); NL;
 	}
 
         for (i = 1; i < next_sid; i++) {
@@ -2746,7 +2662,7 @@ kp_print_orastats (int type)
                 	BLACK_FONT;
 		}
 
-		printf ("\n");
+		NL;
         }
 }
 
@@ -2757,7 +2673,6 @@ kp_oracle_sids()			/* Section 7.1 */
         uint64 warnflag = 0ull;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_7_1);
         HEAD3(_MSG_7_1);
         FONT_SIZE(-1);
@@ -2770,7 +2685,7 @@ kp_oracle_sids()			/* Section 7.1 */
 	}
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
-        T("\n");
+        NL;
 
 	kp_print_orastats(NORACLE);
 }
@@ -2782,7 +2697,6 @@ kp_lgwr_analysis()			/* Section 7.2 */
         uint64 warnflag = 0ull;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_7_2);
         HEAD3(_MSG_7_2);
         FONT_SIZE(-1);
@@ -2796,7 +2710,7 @@ kp_lgwr_analysis()			/* Section 7.2 */
 	}
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
-        T("\n");
+        NL;
 
 	kp_print_orastats(LGWR);
 }
@@ -2808,7 +2722,6 @@ kp_arch_analysis()			/* Section 7.3 */
         uint64 warnflag = 0ull;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_7_3);
         HEAD3(_MSG_7_3);
         FONT_SIZE(-1);
@@ -2822,7 +2735,7 @@ kp_arch_analysis()			/* Section 7.3 */
 	}
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
-        T("\n");
+        NL;
 
 	kp_print_orastats(ARCHIVE);
 }
@@ -2834,7 +2747,6 @@ kp_dbw_analysis()			/* Section 7.4 */
         uint64 warnflag = 0ull;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_7_4);
         HEAD3(_MSG_7_4);
         FONT_SIZE(-1);
@@ -2848,7 +2760,7 @@ kp_dbw_analysis()			/* Section 7.4 */
 	}
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
-        T("\n");
+        NL;
 
 	kp_print_orastats(DBWRITER);
 }
@@ -2860,7 +2772,6 @@ kp_pquery_analysis()			/* Section 7.5 */
         uint64 warnflag = 0ull;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_7_5);
         HEAD3(_MSG_7_5);
         FONT_SIZE(-1);
@@ -2874,7 +2785,7 @@ kp_pquery_analysis()			/* Section 7.5 */
 	}
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
-        T("\n");
+        NL;
 
 	kp_print_orastats(PQUERY);
 }
@@ -2886,7 +2797,6 @@ kp_shared_server_analysis()		/* Section 7.6 */
         uint64 warnflag = 0ull;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_7_6);
         HEAD3(_MSG_7_6);
         FONT_SIZE(-1);
@@ -2900,8 +2810,7 @@ kp_shared_server_analysis()		/* Section 7.6 */
 	}
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
-        T("\n");
-
+        NL;
 
 	kp_print_orastats(ORACLE);
 }
@@ -2913,7 +2822,6 @@ kp_ioslave_analysis()			/* Section 7.7 */
         uint64 warnflag = 0ull;
 
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_7_7);
         HEAD3(_MSG_7_7);
         FONT_SIZE(-1);
@@ -2926,7 +2834,7 @@ kp_ioslave_analysis()			/* Section 7.7 */
 	}
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
-        T("\n");
+        NL;
 
 	kp_print_orastats(SLAVE);
 }
@@ -2936,7 +2844,6 @@ kp_dockers()			/* Section 8.0 */
 {
 	HR;
         BLUE_TABLE;
-        TEXT("\n");
         ANM(_LNK_8_0);
         HEAD2(_MSG_8_0);
         FONT_SIZE(-1);
@@ -2958,7 +2865,6 @@ void
 kp_docker_ps()				/* Section 8.1 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_8_1);
         HEAD3(_MSG_8_1);
         FONT_SIZE(-1);
@@ -2982,7 +2888,6 @@ void
 kp_docker_cpu()				/* Section 8.1 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_8_2);
         HEAD3(_MSG_8_2);
         FONT_SIZE(-1);
@@ -3006,7 +2911,6 @@ void
 kp_docker_io()				/* Section 8.3 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_8_3);
         HEAD3(_MSG_8_3);
         FONT_SIZE(-1);
@@ -3035,7 +2939,6 @@ kp_file_links()			/* Section 9.0 */
 
 	HR;
         BLUE_TABLE;
-        TEXT("\n");
         ANM(_LNK_9_0);
         HEAD2(_MSG_9_0);
         FONT_SIZE(-1);
@@ -3059,7 +2962,6 @@ void
 kp_txt_links()				/* Section 9.1 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_9_1);
         HEAD3(_MSG_9_1);
         FONT_SIZE(-1);
@@ -3090,7 +2992,6 @@ void
 kp_csv_links()				/* Section 9.2 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_9_2);
         HEAD3(_MSG_9_2);
         FONT_SIZE(-1);
@@ -3120,7 +3021,6 @@ void
 kp_misc_links()				/* Section 9.3 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_9_3);
         HEAD3(_MSG_9_3);
         FONT_SIZE(-1);
@@ -3138,13 +3038,13 @@ kp_misc_links()				/* Section 9.3 */
         ARFx(_LNK_10_0,"[Next Section]"); 
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
-	BOLD("General\n");
+	BOLD("General"); NL;
 	FILE_FIELD("uname-a", "uname -a");
 	FILE_FIELD("release", "/etc/*release");
 	FILE_FIELD("uptime", "uptime");
 	FILE_FIELD("cmdline", "/proc/cmdline");
 	FILE_FIELD("grub.conf", "/boot/grub/grub.conf");
-	BOLD("Configuration\n");
+	BOLD("Configuration"); NL;
 	FILE_FIELD("cpuinfo", "/proc/cpuinfo");
 	FILE_FIELD("mem_info", "free; /proc/meminfo");
 	FILE_FIELD("lspci", "lspci");
@@ -3154,15 +3054,15 @@ kp_misc_links()				/* Section 9.3 */
 	FILE_FIELD("sysctl.conf", "/etc/sysctl.conf");
 	FILE_FIELD("sched_features", "<debugfs>/sched_features");
 	FILE_FIELD("ipcs-m", "ipcs -m");
-	BOLD("NUMA Information\n");
+	BOLD("NUMA Information"); NL;
 	FILE_FIELD("numa_info", "numactl --hardware / numastat");
 	FILE_FIELD("mpsched", "mpsched");
-	BOLD("Processes\n");
+	BOLD("Processes"); NL;
 	FILE_FIELD("ps-eLf", "ps -eLf");
 	FILE_FIELD("ps-aux", "ps aus");
 	FILE_FIELD("pstree", "pstree");
 	FILE_FIELD("stacks", "/proc/*/stacks/*");
-	BOLD("File Systems and I/O\n");
+	BOLD("File Systems and I/O"); NL;
 	FILE_FIELD("mount-v", "mount -v");
 	FILE_FIELD("fstab", "/etc/fstab");
 	FILE_FIELD("extfs", "extfs inforamation");
@@ -3172,7 +3072,7 @@ kp_misc_links()				/* Section 9.3 */
 	FILE_FIELD("multipath.conf", "/etc/multipath.conf");
 	FILE_FIELD("block_params", "Block Device parameters");
 	FILE_FIELD("interrupts", "/proc/interrupts");
-	BOLD("Network\n");
+	BOLD("Network"); NL;
 	FILE_FIELD("ifconfig", "ifconfig");
 	FILE_FIELD("ethtool", "ethtool");
 	FILE_FIELD("route-n", "route -n");
@@ -3185,7 +3085,6 @@ void
 kp_vis_links()				/* Section 9.4 */
 {
         GREEN_TABLE;
-        TEXT("\n");
         ANM(_LNK_9_4);
         HEAD3(_MSG_9_4);
         FONT_SIZE(-1);
@@ -3222,7 +3121,6 @@ kp_warnings_report()			/* Section 9.0 */
 
 	HR;
         BLUE_TABLE;
-        TEXT("\n");
         ANM(_LNK_10_0);
         ANM(SPF(line,"%s%d", _LNK_WARN, globals->next_warning));
         HEAD2(_MSG_10_0);
@@ -3233,8 +3131,7 @@ kp_warnings_report()			/* Section 9.0 */
         _TABLE;
 
 	if (globals->next_warning == 0) {
-		TEXT("\n");
-		BOLD("No Warnings Found\n");
+		BOLD("No Warnings Found"); NL;
 		return;
 	}
 
@@ -3253,7 +3150,7 @@ kp_warnings_report()			/* Section 9.0 */
                             LI; ARFx(SPF(line,"%s%d", _LNK_WARN, i), warnmsg[msg_idx].msg); 
                     }
                 } else {
-                        printf ("%s\n", warnmsg[msg_idx].msg);
+                        printf ("%s", warnmsg[msg_idx].msg); NL;
                 }
 
         }

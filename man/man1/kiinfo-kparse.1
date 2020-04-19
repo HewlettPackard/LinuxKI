@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad l
-.TH kiinfo-kparse 1 "6.0 - November 25, 2019" version "6.0"
+.TH kiinfo-kparse 1 "6.1 - April 20, 2020" version "6.1"
 .SH NAME
 kiinfo  -  LinuxKI data collection and analysis engine
 
@@ -23,11 +23,6 @@ See kiinfo(1).
 Provide help information for kparse flags
 .RE
 
-.B lite
-.RS
-Reduce memory footprint of kiinfo for large collections. Some per-thread sections are omitted.
-.RE
-
 .B kptree
 .RS
 When used with kiinfo -kipid pidtree, links PID numbers to kipid output in the PIDS directory.
@@ -38,16 +33,58 @@ When used with kiinfo -kipid pidtree, links PID numbers to kipid output in the P
 Skip oracle section in kparse output.
 .RE
 
+.B nofutex
+.RS
+Do not collect futex statistics
+.RE
+
 .B mangle
 .RS
 Leave C++ function names mangled
 .RE
 
-.B edus=<edus_file>
+.B blkfrq
+.RS
+Add Disk Block Frequency stats to Kparse report
+.RE
+
+.B lite
+.RS
+Reduce memory footprint of kiinfo for large collections. Some per-thread sections are omitted.
+.RE
+
+.B edus=<filename>
 .RS
 Specify output of "db2pd -edus" to get DB2 thread names.
 .RE
 
+.B jstack=<filename>
+.RS
+Jstack output file to use (default jstack.<timestamp>)
+.RE
+
+.B events=[default | all | <kitool> | <event>]
+.RS
+Trace events to be traced
+.RE
+
+.RS 7
+\fBdefault\fR - Only trace default events.
+.RE
+.RS 7
+\fBall\fR - Trace all valid ftrace events
+.RE
+.RS 7
+\fB<kitool>\fR - Only the events needed for a specific subtool is used.
+.RE
+.RS 7
+\fB<event>\fR - Trace a specific event.
+.RE
+
+.B subsys=<subsys>
+.RS
+Enable tracing only for certain subsystems.  Valid subsystems include: power, scsi, block, sched, syscalls, irq.
+.RE
 
 
 .SH EXAMPLES

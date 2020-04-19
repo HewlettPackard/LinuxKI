@@ -481,23 +481,27 @@ traverse_dir(DIR *dir, char *dirname, char *parent, char *subsys)
 				if ((id_file = fopen(fname, "r")) == NULL) {
 					FATAL(errno, "Unable to open file", fname, -1);
 				}
-				rtnptr = fgets((char *)&input_str, 511, id_file);
+				rtnptr = fgets((char *)&input_str, 1024, id_file);
 				sscanf (&input_str[0], "%d", &id);
 
 				fclose(event_file);
 				fclose(id_file);
 			
 			} else { 
-				rtnptr = fgets((char *)&input_str, 511, event_file);
+				rtnptr = fgets((char *)&input_str, 1024, event_file);
 
 				sscanf (&input_str[4], "%d", &id);
 
 				fclose(event_file);
 			}
 
-			ki_actions[id].id = id;
-			strncpy(&ki_actions[id].subsys[0], subsys, 15); ki_actions[id].subsys[15] = 0;
-			strncpy(&ki_actions[id].event[0], parent, 31); ki_actions[id].event[31] = 0;
+			if (id < KI_MAXTRACECALLS) {
+				ki_actions[id].id = id;
+				strncpy(&ki_actions[id].subsys[0], subsys, 15); ki_actions[id].subsys[15] = 0;
+				strncpy(&ki_actions[id].event[0], parent, 31); ki_actions[id].event[31] = 0;
+			} else {
+				printf ("subsys: %s  event: %s  ID: %d  << ID larger than %d, skipping\n", ki_actions[id].subsys, ki_actions[id].event, id, KI_MAXTRACECALLS);
+			}
 			if (debug) printf ("subsys: %s  event: %s  ID: %d\n", ki_actions[id].subsys, ki_actions[id].event, id);
 			/* if I find the format file, then no need to traverse this subdir more */
 			return;

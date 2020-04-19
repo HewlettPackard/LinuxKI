@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad l
-.TH kiinfo-live 1 "6.0 - November 25, 2019" version "6.0"
+.TH kiinfo-live 1 "6.1 - April 20, 2020" version "6.1"
 .SH NAME
 kiinfo  -  LinuxKI data collection and analysis engine
 
@@ -25,19 +25,14 @@ See kiinfo(1).
 Print help syntax
 .RE
 
-.B sysignore=<ignore_file>
-.RS
-Do not trace system calls listed in the <ignore_file>.  This can reduce trace data by eliminating frequently called system calls, such as getrusage(), ctime(), etc.
-.RE
-
-.B edus=<edus_file>
-.RS
-Specify output of "db2pd -edus" to get DB2 thread names
-.RE
-
 .B msr
 .RS
 Collect adanced CPU statistics such as LLC Hit%, CPI, average CPU frequency, and SMI count
+.RE
+
+.B mangle
+.RS
+Leave C++ function names mangled
 .RE
 
 .B step=<step_time>
@@ -45,7 +40,15 @@ Collect adanced CPU statistics such as LLC Hit%, CPI, average CPU frequency, and
 Floating point time is seconds of the step interval
 .RE
 
+.B sysignore=<filename>
+.RS
+Do not trace system calls listed in the <filename>.  This can reduce trace data by eliminating frequently called system calls, such as getrusage(), ctime(), etc.
+.RE
 
+.B edus=<filename>
+.RS
+Specify output of "db2pd -edus" to get DB2 thread names
+.RE
 
 .SH EXAMPLES
 

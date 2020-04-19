@@ -256,8 +256,8 @@ print_pid_swtch_summary(void *arg1, void *arg2)
 	if (pidp->thread_cmd) printf("  (%s)", pidp->thread_cmd);
 	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 
-	if (cluster_flag) { DSPACE; SERVER_URL_FIELD_BRACKETS(globals) }
-        printf ("\n");
+	if (cluster_flag) { DSPACE; SERVER_URL_FIELD_BRACKETS(globals) };
+	NL; 
 
         return 0;
 }

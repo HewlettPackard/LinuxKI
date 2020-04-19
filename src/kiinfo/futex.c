@@ -312,7 +312,6 @@ futex_print_detail(void *arg1, void *arg2)
                         (int (*)(void *, void *))hash_count_entries,
                         NULL, 0, &pid_cnt);
 
-	printf("\n");
 	CAPTION_GREY;
 	BOLD ("Futex 0x%-16llx - Total PID count = %-8d",
 			gfp->addr,
@@ -320,7 +319,6 @@ futex_print_detail(void *arg1, void *arg2)
 
 	if (cluster_flag) {SERVER_URL_FIELD_SECTION_BRACKETS(globals, _LNK_2_3); }
 
-	if (HTML) printf ("\n");
 	_CAPTION;
 	BOLD ("%sOperation                         Count  EAGAIN  ETIMEDOUT  AvRetVal     ElpTime         Avg         Max   Process/Thread name\n", tab);
 	printf("  %-29s %7d %7d %10d   %7.2f %11.3f %11.6f %11.6f   ", 
@@ -332,8 +330,7 @@ futex_print_detail(void *arg1, void *arg2)
                         SECS(gfp->total_time),
                         SECS(gfp->total_time)/gfp->cnt,
                         SECS(gfp->max_time));
-
-	printf ("\n");
+	NL;
 
 	if (gfp->uaddr2_hash) {
 		BOLD ("%s  Requeued Addresses              Count\n",tab);
@@ -355,6 +352,7 @@ futex_print_detail(void *arg1, void *arg2)
                         (int (*)(void *, void *))futex_print_ops_detail,
                         futexops_sort_by_op, 0, &vararg);
 
+	NL;
 	return 0;
 }
 

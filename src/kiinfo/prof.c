@@ -209,7 +209,7 @@ int prof_ftrace_print_func(void *a, void *arg)
                 PRINT_EVENT(rec_ptr->KD_ID);
                 printf (" %s", buf);
 
-                printf ("\n");
+                NL;
         }
 }
 
@@ -265,7 +265,7 @@ hc_print_pc(void *arg1, void *arg2)
 				cpustate_name_index[pcinfop->state],
 				sym ? dmangle(sym) : "UNKNOWN");
 		if (symfile) pid_printf (pidfile, " [%s]", symfile);
-		pid_printf (pidfile, "\n");
+		PNL;
 	}
 
 	BLACK_FONT;
@@ -343,7 +343,7 @@ hc_print_pc2(void *arg1, void *arg2)
 	BLACK_FONT;
 
 	if (symfile) printf (" [%s]", symfile);
-	printf ("\n");
+	NL;
 
 	if ((lineno & 0x1) == 0) _SPAN;
 	lineno++;
@@ -371,17 +371,19 @@ hc_print_pc_sys(void *arg1, void *arg2)
 
 	SPAN_GREY;
 	if ((pcinfop->state == HC_USER) || (idx > globals->nsyms))  {
-		pid_printf (pidfile, "%s%8d %6.2f%%  %-6s %s\n", tab, 
+		pid_printf (pidfile, "%s%8d %6.2f%%  %-6s %s", tab, 
 					pcinfop->count, 
 					(pcinfop->count*100.0) / hcinfop->total, 
 					cpustate_name_index[pcinfop->state], 
 					"UNKNOWN");
+		PNL;
 	} else {
-		pid_printf (pidfile, "%s%8d %6.2f%%  %-6s %s\n", tab, 
+		pid_printf (pidfile, "%s%8d %6.2f%%  %-6s %s", tab, 
 					pcinfop->count, 
 					(pcinfop->count*100.0) / hcinfop->total, 
 					cpustate_name_index[pcinfop->state], 
 					(idx == UNKNOWN_SYMIDX) ? "UNKNOWN" : globals->symtable[idx].nameptr);
+		PNL;;
 	}
 }
 
@@ -475,8 +477,7 @@ hc_print_stktrc(void *p1, void *p2)
 			pid_printf (pidfile, "  0x%llx", key);
 		}
         }
-        pid_printf (pidfile, "\n");
-
+        PNL;
 }
 
 int
@@ -515,7 +516,7 @@ prof_print_percpu_summary()
 			printf ("%7d ", i);
 			prof_print_summary(hcinfop);
 			_SPAN;
-			printf ("\n");
+			NL;
 			lineno++;
 		}
 	}
@@ -577,7 +578,6 @@ int print_pid_symbols(void *arg1, void *arg2)
         if (hcinfop==NULL) return 0;
         if (hcinfop->cpustate[HC_SYS] == 0)   return 0;
 
-        TEXT("\n");
         CAPTION_GREY;
         BOLD("Pid: ");
         PID_URL_FIELD8(pidp->PID);
@@ -596,24 +596,24 @@ int print_pid_symbols(void *arg1, void *arg2)
         if (pidp->thread_cmd) printf("(%s) ", pidp->thread_cmd);
 	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 	if (cluster_flag) {SERVER_URL_FIELD_SECTION_BRACKETS(globals, _LNK_1_4_5); }
-	printf ("\n");
 	
 	_CAPTION;
 
-        TEXT("-----------------------------------------------------------------\n");
+        TEXT("-----------------------------------------------------------------\n"); 
 	lineno=0;
         SPAN_GREY;
-        BOLD ("%s   Count    USER     SYS    INTR\n", tab);
+        BOLD ("%s   Count    USER     SYS    INTR", tab); NL;
 	_SPAN;
 	
-        printf ("%s %7d %7d %7d %7d\n", tab, 
+        printf ("%s %7d %7d %7d %7d", tab, 
 				hcinfop->total, 
 				hcinfop->cpustate[HC_USER], 
 				hcinfop->cpustate[HC_SYS], 
 				hcinfop->cpustate[HC_INTR]);
+	NL;
         TEXT("-----------------------------------------------------------------\n");
 	SPAN_GREY;
-        BOLD("   Count    %%Pid  State  Function\n");
+        BOLD("   Count    %%Pid  State  Function"); NL;
 	_SPAN;
 
         lineno++;
@@ -623,8 +623,9 @@ int print_pid_symbols(void *arg1, void *arg2)
 
 	if (print_pc_args.warnflagp && ((*print_pc_args.warnflagp) & WARNF_HAS_JOURNAL)) {
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_HAS_JOURNAL, _LNK_1_4_5);
-		kp_warning(globals->warnings, warn_indx, _LNK_1_4_5); T("\n");
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_5); NL;
 	}
+	NLt;
 
 	return 0;
 }

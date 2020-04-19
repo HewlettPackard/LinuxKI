@@ -69,9 +69,13 @@ unload_liki_module()
 	char command[255];
 
 	module =  "likit";
-	sprintf (command,  "rmmod %s >/dev/null 2>&1", module);
+	sprintf (command,  "/usr/sbin/rmmod %s >/dev/null 2>&1", module);
 	if ((ret = system(command)) != 0) {
-		return(-1);
+		/* try /sbin/rmmod */
+		sprintf (command,  "/sbin/rmmod %s >/dev/null 2>&1", module);
+		if ((ret = system(command)) != 0) {
+			return(-1);
+		}
 	}
 	liki_module_loaded = 0;
 
@@ -94,15 +98,18 @@ load_liki_module()
 	}
 
 	unload_liki_module(); 
-	sprintf (command,"insmod /lib/modules/%s/misc/likit.ko 2>/dev/null", utsname.release);
+	sprintf (command,"/usr/sbin/insmod /lib/modules/%s/misc/likit.ko 2>/dev/null", utsname.release);
 	if ((ret = system(command)) != 0) {
-		/* if the insmod fails, then we need to check the /opt/linuxki/modules
-		 * directory for the appropriate module.  We will first check
-		 * using the uname */
-
-		sprintf (command,  "insmod /opt/linuxki/likit.ko 2>/dev/null");
+		/* try /sbin/insmod */
+		sprintf (command,"/sbin/insmod /lib/modules/%s/misc/likit.ko 2>/dev/null", utsname.release);
 		if ((ret = system(command)) != 0) {
-			FATAL(1001, "Unable to load likit.ko module", NULL, -1);
+			/* if the insmod fails, then we need to check the /opt/linuxki/modules
+		 	 * directory for the appropriate module.  We will first check
+			 * using the uname */
+			sprintf (command,  "/usr/sbin/insmod /opt/linuxki/likit.ko 2>/dev/null");
+			if ((ret = system(command)) != 0) {
+				FATAL(1001, "Unable to load likit.ko module", NULL, -1);
+			}
 		}
 	}
 

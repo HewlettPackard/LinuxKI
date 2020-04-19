@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad l
-.TH kiinfo-kiwait 1 "6.0 - November 25, 2019" version "6.0"
+.TH kiinfo-kiwait 1 "6.1 - April 20, 2020" version "6.1"
 .SH NAME
 kiinfo  -  LinuxKI data collection and analysis engine
 
@@ -47,16 +47,6 @@ Report Top Tasks calling switch() frequently (default 10)
 List Top <nsym> kernel functions calling SWTCH
 .RE
 
-.B edus=<edus_file>
-.RS
-Specify output of "db2pd -edus" to get DB2 thread names.
-.RE
-
-.B csv
-.RS
-Create CSV report kiwait.*.csv
-.RE
-
 .B kitrace
 .RS
 Include formatted ASCII trace records prior to the standard report
@@ -70,6 +60,26 @@ Print absolute time (seconds since boot) for each record
 .B fmttime
 .RS
 Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
+.RE
+
+.B epochtime
+.RS
+Print time in seconds since the epoch (Jan 1, 1970)
+.RE
+
+.B edus=<filename>
+.RS
+Specify output of "db2pd -edus" to get DB2 thread names.
+.RE
+
+.B jstack=<filename>
+.RS
+Jstack output file to use (default jstack.<timestamp>)
+.RE
+
+.B csv
+.RS
+Create CSV report kiwait.*.csv
 .RE
 
 .SH EXAMPLES

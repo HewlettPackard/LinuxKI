@@ -113,7 +113,7 @@ map_elf(char *fname)
 	}
 
 	if (*(unsigned int *)elfp != ELF_MAGIC) {
-		if (!kilive && do_printf) fprintf (stderr, "map_elf: Invalid ELF MAGIC for %s - 0x%x (expected 0x%x)\n", fname, *(unsigned int *)elfp, ELF_MAGIC);
+		/* if (!kilive && do_printf) fprintf (stderr, "map_elf: Invalid ELF MAGIC for %s - 0x%x (expected 0x%x)\n", fname, *(unsigned int *)elfp, ELF_MAGIC); */
 		munmap(elfp, size);
 		close (elf_fd);
 		return NULL;

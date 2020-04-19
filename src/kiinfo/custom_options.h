@@ -184,31 +184,33 @@ Kparse(init_t *init, arg_t *arg)
 
 	SET(KPARSE_FULL_FLAG | ORACLE_FLAG | SCHED_FLAG | RUNQ_HISTOGRAM | SORT_FLAG);
 	SET_STAT(GLOBAL_STATS | PERCPU_STATS | PERPID_STATS | PERIRQ_STATS | PERTRC_STATS | COOP_STATS |
-		SLEEP_STATS | STKTRC_STATS | PERDSK_STATS | HT_STATS | DSKBLK_STATS | POWER_STATS | 
+		SLEEP_STATS | STKTRC_STATS | PERDSK_STATS | HT_STATS | POWER_STATS | 
 		IDLE_STATS | PERFD_STATS ); 
 
 	if (arg) {
             for (prop = arg->a_props; prop; prop = prop->p_nextp) {
-		if (strcmp("nooracle", prop->p_name) == 0) {
-			CLEAR(ORACLE_FLAG);
-		} else if (strcmp("kptree", prop->p_name) == 0) {
+		if (strcmp("kptree", prop->p_name) == 0) {
 			SET(KPTREE_FLAG);
-		} else if (strcmp("edus", prop->p_name) == 0) {
-			edusfname = prop->p_value.s;
-		} else if (strcmp("jstack", prop->p_name) == 0) {
-			jstackfname = prop->p_value.s;
+		} else if (strcmp("nooracle", prop->p_name) == 0) {
+			CLEAR(ORACLE_FLAG);
 		} else if (strcmp("nofutex", prop->p_name) == 0) {
 			CLEAR_STAT(FUTEX_STATS);
                 } else if (strcmp("mangle", prop->p_name) == 0) {
                         SET(MANGLE_FLAG);
+		} else if (strcmp("blkfrq", prop->p_name) == 0) {
+			SET_STAT(DSKBLK_STATS);
+		} else if (strcmp("lite", prop->p_name) == 0) {
+			CLEAR(KPARSE_FULL_FLAG);
 		} else if (strcmp("vis", prop->p_name) == 0) {
 			SET(VIS_FLAG);
+		} else if (strcmp("edus", prop->p_name) == 0) {
+			edusfname = prop->p_value.s;
+		} else if (strcmp("jstack", prop->p_name) == 0) {
+			jstackfname = prop->p_value.s;
                 } else if (strcmp("events", prop->p_name) == 0) {
                         add_filter_item_str(&trace_filter.f_events, prop->p_value.s);
                 } else if (strcmp("subsys", prop->p_name) == 0) {
                         add_filter_item_str(&trace_filter.f_subsys, prop->p_value.s);
-		} else if (strcmp("lite", prop->p_name) == 0) {
-			CLEAR(KPARSE_FULL_FLAG);
 		} else if (strcmp("help", prop->p_name) == 0) {
 			pw_option_usage(init, NULL, "kparse");
 		}
@@ -332,7 +334,7 @@ Kipid(init_t *init, arg_t *arg)
 	int ret;
 
 	tools_cnt++;
-	SET(SCHED_FLAG | SCALL_FLAG | FILE_FLAG | SOCK_FLAG | SORT_FLAG | DSK_FLAG | 
+	SET(SCHED_FLAG | SCALL_FLAG | FILE_FLAG | SOCK_FLAG | SORT_FLAG | DSK_FLAG | SCDETAIL_FLAG |
 	    FUTEX_FLAG | HC_FLAG | MEMORY_FLAG | CACHE_FLAG | SYSARGS_FLAG | SYSENTER_FLAG );
 	SET_STAT(PERPID_STATS | SLEEP_STATS | STKTRC_STATS | COOP_STATS | SCALL_STATS | PERDSK_STATS | PERFD_STATS | FUTEX_STATS );
 	tool_init_func = pid_init_func;
@@ -359,8 +361,6 @@ Kipid(init_t *init, arg_t *arg)
         		nsym = (uint32)prop->p_value.i;
 		} else if (strcmp("nfutex", prop->p_name) == 0) {
                         nfutex = (uint32)prop->p_value.i;
-                } else if (strcmp("scdetail", prop->p_name) == 0) {
-			SET(SCDETAIL_FLAG);
                 } else if (strcmp("npid", prop->p_name) == 0) {
         		npid = (uint32)prop->p_value.i;
                 } else if (strcmp("rqdetail", prop->p_name) == 0) {
@@ -472,8 +472,6 @@ Kilive(init_t *init, arg_t *arg)
 			edusfname = prop->p_value.s;
                 } else if (strcmp("msr", prop->p_name) == 0) {
                         SET(MSR_FLAG);
-		} else if (strcmp("nofutex", prop->p_name) == 0) {
-			CLEAR_STAT(FUTEX_STATS);
                 } else if (strcmp("mangle", prop->p_name) == 0) {
                         SET(MANGLE_FLAG);
 		} else if (strcmp("step", prop->p_name) == 0) {
@@ -746,15 +744,12 @@ Kifile(init_t *init, arg_t *arg)
 
 	tool_init_func = file_init_func; 
 
-	SET(SYSARGS_FLAG | SCALL_FLAG | SORT_FLAG );
-	SET_STAT(GLOBAL_STATS | PERPID_STATS | PERFD_STATS | SCALL_STATS);
+	SET(SYSARGS_FLAG | SCALL_FLAG | SORT_FLAG | SCDETAIL_FLAG );
+	SET_STAT(GLOBAL_STATS | PERPID_STATS | PERFD_STATS | SCALL_STATS | SLEEP_STATS);
 	if (arg) {
             for (prop = arg->a_props; prop; prop = prop->p_nextp) {
                 if (strcmp("nfile", prop->p_name) == 0) {
         		nfile = (uint32)prop->p_value.i;
-                } else if (strcmp("scdetail", prop->p_name) == 0) {
-			SET(SCDETAIL_FLAG);
-			SET_STAT(SLEEP_STATS);
 		} else if (strcmp("edus", prop->p_name) == 0) {
 			edusfname = prop->p_value.s;
 		} else if (strcmp("jstack", prop->p_name) == 0) {
@@ -789,7 +784,7 @@ Kisock(init_t *init, arg_t *arg)
 	int ret;
 	tools_cnt++;
 
-	SET(SOCK_FLAG | SCDETAIL_FLAG | SYSARGS_FLAG | SYSENTER_FLAG | SORT_FLAG);
+	SET(SOCK_FLAG | SCDETAIL_FLAG | SYSARGS_FLAG | SYSENTER_FLAG | SORT_FLAG | SCDETAIL_FLAG);
 	SET_STAT(GLOBAL_STATS | PERFD_STATS | SCALL_STATS);
 
 	tool_init_func = socket_init_func; 
@@ -798,8 +793,6 @@ Kisock(init_t *init, arg_t *arg)
             for (prop = arg->a_props; prop; prop = prop->p_nextp) {
                 if (strcmp("nsock", prop->p_name) == 0) {
         		nfile = (uint32)prop->p_value.i;
-                } else if (strcmp("scdetail", prop->p_name) == 0) {
-			SET(SCDETAIL_FLAG);
 		} else if (strcmp("edus", prop->p_name) == 0) {
 			edusfname = prop->p_value.s;
 		} else if (strcmp("jstack", prop->p_name) == 0) {
@@ -935,7 +928,7 @@ Kiall(init_t *init, arg_t *arg)
 	    HT_DBDI_HISTOGRAM | RUNQ_HISTOGRAM | KIALL_FLAG); 
 
 	SET_STAT(GLOBAL_STATS | PERPID_STATS | PERCPU_STATS | PERIRQ_STATS | PERTRC_STATS | COOP_STATS | SCALL_STATS |
-		SLEEP_STATS | STKTRC_STATS | PERDSK_STATS | POWER_STATS | DSKBLK_STATS | PERFD_STATS | HT_STATS | 
+		SLEEP_STATS | STKTRC_STATS | PERDSK_STATS | POWER_STATS | PERFD_STATS | HT_STATS | 
 		IDLE_STATS | FUTEX_STATS);
 
 	if (arg) {
@@ -966,6 +959,8 @@ Kiall(init_t *init, arg_t *arg)
 			edusfname = prop->p_value.s;
 		} else if (strcmp("jstack", prop->p_name) == 0) {
 			jstackfname = prop->p_value.s;
+		} else if (strcmp("blkfrq", prop->p_name) == 0) {
+			SET_STAT(DSKBLK_STATS);
 		} else if (strcmp("help", prop->p_name) == 0) {
 			pw_option_usage(init, NULL, "kiall");
 		}
@@ -1084,10 +1079,10 @@ flag_t help_flags[] = {
 flag_t dump_flags[] = {
   { "debug_dir",	"path", FA_ALL, FT_REG, "s"},
   { "dur",              "duration", FA_ALL, FT_REG, "i"},
+  { "events",		"default | all | <kitool> | <event>", FA_ALL, FT_REG, "s"},
+  { "subsys", 		"subsys", FA_ALL, FT_REG, "s"},
   { "bufsize",		"kb", FA_ALL, FT_REG | FT_HIDDEN, "i"},
   { "segments",         "segments", FA_ALL, FT_REG | FT_HIDDEN, "i"},
-  { "events",		"default | all | tool | event", FA_ALL, FT_REG, "s"},
-  { "subsys", 		"subsys", FA_ALL, FT_REG, "s"},
   { "nop",		NULL,      FA_ALL, FT_OPT | FT_HIDDEN, NULL },    /* ignore this option */
   { "help",        NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
@@ -1099,12 +1094,12 @@ flag_t likid_flags[] = {
   { "tgid",		"tgid",  FA_ALL, FT_REG , "i"},
   { "dev",		"dev",     FA_ALL, FT_REG,  "i" },
   { "cpu",		"cpu",     FA_ALL, FT_REG,  "i" },
+  { "dur",              "seconds", FA_ALL, FT_REG, "i"},
   { "msr",		NULL,      FA_ALL, FT_OPT, NULL },
-  { "nop",		NULL,      FA_ALL, FT_OPT | FT_HIDDEN, NULL },    /* ignore this option */
-  { "dur",              "duration", FA_ALL, FT_REG, "i"},
-  { "events",		"default | all | tool | event", FA_ALL, FT_REG, "s"},
-  { "subsys", 		"subsys", FA_ALL, FT_REG, "s"},
   { "sysignore",        "filename",   FA_ALL, FT_REG, "s" },
+  { "events",		"default | all | <kitool> | <event>", FA_ALL, FT_REG, "s"},
+  { "subsys", 		"subsys", FA_ALL, FT_REG, "s"},
+  { "nop",		NULL,      FA_ALL, FT_OPT | FT_HIDDEN, NULL },    /* ignore this option */
   { "help",        	NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
 };
@@ -1114,19 +1109,18 @@ flag_t likim_flags[] = {
   { 0,0,0,0,0 }
 };
 
-
 flag_t kparse_flags[] = {
-  { "nooracle",    NULL,   FA_ALL, FT_OPT, NULL },
   { "kptree",      NULL,   FA_ALL, FT_OPT, NULL },
+  { "nooracle",    NULL,   FA_ALL, FT_OPT, NULL },
+  { "nofutex",	   NULL,    FA_ALL, FT_OPT, NULL },
+  { "mangle",   NULL, FA_ALL, FT_OPT, NULL},
+  { "blkfrq",	   NULL,   FA_ALL, FT_OPT, NULL },
+  { "lite",        NULL,   FA_ALL, FT_OPT, NULL },
+  { "vis",         NULL,   FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "edus",        "filename", FA_ALL, FT_REG, "s"},
   { "jstack",      "filename", FA_ALL, FT_REG, "s"},
-  { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "mangle",   "mangle", FA_ALL, FT_OPT, NULL},
-  { "vis",         NULL,   FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "events",	"default | all | tool | event", FA_ALL, FT_REG, "s"},
+  { "events",	"default | all | <kitool> | <event>", FA_ALL, FT_REG, "s"},
   { "subsys", 	"subsys", FA_ALL, FT_REG, "s"},
-  { "lite",        NULL,   FA_ALL, FT_OPT, NULL },
   { "help",        NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
 };
@@ -1135,37 +1129,35 @@ flag_t pid_flags[] = {
   { "help",        NULL,    FA_ALL, FT_OPT, NULL},
   { "pid",         "pid",   FA_ALL, FT_REG, "i"},
   { "tgid",        "tgid",  FA_ALL, FT_REG, "i"},
-  { "scdetail",    NULL,    FA_ALL, FT_OPT, NULL},
-  { "nsym",   "nsym",    FA_ALL, FT_REG, "i" },
-  { "nfutex",   "nfutex",    FA_ALL, FT_REG, "i" },
-  { "npid",   "npid",    FA_ALL, FT_REG, "i" },
-  { "pidtree",     NULL,    FA_ALL, FT_OPT, NULL},
-  { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "mangle",   "mangle", FA_ALL, FT_OPT, NULL},
-  { "vis",         NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL},
-  { "vpct",        "vpct",  FA_ALL, FT_REG | FT_HIDDEN, "i" },
-  { "vdepth",      "vdepth",  FA_ALL, FT_REG | FT_HIDDEN, "i" },
-  { "rqhist",      NULL,    FA_ALL, FT_OPT, NULL },
-  { "oracle",	   NULL,    FA_ALL, FT_OPT, NULL },
+  { "nsym",	   "nsym",    FA_ALL, FT_REG, "i" },
+  { "nfutex",	   "nfutex",    FA_ALL, FT_REG, "i" },
+  { "npid",	   "npid",    FA_ALL, FT_REG, "i" },
   { "coop",        NULL,    FA_ALL, FT_OPT, NULL },
-  { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
+  { "mangle",	   NULL, FA_ALL, FT_OPT, NULL},
   { "msr",	   NULL,    FA_ALL, FT_OPT, NULL },
+  { "oracle",	   NULL,    FA_ALL, FT_OPT, NULL },
+  { "pidtree",     NULL,    FA_ALL, FT_OPT, NULL},
+  { "rqhist",      NULL,    FA_ALL, FT_OPT, NULL },
+  { "nofutex",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "kitrace", 	   NULL,    FA_ALL, FT_OPT, NULL},
   { "nosysenter",  NULL,    FA_ALL, FT_OPT, NULL },
   { "abstime", NULL, FA_ALL, FT_OPT, NULL },
   { "fmttime", NULL, FA_ALL, FT_OPT, NULL },
   { "epochtime", NULL, FA_ALL, FT_OPT, NULL },
-  { "sysignore",        "filename",   FA_ALL, FT_REG, "s" },
+  { "sysignore",   "filename",   FA_ALL, FT_REG, "s" },
   { "objfile",     "filename",    FA_ALL, FT_REG, "s" },
-  { "events",		"default | all | tool | event", FA_ALL, FT_REG, "s"},
+  { "edus",        "filename", FA_ALL, FT_REG, "s"},
+  { "jstack",      "filename", FA_ALL, FT_REG, "s"},
+  { "events",		"default | all | <kitool> | <event>", FA_ALL, FT_REG, "s"},
   { "subsys", 		"subsys", FA_ALL, FT_REG, "s"},
-  { "report",	   "[-]asxhfopnm\n\t\t\t\t- - Omit Reports\n\t\t\t\ta - Scheduler Activity Report\n\t\t\t\ts - System Call Report\n\t\t\t\tx - Futex Report\n\t\t\t\th - CPU Activity Report\n\t\t\t\tf - File Activity Report\n\t\t\t\to - Network/Socket Activity Report\n\t\t\t\tp - Physical Volume Report\n\t\t\t\tm - Memory Report\n ", FA_ALL, FT_REG, "s"}, 
+  { "report",	   "[-]asxhfopnm\n\t\t\t\t- - Omit Reports\n\t\t\t\ta - Scheduler Activity Report\n\t\t\t\ts - System Call Report\n\t\t\t\tx - Futex Report\n\t\t\t\th - CPU Activity Report\n\t\t\t\tf - File Activity Report\n\t\t\t\to - Network/Socket Activity Report\n\t\t\t\tp - Physical Volume Report\n\t\t\t\tm - Memory Report", FA_ALL, FT_REG, "s"}, 
 /*
   { "rqdetail",    "usecs",    FA_ALL, FT_OPT, "i" },
 */
-  { "edus",        "filename", FA_ALL, FT_REG, "s"},
-  { "jstack",      "filename", FA_ALL, FT_REG, "s"},
+  { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
+  { "vis",         NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL},
+  { "vpct",        "vpct",  FA_ALL, FT_REG | FT_HIDDEN, "i" },
+  { "vdepth",      "vdepth",  FA_ALL, FT_REG | FT_HIDDEN, "i" },
   { 0,0,0,0,0 }
 };
 
@@ -1173,19 +1165,16 @@ flag_t dock_flags[] = {
   { "help",        NULL,    FA_ALL, FT_OPT, NULL},
   { "npid",   "npid",    FA_ALL, FT_REG, "i" },
   { "docktree",     NULL,    FA_ALL, FT_OPT, NULL},
-  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { 0,0,0,0,0 }
 };
 
 flag_t live_flags[] = {
   { "help",         NULL,   FA_ALL, FT_OPT, NULL },
+  { "msr",	   NULL,    FA_ALL, FT_OPT, NULL },
+  { "mangle",      NULL, FA_ALL, FT_OPT, NULL},
+  { "step",	   "<time_in_secs>",  FA_ALL, FT_OPT, "s" },
   { "sysignore",   "filename", FA_ALL, FT_REG, "s" },
   { "edus",        "filename", FA_ALL, FT_REG, "s"},  
-  { "msr",	   NULL,    FA_ALL, FT_OPT, NULL },
-  { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "mangle",   "mangle", FA_ALL, FT_OPT, NULL},
-  { "step",	   "<time_in_secs>",  FA_ALL, FT_OPT, "s" },
   { 0,0,0,0,0 }
 };
 
@@ -1198,18 +1187,17 @@ flag_t dsk_flags[] = {
   { "percpu",  	  NULL,  FA_ALL, FT_OPT, NULL },
   { "nodev",      NULL,  FA_ALL, FT_OPT, NULL },
   { "nomapper",   NULL,  FA_ALL, FT_OPT, NULL },
-  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "mpath_detail", NULL, FA_ALL, FT_OPT, NULL },
-  { "bkfname",     "filename",   FA_ALL, FT_REG, "s" },
-  { "detail",   "detail (default 1)",    FA_ALL, FT_REG, "i" },
-  { "edus",        "filename", FA_ALL, FT_REG, "s"},
-  { "jstack",      "filename", FA_ALL, FT_REG, "s"},
-  { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
-  { "vis",         NULL,   FA_ALL, FT_OPT | FT_HIDDEN, NULL },
+  { "detail",   "<0|1> (default 1)",    FA_ALL, FT_REG, "i" },
   { "kitrace", 	   NULL,    FA_ALL, FT_OPT, NULL},
   { "abstime", NULL, FA_ALL, FT_OPT, NULL },
   { "fmttime", NULL, FA_ALL, FT_OPT, NULL },
   { "epochtime", NULL, FA_ALL, FT_OPT, NULL },
+  { "bkfname",     "filename",   FA_ALL, FT_REG, "s" },
+  { "edus",        "filename", FA_ALL, FT_REG, "s"},
+  { "jstack",      "filename", FA_ALL, FT_REG, "s"},
+  { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
+  { "vis",         NULL,   FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { 0,0,0,0,0 }
 };
 
@@ -1220,56 +1208,54 @@ flag_t prof_flags[] = {
   { "cpu",    "cpu",     FA_ALL, FT_REG,  "i" },
   { "npid",   "npid",    FA_ALL, FT_REG, "i" },
   { "nsym",   "nsym",    FA_ALL, FT_REG, "i" },
-  { "objfile",     "filename",    FA_ALL, FT_REG, "s" },
-  { "edus",        "filename", FA_ALL, FT_REG, "s"},
-  { "jstack",      "filename", FA_ALL, FT_REG, "s"},
   { "kitrace", 	   NULL,    FA_ALL, FT_OPT, NULL},
   { "abstime", NULL, FA_ALL, FT_OPT, NULL },
   { "fmttime", NULL, FA_ALL, FT_OPT, NULL },
   { "epochtime", NULL, FA_ALL, FT_OPT, NULL },
+  { "objfile",     "filename",    FA_ALL, FT_REG, "s" },
+  { "edus",        "filename", FA_ALL, FT_REG, "s"},
+  { "jstack",      "filename", FA_ALL, FT_REG, "s"},
   { 0,0,0,0,0 }
 };
 
 flag_t wait_flags[] = {
   { "npid",   "npid",    FA_ALL, FT_REG, "i" },
   { "nsym",   "nsym",    FA_ALL, FT_REG, "i" },
-  { "edus",        "filename", FA_ALL, FT_REG, "s"},
-  { "jstack",      "filename", FA_ALL, FT_REG, "s"},
-  { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "kitrace", 	   NULL,    FA_ALL, FT_OPT, NULL},
   { "abstime", NULL, FA_ALL, FT_OPT, NULL },
   { "fmttime", NULL, FA_ALL, FT_OPT, NULL },
   { "epochtime", NULL, FA_ALL, FT_OPT, NULL },
+  { "edus",        "filename", FA_ALL, FT_REG, "s"},
+  { "jstack",      "filename", FA_ALL, FT_REG, "s"},
+  { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "help",        NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
 };
 
 flag_t file_flags[] = {
   { "nfile",   "nfile",    FA_ALL, FT_REG, "i" },
-  { "scdetail",    NULL,    FA_ALL, FT_OPT, NULL},
-  { "edus",        "filename", FA_ALL, FT_REG, "s"},
-  { "jstack",      "filename", FA_ALL, FT_REG, "s"},
-  { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "kitrace", 	   NULL,    FA_ALL, FT_OPT, NULL},
   { "nosysenter",  NULL,    FA_ALL, FT_OPT, NULL },
   { "abstime", NULL, FA_ALL, FT_OPT, NULL },
   { "fmttime", NULL, FA_ALL, FT_OPT, NULL },
   { "epochtime", NULL, FA_ALL, FT_OPT, NULL },
-  { "sysignore",        "filename",   FA_ALL, FT_REG, "s" },
+  { "sysignore",   "filename",   FA_ALL, FT_REG, "s" },
+  { "edus",        "filename", FA_ALL, FT_REG, "s"},
+  { "jstack",      "filename", FA_ALL, FT_REG, "s"},
+  { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "help",        NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
 };
 
 flag_t sock_flags[] = {
   { "nsock",   "nsock",    FA_ALL, FT_REG, "i" },
-  { "scdetail",    NULL,    FA_ALL, FT_OPT, NULL},
-  { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "kitrace", 	   NULL,    FA_ALL, FT_OPT, NULL},
   { "nosysenter",  NULL,    FA_ALL, FT_OPT, NULL },
   { "abstime", NULL, FA_ALL, FT_OPT, NULL },
   { "fmttime", NULL, FA_ALL, FT_OPT, NULL },
   { "epochtime", NULL, FA_ALL, FT_OPT, NULL },
   { "sysignore",        "filename",   FA_ALL, FT_REG, "s" },
+  { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "help",        NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
 };
@@ -1278,14 +1264,14 @@ flag_t futex_flags[] = {
   { "uaddr",     "uaddr",  FA_ALL, FT_REG, "i" },
   { "nfutex",   "nfutex",    FA_ALL, FT_REG, "i" },
   { "npid",   "npid",    FA_ALL, FT_REG, "i" },
-  { "edus",        "filename", FA_ALL, FT_REG, "s"},
-  { "jstack",      "filename", FA_ALL, FT_REG, "s"},
   { "kitrace", 	   NULL,    FA_ALL, FT_OPT, NULL},
   { "nosysenter",  NULL,    FA_ALL, FT_OPT, NULL },
   { "abstime", NULL, FA_ALL, FT_OPT, NULL },
   { "fmttime", NULL, FA_ALL, FT_OPT, NULL },
   { "epochtime", NULL, FA_ALL, FT_OPT, NULL },
-  { "sysignore",        "filename",   FA_ALL, FT_REG, "s" },
+  { "sysignore",   "filename",   FA_ALL, FT_REG, "s" },
+  { "edus",        "filename", FA_ALL, FT_REG, "s"},
+  { "jstack",      "filename", FA_ALL, FT_REG, "s"},
   { "help",        NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
 };
@@ -1295,77 +1281,75 @@ flag_t trace_flags[] = {
   { "tgid",    "tgid",     FA_ALL, FT_REG,  "i" },
   { "cpu",    "cpu",     FA_ALL, FT_REG,  "i" },
   { "dev",    "dev",     FA_ALL, FT_REG,  "i" },
-  { "sysenter",    NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "nosysenter",  NULL,    FA_ALL, FT_OPT, NULL },
-  { "sysargs",     NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "nosysargs",   NULL,    FA_ALL, FT_OPT, NULL },
-  { "printcmd",    NULL,    FA_ALL, FT_OPT, NULL },
-  { "objfile",     "filename",    FA_ALL, FT_REG, "s" },
   { "nomapper", NULL, FA_ALL, FT_OPT, NULL },
   { "nomarker", NULL, FA_ALL, FT_OPT, NULL },
-  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "mangle",   "mangle", FA_ALL, FT_OPT, NULL},
+  { "mangle",   NULL, FA_ALL, FT_OPT, NULL},
+  { "msr",	   NULL,    FA_ALL, FT_OPT, NULL },
+  { "printcmd",    NULL,    FA_ALL, FT_OPT, NULL },
+  { "seqcnt", NULL, FA_ALL, FT_OPT, NULL },
   { "abstime", NULL, FA_ALL, FT_OPT, NULL },
   { "fmttime", NULL, FA_ALL, FT_OPT, NULL },
   { "epochtime", NULL, FA_ALL, FT_OPT, NULL },
-  { "seqcnt", NULL, FA_ALL, FT_OPT, NULL },
-  { "events",		"default | all | tool | event", FA_ALL, FT_REG, "s"},
-  { "subsys", 		"subsys", FA_ALL, FT_REG, "s"},
-  { "sysignore",        "filename",   FA_ALL, FT_REG, "s" },
+  { "sysignore",   "filename",   FA_ALL, FT_REG, "s" },
+  { "objfile",     "filename",    FA_ALL, FT_REG, "s" },
   { "edus",        "filename", FA_ALL, FT_REG, "s"},
   { "jstack",      "filename", FA_ALL, FT_REG, "s"},
+  { "events",		"default | all | <kitool> | <event>", FA_ALL, FT_REG, "s"},
+  { "subsys", 		"subsys", FA_ALL, FT_REG, "s"},
   { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
-  { "msr",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "info",	NULL,     FA_ALL, FT_OPT | FT_HIDDEN, NULL },
+  { "sysenter",    NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
+  { "sysargs",     NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "help",        NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
 };
 
 flag_t runq_flags[] = {
   { "npid",   "npid",    FA_ALL, FT_REG, "i" },
-  { "itime",   "itime",    FA_ALL, FT_REG | FT_HIDDEN, "i" },
-  { "rqpid",   "rqpid",    FA_ALL, FT_REG, "i" },
-  { "rqwait",   "rqwait",    FA_ALL, FT_REG, "i" },
-  { "events",		"default | all | tool | event", FA_ALL, FT_REG, "s"},
-  { "subsys", 		"subsys", FA_ALL, FT_REG, "s"},
-  { "edus",        "filename", FA_ALL, FT_REG, "s"},
-  { "jstack",      "filename", FA_ALL, FT_REG, "s"},
-  { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
+  { "msr",	   NULL,    FA_ALL, FT_OPT, NULL },
+  { "rqpid",   "PID",    FA_ALL, FT_REG, "i" },
+  { "rqwait",   "usecs",    FA_ALL, FT_REG, "i" },
   { "kitrace", 	   NULL,    FA_ALL, FT_OPT, NULL},
   { "abstime", NULL, FA_ALL, FT_OPT, NULL },
   { "fmttime", NULL, FA_ALL, FT_OPT, NULL },
   { "epochtime", NULL, FA_ALL, FT_OPT, NULL },
-  { "msr",	   NULL,    FA_ALL, FT_OPT, NULL },
+  { "edus",        "filename", FA_ALL, FT_REG, "s"},
+  { "jstack",      "filename", FA_ALL, FT_REG, "s"},
+  { "events",		"default | all | <kitool> | <event>", FA_ALL, FT_REG, "s"},
+  { "subsys", 		"subsys", FA_ALL, FT_REG, "s"},
+  { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
+  { "itime",   "itime",    FA_ALL, FT_REG | FT_HIDDEN, "i" },
   { "help",        NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
 };
 
 flag_t clparse_flags[] = {
-  { "top",   "num",    FA_ALL, FT_REG, "i" },
+  { "top",	   "num",    FA_ALL, FT_REG, "i" },
   { "nooracle",    NULL,   FA_ALL, FT_OPT, NULL },
+  { "nofutex",	   NULL,    FA_ALL, FT_OPT, NULL },
+  { "mangle",      NULL, FA_ALL, FT_OPT, NULL},
   { "cltree",      NULL,   FA_ALL, FT_OPT, NULL },
   { "csv",         NULL,   FA_ALL, FT_OPT, NULL },
   { "vis",         NULL,   FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "mangle",   "mangle", FA_ALL, FT_OPT, NULL},
   { "help",        NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
 };
 
 flag_t kiall_flags[] = {
   { "oracle",	   NULL,    FA_ALL, FT_OPT, NULL },
-  { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
+  { "nofutex",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "mangle",  	   NULL,    FA_ALL, FT_OPT, NULL},
+  { "blkfrq",	   NULL,   FA_ALL, FT_OPT, NULL },
+  { "edus",        "filename", FA_ALL, FT_REG, "s"},
+  { "jstack",      "filename", FA_ALL, FT_REG, "s"},
   { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "vis",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "vpct",        "vpct",    FA_ALL, FT_OPT | FT_HIDDEN, "i"},
   { "vdepth",      "vdepth",  FA_ALL, FT_OPT | FT_HIDDEN, "i"},
   { "vint",        "vint",    FA_ALL, FT_OPT | FT_HIDDEN, "i"},
-  { "hthr",  "num_threads",    FA_ALL, FT_OPT | FT_HIDDEN, "i"},
-  { "edus",        "filename", FA_ALL, FT_REG, "s"},
-  { "jstack",      "filename", FA_ALL, FT_REG, "s"},
-  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
+  { "hthr",        "num_threads",    FA_ALL, FT_OPT | FT_HIDDEN, "i"},
   { "help",        NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
 };
@@ -1392,7 +1376,6 @@ option_t otab[] =
   { "kiall",     NULL,  NULL,    kiall_flags, OT_CONF, 0, NULL, Kiall },
   { "kilive",     "live",  NULL,    live_flags , OT_CONF,    0, NULL, Kilive     },
   { "clparse",    "cl",  NULL,    clparse_flags, OT_CONF,    0, NULL, Clparse    }, 
-  { "help",      "h",  NULL,    help_flags, OT_CONF,     0, NULL, Usage      },
   { "html",     NULL,  NULL,          NULL, OT_CONF,     0, NULL, Html       },   
   { "timestamp", "ts", " <timestamp>", NULL, OT_CONF | OT_MANARG,   0, "s",  Timestamp  },
   { "starttime", "start", " <time_in_secs>", NULL, OT_CONF | OT_MANARG, 0, "s", Starttime },
@@ -1402,5 +1385,6 @@ option_t otab[] =
   { "nosort",     "ns", NULL, NULL,         OT_CONF | OT_HIDDEN,     0, NULL, Nosort     },
   { "objdump", "sd", NULL,   NULL, OT_CONF | OT_HIDDEN, 0, NULL, Objdump },
   { "Debug",	 "D",  NULL,	NULL,	    OT_CONF | OT_HIDDEN | OT_OPTARG,   0, "i",  Debug      },
+  { "help",      "h",  NULL,    help_flags, OT_CONF,     0, NULL, Usage      },
   { 0, 0, 0, 0, 0, 0, 0, 0 }  /* End of option list */
 };

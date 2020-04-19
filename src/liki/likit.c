@@ -99,6 +99,11 @@ Confused about platform!
 #endif
 #include "liki.h"
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,5,0)
+#define KTIME_GET       ktime_get_real_ts64
+#else
+#define KTIME_GET       getnstimeofday
+#endif
 
 /* Regular spinlocks may sleep in an RT kernel. From a trace 
  * perspective that is bad for a number of reasons. For those
@@ -268,6 +273,8 @@ STATIC int 	tt_fork_hook_installed = FALSE;
 static struct socket *(*sockfd_lookup_light_fp)(int, int *, int *);
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
 unsigned int (*stack_trace_save_regs_fp)(struct pt_regs*, unsigned long *, unsigned int, unsigned int);
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4,18,0) && (defined RHEL82)
+unsigned int (*stack_trace_save_regs_fp)(struct pt_regs*, unsigned long *, unsigned int, unsigned int);
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
 static struct stack_trace *(*save_stack_trace_regs_fp)(struct pt_regs*, struct stack_trace*);
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
@@ -399,6 +406,11 @@ struct tp_struct tp_table[];
 #define SYSCALL_GET_ARGUMENTS(a1, a2, a3, a4, a5) syscall_get_arguments(a1, a2, a5)
 #define synchronize_sched() synchronize_rcu()
 #else
+
+#if (defined RHEL82) && LINUX_VERSION_CODE >= KERNEL_VERSION(4,18,0)
+#define synchronize_sched() synchronize_rcu()
+#endif
+
 #define SYSCALL_GET_ARGUMENTS(a1, a2, a3, a4, a5) syscall_get_arguments(a1, a2, a3, a4, a5)
 #endif
 
@@ -463,7 +475,6 @@ struct tp_struct tp_table[];
 #ifdef CONFIG_X86_64
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
-
 struct stack_trace {
 	unsigned int nr_entries, max_entries;
 	unsigned long *entries;
@@ -476,13 +487,23 @@ void save_stack_trace_regs(struct stack_trace *st, struct pt_regs *regs)
 }
 
 #define STACK_TRACE(DATA, REGS)						\
-	save_stack_trace_regs(DATA, REGS);
+	save_stack_trace_regs(DATA, NULL);
 
-#elif (defined SLES15)
+#elif (defined RHEL82)
+
+void save_stack_trace_regs(struct stack_trace *st, struct pt_regs *regs)
+{
+	st->nr_entries = stack_trace_save_regs_fp(regs, st->entries, st->max_entries, st->skip);
+}
+
+#define STACK_TRACE(DATA, REGS)						\
+	save_stack_trace_regs(DATA, NULL);
+
+#elif (defined RHEL8)
 #define STACK_TRACE(DATA, REGS)						\
 	save_stack_trace_regs_fp(NULL, DATA);
 
-#elif (defined RHEL8)
+#elif (defined SLES15)
 #define STACK_TRACE(DATA, REGS)						\
 	save_stack_trace_regs_fp(NULL, DATA);
 
@@ -3591,11 +3612,11 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
 		 * here. Rather than give you the first so many bytes, you'll
 		 * get nothing if you have rediculously long arguments. Frankly
 		 * it was just too complicated to apportion N bytes across a
-		 * timeval and three bitmasks; mistakes may be made.
+		 * TIMESPEC and three bitmasks; mistakes may be made.
 		 */
 
 		fds_bytes = (args_tmp[0]/8) + (args_tmp[0] & 07ULL ? 1 : 0);
-		vldsz = sizeof(struct timeval) + (3 * fds_bytes);
+		vldsz = sizeof(struct TIMESPEC) + (3 * fds_bytes);
 
 		if (vldsz > MAX_VLDATA_LEN)
 			goto scentry_skip_vldata;
@@ -3615,10 +3636,10 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
   		 * for the timeout pointer; copy_from_user will return non-zero here
   		 * and we'll write zeros into the trace record - we will not barf.
   		 */
-		if (copy_from_user(p, (const char __user *)args_tmp[4], sizeof(struct timeval)) != 0)
-			memset(p, 0, sizeof(struct timeval));
+		if (copy_from_user(p, (const char __user *)args_tmp[4], sizeof(struct TIMESPEC)) != 0)
+			memset(p, 0, sizeof(struct TIMESPEC));
 
-		p += sizeof(struct timeval);
+		p += sizeof(struct TIMESPEC);
 
 		/* then each of the variable length fd sets; infds */
 		if (copy_from_user(p, (const char __user *)args_tmp[1], fds_bytes) != 0)
@@ -3674,7 +3695,7 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
 		SYSCALL_GET_ARGUMENTS(current, regs, 0, 6, args_tmp);
 
 		fds_bytes = (args_tmp[0]/8) + (args_tmp[0] & 07ULL ? 1 : 0);
-		vldsz = sizeof(struct timespec) + (3 * fds_bytes);
+		vldsz = sizeof(struct TIMESPEC) + (3 * fds_bytes);
 
 		if (vldsz > MAX_VLDATA_LEN)
 			goto scentry_skip_vldata;
@@ -3687,10 +3708,10 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
 
 		p = vldtmp;
 
-		if (copy_from_user(p, (const char __user *)args_tmp[4], sizeof(struct timespec)) != 0)
-			memset(p, 0, sizeof(struct timespec));
+		if (copy_from_user(p, (const char __user *)args_tmp[4], sizeof(struct TIMESPEC)) != 0)
+			memset(p, 0, sizeof(struct TIMESPEC));
 
-		p += sizeof(struct timespec);
+		p += sizeof(struct TIMESPEC);
 
 		if (copy_from_user(p, (const char __user *)args_tmp[1], fds_bytes) != 0)
 			memset(p, 0, fds_bytes);
@@ -3785,7 +3806,7 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
 		SYSCALL_GET_ARGUMENTS(current, regs, 0, 4, args_tmp);
 
 		fdssz = sizeof(struct pollfd) * args_tmp[1];
-		vldsz = fdssz + sizeof(struct timespec);
+		vldsz = fdssz + sizeof(struct TIMESPEC);
 
 		if (vldsz > MAX_VLDATA_LEN)
 			goto scentry_skip_vldata;
@@ -3798,10 +3819,10 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
 		p = vldtmp;
 
 		/* timeout goes in first */
-		if (copy_from_user(p, (const char __user *)args_tmp[2], sizeof(struct timespec)) != 0)
-			memset(p, 0, sizeof(struct timespec));
+		if (copy_from_user(p, (const char __user *)args_tmp[2], sizeof(struct TIMESPEC)) != 0)
+			memset(p, 0, sizeof(struct TIMESPEC));
 
-		p += sizeof(struct timespec);
+		p += sizeof(struct TIMESPEC);
 
 		/* then the fdsets */
 		if (copy_from_user(p, (const char __user *)args_tmp[0], fdssz) != 0)
@@ -5581,7 +5602,7 @@ startup_trace(void)
 	POPULATE_COMMON_FIELDS(t, TT_STARTUP, TRACE_SIZE(startup_t), UNORDERED);
 
 	before = liki_global_clock(tb, ORDERED);
-	getnstimeofday(&(t->walltime));
+	KTIME_GET(&(t->walltime));
 	after = liki_global_clock(tb, ORDERED);
 	t->hrtime = ((after - before)/2) + before;
 
@@ -6898,7 +6919,7 @@ liki_initialize(void)
 	int	i;
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,3,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,7,0)
 	printk(KERN_INFO "LiKI: unsupported kernel version\n");
 	return(-EINVAL);
 #else
@@ -6930,6 +6951,12 @@ liki_initialize(void)
 	}
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
+	if ((stack_trace_save_regs_fp = (void *)kallsyms_lookup_name("stack_trace_save_regs")) == 0) {
+		printk(KERN_WARNING "LiKI: cannot find stack_trace_save_regs()\n");
+		printk(KERN_WARNING "LiKI: tracing initialization failed\n");
+		return(-EINVAL);
+	}
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4,18,0) && (defined RHEL82)
 	if ((stack_trace_save_regs_fp = (void *)kallsyms_lookup_name("stack_trace_save_regs")) == 0) {
 		printk(KERN_WARNING "LiKI: cannot find stack_trace_save_regs()\n");
 		printk(KERN_WARNING "LiKI: tracing initialization failed\n");

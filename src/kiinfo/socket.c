@@ -171,7 +171,6 @@ socket_print_detail(sd_stats_t *statsp, void **syscallp, struct sockaddr_in6 *ls
         if (scallflagp == NULL) return 0;
         if (*scallflagp == 0) return 0;
 
-	printf("\n");
 	if (lsock) {
 		BOLD ("L=");
 		print_ip_port_v6(lsock, 0, NULL);
@@ -202,8 +201,8 @@ socket_print_detail(sd_stats_t *statsp, void **syscallp, struct sockaddr_in6 *ls
                                         (int (*)(void *, void *))print_syscall_info,
                                         (int (*)()) syscall_sort_by_time,
                                         0, &vararg);
-		TEXT("\n");
         }
+	NL;
 	return 0;
 }
 int 

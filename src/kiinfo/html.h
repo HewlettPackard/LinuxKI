@@ -38,12 +38,16 @@ extern int font_color;
 
 #define UL  if (HTML) printf ("<ul>")
 #define LI  if (HTML) printf ("<li>")
-#define NL  printf("\n");
+#define NL  printf("\n")
+#define DNL if (dockfile) fprintf (dockfile, "\n"); NL;
+#define PNL if (pidfile) fprintf (pidfile, "\n"); NL;
+
 #define NLt if (!HTML) printf ("\n");
 
 #define _A  if (HTML) printf ("</a>")
 #define _UL if (HTML) printf ("</ul>")
 #define _LI if (HTML) printf ("</li>")
+#define _PRE if (HTML) printf ("</pre>")
 
 #define ANM(l) if (HTML) printf ("<a name=""%s""></a>", l )
 
@@ -55,18 +59,19 @@ extern int font_color;
 
 /*  this macro is for warnings */
 
-#define GREEN_TABLE if (HTML) printf("<table border=0 cellpadding=0 cellspacing=0 width=\"100%%\" bgcolor=\"#8CFF8C\"><tr><td>")
-#define BLUE_TABLE if (HTML) printf("<table border=0 cellpadding=0 cellspacing=0 width=\"100%%\" bgcolor=\"#CCCCFF\"><tr><td>")
-#define ORANGE_TABLE if (HTML) printf("<table border=0 cellpadding=0 cellspacing=0 width=\"100%%\" bgcolor=\"#FFD1A4\"><tr><td>")
-#define _TABLE	if (HTML) printf("</td></tr></table>"); else printf("\n");
+#define GREEN_TABLE if (HTML) printf("<table border=0 cellpadding=0 cellspacing=0 width=\"100%%\" bgcolor=\"#8CFF8C\"><tr><td>"); else printf ("\n");
+#define BLUE_TABLE if (HTML) printf("<table border=0 cellpadding=0 cellspacing=0 width=\"100%%\" bgcolor=\"#CCCCFF\"><tr><td>"); else printf ("\n");
+#define ORANGE_TABLE if (HTML) printf("<table border=0 cellpadding=0 cellspacing=0 width=\"100%%\" bgcolor=\"#FFD1A4\"><tr><td>"); else printf ("\n");
+#define _TABLE	if (HTML) printf("</td></tr></table>"); else printf("\n\n");
 
 #define SPAN_GREY if (HTML && ((lineno & 1) == 0)) printf("<span style=\"background-color: #EEEEEE\">") 
 #define _SPAN	if (HTML && ((lineno & 1) == 0)) printf("</span>");  
 
-#define CAPTION_GREY if (HTML) printf("<TABLE style=\"padding:0px 0px 0px 0px;border-collapse:collapse;font-family:monospace;font-size:10pt;white-space:nowrap;\"><CAPTION style=\"text-align: left;background-color: #DDDDDD;\">");
-#define _CAPTION if (HTML) printf("</CAPTION></TABLE>"); else printf ("\n");
+#define CAPTION_GREY if (HTML)  printf("<span style=\"background-color: #DDDDDD\">") 
+#define _CAPTION if (HTML) printf("</span>\n"); else printf ("\n");
 
-#define FONT_SIZE(size)  if (HTML) printf("<FONT size=%d>", size);
+#define FONT_SIZE(size)
+/* #define FONT_SIZE(size)  if (HTML) printf("<FONT size=%d>", size); */
 #define BLACK_FONT if (HTML && font_color) { printf("</font>"); font_color=0; }
 #define RED_FONT if (HTML) {font_color=0xcc0000; printf("<font color=\"#CC0000\">");}
 #define BROWN_FONT if (HTML) {font_color=0x996600; printf("<font color=\"#996600\">");}
@@ -95,7 +100,7 @@ extern int font_color;
 	printf("<style type=\"text/css\">\n"); \
 	printf("body {font-family: courier new, courier, serif;}\n"); \
 	printf("p {font-family: arial, sans-serif;}\n"); \
-	printf("PRE {font-family: monospace, courier new, courier; font-size:10pt;}\n"); \
+	printf("PRE {font-family: monospace, courier new, courier; font-size:12pt; white-space: pre; margin: 0;}\n"); \
 	printf("table {padding: 0px 0px 0px 0px;}\n"); \
 	printf("th {padding: 0px 4px 0px 4px;}\n"); \
 	printf("td {padding: 2px 3px 2px 3px;}\n"); \

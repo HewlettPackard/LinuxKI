@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad l
-.TH kiinfo-kifutex 1 "6.0 - November 25, 2019" version "6.0"
+.TH kiinfo-kifutex 1 "6.1 - April 20, 2020" version "6.1"
 .SH NAME
 kiinfo  -  LinuxKI data collection and analysis engine
 
@@ -38,14 +38,14 @@ Limit output only list top nfutex futexes
 Limit per-futex details to list npids for each futex
 .RE
 
-.B sysignore=<file>
-.RS
-Specify file of system calls to ignore when tracing (live tracing only)
-.RE
-
 .B kitrace
 .RS
 Include formatted ASCII trace records prior to the standard report
+.RE
+
+.B nosysenter
+.RS
+Do not print syscall entry records when using kitrace flag
 .RE
 
 .B abstime
@@ -58,9 +58,24 @@ Print absolute time (seconds since boot) for each record
 Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
 .RE
 
-.B nosysenter
+.B epochtime
 .RS
-Do not print syscall entry records when using kitrace flag
+Print time in seconds since the epoch (Jan 1, 1970)
+.RE
+
+.B sysignore=<filename>
+.RS
+Do not trace system calls listed in the <filename>.  This can reduce trace data by eliminating frequently called system calls, such as getrusage(), ctime(), etc. 
+.RE
+
+.B edus=<filename>
+.RS
+Specify output of "db2pd -edus" to get DB2 thread names
+.RE
+
+.B jstack=<filename>
+.RS
+Jstack output file to use (default jstack.<timestamp>)
 .RE
 
 .SH EXAMPLES

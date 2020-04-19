@@ -694,7 +694,7 @@ print_slp_info_live (void *arg1, void *arg2)
                         SECS(slpinfop->sleep_time),
                         MSECS(slpinfop->sleep_time / slpinfop->count),
                         MSECS(slpinfop->max_time),
-                        idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr);
+                        idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr); 
         return 0;
 }
 

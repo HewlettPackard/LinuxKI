@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad l
-.TH kiinfo-kipid 1 "6.0 - November 25, 2019" version "6.0"
+.TH kiinfo-kipid 1 "6.1 - April 20, 2020" version "6.1"
 .SH NAME
 kiinfo  -  LinuxKI data collection and analysis engine
 
@@ -45,7 +45,7 @@ Examines the HARDCLOCK traces to identify where the threads are taking CPU time.
 
 .B ******** SYSTEM CALL REPORT ********
 
-Report lists each system call and how much time was spent in each system call.   If the scdetail flag is used, then for each system call, the amount of time spent in sleeping, running, and on the CPU runq is also printed.   If the trace data is from LiKi, then the SLEEP time is broken out into kernel functions where sleep is called. 
+Report lists each system call and how much time was spent in each system call.   For each system call, the amount of time spent in sleeping, running, and on the CPU runq is also printed.   If the trace data is from LiKi, then the SLEEP time is broken out into kernel functions where sleep is called. 
 
 .B ******** FUTEX REPORT ********
 
@@ -53,7 +53,7 @@ Reports on activity on the top Fast User-space muTEXes (futex) for the process. 
 
 .B ******** FILE ACTIVITY REPORT ********
 
-Reports system call activity for each file.   If scdetail flag is set, then additional information for each system call is listed, similar to the SYSTEM CALL REPORT.
+Reports system call activity for each file.   Addditional information for each system call is listed, similar to the SYSTEM CALL REPORT.
 
 .B ******** PHYSICAL DEVICE REPORT ********
 
@@ -83,11 +83,6 @@ Filter on pid
 Filter on task group ID
 .RE
 
-.B scdetail 
-.RS
-Produce additional detail information on each system call such as how long the system call was running, sleeping, or on the run queue
-.RE
-
 .B nsym=<nsym> 
 .RS
 Reports <nsym> kernel functions for switch and hardclock 
@@ -104,6 +99,26 @@ Limit the number of futexes listed for each task (default 10)
 Top <npid> tasks woken up or tasks that did wakeups in Schedule Activity Report (default 10)
 .RE
 
+.B coop 
+.RS
+Include additionl details on cooperating/competing processes
+.RE
+
+.B mangle
+.RS
+Leave C++ function names mangled
+.RE
+
+.B msr
+.RS
+Collect adanced CPU statistics such as LLC Hit%, CPI, average CPU frequency, and SMI count
+.RE
+
+.B oracle 
+.RS
+Report on Oracle processes
+.RE
+
 .B pidtree
 .RS
 Create PIDS subdirectory and kipid output for each process. Used with kiinfo -kparse kptree 
@@ -114,29 +129,19 @@ Create PIDS subdirectory and kipid output for each process. Used with kiinfo -kp
 Include RunQ Histogram
 .RE
 
-.B oracle 
+.B nofutex
 .RS
-Report on Oracle processes
-.RE
-
-.B mangle
-.RS
-Leave C++ function names mangled
-.RE
-
-.B coop 
-.RS
-Include additionl details on cooperating/competing processes
-.RE
-
-.B csv
-.RS
-Create CSV report kipid.*.csv
+Do not collect futex statistics
 .RE
 
 .B kitrace
 .RS
 Include formatted ASCII trace records prior to the standard report
+.RE
+
+.B nosysenter
+.RS
+Do not print syscall entry records when using kitrace flag 
 .RE
 
 .B abstime
@@ -149,19 +154,29 @@ Print absolute time (seconds since boot) for each record
 Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
 .RE
 
-.B nosysenter
+.B epochtime
 .RS
-Do not print syscall entry records when using kitrace flag 
+Print time in seconds since the epoch (Jan 1, 1970)
 .RE
 
-.B sysignore=<ignore_filee>
+.B sysignore=<filename>
 .RS
-Do not trace system calls listed in the <ignore_file>. This can reduce trace data by eliminating frequently called system calls, such as getrusage(),gettimeofday(), time(), etc...
+Do not trace system calls listed in the <filename>.  This can reduce trace data by eliminating frequently called system calls, such as getrusage(), ctime(), etc.
 .RE
 
 .B objfile=<filename>
 .RS
 For runki data collections, use objfile binary to perform symbol table lookups 
+.RE
+
+.B edus=<filename>
+.RS
+Specify output of "db2pd -edus" to get DB2 thread names
+.RE
+
+.B jstack=<filename>
+.RS
+Jstack output file to use (default jstack.<timestamp>)
 .RE
 
 .B events=[default | all | <kitool> | event]
@@ -204,14 +219,9 @@ Customize what sections of the PID Analysis Report to show
          m - Memory Report 
 .RE
 
-.B edus=<edus_file>
+.B csv
 .RS
-Specify output of "db2pd -edus" to get DB2 thread names.
-.RE
-
-.B msr
-.RS
-Collect adanced CPU statistics such as LLC Hit%, CPI, average CPU frequency, and SMI count
+Create CSV report kipid.*.csv
 .RE
 
 .SH EXAMPLES
@@ -223,19 +233,19 @@ Note that when the -ts option is used, kiinfo -kipid will attempt to open the ls
 
 .B $ kiinfo -kipid npid=10,pidtree -ts 0901_1548 >kipid.0901_1548.txt
 
-2) Create a PID report for a specific process with additional system call details (scdetail flag) and runq histograms (rqhist flag).   Show up to 20 sleep functions or profile functions and 20 stacktraces for each (nsym=20 flag).  Also include additional details about the cooperating/competing processes (coop flag):
+2) Create a PID report for a specific process with runq histograms (rqhist flag).   Show up to 20 sleep functions or profile functions and 20 stacktraces for each (nsym=20 flag).  Also include additional details about the cooperating/competing processes (coop flag):
 
-.B $ kiinfo -kipid pid=26649,scdetail,rqhist,nsym=20,coop -ts 0814_2040
+.B $ kiinfo -kipid pid=26649,rqhist,nsym=20,coop -ts 0814_2040
 
 3) Create a PID report for a specific online process for 30 seconds:
 
-.B $ kiinfo -kipid pid=5683,scdetail,nsym=10,npid=5 -a 30 -p 1
+.B $ kiinfo -kipid pid=5683,nsym=10,npid=5 -a 30 -p 1
 
 .SH SAMPLE OUTPUT
 
 .B Note that stack trace and Hardclock profiling are available with the LiKI tracing mechanism is used:
 
-Command line: /opt/linuxki/kiinfo -kipid scdetail,pid=15572,nsym=5,npid=5 -ts 0816_0839
+Command line: /opt/linuxki/kiinfo -kipid pid=15572,nsym=5,npid=5 -ts 0816_0839
 
 kiinfo (2.0)
 

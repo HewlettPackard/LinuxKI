@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad l
-.TH kiinfo-likidump 1 "6.0 - November 25, 2019" version "6.0"
+.TH kiinfo-likidump 1 "6.1 - April 20, 2020" version "6.1"
 .SH NAME
 kiinfo  -  LinuxKI data collection and analysis engine
 
@@ -73,6 +73,17 @@ dur=<seconds>
 Number of seconds to collect data.  Default value is 20.
 .RE
 
+.B 
+msr
+.RS 
+Collect adanced CPU statistics such as LLC Hit%, CPI, average CPU frequency, and SMI count
+.RE
+
+.B sysignore=<filename>
+.RS
+Do not trace system calls listed in the <filenamee>. This can reduce trace data by eliminating frequently called system calls, such as getrusage(),gettimeofday(), time(), etc...
+.RE
+
 .B events=[default | all | <kitool> | event]
 .RS
 Trace events to be traced
@@ -94,11 +105,6 @@ Trace events to be traced
 .B subsys=<subsys>
 .RS
 Enable tracing only for certain subsystems.  Valid subsystems include: power, scsi, block, sched, syscalls, irq.   
-.RE
-
-.B sysignore=<ignore_filee>
-.RS
-Do not trace system calls listed in the <ignore_file>. This can reduce trace data by eliminating frequently called system calls, such as getrusage(),gettimeofday(), time(), etc...
 .RE
 
 .SH EXAMPLES

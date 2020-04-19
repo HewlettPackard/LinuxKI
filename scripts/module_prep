@@ -13,6 +13,7 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #***************************************************************************
 DIR=/opt/linuxki
+PATH=$PATH:/usr/sbin:/sbin
 #
 # Check if we already have the module installed
 #

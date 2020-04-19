@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad l
-.TH kiinfo-kifile 1 "6.0 - November 25, 2019" version "6.0"
+.TH kiinfo-kifile 1 "6.1 - April 20, 2020" version "6.1"
 .SH NAME
 kiinfo  -  LinuxKI data collection and analysis engine
 
@@ -28,29 +28,14 @@ Provide help information for kifile flags
 Limit reports sections to Top <nfile> files 
 .RE
 
-.B scdetail
-.RS
-Produce additional detail information on each system call
-.RE
-
-.B sysignore=<file>
-.RS
-Specify file of system calls to ignore when tracing (live tracing only)
-.RE
-
-.B edus=<edus_file>
-.RS
-Specify output of "db2pd -edus" to get DB2 thread names.
-.RE
-
-.B csv
-.RS
-Create CSV report kifile.*.csv
-.RE
-
 .B kitrace
 .RS
 Include formatted ASCII trace records prior to the standard report
+.RE
+
+.B nosysenter
+.RS
+Do not print syscall entry records when using kitrace flag
 .RE
 
 .B abstime
@@ -63,19 +48,39 @@ Print absolute time (seconds since boot) for each record
 Print formatted time for each records (ie.  Wed Feb  5 16:40:15.529100) 
 .RE
 
+.B epochtime
+.RS
+Print time in seconds since the epoch (Jan 1, 1970)
+.RE
+
+.B sysignore=<filename>
+.RS
+Do not trace system calls listed in the <filename>.  This can reduce trace data by eliminating frequently called system calls, such as getrusage(), ctime(), etc.
+.RE
+
+.B edus=<filename>
+.RS
+Specify output of "db2pd -edus" to get DB2 thread names.
+.RE
+
+.B csv
+.RS
+Create CSV report kifile.*.csv
+.RE
+
 .SH EXAMPLES
 
 1) Create a File Activity Report and report on top 4 files: 
 
-.B $ kiinfo -kifile nfile=4,scdetail,csv -ts 0816_0839
+.B $ kiinfo -kifile nfile=4,csv -ts 0816_0839
 
 2) Create a File Activity Report for the top 5 active online files over a 15 second period
 
-.B $ kiinfo -kifile nfile=5,scdetail -a 15 -p 1
+.B $ kiinfo -kifile nfile=5 -a 15 -p 1
 
 .SH SAMPLE OUTPUT
 
- Command line: kiinfo -kifile scdetail,nfile=5 -ts 0414_1119 
+ Command line: kiinfo -kifile nfile=5 -ts 0414_1119 
 
  kiinfo (5.3)
 

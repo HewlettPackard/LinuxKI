@@ -902,6 +902,7 @@ pid_report(void *arg1, void *v)
 	}
 	if (pidp->tgid && (pidp->tgid != pidp->PID)) {
 		tgidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
+		dockerp = tgidp->dockerp;
 		pid_printf (pidfile, "  TGID %d  %s\n", tgidp->PID, (char *)tgidp->cmd);
 	}
 	if (pidp->nlwp > 1) {

@@ -61,31 +61,30 @@
 #include <linux/tracepoint.h>
 #include <linux/aio_abi.h>
 #include <asm/page.h>
+#include <asm/irq_regs.h>
 
 #if defined CONFIG_X86_64
 #include <../arch/x86/include/asm/unistd.h>
 #include <../arch/x86/include/asm/stacktrace.h>
+#define	IS_32BIT	test_thread_flag(TIF_IA32)
+
 #elif defined CONFIG_ARM64
 #include <../arch/arm64/include/asm/unistd.h>
 #include <../arch/arm64/include/asm/stacktrace.h>
+#define IS_32BIT	test_thread_flag(TIF_32BIT)
+
+#elif defined CONFIG_PPC64
+#include <../arch/powerpc/include/asm/unistd.h>
+#include <../include/linux/stacktrace.h>
+#define IS_32BIT	test_thread_flag(TIF_32BIT)
+
+#else
+Confused about platform!
+#endif
 
 #ifndef NR_syscalls
 #define NR_syscalls __NR_syscalls
 #endif
-
-#else
-Confused about platform!
-#endif
-
-
-#if defined CONFIG_X86_64
-#define	IS_32BIT	test_thread_flag(TIF_IA32)
-#elif defined CONFIG_ARM64
-#define IS_32BIT	test_thread_flag(TIF_32BIT)
-#else
-Confused about platform!
-#endif
-
 
 /* liki.h holds definitions of the trace types and a few other
  * things that need to be shared with userspace consumers.
@@ -238,10 +237,10 @@ STATIC void msr_ops(struct MsrList *oplist);
 
 STATIC struct timer_list *timer_lists ____cacheline_aligned_in_smp;
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
-STATIC void hardclock_timer(unsigned long cpu);
-#else
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,15,0) || (defined(CONFIG_PPC64) && (LINUX_VERSION_CODE >= KERNEL_VERSION(4,12,0)))
 STATIC void hardclock_timer(struct timer_list *t);
+#else
+STATIC void hardclock_timer(unsigned long cpu);
 #endif
 
 
@@ -263,16 +262,14 @@ STATIC unsigned long	enabled_features = 0;
 STATIC char		ignored_syscalls64[NR_syscalls];
 STATIC char		ignored_syscalls32[NR_syscalls];
 
-/* When we're tracing a target set of tasks we need to install a hook
- * in the task exit path so we can unregister tasks as they exit.
- */
-STATIC int 	tt_exit_hook_installed = FALSE;
-STATIC int 	tt_fork_hook_installed = FALSE;
-
 /* Function pointers for unexported functions */
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,2,0)
 static struct socket *(*sockfd_lookup_light_fp)(int, int *, int *);
+#endif
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
-unsigned int (*stack_trace_save_regs_fp)(struct pt_regs*, unsigned long *, unsigned int, unsigned int);
+/* Do nothing, we will call stack_trace_save() later */
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(4,18,0) && (defined RHEL82)
 unsigned int (*stack_trace_save_regs_fp)(struct pt_regs*, unsigned long *, unsigned int, unsigned int);
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
@@ -483,7 +480,7 @@ struct stack_trace {
 
 void save_stack_trace_regs(struct stack_trace *st, struct pt_regs *regs)
 {
-	st->nr_entries = stack_trace_save_regs_fp(regs, st->entries, st->max_entries, st->skip);
+	st->nr_entries = stack_trace_save(st->entries, st->max_entries, st->skip);
 }
 
 #define STACK_TRACE(DATA, REGS)						\
@@ -577,6 +574,16 @@ STATIC struct stacktrace_ops unwind_ops = {
 #endif  //  (defined SLES11 || defined SLES12)
 #endif  //  LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
 
+#elif defined CONFIG_PPC64
+#if (defined SLES12)
+#define STACK_TRACE(DATA, REGS)                                         \
+save_stack_trace(DATA);
+#else
+/* currently supports RHEL 7.3 and later and SLES SP4 and later */
+#define STACK_TRACE(DATA, REGS)                                         \
+        save_stack_trace_regs(REGS, DATA);
+#endif
+
 #elif defined CONFIG_ARM64
 #define STACK_TRACE(DATA, REGS)						\
 	save_stack_trace(DATA);
@@ -653,11 +660,6 @@ liki_stack_unwind(struct pt_regs *regs, int skip, int *start)
 		liki_fetch_kern_caller_regs(&local_regs);
 		regs = &local_regs;
 	} else {
-		/* Hardclock case regs will be set
-		 */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
-		regs = get_irq_regs();
-#else
 		/* The register context passed in from the profiling driver
 		 * doesn't form the basis of a good unwind for earlier
 		 * kernels
@@ -670,14 +672,13 @@ liki_stack_unwind(struct pt_regs *regs, int skip, int *start)
 			liki_fetch_kern_caller_regs(&local_regs);
 			regs = &local_regs;
 		}
-#endif
 	}
 
 	*start = 0;
 	callchain = (struct liki_callchain_entry *)&get_cpu_var(liki_callchains);
 	callchain->nr = 0;
 
-	if (!user_mode(regs)) {
+	if (regs && !user_mode(regs)) {
 		struct stack_trace	st;
 
 		st.entries = (unsigned long *)callchain->ip;
@@ -727,6 +728,124 @@ liki_stack_unwind(struct pt_regs *regs, int skip, int *start)
 			if (fp == frame.next_frame)  break;
 
 			fp = frame.next_frame;
+		}
+	}
+
+	put_cpu_var(liki_callchains);
+
+	return(callchain);
+}
+
+#elif defined CONFIG_PPC64
+
+#define liki_fetch_kern_caller_regs(regs)                 \
+	do {                                                    \
+		(regs)->result = 0;                             \
+		(regs)->nip = (unsigned long)__builtin_return_address(0);                             \
+		asm volatile("mr %0,1": "=r" ((regs)->gpr[1]));       \
+		asm volatile("mfmsr %0" : "=r" ((regs)->msr));  \
+	} while (0)
+
+
+struct frame_tail {
+	struct frame_tail __user *fp;
+	unsigned long cr;  /* Condition register save area - not used */
+	unsigned long lr;
+} __attribute__((packed));
+
+
+inline struct liki_callchain_entry *
+liki_stack_unwind(struct pt_regs *regs, int skip, int *start)
+{
+
+	unsigned long err;
+	unsigned long lr;
+	struct frame_tail __user *fp;
+	struct frame_tail buftail;
+	struct liki_callchain_entry     *callchain;
+	struct pt_regs                  local_regs;
+
+	/* Switch and migration cases regs will be NULL
+	 */
+	if (regs == NULL) {
+		liki_fetch_kern_caller_regs(&local_regs);
+		regs = &local_regs;
+		} else {
+		/* Hardclock case regs will be set */
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
+		regs = get_irq_regs();
+#else
+		/* The register context passed in from the profiling driver
+		 * doesn't form the basis of a good unwind for earlier
+		 * kernels
+		 */
+		if (user_mode(regs)) {
+			if (current && current->mm) {
+				regs = task_pt_regs(current);
+			}
+		} else {
+			liki_fetch_kern_caller_regs(&local_regs);
+			regs = &local_regs;
+		}
+#endif
+	}
+
+	*start = 0;
+	callchain = (struct liki_callchain_entry *)&get_cpu_var(liki_callchains);
+	callchain->nr = 0;
+
+	if (!user_mode(regs)) {
+		struct stack_trace      st;
+
+		st.entries = (unsigned long *)callchain->ip;
+		st.skip = skip;
+
+		st.max_entries = MAX_STACK_DEPTH;
+
+		/* Leave space for kernel marker */
+		st.nr_entries = 1;
+
+		STACK_TRACE(&st, regs);
+
+		/* If STACK_TRACE() gives us a useful stack then prepend
+		 * the kernel marker
+		 */
+		if (st.nr_entries > 1) {
+			if (callchain->ip[st.nr_entries-1] == END_STACK)
+			st.nr_entries--;
+
+			callchain->ip[0] = STACK_CONTEXT_KERNEL;
+			callchain->nr = st.nr_entries;
+		} else
+			callchain->nr = 0;
+
+		if (current && current->mm)
+			regs = task_pt_regs(current);
+		else
+			regs = NULL;
+	}
+
+	if (regs) {
+		lr = regs->link;
+		fp = (struct frame_tail __user *) regs->gpr[1];
+
+		callchain->ip[callchain->nr++] = STACK_CONTEXT_USER;
+		callchain->ip[callchain->nr++] = lr;
+
+		while (callchain->nr < MAX_STACK_DEPTH && fp &&
+			!((unsigned long)fp & 0xf)) {
+
+			pagefault_disable();
+			err = __copy_from_user_inatomic(&buftail, fp, sizeof(buftail));
+			pagefault_enable();
+			if (err) break;
+
+			callchain->ip[callchain->nr++]=buftail.lr;
+
+			if (fp >= buftail.fp) break;
+
+			fp = buftail.fp;
 		}
 	}
 
@@ -870,9 +989,10 @@ kallsyms_lookup_name(const char * name)
 
 int	__liki_old_call_trace_state = BOGUS_CALL_TRACE;
 
-void
+static inline void
 save_sles11_backtrace_state(void)
 {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,2,0)
         unsigned long   addr;
 
         if ((addr = kallsyms_lookup_name("call_trace")) == 0) {
@@ -889,13 +1009,15 @@ save_sles11_backtrace_state(void)
 #endif
 
 	*((int *)addr) = PREFERRED_CALL_TRACE;
+#endif
 
 	return;
 }
 
-void
+static inline void
 restore_sles11_backtrace_state(void)
 {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,2,0)
         unsigned long   addr;
 
         if ((addr = kallsyms_lookup_name("call_trace")) == 0) {
@@ -918,6 +1040,8 @@ restore_sles11_backtrace_state(void)
 
 	*((int *)addr) = __liki_old_call_trace_state;
 
+#endif
+	return;
 }
 
 
@@ -1029,12 +1153,6 @@ liki_global_clock(struct tbuf * tb, int ordered)
  * later and add some compaction and free'ing of second and subsequent
  * chain entries during CPU idle times.
  */
-STATIC void exit_hook(struct task_struct *);
-STATIC void fork_hook(struct task_struct *, struct task_struct *);
-STATIC int install_exit_hook(void);
-STATIC void remove_exit_hook(void);
-STATIC int install_fork_hook(void);
-STATIC void remove_fork_hook(void);
 STATIC INLINE int resource_is_traced(unsigned long);
 STATIC int enable_tracing_for_resource(unsigned long);
 STATIC int disable_tracing_for_resource(unsigned long);
@@ -1127,79 +1245,6 @@ resource_is_traced(unsigned long rid)
 		trp = trp->next;
 	}
 	return(FALSE);
-}
-
-
-/* We need to intercept task destruction and ensure we remove resource entries
- * relating to the terminating task from our table, otherwise a lazy application
- * that selected tasks to trace and didn't unselect them could cause our tables
- * to grow and grow.
- */
-STATIC inline void
-remove_exit_hook(void)
-{
-	if (tt_exit_hook_installed) {
-
-		if (liki_probe_unregister(TT_SCHED_PROCESS_EXIT)) {
-       			printk(KERN_WARNING "LiKI: could not remove exit hook\n");
-			return;
-		}
-
-		tt_exit_hook_installed = FALSE;
-	}
-
-	return;
-}
-
-
-STATIC inline int
-install_exit_hook(void)
-{
-	if (!tt_exit_hook_installed) {
-
-		if (liki_probe_register(TT_SCHED_PROCESS_EXIT)) {
-       			printk(KERN_WARNING "LiKI: could not install exit hook\n");
-			return(-EIO);
-		}
-
-		tt_exit_hook_installed = TRUE;
-	}
-
-	return(0);
-}
-
-
-STATIC void
-remove_fork_hook(void)
-{
-	if (tt_fork_hook_installed) {
-
-		if (liki_probe_unregister(TT_SCHED_PROCESS_FORK)) {
-       			printk(KERN_WARNING "LiKI: could not remove fork hook\n");
-			return;
-		}
-
-		tt_fork_hook_installed = FALSE;
-	}
-
-	return;
-}
-
-
-STATIC int
-install_fork_hook(void)
-{
-	if (!tt_fork_hook_installed) {
-
-		if (liki_probe_register(TT_SCHED_PROCESS_FORK)) {
-       			printk(KERN_WARNING "LiKI: could not install fork hook\n");
-			return(-EIO);
-		}
-
-		tt_fork_hook_installed = TRUE;
-	}
-
-	return(0);
 }
 
 STATIC int
@@ -1369,9 +1414,6 @@ reset_traced_resources(void)
 	/* Manipulation of exit and fork hooks done under state_mutex 
 	 * protection provided by caller
 	 */
-	remove_exit_hook();
-	remove_fork_hook();
-
 }
 
 STATIC void
@@ -1622,12 +1664,12 @@ startup_timer_list(void)
 	/* initialize each per-cpu timer and arm it */
 	for (cpu=0; cpu<nr_cpu_ids; cpu++) {
 		if (cpumask_test_cpu(cpu, cpu_online_mask)) {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,15,0) || (defined(CONFIG_PPC64) && (LINUX_VERSION_CODE >= KERNEL_VERSION(4,12,0)))
+			timer_setup(&timer_lists[cpu], hardclock_timer, 0);
+#else
                         init_timer(&timer_lists[cpu]);
 			timer_lists[cpu].function = hardclock_timer;
 			timer_lists[cpu].data = cpu;
-#else
-			timer_setup(&timer_lists[cpu], hardclock_timer, 0);
 
 #endif
 			timer_lists[cpu].expires = jiffies + 1;
@@ -2396,7 +2438,13 @@ sched_switch_trace(RXUNUSED struct rq *rq, struct task_struct *p, struct task_st
 
 	strncpy(t->prev_comm, current->comm, TASK_COMM_LEN);
 	regs = task_pt_regs(current);
-	t->syscallno = syscall_get_nr(current, regs);
+
+	/* set syscallno to -1 if regs is NULL */
+	if (regs)
+		t->syscallno = syscall_get_nr(current, regs);
+	else
+		t->syscallno = -1; 
+
 	t->prev_prio = p->prio;
 	t->prev_state = p->state;
 
@@ -3124,6 +3172,7 @@ mm_page_free_trace(RXUNUSED struct page *page, unsigned int order )
 	return;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
 STATIC void
 page_cache_insert_trace(RXUNUSED struct page *page)
 {
@@ -3177,29 +3226,7 @@ page_cache_insert_trace(RXUNUSED struct page *page)
 	return;
 }
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
-
-STATIC void
-page_cache_insert_jprobe(struct page *page, enum zone_stat_item item)
-{
-	if (item != NR_FILE_PAGES)
-		jprobe_return();
-
-	page_cache_insert_trace(TXUNUSED page);
-
-	jprobe_return();
-}
-
-STATIC struct jprobe jppci = {
-	.entry = (kprobe_opcode_t *)page_cache_insert_jprobe,
-	.kp = {
-		.symbol_name = "__inc_zone_page_state",
-	},
-};
-
-#endif
-
-
+/* the cache_evict jprobe is obsolete */
 STATIC void
 page_cache_evict_trace(RXUNUSED struct page *page)
 {
@@ -3272,26 +3299,7 @@ page_cache_evict_trace(RXUNUSED struct page *page)
 
 	return;
 }
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
-
-STATIC void
-page_cache_evict_jprobe(struct page *page)
-{
-	page_cache_evict_trace(TXUNUSED page);
-
-	jprobe_return();
-}
-
-STATIC struct jprobe jppce = {
-	.entry = (kprobe_opcode_t *)page_cache_evict_jprobe,
-	.kp = {
-		.symbol_name = "__remove_from_page_cache",
-	},
-};
-
 #endif
-
 
 STATIC void 
 syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
@@ -4196,7 +4204,12 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		 */
 		fd = (int)args_tmp[0];
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,2,0)
 		if ((sock = sockfd_lookup_light_fp(fd, &err, &fput_needed)) == NULL) 
+#else
+		fput_needed = 1;
+		if ((sock = sockfd_lookup(fd, &err)) == NULL) 
+#endif
 			goto scexit_skip_vldata;
 
 		sock_type = sock->type;
@@ -4302,8 +4315,12 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		 */
 		fd = (int)args_tmp[0];
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,2,0)
 		if ((sock = sockfd_lookup_light_fp(fd, &err, &fput_needed)) != NULL)  {
-
+#else
+		fput_needed = 1;
+		if ((sock = sockfd_lookup(fd, &err)) != NULL) {
+#endif
 			memset(&remote, 0, sizeof(struct sockaddr_storage));
 			memset(&local, 0, sizeof(struct sockaddr_storage));
 			sock_type = sock->type;
@@ -4431,7 +4448,12 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		 */
 		fd = (int)args_tmp[0];
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,2,0)
 		if ((sock = sockfd_lookup_light_fp(fd, &err, &fput_needed)) == NULL) 
+#else
+		fput_needed = 1;
+		if ((sock = sockfd_lookup(fd, &err)) == NULL) 
+#endif
 			goto mmsgexit_skip_addresses;
 
 		if (GETNAME(sock, (struct sockaddr *)&remote, &remlen, 1)) {
@@ -4501,7 +4523,12 @@ mmsgexit_skip_addresses:
 		 * and getpeername()
 		 */
 		out_fd = (int)args_tmp[1];
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,2,0)
 		if ((sock = sockfd_lookup_light_fp(out_fd, &err, &fput_needed)) == NULL) 
+#else
+		fput_needed = 1;
+		if ((sock = sockfd_lookup(out_fd, &err)) == NULL) 
+#endif
 			goto scexit_skip_vldata;
 
 		if (GETNAME(sock, (struct sockaddr *)&remote, &remlen, 1)) {
@@ -4648,20 +4675,13 @@ hardclock_trace(struct pt_regs *regs)
 	if (unlikely(tracing_state == TRACING_DISABLED))
 		return;
 
-	if (unlikely(regs == NULL)) {
-#ifdef __LIKI_DEBUG
-		printk(KERN_WARNING "LiKI: NULL pointer passed to hardclock_trace()\n");
-#endif
-		return;
-	}
-
 	if (unlikely(tracing_state == TRACING_RESOURCES)) {
 
 		if (!(resource_is_traced(PID_RESOURCE(current->pid)) ||
 		      resource_is_traced(TGID_RESOURCE(current->tgid)) ||
-		      resource_is_traced(CPU_RESOURCE(raw_smp_processor_id()))))
-
+		      resource_is_traced(CPU_RESOURCE(raw_smp_processor_id())))) {
 			return;
+		}
 	}
 
 	/* Do the unwind early so I know how much space to allocate in
@@ -4681,7 +4701,12 @@ hardclock_trace(struct pt_regs *regs)
 	/* If we're idle we don't want any stacktrace. 
 	 */
 	if (!(current->pid == 0 && (preempt_cnt == 0)))
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,7,0)
+		/* I don't know if this is always true, but it was for Ubuntu with 5.8.12 kernel */
+		callchain = liki_stack_unwind(regs, HARDCLOCK_STACK_SKIP+2, &first_entry);
+#else
 		callchain = liki_stack_unwind(regs, HARDCLOCK_STACK_SKIP, &first_entry);
+#endif
 
 	if (callchain)
 		stksz = sizeof(unsigned long) * (callchain->nr - first_entry);
@@ -4714,6 +4739,7 @@ hardclock_trace(struct pt_regs *regs)
 
 	if (unlikely((t = (hardclock_t *)trace_alloc(sz, TRUE)) == NULL)) {
 		raw_local_irq_restore(flags);
+		printk(KERN_WARNING "LiKI: hardclock_trace() - trace_alloc failed\n");
 		return;
 	}
 
@@ -4727,17 +4753,18 @@ hardclock_trace(struct pt_regs *regs)
 	t->pid = current->pid;
 	t->tgid = current->tgid;
 
-	if (user_mode(regs))
-		t->preempt_count = USER_MODE;
-	else 
-		t->preempt_count = preempt_cnt;
-
 	/* Copy in stack trace if we got one */
 	if (callchain) {
 		t->stack_depth = callchain->nr - first_entry;
 		memcpy(t->ips, &callchain->ip[first_entry], stksz);
 	} else 
 		t->stack_depth = 0;
+
+	if (callchain && (callchain->nr && (callchain->ip[0] == STACK_CONTEXT_USER))) {
+		t->preempt_count = USER_MODE;
+	} else {
+		t->preempt_count = preempt_cnt;
+	}
 
 	trace_commit(t);
 
@@ -4809,7 +4836,7 @@ hardclock_trace(struct pt_regs *regs)
  * should use it. However in the mean time we can hook ourselves back into the
  * profile_tick mechanism using jprobes.
  */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0) && LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0) && LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0) 
 
 STATIC void
 hardclock_jprobe(int type)
@@ -4830,18 +4857,20 @@ STATIC struct jprobe jphc = {
 
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
-STATIC void
-hardclock_timer(unsigned long data)
-{
-#else
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,15,0) || (defined(CONFIG_PPC64) && (LINUX_VERSION_CODE >= KERNEL_VERSION(4,12,0)))
 STATIC void
 hardclock_timer(struct timer_list *t)
 {
+#else
+STATIC void
+hardclock_timer(unsigned long data)
+{
 #endif
 	int cpu = raw_smp_processor_id();
-	struct pt_regs *regs = get_irq_regs();
 	unsigned long target_jiffy = jiffies + 1;
+	struct pt_regs *regs;
+
+	regs = get_irq_regs();
 
 	hardclock_trace(regs);
 
@@ -5266,77 +5295,6 @@ softirq_raise_trace(RXUNUSED struct softirq_action *h, struct softirq_action *ve
 }
 
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
-STATIC INLINE void
-__tasklet_enqueue_core(unsigned long hi, struct tasklet_struct *tst)
-{
-	tasklet_enqueue_t	*t;
-	TRACE_COMMON_DECLS;
-
-	if (unlikely(tracing_state == TRACING_DISABLED))
-		jprobe_return();
-
-	if (unlikely(tracing_state == TRACING_RESOURCES)) {
-
-		if (!((current ? resource_is_traced(PID_RESOURCE(current->pid)) : 0) ||
-		      (current ? resource_is_traced(TGID_RESOURCE(current->tgid)) : 0) ||
-		      resource_is_traced(CPU_RESOURCE(raw_smp_processor_id()))))
-
-			jprobe_return();
-	}
-
-	raw_local_irq_save(flags);
-
-	mycpu = raw_smp_processor_id();
-	tb = &tbufs[mycpu];
-
-	if (unlikely((t = (tasklet_enqueue_t *)trace_alloc(TRACE_SIZE(tasklet_enqueue_t), FALSE)) == NULL)) {
-		raw_local_irq_restore(flags);
-		jprobe_return();
-	}
-
-	POPULATE_COMMON_FIELDS(t, TT_TASKLET_ENQUEUE, TRACE_SIZE(tasklet_enqueue_t), UNORDERED);
-
-	t->hi = hi;
-	t->funcp = tst->func;
-	t->arg = tst->data;
-
-	trace_commit(t);
-
-	raw_local_irq_restore(flags);
-
-	jprobe_return();
-}
-
-
-STATIC void
-tasklet_schedule_jprobe(struct tasklet_struct *tst)
-{
-	__tasklet_enqueue_core((unsigned long)0, tst);
-}
-
-STATIC struct jprobe tsj = {
-	.entry = (kprobe_opcode_t *)tasklet_schedule_jprobe,
-	.kp = {
-		.symbol_name = "__tasklet_schedule",
-	},
-};
-
-
-STATIC void
-tasklet_hi_schedule_jprobe(struct tasklet_struct *tst)
-{
-	__tasklet_enqueue_core((unsigned long)1, tst);
-}
-
-STATIC struct jprobe thsj = {
-	.entry = (kprobe_opcode_t *)tasklet_hi_schedule_jprobe,
-	.kp = {
-		.symbol_name = "__tasklet_hi_schedule",
-	},
-};
-#endif
-
 STATIC void
 __workqueue_enqueue_trace_common(int cpu, struct work_struct *work)
 {
@@ -5615,56 +5573,6 @@ startup_trace(void)
 
 	return;
 }
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
-STATIC struct sock *
-listen_overflow_jprobe(struct sock *sk, struct sk_buff *skb,
-		       struct request_sock *req,
- 		       struct dst_entry *dst)
-{
-	if (unlikely(tracing_state == TRACING_DISABLED))
-		jprobe_return();
-
-	if (unlikely(tracing_state == TRACING_RESOURCES)) 
-		jprobe_return();
-
-	/* Only generate the trace if the accept queue really is full */
-	if (sk_acceptq_is_full(sk)) {
-
-		listen_overflow_t	*t;
-		TRACE_COMMON_DECLS;
-
-		raw_local_irq_save(flags);
-
-		mycpu = raw_smp_processor_id();
-		tb = &tbufs[mycpu];
-
-		if (unlikely((t = (listen_overflow_t *)trace_alloc(TRACE_SIZE(listen_overflow_t), FALSE)) == NULL)) {
-			raw_local_irq_restore(flags);
-			jprobe_return();
-		}
-
-		POPULATE_COMMON_FIELDS(t, TT_LISTEN_OVERFLOW, TRACE_SIZE(listen_overflow_t), UNORDERED);
-
-		t->sock_flags = sk->sk_flags;
-
-		trace_commit(t);
-
-		raw_local_irq_restore(flags);
-
-	}
-
-	jprobe_return();
-	return(NULL); /* gcc doesn't know about jprobe_return() */
-}
-
-STATIC struct jprobe jplo = {
-	.entry = (kprobe_opcode_t *)listen_overflow_jprobe,
-	.kp = {
-		.symbol_name = "tcp_v4_syn_recv_sock",
-	},
-};
-#endif
 
 /* debugfs dummy open
  * This is to work around a bug in RHEL 8 where the 
@@ -6307,24 +6215,9 @@ change_installed_traces(unsigned long requested_traces)
 			liki_probe_unregister(i);
 	}
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,12,0) 
+
 /* jprobes are obsolete in 4.15 */
-
-	if (TRACE_ENABLED_IN(TT_LISTEN_OVERFLOW, installed_traces))
-		unregister_jprobe(&jplo);
-
-	if (TRACE_ENABLED_IN(TT_TASKLET_ENQUEUE, installed_traces)) {
-		unregister_jprobe(&tsj);
-		unregister_jprobe(&thsj);
-	}
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
-	if (TRACE_ENABLED_IN(TT_CACHE_INSERT, installed_traces))
-		unregister_jprobe(&jppci);
-
-	if (TRACE_ENABLED_IN(TT_CACHE_EVICT, installed_traces))
-		unregister_jprobe(&jppce);
-#endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
 	if (TRACE_ENABLED_IN(TT_HARDCLOCK, installed_traces))
@@ -6333,6 +6226,7 @@ change_installed_traces(unsigned long requested_traces)
 	if (TRACE_ENABLED_IN(TT_HARDCLOCK, installed_traces))
 		unregister_timer_hook((int (*)(struct pt_regs *))hardclock_trace);
 #endif
+
 #endif
 
 
@@ -6354,8 +6248,7 @@ change_installed_traces(unsigned long requested_traces)
 
 	if (TRACE_ENABLED_IN(TT_HARDCLOCK, requested_traces)) {
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,15,0)
-
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,12,0) 
 /* jprobes are obsolet in 4.15.   So use the timer list instead */
 
 		if (startup_timer_list() != 0) {
@@ -6385,78 +6278,6 @@ change_installed_traces(unsigned long requested_traces)
 			new_installed_traces |= (TT_BIT(TT_HARDCLOCK));
 #endif
 	}
-
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
-
-	if (TRACE_ENABLED_IN(TT_CACHE_INSERT, requested_traces)) {
-
-		memset(&jppci, 0, sizeof(struct jprobe));
-		jppci.entry = (kprobe_opcode_t *)page_cache_insert_jprobe;
-		jppci.kp.symbol_name = "__inc_zone_page_state";
-
-		if (register_jprobe(&jppci) < 0)
-			printk(KERN_WARNING "LiKI: could not enable cache_insert jprobe\n");
-		else
-			new_installed_traces |= (TT_BIT(TT_CACHE_INSERT));
-	}
-
-	if (TRACE_ENABLED_IN(TT_CACHE_EVICT, requested_traces)) {
-
-		memset(&jppce, 0, sizeof(struct jprobe));
-		jppce.entry = (kprobe_opcode_t *)page_cache_evict_jprobe;
-		jppce.kp.symbol_name = "__remove_from_page_cache";
-
-		if (register_jprobe(&jppce) < 0)
-			printk(KERN_WARNING "LiKI: could not enable cache_evict jprobe\n");
-		else
-			new_installed_traces |= (TT_BIT(TT_CACHE_EVICT));
-	}
-#endif
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
-	/* jprobes are obsolete in 4.15 */
-	if (TRACE_ENABLED_IN(TT_LISTEN_OVERFLOW, requested_traces)) {
-
-		/* The probe location can be specified in two ways: through the kp.addr field
-		 * or the kp.symbol_name field. The symbol_name approach is obviously easier. 
-		 * However when using the symbol_name approach the addr field gets populated
-		 * during register_jprobe(); if we uninstall and then try to reinstall the
-		 * probe we'll find we have both addr and symbol_name populated, and 
-		 * register_jprobe() doesn't like that. Therefore I zero out the addr field
-		 * here.
-		 */
-		memset(&jplo, 0, sizeof(struct jprobe));
-		jplo.entry = (kprobe_opcode_t *)listen_overflow_jprobe;
-		jplo.kp.symbol_name = "tcp_v4_syn_recv_sock";
-
-		if (register_jprobe(&jplo))
-			printk(KERN_WARNING "LiKI: could not enable listen_overflow jprobe\n");
-		else
-			new_installed_traces |= (TT_BIT(TT_LISTEN_OVERFLOW));
-	}
-
-	if (TRACE_ENABLED_IN(TT_TASKLET_ENQUEUE, requested_traces)) {
-
-		memset(&tsj, 0, sizeof(struct jprobe));
-		tsj.entry = (kprobe_opcode_t *)tasklet_schedule_jprobe;
-		tsj.kp.symbol_name = "__tasklet_schedule";
-
-		memset(&thsj, 0, sizeof(struct jprobe));
-		thsj.entry = (kprobe_opcode_t *)tasklet_hi_schedule_jprobe;
-		thsj.kp.symbol_name = "__tasklet_hi_schedule";
-
-		if (register_jprobe(&thsj))
-			printk(KERN_WARNING "LiKI: could not enable tasklet_hi_schedule jprobe\n");
-		else {
-			if (register_jprobe(&tsj)) {
-				printk(KERN_WARNING "LiKI: could not enable tasklet_schedule jprobe\n");
-				unregister_jprobe(&thsj);
-			} else
-				new_installed_traces |= (TT_BIT(TT_TASKLET_ENQUEUE));
-		}
-	}
-#endif
 
 	if (requested_traces & TT_BITMASK_READS_BLOCK)
 		new_installed_traces |= (TT_BITMASK_READS_BLOCK);
@@ -6691,24 +6512,6 @@ liki_modify_traced_resources(struct file *file, const char __user *ubuf,
 		break;
 	}
 
-	case TASKFAMILY:
-
-	{
-
-		if ((ret = task_tracing_op(PID_RESOURCE(rop.id), rop.op))) {
-			ret = -EINVAL;
-			break;
-		}
-
-		install_exit_hook();
-		install_fork_hook();
- 
-		enabled_features |= FAMILY_FILTERING;
-		tracing_state = TRACING_RESOURCES;
-
-		break;
-	}
-
 	default:
 		ret = -EINVAL;
 		break;
@@ -6859,8 +6662,6 @@ shutdown(void)
 	shutdown_pending=TRUE;
 
 	change_installed_traces(TT_BITMASK_NO_TRACES);
-	remove_fork_hook();
-	remove_exit_hook();
 	synchronize_sched();
 
 	if (timer_lists)
@@ -6919,7 +6720,7 @@ liki_initialize(void)
 	int	i;
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,7,0)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(5,8,14)
 	printk(KERN_INFO "LiKI: unsupported kernel version\n");
 	return(-EINVAL);
 #else
@@ -6944,18 +6745,27 @@ liki_initialize(void)
 	 * for module use, so instead I'll go find the address of those 
 	 * un-exported functions and call them anyway.
 	 */
+
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
+	/* Nothing to do here as we will use sockfd_lookup() */
+#elif defined CONFIG_PPC64
+	if ((sockfd_lookup_light_fp = (void *)kallsyms_lookup_name("sockfd_lookup")) == 0) {
+		printk(KERN_WARNING "LiKI: cannot find sockfd_lookup()\n");
+		printk(KERN_WARNING "LiKI: tracing initialization failed\n");
+		return(-EINVAL);
+	}
+#else
+
         if ((sockfd_lookup_light_fp = (void *)kallsyms_lookup_name("sockfd_lookup_light")) == 0) {
 		printk(KERN_WARNING "LiKI: cannot find sockfd_lookup_light()\n");
 		printk(KERN_WARNING "LiKI: tracing initialization failed\n");
 		return(-EINVAL);
 	}
+#endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
-	if ((stack_trace_save_regs_fp = (void *)kallsyms_lookup_name("stack_trace_save_regs")) == 0) {
-		printk(KERN_WARNING "LiKI: cannot find stack_trace_save_regs()\n");
-		printk(KERN_WARNING "LiKI: tracing initialization failed\n");
-		return(-EINVAL);
-	}
+	/* Nothing to do here as we will use stack_trace_save() */
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(4,18,0) && (defined RHEL82)
 	if ((stack_trace_save_regs_fp = (void *)kallsyms_lookup_name("stack_trace_save_regs")) == 0) {
 		printk(KERN_WARNING "LiKI: cannot find stack_trace_save_regs()\n");

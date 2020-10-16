@@ -181,7 +181,7 @@ int file_print_fdata(void *arg1, void *arg2)
 			fdatap->node,
                         ftype_name_index[fdatap->ftype]);
         } else {
-                printf ("%8d %9.4f %7d %7d %7d %7d 0x%016llx %10u %8s",
+                printf ("%8d %10.4f %7d %7d %7d %7d 0x%016llx %10u %8s",
                         fdatap->stats.syscall_cnt,
                         SECS(fdatap->stats.total_time),
                         fdatap->stats.lseek_cnt,
@@ -353,7 +353,7 @@ file_print_report(void *v)
 	printf ("\n%s******** GLOBAL FILE ACTIVITY REPORT ********\n", tab);
 
         printf ("\n%s---  Top Files sorted by System Call Count  ---\n", tab);
-        printf("%sSyscalls   ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
+        printf("%sSyscalls    ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
         foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata,
                            (int (*)())fdata_sort_by_syscalls,
                            nfile, NULL);
@@ -364,13 +364,13 @@ file_print_report(void *v)
                            nfile, &scallflag);
 
         printf ("\n%s---  Top Files sorted by Errors  ---\n", tab);
-        printf("%sSyscalls   ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
+        printf("%sSyscalls    ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
         foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata_errs,
                            (int (*)())fdata_sort_by_errs,
                            nfile, NULL);
 
         printf ("\n%s---  Top Files sorted by Elapsed Time  ---\n", tab);
-        printf("%sSyscalls   ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
+        printf("%sSyscalls    ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
         foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata,
                             (int (*)())fdata_sort_by_elptime,
                             nfile, NULL);

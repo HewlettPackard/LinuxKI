@@ -720,7 +720,6 @@ int 		liki_enable_tracing_for_task(pid_t);
 int 		liki_disable_tracing_for_task(pid_t);
 int 		liki_enable_tracing_for_task_group(pid_t);
 int 		liki_disable_tracing_for_task_group(pid_t);
-int 		liki_enable_tracing_for_task_family(pid_t);
 /* There is no disable_tracing for task_family. Use 
  * liki_reset_traced_resources() or
  * liki_reenable_global_tracing()

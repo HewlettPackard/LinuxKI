@@ -98,6 +98,8 @@ parse_uname(char print_flag)
 
 			if (strstr(input_str, "aarch64")) {
 				arch_flag = AARCH64;
+			} else if (strstr(input_str, "ppc64le")) {
+				arch_flag = PPC64LE;
 			}
                 }
 
@@ -420,47 +422,6 @@ parse_lsof()
 	}
 	fclose(lsof);
 }
-
-#if 0
-/* parse_dmidecode 
- * This is no longer needed as we look at cpuinfo to see
- * if the system is a hypervisor
- */
-void
-parse_dmidecode()
-{
-	FILE *f = NULL;
-	char fname[30];
-	char *rtnptr;
-
-	if (is_alive || (arch_flag == AARCH64))  return;
-
-	sprintf(fname, "dmidecode.%s", timestamp);
-        if ( (f = fopen(fname,"r")) == NULL) {
-		if (!kilive) {
-                	fprintf (stderr, "Unable to open dmidecode file %s, errno %d\n", fname, errno);
-                	fprintf (stderr, "Assuming this is a VM guest\n");
-		}
-		globals->VM_guest = 1;
-                return;
-        }
-
-	while (1) {
-		rtnptr = fgets((char *)&input_str, 511, f);
-		if (rtnptr == NULL)  {
-			/* stop if at the end of the file */
-			break;
-		}
-
-		if (strstr(input_str, "Vendor:")) {
-			if (strstr(input_str, "Phoenix") || strstr(input_str, "Seabios")) {
-				globals->VM_guest=1;
-			}
-			break;
-		}
-	}
-}
-#endif
 
 /* parse_cpuinfo */
 void
@@ -1386,7 +1347,8 @@ parse_cstates()
 		
 		if (cpuinfop = FIND_CPUP(globals->cpu_hash, cpu)) {
 			powerp = GET_POWERP(cpuinfop->powerp);
-			bcopy(cstate_times, powerp->cstate_times, sizeof(uint64)*NCSTATES);
+			bcopy(&cstate_times[1], &powerp->cstate_times[1], sizeof(uint64)*(NCSTATES-1));
+			powerp->cstate_times[CSTATE_BUSY] = cstate_times[0];
 			if (debug) {
 				fprintf (stderr, "CPU: %d", cpu);
 				for (i = 0; i <= max_cstate; i++) {

@@ -381,8 +381,11 @@ init_trace_ids()
 		else if (strcmp(ki_actions[i].event, "cache_insert") == 0) TRACE_CACHE_INSERT = i;
 		else if (strcmp(ki_actions[i].event, "cache_evict") == 0) TRACE_CACHE_EVICT = i;
 		else if (strcmp(ki_actions[i].event, "tasklet_enqueue") == 0) TRACE_TASKLET_ENQUEUE = i;
+#if 0
+THese events cause panics on SLES 15, so removing them!!
 		else if (strcmp(ki_actions[i].event, "page_fault_kernel") == 0) TRACE_PAGE_FAULT_KERNEL = i;
 		else if (strcmp(ki_actions[i].event, "page_fault_user") == 0) TRACE_PAGE_FAULT_USER = i;
+#endif
 		else if (strcmp(ki_actions[i].event, "mm_filemap_fault") == 0) TRACE_FILEMAP_FAULT = i;
 		else if (strcmp(ki_actions[i].event, "mm_anon_fault") == 0) TRACE_ANON_FAULT = i;
 		else if (strcmp(ki_actions[i].event, "mm_kernel_pagefault") == 0) TRACE_KERNEL_PAGEFAULT = i;
@@ -782,9 +785,12 @@ set_events_options(void *v)
 				if (TRACE_CACHE_EVICT) ki_actions[TRACE_CACHE_EVICT].execute = 1;
 				if (TRACE_ANON_FAULT) ki_actions[TRACE_ANON_FAULT].execute = 1;
 				if (TRACE_FILEMAP_FAULT) ki_actions[TRACE_FILEMAP_FAULT].execute = 1;
-				if (TRACE_KERNEL_PAGEFAULT) ki_actions[TRACE_KERNEL_PAGEFAULT].execute = 1;
-				if (TRACE_PAGE_FAULT_USER) ki_actions[TRACE_PAGE_FAULT_USER].execute = 1;
+				if (TRACE_KERNEL_PAGEFAULT) ki_actions[TRACE_KERNEL_PAGEFAULT].execute = 0;
+#if 0
+These events cause panics on SLES 15
+				if (TRACE_PAGE_FAULT_USER) ki_actions[TRACE_PAGE_FAULT_USER].execute = 0;
 				if (TRACE_PAGE_FAULT_KERNEL) ki_actions[TRACE_PAGE_FAULT_KERNEL].execute = 1;
+#endif
 				if (TRACE_MM_PAGE_ALLOC) ki_actions[TRACE_MM_PAGE_ALLOC].execute = 1;
 				if (TRACE_MM_PAGE_FREE)ki_actions[TRACE_MM_PAGE_FREE].execute = 1;
 				if (TRACE_MM_PAGE_FREE_DIRECT)ki_actions[TRACE_MM_PAGE_FREE_DIRECT].execute = 1;
@@ -1282,6 +1288,7 @@ open_trace_files() {
 	char fname[256];
 	struct stat statbuf;
 	char *addr, *id_addr, *anon_addr, *first_addr = NULL;
+	uint64 size;
 	header_page_t *header;
 
 	if (debug) printf ("open_trace_files %s\n", timestamp);
@@ -1346,7 +1353,15 @@ open_trace_files() {
 			FATAL(errno, "Unable to ids.<timestamp> file.   Check timestamp used and permissions", fname, -1);
         	}
 
-        	id_addr = mmap(NULL, sizeof(ki_action_t)*KI_MAXTRACECALLS, PROT_READ, MAP_PRIVATE, id_fd, 0);
+	        if (fstat(id_fd, &statbuf) != 0) {
+			if (debug) perror ("fstat() failed");
+			size = 0;
+		} else {
+			size = MIN(sizeof(ki_action_t)*KI_MAXTRACECALLS, statbuf.st_size);
+		}
+
+
+        	id_addr = mmap(NULL, size, PROT_READ, MAP_PRIVATE, id_fd, 0);
         	if (id_addr == MAP_FAILED) {
                 	FATAL(errno, "Cannot mmap file", fname, -1);
         	}
@@ -1356,10 +1371,10 @@ open_trace_files() {
                 	FATAL(errno, "Cannot create anon ids mmap file", NULL, -1);
         	}
 
-		memcpy(anon_addr, id_addr, sizeof(ki_action_t)*KI_MAXTRACECALLS);
+		memcpy(anon_addr, id_addr, size);
 		ki_actions = (ki_action_t *)anon_addr;
 
-		munmap (id_addr,  sizeof(ki_action_t)*KI_MAXTRACECALLS);
+		munmap (id_addr,  size);
 		close (id_fd);
 	}
 

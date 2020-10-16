@@ -44,10 +44,6 @@ static uint64 rq_times[RUNQ_NBUCKETS-1]={
 int ldom_cnt = 0;
 int cpu_cnt = 0;
 
-runq_info_t     ldrq[MAXLDOMS];
-runq_info_t     prev_int_ldrq[MAXLDOMS];	/* Two runq_info_t's to track delta stats */
-runq_info_t     curr_int_ldrq[MAXLDOMS];	/* for 100ms interval CPU summary.  See   */
-						/* node_interval_processing().		  */
 void *
 find_sched_info(void *arg1)
 {

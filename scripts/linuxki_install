@@ -40,8 +40,11 @@ if ([ "$ARCH" == "x86_64" ] || [ "$ARCH" == "amd64" ]); then
 elif [ "$ARCH" == "aarch64" ]; then
 	rm /opt/linuxki/kiinfo >/dev/null 2>&1
 	ln /opt/linuxki/kiinfo.aarch64 /opt/linuxki/kiinfo
+elif [ "$ARCH" == "ppc64le" ]; then
+       rm /opt/linuxki/kiinfo >/dev/null 2>&1
+       ln /opt/linuxki/kiinfo.ppc64le /opt/linuxki/kiinfo
 else
-	echo "Unknown Architecture.  Only x86_64 and aarch64 supported"
+	echo "Unknown Architecture.  Only x86_64, aarch64, ppc64le supported"
 	exit 0
 fi
 

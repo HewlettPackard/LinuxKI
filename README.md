@@ -1,9 +1,9 @@
-# LinuxKI Toolset v6.1
+# LinuxKI Toolset v6.2
 
 The LinuxKI Toolset (or LinuxKI for short) is an opensourced advanced mission critical performance troubleshooting tool for Linux.  It is designed to identify performance issues beyond the typical performance metrics and results in faster root cause for many performance issues. LinuxKI is a kernel tracing toolkit designed to answer two primary questions about the system:
 
-* If its running, whats it doing?
-* If its waiting, whats it waiting on?
+* If it's running, what's it doing?
+* If it's waiting, what's it waiting on?
 
 LinuxKI analyzes the kernel trace data in different and often unique ways to help performance specialist drill down on often complex performance issues.   The following output is an example of data displayed for a specific task:
 
@@ -78,7 +78,7 @@ Pre-packaged RPM and DEB files are available on the [Releases Page](https://gith
 
 ### Prerequisites
 
-There are no mandatory pre-requisites.   LinuxKI should install and run on most Linux kernels from 2.6.32 through 5.6.4.  
+There are no mandatory pre-requisites.   LinuxKI should install and run on most Linux systems from 2.6.32 through 5.6.4.  
 
 However, if you would like to use the LiKI tracing mechanism (perferred method), you will need the following packages installed to compile the LiKI module from source code:
 
@@ -110,10 +110,10 @@ You can also use your favorite package manager, such as yum.
 You can verify the version of the LinuxKI toolset using rpm or dpkg as follows:
 
      $ rpm --query linuxki
-     linuxki-6.1-1.noarch
+     linuxki-6.2-1.noarch
 
      $ dpkg --status linuxki | grep Version
-     Version: 6.1-1
+     Version: 6.2-1
 
 ### Removing the LinuxKI toolset
 
@@ -131,7 +131,7 @@ When the system is experiencing performance problems, the runki script can be ex
 After installing the LinuxKI Toolset, a 20-second trace dump can easily be obtained as follows:
 
     $ export PATH=$PATH:/opt/linuxki 
-    $ /dev/shm        # optional, to collect data in memory
+    $ cd /dev/shm     # optional, to collect data in memory
     $ runki           # use LiKI tracing mechanism
 
 or

@@ -70,6 +70,9 @@ else ifneq (,$(wildcard /etc/os-release))
    hostdistro:=$(shell grep "^ID=" /etc/os-release|awk -F= '{print $$2}')
    hostversion:=$(shell grep "^VERSION_ID=" /etc/os-release \
                         | awk -F= '{print $$2}' | sed -e 's/"//g')
+else ifneq (,$(wildcard /etc/os-release))
+   hostdistro:=$(shell grep "^ID=" /etc/os-release|awk -F= '{print $$2}')
+   hostversion:=$(shell uname -r | sed 's/-/ /g' | sed 's/_/ /g' | awk '{print $$1}')
 endif
 
 $(info hostkernel=${hostkernel})
@@ -82,12 +85,12 @@ ifeq ($(hostdistro),rhel) # Red Hat Enterprise Linux (RHEL)
       EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
    else ifneq (,$(findstring 7.,$(hostversion)))
       #RHEL 7 (3.10)
-      EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
+      EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=9 -DOTHER_STACK_SKIP=2
    else ifneq (,$(findstring 8.0,$(hostversion)))
       #RHEL 8.0 (4.18)
       EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
    else ifneq (,$(findstring 8.1,$(hostversion)))
-      #RHEL 8.11(4.18)
+      #RHEL 8.1(4.18)
       EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
    else ifneq (,$(findstring 8.,$(hostversion)))
       #RHEL 8.2 and later (4.18)
@@ -99,10 +102,16 @@ else ifeq ($(hostdistro),centos) #  Centos
       EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
    else ifneq (,$(findstring 7.,$(hostversion)))
       #RHEL 7 (3.10)
-      EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
+      EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=9 -DOTHER_STACK_SKIP=2
+   else ifneq (,$(findstring 8.0,$(hostversion)))
+      #RHEL 8.0 (4.18)
+      EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+   else ifneq (,$(findstring 8.1,$(hostversion)))
+      #RHEL 8.1(4.18)
+      EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
    else ifneq (,$(findstring 8.,$(hostversion)))
       #RHEL 8 (4.18)
-      EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
+      EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
    endif
 else ifeq ($(hostdistro),ol) # Oracle Linux (OL)
    ifeq (,$(findstring uek,$(hostkernel)))
@@ -153,11 +162,11 @@ else ifeq ($(hostdistro),ubuntu)
         EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
     else
    	#UBUNTU 12.04, 12.10 (3.5)
-        EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
     endif
-else ifeq ($(hostdistro),l4tm)
-   #L4TM
-   EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=11 -DOTHER_STACK_SKIP=3
+else ifeq ($(hostdistro),arch)
+   #ARCH Linux
+   EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=0
 else
    #
    # Defaults

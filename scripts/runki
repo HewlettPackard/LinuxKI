@@ -13,13 +13,13 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #***************************************************************************
 # runki script  -- captures LinuxKI trace data
-# @(#) runki for Linux $Date: 2020/04/20 $Revision: 6.1
+# @(#) runki for Linux $Date: 2020/04/20 $Revision: 6.2
 
 TOOLDIR=/opt/linuxki
 
 # need to make sure /usr/sbin and /sbin are in the path 
 PATH=$TOOLDIR:$PATH:/usr/sbin:/sbin
-version="runki for Linux version 6.1"
+version="runki for Linux version 6.2"
 tag=`date +%m%d_%H%M`
 HOSTNAME=`hostname -s`
 KIDIR=`pwd`
@@ -349,9 +349,13 @@ kitrace_data()
 
 	# if this is a Dockers implementation...
 	if [[ -x /usr/bin/docker ]] ; then
+		echo "=== Collecting docker container details..."
 		/usr/bin/docker info > docker_info.$tag 2>/dev/null
 		/usr/bin/docker version > docker_version.$tag 2>/dev/null
 		/usr/bin/docker ps > docker_ps.$tag 2>/dev/null
+
+		# capture docker container inspect data
+		for ID in `docker ps | grep -v "^CONTAINER ID" | awk '{print $1}'`; do echo "ContainerID: $ID" >>docker_inspect.$tag; docker container inspect $ID >>docker_inspect.$tag; done
 
 		# capture task cgroup
 		echo "=== Collecting task cgroups from /proc ..."
@@ -1196,6 +1200,8 @@ netstat -s              >> netstat-s.$tag 2>&1
 
 echo "=== Getting Processor C-state information ..." | tee -a ki.err.$tag
 get_cstates_diff
+cpupower idle-info >cpupower.$tag 2>&1
+cpupower frequency-info >>cpupower.$tag 2>&1
 
 userspace_data
 
@@ -1389,6 +1395,7 @@ ls -lR --time-style=locale /dev 		> ll_R_dev_all.$tag 2>&1
 cat $debugfs_mount_point/sched_features >sched_features.$tag 2>&1
 
 fgrep "" /sys/block/*/queue/*	> block_params.$tag 2>&1
+for file in `find /sys/devices -name speed | grep fc_host`; do echo "$file `cat $file`" >fc_linkspeed.$tag 2>&1; done
 
 if [ $do_liki -eq 0 ]; then
   cp $debugfs_mount_point/tracing/events/block/block_rq_issue/format block_rq_issue.fmt.$tag

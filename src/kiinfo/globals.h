@@ -302,7 +302,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define SOFTIRQ_VAL(val)	((val & SOFTIRQ_MASK) >> SOFTIRQ_SHIFT)
 #define HARDIRQ_VAL(val)	((val & HARDIRQ_MASK) >> HARDIRQ_SHIFT)
 #define NMI_BIT(val)		((val & NMI_MASK) >> NMI_SHIFT)
-#define NCSTATES	10	/* number of cstates */
+#define NCSTATES	11	/* number of cstates */
+#define CSTATE_BUSY	10
 
 #define HC_USER		0
 #define HC_SYS		1
@@ -346,7 +347,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #define X86_64		0
 #define AARCH64		1
-#define MAXARCH		2
+#define PPC64LE		2
+#define MAXARCH		3
 
 #define ELF32		0		
 #define ELF64		1
@@ -2295,6 +2297,7 @@ extern arg_action_t arg_actions[];
 extern short syscall_index_x86_64[];
 extern short syscall_index_x86_32[];
 extern short syscall_index_aarch_64[];
+extern short syscall_index_ppc64le[];
 extern int cpu2ldom[MAXCPUS*2][2];
 
 extern void hex_dump(void *, int);

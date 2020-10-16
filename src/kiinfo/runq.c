@@ -605,7 +605,7 @@ print_percpu_stats(uint64 *warnflagp)
   	total_time = gstatp->T_total_time;
 
 	if (!kparse_flag) { 
-            BOLD ("%scpu node          Total          sys         user         idle", tab);
+            BOLD ("%s cpu node          Total          sys         user         idle", tab);
 	    if (gstatp->T_irq_time) BOLD ("  hardirq_sys hardirq_user hardirq_idle  softirq_sys softirq_user softirq_idle");
 	    if (STEAL_ON) BOLD ("    stealbusy    stealidle");
 	    if (msr_flag) BOLD ("  LLC_hit%%    CPI   Avg_MHz  SMI_cnt");
@@ -619,7 +619,7 @@ print_percpu_stats(uint64 *warnflagp)
 
 			cpu_total_time = statp->T_total_time;
 
-                        printf ("%s%3d [%2d] : %12.6f %12.6f %12.6f %12.6f", tab, i, 
+                        printf ("%s%4d [%2d] : %12.6f %12.6f %12.6f %12.6f", tab, i, 
 				cpuinfop->ldom,
 				SECS(cpu_total_time),
                                 SECS(statp->T_sys_time),
@@ -656,7 +656,7 @@ print_percpu_stats(uint64 *warnflagp)
                 }
             }
 
-	    BOLD ("%sTotal                   %11.2f%% %11.2f%% %11.2f%%", tab,
+	    BOLD ("%sTotal                    %11.2f%% %11.2f%% %11.2f%%", tab,
 		(gstatp->T_sys_time * 100.0) / total_time,
 		(gstatp->T_user_time * 100.0) / total_time,
 		(gstatp->T_idle_time * 100.0) / total_time);
@@ -688,7 +688,7 @@ print_percpu_stats(uint64 *warnflagp)
 	    NL; NLt; 
 	}
 
-	BOLD("cpu node     Total Busy          sys          usr         idle");
+	BOLD(" cpu node     Total Busy          sys          usr         idle");
 	if (gstatp->T_irq_time) BOLD ("  hardirq_sys hardirq_user hardirq idle  softirq_sys softirq_user softirq_idle");
 	if (STEAL_ON) BOLD ("    stealbusy    stealidle");
 	if (msr_flag) BOLD ("  LLC_hit%%    CPI   Avg_MHz  SMI_cnt");
@@ -712,7 +712,7 @@ print_percpu_stats(uint64 *warnflagp)
 				RED_FONT;
 			} 
 
-                        printf ("%s%3d [%2d] : %11.2f%% %11.2f%% %11.2f%% %11.2f%%", tab, i, 
+                        printf ("%s%4d [%2d] : %11.2f%% %11.2f%% %11.2f%% %11.2f%%", tab, i, 
 				cpuinfop->ldom,
 				(statp->T_run_time * 100.0) / cpu_total_time,
                                 (statp->T_sys_time * 100.0) / cpu_total_time,
@@ -749,7 +749,7 @@ print_percpu_stats(uint64 *warnflagp)
                 }
         }
 
-        BOLD ("%sTotal      %11.2f%% %11.2f%% %11.2f%% %11.2f%%", tab, i, 
+        BOLD ("%sTotal       %11.2f%% %11.2f%% %11.2f%% %11.2f%%", tab, i, 
 		(gstatp->T_run_time * 100.0) / total_time,
 		(gstatp->T_sys_time * 100.0) / total_time,
 		(gstatp->T_user_time * 100.0) / total_time,
@@ -888,7 +888,7 @@ print_HT_DBDI_histogram()
 	NL;
         printf("%sSystem-Wide Double-Busy Double-Idle CPU Time Histogram", tab); NL;
         printf("%sIdle time in Usecs", tab); NL;
-        printf("%s     PCPU        <10    <20    <50    <100   <250   <500   <750  <1000  <1250  <1500  <2000  <3000  <5000 <10000 <20000 >20000", tab); NL;
+        printf("%s     PCPU        <10    <20    <50    <100   <250   <500   <750  <1000  <1250  <1500  <2000  <3000  <5000  <10000 <20000 >20000", tab); NL;
         for (i = 0; i < MAXCPUS; i++) {
                 pcpuinfop = FIND_PCPUP(globals->pcpu_hash, i);
                 if (pcpuinfop) {
@@ -1402,7 +1402,7 @@ print_slp_info(void *arg1, void *arg2)
 	if (idx > globals->nsyms-1) idx = UNKNOWN_SYMIDX;
 
 	if (gschedp && statsp == &gschedp->sched_stats) {
-            pid_printf(pidfile, "%s%8d %6.2f%% %10.4f %6.2f%% %10.3f %10.3f %s", tab, 
+            pid_printf(pidfile, "%s%8d %6.2f%% %10.4f %6.2f%% %10.3f %10.3f  %s", tab, 
                     slpinfop->count,
                     (slpinfop->count * 100.0) / statsp->C_sleep_cnt,
                     SECS(slpinfop->sleep_time),
@@ -2588,8 +2588,8 @@ print_cstate_stats(uint64 *warnflagp)
 	uint64		cstate_total_time=0;
 	int warn_cnt = 0;
 
-	BOLD("cpu node    Events");
-	for (j=1; j<=max_cstate;j++) {
+	BOLD(" cpu node    Events     Busy%%");
+	for (j=0; j<=max_cstate;j++) {
 		BOLD("   Cstate%d", j);
 	}
 	BOLD ("  freq_changes    freq_hi   freq_low"); NL;
@@ -2603,12 +2603,13 @@ print_cstate_stats(uint64 *warnflagp)
 				}	
 
 				cstate_total_time = 0;
-				for (j=1;j<=max_cstate;j++) {
+				for (j=0;j<NCSTATES;j++) {
 					cstate_total_time += powerp->cstate_times[j];
 				}
 	
-				printf ("%-3d [%2d]  %8d", i, cpuinfop->ldom, powerp->power_start_cnt);
-				for (j=1; j<=max_cstate;j++) {
+				printf ("%-4d [%2d]  %8d", i, cpuinfop->ldom, powerp->power_start_cnt);
+				printf ("  %7.2f%%", cstate_total_time ?  (powerp->cstate_times[CSTATE_BUSY] * 100.0) / cstate_total_time : 0);
+				for (j=0; j<=max_cstate;j++) {
 					if ((j > 1) && powerp->cstate_times[j]) { 
 						warn_cnt++;
 						RED_FONT;
@@ -2651,9 +2652,9 @@ print_hardirq_entry(void *arg1, void *arg2)
 
 	irqname_entry = (irq_name_t *)find_entry((lle_t **)globals->irqname_hash, irq, IRQ_HASH(irq));
 	if (irqname_entry) {
-		printf ("%3d %-16s", irq, irqname_entry->name);
+		printf ("%4d %-16s", irq, irqname_entry->name);
 	} else {
-		printf ("%3d %-16s", irq, " ");
+		printf ("%4d %-16s", irq, " ");
 	}
 	printf (" %8d %12.6f %12.6f", irqentryp->count, SECS(irqentryp->total_time), 
 					(SECS(irqentryp->total_time) / irqentryp->count)*1000000.0);
@@ -2682,7 +2683,7 @@ print_softirq_entry(void *arg1, void *arg2)
 		} 
 	}
 
-	printf ("%3d %-16s %8d %12.6f %12.3f", irq, softirq_name[irq], 
+	printf ("%4d %-16s %8d %12.6f %12.3f", irq, softirq_name[irq], 
 					irqentryp->count,
 					SECS(irqentryp->total_time),
 					(SECS(irqentryp->total_time) / irqentryp->count)*1000000.0);
@@ -2706,9 +2707,9 @@ print_percpu_irq_stats(int irqtype)
 			irqinfop = (irqtype == HARDIRQ) ? cpuinfop->irqp : cpuinfop->softirqp;
 			if (irqinfop) {
 				CAPTION_GREY;
-				BOLD ("CPU %3d      Events: %8d  ElpTime: %9.6f", i, irqinfop->count, SECS(irqinfop->total_time)); 
+				BOLD ("CPU %4d      Events: %8d  ElpTime: %9.6f", i, irqinfop->count, SECS(irqinfop->total_time)); 
 				_CAPTION;
-				BOLD ("IRQ Name                Count      ElpTime    Avg(usec)"); NL;
+				BOLD (" IRQ Name                Count      ElpTime    Avg(usec)"); NL;
 				foreach_hash_entry((void **)irqinfop->irq_entry_hash, IRQ_HSIZE,
 							irqtype == HARDIRQ ? print_hardirq_entry : print_softirq_entry,
 				 			irq_sort_by_time, 0, NULL);
@@ -2727,10 +2728,10 @@ print_global_hardirq_stats(void *arg1)
 
 	if (irqinfop == NULL) return;
 
-	BOLD ("IRQ Name                Count      ElpTime    Avg(usec)"); NL;
+	BOLD (" IRQ Name                Count      ElpTime    Avg(usec)"); NL;
 	foreach_hash_entry((void **)irqinfop->irq_entry_hash, IRQ_HSIZE,
 					print_hardirq_entry, irq_sort_by_time, 0, NULL);
-	printf ("    Total:           %8d %12.6f", irqinfop->count, SECS(irqinfop->total_time)); NL;
+	printf ("     Total:           %8d %12.6f", irqinfop->count, SECS(irqinfop->total_time)); NL;
 	return;
 }
 
@@ -2742,10 +2743,10 @@ print_global_softirq_stats(void *arg1)
 
 	if (irqinfop == NULL) return;
 
-	BOLD ("IRQ Name                Count      ElpTime    Avg(usec)"); NL;
+	BOLD (" IRQ Name                Count      ElpTime    Avg(usec)"); NL;
 	foreach_hash_entry((void **)irqinfop->irq_entry_hash, IRQ_HSIZE,
 					print_softirq_entry, irq_sort_by_time, 0, warnflagp);
-	printf ("    Total:           %8d %12.6f", irqinfop->count, SECS(irqinfop->total_time)); NL;
+	printf ("     Total:           %8d %12.6f", irqinfop->count, SECS(irqinfop->total_time)); NL;
 	return;
 }
 
@@ -2894,11 +2895,11 @@ print_runq_itime_analysis()
         }
 
         printf("\nIdle CPU Time Histogram\n");
-        printf("Idle time in Usecs\ncpu    <10    <20    <50    <100   <250   <500   <750  <1000  <1250  <1500  <2000  <3000  <5000 <10000 <20000 >20000 \n");
+        printf("Idle time in Usecs\n cpu    <10    <20    <50    <100   <250   <500   <750  <1000  <1250  <1500  <2000  <3000  <5000 <10000 <20000 >20000 \n");
 
         for (i=0;i<MAXCPUS;i++) {
 		if (cpuinfop = FIND_CPUP(globals->cpu_hash, i)) {
-                        printf (" %-2d  :", i);
+                        printf ("%4d :", i);
                         for (j = 0; j < IDLE_TIME_NBUCKETS; j++) {
                                 printf(" %-6lld", cpuinfop->idle_hist[j]);
                         }
@@ -2963,20 +2964,22 @@ void print_percpu_csv(cpu_info_t *cpuinfop)
                 	powerp->cstate_times[powerp->cur_cstate] += (end_time - powerp->last_cstate_time);
 		}
 
-                for (j=1;j<=max_cstate;j++) {
+                for (j=0;j<NCSTATES;j++) {
                         gbl_total_time += powerp->cstate_times[j];
                 }
 
 		if (gbl_total_time == 0) gbl_total_time = globals->total_secs;
 
 		csv_printf(runq_csvfile,",%d", powerp->power_start_cnt);
-                for (j=1;j<=max_cstate;j++) {
-			csv_printf(runq_csvfile,",%3.2f", (powerp->cstate_times[j] * 100.0) / gbl_total_time);
+		csv_printf (runq_csvfile,",%3.2f%%", gbl_total_time ?  (powerp->cstate_times[CSTATE_BUSY] * 100.0) / gbl_total_time : 0.0);
+                for (j=0;j<=max_cstate;j++) {
+			csv_printf(runq_csvfile,",%3.2f", gbl_total_time ? (powerp->cstate_times[j] * 100.0) / gbl_total_time : 0.0);
 		}
 	} else {
 		csv_printf(runq_csvfile,",0,0,0,0");
 		csv_printf(runq_csvfile,",0");   
-                for (j=1;j<=max_cstate;j++) {
+		csv_printf(runq_csvfile,",0.00");
+                for (j=0;j<=max_cstate;j++) {
 			csv_printf(runq_csvfile,",0.00");
 		}
 	}	
@@ -3007,7 +3010,8 @@ void print_cpu_csv()
 	csv_printf(runq_csvfile, ",%%StlTm,%%StlTmIdle");
 	csv_printf(runq_csvfile,",FreqEvents,FreqHi,FreqLo");
 	csv_printf(runq_csvfile,",CstateEvents");
-	for (i=1; i<=max_cstate; i++) {
+	csv_printf(runq_csvfile,",Busy%%");
+	for (i=0; i<=max_cstate; i++) {
 		csv_printf(runq_csvfile,",Cstate%d", i);
 	}
 	if (msr_flag)  csv_printf(runq_csvfile,",LLC ref,LLC hit,LLC hit%%,Instrs,Cycles,CPI,Avg MHz,SMI Count");

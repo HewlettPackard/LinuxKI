@@ -137,7 +137,7 @@ incr_power_end_stats(power_end_t *rec_ptr)
 	}
 
 	powerp->power_end_cnt++;
-	powerp->cur_cstate = 0;
+	powerp->cur_cstate = CSTATE_BUSY;
 	powerp->last_cstate_time = rec_ptr->hrtime;
 	
 }

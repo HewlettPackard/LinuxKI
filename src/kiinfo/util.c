@@ -1551,17 +1551,20 @@ dmangle(char *sym)
 
 	/* Locate the first "N" after the _Z */
 	while (i < strlen(sym)) { 
-		if (sym[i] == 'N') break;
-		i++;
+		if (sym[i] == 'N') { 
+			i++; 
+			break;
+		} else 
+			i++;
 	}
 
-	if (i >= strlen(sym)) return sym;
+        /* if we didn't find the first "N", then reset i to 2 */
+        if (i >= strlen(sym)) i = 2;
 
 	/* we need to find the first number after _Z and the first character after 
 	 * the number.
 	 */
 
-	i++;
 	util_str[0] = 0;
 	util_pos = 0;
 	/* we will allow _nested_ symbols, so we loop here */

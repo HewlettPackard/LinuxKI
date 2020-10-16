@@ -141,7 +141,7 @@ collect_hc_stktrc(hardclock_t *rec_ptr, hc_info_t *hcinfop, pid_info_t *pidp)
 	    	if (pidp && (pidp->vtxt_pregp == NULL)) return 0;
 	}
 
-	if (pidp && pidp->vtxt_pregp) {
+	if (pidp) {
 		cnt = save_entire_stack(&stktrc[0], &rec_ptr->ips[1], MIN(rec_ptr->stack_depth-1, LEGACY_STACK_DEPTH));
 	} else {
 		cnt = save_kernel_stack(&stktrc[0], &rec_ptr->ips[1], MIN(rec_ptr->stack_depth-1, LEGACY_STACK_DEPTH));
@@ -256,10 +256,11 @@ print_hardclock_rec(void *a)
 
         PRINT_COMMON_FIELDS(rec_ptr);
         PRINT_EVENT(rec_ptr->id);
-#if DEBUG
+#if 0
 	if (rec_ptr->preempt_count == PREEMPT_USER) {
 		printf ("%chardirq=%d%csoftirq=%d%cpreempt=%d", fsep, 0, fsep, 0, fsep, 0);
 	} else {
+		printf ("%chardirq=%d%csoftirq=%d%cpreempt=%d", 
 		fsep, HARDIRQ_VAL(rec_ptr->preempt_count),
 		fsep, SOFTIRQ_VAL(rec_ptr->preempt_count),
 		fsep, PREEMPT_VAL(rec_ptr->preempt_count));

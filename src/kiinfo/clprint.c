@@ -874,7 +874,7 @@ cl_th_detection()                       /* Section 1.5 */
         _TABLE;
         TEXT("\n");
 
-        BOLD("PID       Wakeups MaxWakeups    Count     TimeStamp  cmd\n");
+        BOLD("PID       Wakeups MaxWakeups    Count     TimeStamp  cmd abstime_flag: %d\n", abstime_flag);
         foreach_hash_entry((void **)clpid_hash, CLPID_HASHSZ, cl_print_wakeup_pids, clpid_sort_by_wakeups, top, NULL);
 }
 
@@ -1148,7 +1148,7 @@ cl_file_ops()                           /* Section 3.1 */
         lineno = 1;
         tab=tab0;
 
-        BOLD("%sSyscalls   ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
+        BOLD("%sSyscalls    ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
         foreach_hash_entry((void **)clfdata_hash, CLFDATA_HASHSZ, cl_file_print_fdata, clfdata_sort_by_syscalls, top, NULL); 
 }
 
@@ -1226,10 +1226,10 @@ cl_print_global_disk_stats (void *arg1, void *arg2)
 	SPACE;
 	print_iostats_totals(serverp, &serverp->iostats[0], arg2);
 	if (iostatsp->barrier_cnt) {
-		printf (" barriers: %d\n", iostatsp->barrier_cnt);
+		printf (" barriers: %d", iostatsp->barrier_cnt);
 	}
 	if (iostatsp->requeue_cnt) {
-		printf (" requeues: %d\n", iostatsp->requeue_cnt);
+		printf (" requeues: %d", iostatsp->requeue_cnt);
 	}
 	printf ("\n");
 }

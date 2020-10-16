@@ -36,6 +36,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <asm-generic/unistd.h>
 #undef __ARCH_WANT_SYSCALL_NO_AT
 #undef __ARCH_WANT_SYSCALL_DEPRECATED
+
+#elif __PPC__
+#include <asm/unistd.h>
 #else
 #include <asm/unistd_64.h>
 #endif

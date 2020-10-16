@@ -412,21 +412,6 @@ liki_disable_tracing_for_task_group(pid_t task)
 }
 
 int
-liki_enable_tracing_for_task_family(pid_t task)
-{
-	resource_op_t	rop;
-
-	if (liki_trf == -1)
-		return -EINVAL;
-
-	rop.op = ADD_RESOURCE;
-	rop.id = task;
-	rop.type = TASKFAMILY;
-
-	return(write(liki_trf, &rop, sizeof(resource_op_t)));
-}
-
-int
 liki_enable_tracing_for_cpu(int cpu)
 {
 	resource_op_t	rop;

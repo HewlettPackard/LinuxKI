@@ -85,11 +85,9 @@ incr_issue_iostats (block_rq_issue_t *rec_ptr, iostats_t *statp, int *rndio_flag
 {
 	if (statp->qlen > 0) {
 		statp->issue_cnt++;
-		if (statp->qlen > 0) { 
-			statp->qlen--;
-			statp->cum_qlen+=statp->qlen;
-			statp->qops++;
-		}
+		statp->qlen--;
+		statp->cum_qlen+=statp->qlen;
+		statp->qops++;
 	}
 
 	statp->cum_async_inflight += rec_ptr->async_in_flight;
@@ -274,7 +272,6 @@ block_dev_insert_stats(block_rq_insert_t *rec_ptr)
 	uint32 rw;
 	int rndio_flag=-1;
 	
-	if (debug) printf ("block_dev_insert_stats\n");
 	rw = reqop(rec_ptr->cmd_flags); 
 	if (rw > IO_WRITE) return;
 	
@@ -370,9 +367,15 @@ block_perpid_requeue_stats(block_rq_requeue_t *rec_ptr, pid_info_t *pidp)
 	if ((rw > IO_WRITE) || INVALID_SECTOR(rec_ptr->sector)) return;
 
 	IOSTATSP(pidp, dev, rw)->requeue_cnt++;
+	if (IOSTATSP(pidp, dev, rw)->qlen > 0) {
+		IOSTATSP(pidp, dev, rw)->qlen--;
+	}
 
 	devinfop = GET_DEVP(DEVHASHP(pidp, dev),dev); 
 	devinfop->iostats[rw].requeue_cnt++;
+	if (devinfop->iostats[rw].qlen > 0) { 
+		devinfop->iostats[rw].qlen--;
+	}
 }
 
 static inline void
@@ -387,6 +390,9 @@ block_dev_requeue_stats(block_rq_requeue_t *rec_ptr)
 
 	devinfop = GET_DEVP(DEVHASHP(globals,dev),dev); 
 	devinfop->iostats[rw].requeue_cnt++;
+	if (devinfop->iostats[rw].qlen > 0) {
+		devinfop->iostats[rw].qlen--;
+	}
 }
 
 static inline void

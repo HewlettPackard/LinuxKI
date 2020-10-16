@@ -2512,7 +2512,7 @@ kp_pid_memory(void *arg1, void *arg2)
 	sched_info_t *schedp;
         uint64 *warnflagp = (uint64 *)arg2;
 
-        printf ("%8d %8d ",
+        printf ("%9d %9d ",
                 pidp->vss,
                 pidp->rss);
         PID_URL_FIELD8_R(pidp->PID);
@@ -2547,7 +2547,7 @@ kp_rss()				/* Section 6.1 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-        BOLD("     vss      rss      PID Command"); NL;
+        BOLD("      vss       rss      PID Command"); NL;
         foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, kp_pid_memory, pid_sort_by_rss, 10, &warnflag);
 	CSV_FIELD("kipid", "[CSV]");
 }
@@ -2574,7 +2574,7 @@ kp_vss()				/* Section 6.2 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-        BOLD("     vss      rss      PID Command"); NL;
+        BOLD("      vss       rss      PID Command"); NL;
         foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, kp_pid_memory, pid_sort_by_vss, 10, &warnflag);
 	CSV_FIELD("kipid", "[CSV]");
 }

@@ -1422,8 +1422,8 @@ print_pidhc_window()
 
 	if (IS_LIKI && (LINES_AVAIL > 3) && hcinfop &&  hcinfop->hc_stktrc_hash ) {
 		lineno++;
-		mvprintw (lineno++, 0, "---- Top System Hardclock Stack Traces ----");
-		mvprintw (lineno++, 0, "   count  wait%%  Stack trace");
+		mvprintw (lineno++, 0, "---- Top Hardclock Stack Traces ----");
+		mvprintw (lineno++, 0, "   count    Pct  Stack trace");
 		foreach_hash_entry((void **)hcinfop->hc_stktrc_hash, STKTRC_HSIZE, print_hc_stktrc_live, stktrc_sort_by_cnt, LINES_AVAIL, (void *)hcinfop);
 	}
 		
@@ -2052,11 +2052,11 @@ print_irq_entry_live(void *arg1, void *arg2)
         if (*irqtypep == HARDIRQ) {
                 irqname_entry = (irq_name_t *)find_entry((lle_t **)globals->irqname_hash, irq, IRQ_HASH(irq));
                 if (irqname_entry) {
-                        mvprintw (lineno, col, "%3d %-16s", irq, irqname_entry->name);
+                        mvprintw (lineno, col, "%4d %-16s", irq, irqname_entry->name);
                 } else {
-                        mvprintw (lineno, col, "%3d %-16s", irq, " ");
+                        mvprintw (lineno, col, "%4d %-16s", irq, " ");
                 }
-		ncol+=21;
+		ncol+=22;
         } else {
                 mvprintw (lineno, col, "%3d %-11s", irq, softirq_name[irq]);
 		ncol+=16;
@@ -2174,8 +2174,8 @@ print_irq_window()
 	header_lineno = lineno;
 	lineno++;
 	col = 0;
-	mvprintw(lineno++, col, "---------------------- Hard IRQs ---------------------");
-	mvprintw(lineno++, col, "IRQ Name                Count     ElpTime   Avg(usecs)");
+	mvprintw(lineno++, col, "----------------------- Hard IRQs ---------------------");
+	mvprintw(lineno++, col, " IRQ Name                Count     ElpTime   Avg(usecs)");
 	irqinfop = globals->irqp;
 	if (irqinfop && (LINES_AVAIL > 3)) {
 		irqtype = HARDIRQ;
@@ -2318,8 +2318,8 @@ print_select_cpu_window()
 		irqheader_lineno = lineno;
 		lineno++;
 		col=0;
-		mvprintw(lineno++, col, "---------------- Hard IRQs ---------------");
-		mvprintw(lineno++, col, "IRQ Name                Count      ElpTime");
+		mvprintw(lineno++, col, "----------------------- Hard IRQs ---------------------");
+		mvprintw(lineno++, col, "IRQ Name                Count      ElpTime   Avg(usecs)");
 		irqinfop = cpuinfop->irqp;
 		if (irqinfop) {
 			irqtype = HARDIRQ;
@@ -2329,9 +2329,9 @@ print_select_cpu_window()
 
 		saved_lineno = lineno;
 		lineno = irqheader_lineno+1;
-		col=44;
-		mvprintw(lineno++, col, "------------- Soft IRQs ------------");
-		mvprintw(lineno++, col, "IRQ Name           Count     ElpTime");
+		col=57;
+		mvprintw(lineno++, col, "-------------------- Soft IRQs ------------------");
+		mvprintw(lineno++, col, "IRQ Name           Count     ElpTime   Avg(usecs)");
 		irqinfop = cpuinfop->softirqp;
 		if (irqinfop) {
 			irqtype = SOFTIRQ;
@@ -2583,7 +2583,7 @@ print_cpu_window()
 
 	for (i = 0; i < globals->nldom; i++) {
 		ldom_lineno[i] = lineno + ((4 + lcpus_per_ldom) * (i / ldoms_columns));
-		ldom_colno[i] = (i % ldoms_columns ) * 26;
+		ldom_colno[i] = (i % ldoms_columns ) * 27;
 	}
 
 	gschedp = GET_ADD_SCHEDP(&globals->schedp);
@@ -2595,8 +2595,8 @@ print_cpu_window()
 		col=ldom_colno[i];
 
 		if (((col+25) < COLS) && LINES_AVAIL>2) {
-			mvprintw (lineno++, col, "------- Node %2d --------", i);
-			mvprintw (lineno++, col, "cpu   sys  usr  irq  idl");
+			mvprintw (lineno++, col, "-------- Node %2d --------", i);
+			mvprintw (lineno++, col, " cpu   sys  usr  irq  idl");
 			ldom_lineno[i]= lineno;
 		}
 	}
@@ -2610,8 +2610,8 @@ print_cpu_window()
 			lineno=ldom_lineno[cpuinfop->ldom];
 			col=ldom_colno[cpuinfop->ldom];
 
-			if (((col+25) < COLS) && LINES_AVAIL) {
-				mvprintw (lineno++, col, "%3d: %3.0f%% %3.0f%% %3.0f%% %3.0f%%",
+			if (((col+26) < COLS) && LINES_AVAIL) {
+				mvprintw (lineno++, col, "%4d: %3.0f%% %3.0f%% %3.0f%% %3.0f%%",
 					i,
                                	 	(cstatp->T_sys_time * 100.0) / cpu_total_time,
                                 	(cstatp->T_user_time * 100.0) / cpu_total_time,
@@ -2631,8 +2631,8 @@ print_cpu_window()
 		if (ldom_total_time) {
 			lineno=ldom_lineno[i];
 			col=ldom_colno[i];
-			if (((col+25) < COLS) && LINES_AVAIL) {
-				mvprintw (lineno++, col, "Tot: %3.0f%% %3.0f%% %3.0f%% %3.0f%%",
+			if (((col+26) < COLS) && LINES_AVAIL) {
+				mvprintw (lineno++, col, " Tot: %3.0f%% %3.0f%% %3.0f%% %3.0f%%",
                                	 	(lstatp->T_sys_time * 100.0) / ldom_total_time,
                                 	(lstatp->T_user_time * 100.0) / ldom_total_time,
                                 	(lstatp->T_irq_time * 100.0) / ldom_total_time,
@@ -3118,6 +3118,7 @@ live_print_docker_totals(void *arg1, void *arg2)
 	if (COLS > 120) printw (" %8.1f %8.1f",
 		(dockerp->netstats.rd_cnt+dockerp->netstats.wr_cnt)/secs,
 		((dockerp->netstats.rd_bytes+dockerp->netstats.wr_bytes)/(1024*1024))/secs);	
+	if ((COLS > 180) && dockerp && dockerp->name) printw ("  %s", dockerp->name);
 
 	return 0;
 }
@@ -3147,6 +3148,7 @@ print_docker_window()
 	mvprintw(lineno++, 0, "Container            busy          sys         user          irq         runq");
 	if (COLS > 104) printw ("     IOPS     MB/s");
 	if (COLS > 124) printw ("   NetOPS  NetMB/s");
+	if (COLS > 180) printw ("  Name");
 
 	foreach_hash_entry((void **)globals->docker_hash, DOCKER_HASHSZ, live_print_docker_totals, docker_sort_by_runtime, 0, NULL);
 

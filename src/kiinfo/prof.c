@@ -328,11 +328,19 @@ hc_print_pc2(void *arg1, void *arg2)
 	}
 		
 	if (sym == NULL) {
-		printf ("%s%8d %6.2f%%  %-6s 0x%llx", tab, 
+		if (key == UNKNOWN_SYMIDX) {
+			printf ("%s%8d %6.2f%%  %-6s %s", tab, 
+				pcinfop->count, 
+				(pcinfop->count*100.0) / hcinfop->total, 
+				cpustate_name_index[pcinfop->state],
+				"unknown");
+		} else {
+			printf ("%s%8d %6.2f%%  %-6s 0x%llx", tab, 
 				pcinfop->count, 
 				(pcinfop->count*100.0) / hcinfop->total, 
 				cpustate_name_index[pcinfop->state],
 				key);
+		}
 	} else {
 		printf ("%s%8d %6.2f%%  %-6s %s", tab, 
 				pcinfop->count, 

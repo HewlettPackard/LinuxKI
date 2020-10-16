@@ -181,6 +181,9 @@ extract_ki_files()
     elif [ -f ki_all.$tag.tgz ] ; then
 	tar xf ki_all.$tag.tgz
     fi
+
+# add read access to the files 
+    chmod +r *.$tag  >/dev/null 2>&1
 }
 
 likimerge()

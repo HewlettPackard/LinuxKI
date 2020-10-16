@@ -102,8 +102,8 @@
 #define TT_WORKQUEUE_ENQUEUE		27
 #define TT_WORKQUEUE_EXECUTE		28
 #define TT_TASKLET_ENQUEUE		29
-#define TT_CACHE_INSERT			30
-#define TT_CACHE_EVICT			31
+#define TT_CACHE_INSERT			30	/* obsolete - unused */
+#define TT_CACHE_EVICT			31	/* obsolete - unused */
 #define TT_MM_PAGE_ALLOC                32
 #define TT_MM_PAGE_FREE			33
 
@@ -684,7 +684,7 @@ enum resource_type {
 	TASKGID,
 	CPUID,
 	DEVICEID,
-	TASKFAMILY,
+	TASKFAMILY,		/* obsolete */
 	MSR_DATA
 };
 

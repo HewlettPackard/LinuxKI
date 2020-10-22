@@ -48,7 +48,7 @@ LinuxKI analyzes the kernel trace data in different and often unique ways to hel
        CPU                                 3.622297
     lseek                79808   7980.7    0.029498   0.000000   0.000012       0
 
-LinuxKI is designed to be easy to install, collect data, and generate reports.   It runs on Linux kernels 2.6.32 or later running on x86_64 and arm64 platforms. It collects low-level detailed traces reflecting the behavior of the running workload, which can be analyzed online or bundled along with configuration and other performance data into a single gzip file suitable for transfer and offline analysis.  
+LinuxKI is designed to be easy to install, collect data, and generate reports.   It runs on Linux kernels 2.6.32 or later running on x86_64, arm64 and ppc64 platforms. It collects low-level detailed traces reflecting the behavior of the running workload, which can be analyzed online or bundled along with configuration and other performance data into a single gzip file suitable for transfer and offline analysis.  
 
 LinuxKI only enables key tracepoints in the performance paths, such as scheduler events, system call events, block I/O events, interrupt events, and CPU profiling events.   It has the ability to collect system and user stack traces during sched_switch events and CPU profiling events, and much more.   LinuxKI can analyze the detailed trace data in many different ways - per-PID, per-device, per-HBA path, per-CPU, per-LDOM, per-interrupt, per-Docker container, and much more.  
 
@@ -78,7 +78,7 @@ Pre-packaged RPM and DEB files are available on the [Releases Page](https://gith
 
 ### Prerequisites
 
-There are no mandatory pre-requisites.   LinuxKI should install and run on most Linux systems from 2.6.32 through 5.6.4.  
+There are no mandatory pre-requisites.   LinuxKI should install and run on most Linux systems from 2.6.32 through 5.8.14.  
 
 However, if you would like to use the LiKI tracing mechanism (perferred method), you will need the following packages installed to compile the LiKI module from source code:
 

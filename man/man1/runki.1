@@ -11,7 +11,7 @@ runki  -  LinuxKI trace dump collection script
 
 .SH DESCRIPTION
 
-Script to collect a LinuxKI trace dump using the LiKI kernel tracking module (default), or the Linux ftrace tracking module.   The runki script will execute the kiinfo binary to setup the tracepoints and and initiate the trace for a specified period of time.    When the dump is complete, the runki script will gather some system information and place all of the trace data and supplemental data into a single gzipped tar file (ki_all.<HOSTNAME>.<TIMESTAMP>.tgz).
+Script to collect a LinuxKI trace dump using the LiKI kernel tracking module (default), or the Linux ftrace tracking module.   The runki script will execute the kiinfo binary to setup the tracepoints and initiate the trace for a specified period of time.    When the dump is complete, the runki script will gather some system information and place all of the trace data and supplemental data into a single gzipped tar file (ki_all.<HOSTNAME>.<TIMESTAMP>.tgz).
 
 .SH OPTIONS
 
@@ -52,6 +52,7 @@ At its simplest, LinuxKI trace data is collected using the runki script, which w
 If there is sufficient available memory on the system, you should collect the data in memory using /dev/shm first and then copy the ki_all.*.tgz file to a disk filesystem afterwards.   This reduces the risk of missing LinuxKI events during the tracing and does not add to the disk workload during the collection as well. 
 
 .B $ cd /dev/shm
+
 .B $ /opt/linuxki/runki 
 
 The runki script will do all the work.   It will make sure the debug filesystem is mounted, insert the LiKI DLKM if needed, enable the trace points and dump the trace data to disk.   It will also collect supplemental information which can be used to interpret the trace data and help troubleshoot performance problems.    The result will be a single compress tar file of the format ki_all.<hostname>.<timestamp>.tgz, where the timestamp will be of the format MMDD_HHMM.   The amount of trace data depends on the number of CPU and the rate at which the trace events occur.   The data should be collected in a filesystem with plenty of disk space (200 MB - 5 GB) which is mounted for cached I/O.    Note that root privilege will be needed to execute the runki script.   Below is an example using the LiKI tracing:

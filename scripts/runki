@@ -45,7 +45,6 @@ do_sar=0
 do_annotate=0
 do_java=0
 do_tcpdump=""
-do_kmeminfo=1
 do_vxfs=1
 do_proc=1
 do_liki=1

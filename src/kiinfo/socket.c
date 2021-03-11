@@ -171,18 +171,18 @@ socket_print_detail(sd_stats_t *statsp, void **syscallp, struct sockaddr_in6 *ls
         if (scallflagp == NULL) return 0;
         if (*scallflagp == 0) return 0;
 
+        CAPTION_GREY;
 	if (lsock) {
-		BOLD ("L=");
+		printf ("L=");
 		print_ip_port_v6(lsock, 0, NULL);
 		if (rsock) BOLD (" -> ");
 	}
 	
 	if (rsock) {
-		BOLD ("R=");
+		printf ("R=");
 		print_ip_port_v6(rsock, 0, NULL);
 	}
 
-        CAPTION_GREY;
 	BOLD ("   Syscalls: %d", statsp->syscall_cnt);
 	BOLD ("   Last PID: %d", statsp->last_pid);
 	if (cluster_flag) {
@@ -194,7 +194,7 @@ socket_print_detail(sd_stats_t *statsp, void **syscallp, struct sockaddr_in6 *ls
         _CAPTION;
 
         if (scallflagp && *scallflagp) {
-                BOLD("System Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n");
+                BOLD("System Call Name                 Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n");
 			vararg.arg1 = NULL;
 			vararg.arg2 = NULL;
                         foreach_hash_entry((void **)syscallp, SYSCALL_HASHSZ,

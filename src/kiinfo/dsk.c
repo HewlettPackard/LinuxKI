@@ -21,6 +21,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <sys/types.h>
 #include "ki_tool.h"
 #include "liki.h"
+#include "winki.h"
 #include "developers.h"
 #include "kd_types.h"
 #include "globals.h"
@@ -33,6 +34,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "conv.h"
 #include <ncurses.h>
 #include <curses.h>
+
+#include "SysConfig.h"
+#include "DiskIo.h"
+#include "Process.h"
+#include "winki_util.h"
 
 int dsk_ftrace_print_func(void *, void *);
 
@@ -433,11 +439,12 @@ print_pid_iosum(void *arg1, void *arg2)
 	pid_info_t *pidp = (pid_info_t *)arg1;
 	iostats_t *rstatp, *wstatp, *tstatp;
 	docker_info_t *dockerp;
+	pid_info_t *tgidp;
 	
 	if (pidp == NULL) return 0;
 	
 	tstatp = &pidp->iostats[IO_TOTAL];
-	if (tstatp->compl_cnt == 0) return 0;
+	/* if (tstatp->compl_cnt == 0) return 0; */
 
 	SPAN_GREY;
 	print_iostats_totals (globals, &pidp->iostats[0], NULL);
@@ -449,7 +456,15 @@ print_pid_iosum(void *arg1, void *arg2)
 	}
 
 	dockerp = pidp->dockerp;
-	if (pidp->cmd) dock_printf ("  %s", pidp->cmd);
+	if (pidp->cmd) {
+		dock_printf ("  %s", pidp->cmd);
+	} else if (pidp->tgid) { 
+		/* try to show TGID command */
+		tgidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
+		if (tgidp->cmd) {
+			dock_printf ("  %s", tgidp->cmd);
+		}
+	}
 	if (pidp->hcmd) dock_printf ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) dock_printf (" (%s)", pidp->thread_cmd);
 	if (dockerp && (dockfile == NULL)) {
@@ -597,7 +612,10 @@ dsk_print_dev_iostats(void *arg1, void *arg2)
 	uint64 devpath;
 	char devstr[16];
 	char devpath_str[16];
+	char devname_str[16];
 	char *devname;
+	uint16 *chr;
+	SysConfig_PhysDisk_t *wsysconfigp;
 
 	if (devinfop->iostats[IOTOT].compl_cnt == 0) return 0;
 
@@ -606,42 +624,68 @@ dsk_print_dev_iostats(void *arg1, void *arg2)
         gdevinfop = GET_DEVP(DEVHASHP(globals,dev),dev);
 
 	pid_printf (pidfile, "%s0x%08llx", tab, dev);
-	if (devinfop->mapname) { 
-		pid_printf (pidfile, "   /dev/mapper/%s  ->", devinfop->mapname);
-	} else if (gdevinfop->mapname) {
-		pid_printf (pidfile, "   /dev/mapper/%s  ->", gdevinfop->mapname);
-	} 
 
-	devname = "unkn";
-	if (devinfop->devname) {
-		devname = devinfop->devname;
-	} else if (gdevinfop->devname) {
-		devname = gdevinfop->devname;
-	} 
+	wsysconfigp = (SysConfig_PhysDisk_t *)devinfop->wsysconfigp;
+	if (IS_WINKI) {
+	    if (wsysconfigp) {
+		pid_printf (pidfile, " disknum=%d bps=%d port=%d path=%d target=%d lun=%d partcnt=%d dwc=%d  ", 
+			wsysconfigp->DiskNumber,
+			wsysconfigp->BytesPerSector,
+			wsysconfigp->SCSIPort,
+			wsysconfigp->SCSIPath,
+			wsysconfigp->SCSITarget,
+			wsysconfigp->SCSILun,
+			wsysconfigp->PartitionCount,
+			wsysconfigp->WriteCacheEnabled);
 
-	pid_printf (pidfile, "  /dev/%s", devname);
-
-	if (gdevinfop->devpath != NO_HBA) {
-		devpath = gdevinfop->devpath;
-		sprintf (devpath_str, "%d:%d:%d:%d", FCPATH1(devpath), FCPATH2(devpath), FCPATH3(devpath), FCPATH4(devpath));
-		pid_printf (pidfile, "  (HW path: %s)", devpath_str);
-	}
-
-	mdevinfop = gdevinfop->mdevinfop;
-	if (mdevinfop && mdevinfop->devname) {
-		pid_printf (pidfile, "   (mpath device: /dev/mapper/%s)", mdevinfop->mapname);
+		chr = &wsysconfigp->Manufacturer[0];
+		PRINT_WIN_NAME2(chr);
+	    } else { 
+		pid_printf (pidfile, " disknum=%d", dev);
+	    }
 	} else {
-		devpath_str[0] = 0;
-	}
+		if (devinfop->mapname) { 
+			pid_printf (pidfile, "   /dev/mapper/%s  ->", devinfop->mapname);
+		} else if (gdevinfop->mapname) {
+			pid_printf (pidfile, "   /dev/mapper/%s  ->", gdevinfop->mapname);
+		} 
 
-	if (gdevinfop->pathname) {
-		pid_printf (pidfile, "  (pathname: %s)", gdevinfop->pathname);
+		devname = "unkn";
+		if (devinfop->devname) {
+			devname = devinfop->devname;
+		} else if (gdevinfop->devname) {
+			devname = gdevinfop->devname;
+		} 
+
+		pid_printf (pidfile, "  /dev/%s", devname);
+
+		if (gdevinfop->devpath != NO_HBA) {
+			devpath = gdevinfop->devpath;
+			sprintf (devpath_str, "%d:%d:%d:%d", FCPATH1(devpath), FCPATH2(devpath), FCPATH3(devpath), FCPATH4(devpath));
+			pid_printf (pidfile, "  (HW path: %s)", devpath_str);
+		}
+	
+		mdevinfop = gdevinfop->mdevinfop;
+		if (mdevinfop && mdevinfop->devname) {
+			pid_printf (pidfile, "   (mpath device: /dev/mapper/%s)", mdevinfop->mapname);
+		} else {
+			devpath_str[0] = 0;
+		}
+
+		if (gdevinfop->pathname) {
+			pid_printf (pidfile, "  (pathname: %s)", gdevinfop->pathname);
+		}
 	}
 		
 	pid_printf (pidfile, "\n");
 
 	sprintf(devstr, "0x%08x", dev);
-	print_dev_iostats(statp, devstr, devname, &devpath_str[0], mdevinfop ? mdevinfop->mapname : NULL, gdevinfop->wwn, pidfile);
+	if (IS_WINKI) {
+	    /* if (wsysconfigp = (SysConfig_PhysDisk_t *)devinfop->wsysconfigp) { */
+		print_dev_iostats(statp, devstr, &devname_str[0], NULL, NULL, 0, pidfile);
+	} else {
+		print_dev_iostats(statp, devstr, devname, &devpath_str[0], mdevinfop ? mdevinfop->mapname : NULL, gdevinfop->wwn, pidfile);
+	}
 
 	if (dsk_mpath_flag) {
 		foreach_hash_entry((void **)devinfop->mpath_hash, MPATH_HSIZE, calc_mpath_iototals, NULL, 0, NULL);
@@ -869,6 +913,58 @@ dsk_bucket_adjust()
         return 0;
 }
 
+static inline void
+dsk_win_trace_funcs()
+{
+	int i;
+
+	for (i = 0; i < 65536; i++) {
+		ki_actions[i].id = i;
+		ki_actions[i].func = NULL;
+		ki_actions[i].execute = 0;
+	}
+
+	strcpy(&ki_actions[0].subsys[0], "EventTrace");
+	strcpy(&ki_actions[0].event[0], "Header");
+	ki_actions[0].func = winki_header_func;
+	ki_actions[0].execute = 1;
+
+	/* Init events aren't needed at this time */
+	strcpy(&ki_actions[0x10a].subsys[0], "DiskIo");
+	strcpy(&ki_actions[0x10a].event[0], "Read");
+	ki_actions[0x10a].func=diskio_readwrite_func;
+	ki_actions[0x10a].execute = 1;
+
+	strcpy(&ki_actions[0x10b].subsys[0], "DiskIo");
+	strcpy(&ki_actions[0x10b].event[0], "Write");
+	ki_actions[0x10b].func=diskio_readwrite_func;
+	ki_actions[0x10b].execute = 1;
+
+	strcpy(&ki_actions[0x10c].subsys[0], "DiskIo");
+	strcpy(&ki_actions[0x10c].event[0], "ReadInit");
+	ki_actions[0x10c].func=diskio_init_func;
+	ki_actions[0x10c].execute = 1;
+
+	strcpy(&ki_actions[0x10d].subsys[0], "DiskIo");
+	strcpy(&ki_actions[0x10d].event[0], "WriteInit");
+	ki_actions[0x10d].func=diskio_init_func;
+	ki_actions[0x10d].execute = 1;
+
+        strcpy(&ki_actions[0x10e].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10e].event[0], "FlushBuffers");
+        ki_actions[0x10e].func=diskio_flush_func;
+	ki_actions[0x10e].execute = 1;
+
+        strcpy(&ki_actions[0x10e].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10e].event[0], "FlushInit");
+        ki_actions[0x10e].func=diskio_init_func;
+	ki_actions[0x10e].execute = 0;
+
+	strcpy(&ki_actions[0xb0b].subsys[0], "SysConfig");
+	strcpy(&ki_actions[0xb0b].event[0], "PhysDisk");
+	ki_actions[0xb0b].func=sysconfig_physdisk_func;
+	ki_actions[0xb0b].execute = 1;
+}
 	
 
 /*
@@ -887,34 +983,55 @@ dsk_init_func(void *v)
 	alarm_func = dsk_alarm_func;
 	filter_func = trace_filter_func;
 
-        /* We will disgard the trace records until the Marker is found */
-        for (i = 0; i < KI_MAXTRACECALLS; i++) {
-                ki_actions[i].execute = 0;
-        }
-
-	ki_actions[TRACE_BLOCK_RQ_ISSUE].func = block_rq_issue_func;
-	ki_actions[TRACE_BLOCK_RQ_INSERT].func = block_rq_insert_func;
-	ki_actions[TRACE_BLOCK_RQ_COMPLETE].func = block_rq_complete_func;
-	ki_actions[TRACE_BLOCK_RQ_REQUEUE].func = block_rq_requeue_func;
-	ki_actions[TRACE_BLOCK_RQ_ABORT].func = block_rq_abort_func;
-	ki_actions[TRACE_SCHED_SWITCH].func = sched_switch_thread_names_func;
-	if (IS_LIKI_V4_PLUS)
-                ki_actions[TRACE_WALLTIME].func = trace_startup_func;
-        else
-                ki_actions[TRACE_WALLTIME].func = trace_walltime_func;
-
-	if (IS_LIKI)	 {
-		ki_actions[TRACE_BLOCK_RQ_ISSUE].execute = 1;
-		ki_actions[TRACE_BLOCK_RQ_INSERT].execute = 1; 
-		ki_actions[TRACE_BLOCK_RQ_COMPLETE].execute = 1;
-		ki_actions[TRACE_BLOCK_RQ_REQUEUE].execute = 1;
-		ki_actions[TRACE_BLOCK_RQ_ABORT].execute = 1;
-		ki_actions[TRACE_WALLTIME].execute = 1;
-		if (!is_alive) ki_actions[TRACE_SCHED_SWITCH].execute = 1;
+	if (IS_WINKI) {
+		dsk_win_trace_funcs();
+		CLEAR(NOMAPPER_FLAG);
 	} else {
         	/* We will disgard the trace records until the Marker is found */
-        	ki_actions[TRACE_PRINT].func = dsk_ftrace_print_func;
-        	ki_actions[TRACE_PRINT].execute = 1;
+		for (i = 0; i < KI_MAXTRACECALLS; i++) {
+                	ki_actions[i].execute = 0;
+        	}
+
+		ki_actions[TRACE_BLOCK_RQ_ISSUE].func = block_rq_issue_func;
+		ki_actions[TRACE_BLOCK_RQ_INSERT].func = block_rq_insert_func;
+		ki_actions[TRACE_BLOCK_RQ_COMPLETE].func = block_rq_complete_func;
+		ki_actions[TRACE_BLOCK_RQ_REQUEUE].func = block_rq_requeue_func;
+		ki_actions[TRACE_BLOCK_RQ_ABORT].func = block_rq_abort_func;
+		ki_actions[TRACE_SCHED_SWITCH].func = sched_switch_thread_names_func;
+		if (IS_LIKI_V4_PLUS)
+                	ki_actions[TRACE_WALLTIME].func = trace_startup_func;
+        	else
+                	ki_actions[TRACE_WALLTIME].func = trace_walltime_func;
+
+		if (IS_LIKI)	 {
+			ki_actions[TRACE_BLOCK_RQ_ISSUE].execute = 1;
+			ki_actions[TRACE_BLOCK_RQ_INSERT].execute = 1; 
+			ki_actions[TRACE_BLOCK_RQ_COMPLETE].execute = 1;
+			ki_actions[TRACE_BLOCK_RQ_REQUEUE].execute = 1;
+			ki_actions[TRACE_BLOCK_RQ_ABORT].execute = 1;
+			ki_actions[TRACE_WALLTIME].execute = 1;
+			if (!is_alive) ki_actions[TRACE_SCHED_SWITCH].execute = 1;
+		} else {
+        		/* We will disgard the trace records until the Marker is found */
+        		ki_actions[TRACE_PRINT].func = dsk_ftrace_print_func;
+        		ki_actions[TRACE_PRINT].execute = 1;
+		}
+
+		parse_devices();
+		parse_docker_ps();
+		parse_ll_R();
+
+		if (timestamp) {
+			parse_proc_cgroup();
+			parse_pself();
+			parse_edus();
+			parse_mpath();
+			parse_jstack();
+		}
+	
+		if (timestamp) {
+			dsk_csvfile = open_csv_file("kidsk", 1);
+		}
 	}
 
         dsk_io_sizes[0]= 5ull;
@@ -930,19 +1047,6 @@ dsk_init_func(void *v)
 		dsk_bucket_adjust();
 	}
 
-	parse_devices();
-	parse_docker_ps();
-	parse_ll_R();
-
-	if (timestamp) {
-		parse_proc_cgroup();
-		parse_pself();
-		parse_edus();
-		parse_mpath();
-		parse_jstack();
-
-		dsk_csvfile = open_csv_file("kidsk", 1);
-	}
 }
 
 int
@@ -975,6 +1079,7 @@ dsk_print_report()
 	FILE *tmp;
 
 	tab=tab0;
+
 	csv_printf(dsk_csvfile,"devname   ,device    ,h/w path        ,Mapper Device                    ,Target Path       ,  rwt,  avque,avinflt,  io/s,  KB/s, avsz,   avwait,   avserv,   tot,   seq,   rnd, reque, abort, flush, maxwait, maxserv\n");
 
 	if (is_alive) {
@@ -985,65 +1090,81 @@ dsk_print_report()
 		/* do mpath summary */
 	}
 
+	printf ("\nGlobal Device Statistics\n\n");
+	printf ("         --------------------  Total  -------------------- --------------------  Write  -------------------- ---------------------  Read  --------------------\n");
+	printf ("Devices     IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+	calc_io_totals(&globals->iostats[0], NULL);
+	printf ("%7d  ", globals->ndevs);
+	print_iostats_totals (globals, &globals->iostats[0], NULL);
+	printf ("\n");
+
         foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, calc_dev_totals, NULL, 0, (void *)1);
-        foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, calc_dev_totals, NULL, 0, NULL);
+        if (!IS_WINKI) foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, calc_dev_totals, NULL, 0, NULL);
 	if (!dsk_nodev_flag) {
 		printf ("\nPhysical Device Statistics\n");
 		printf ("\n%s      device rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
 		foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, dsk_print_dev_iostats, dev_sort_by_mdev, 0, NULL);
 
-		printf ("\nMapper Device Statistics\n");
-		printf ("\n%s      device rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
-		foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, dsk_print_dev_iostats, dev_sort_by_dev, 0, NULL);
+		if (!IS_WINKI) {
+			printf ("\nMapper Device Statistics\n");
+			printf ("\n%s      device rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+			foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, dsk_print_dev_iostats, dev_sort_by_dev, 0, NULL);
+		}
 	}
 
 	/* We do this to omit the CSV printing for the HBA devices and per-CPU stats */
 	tmp = dsk_csvfile; dsk_csvfile=NULL;
 	
 	/* print multipath FC totals */
-	if (!kiall_flag) foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, calc_fc_totals, NULL, 0, NULL);
-	if (globals->fchash) {
+	if (!IS_WINKI) {
+	    if (!kiall_flag) foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, calc_fc_totals, NULL, 0, NULL);
+	    if (globals->fchash && !IS_WINKI) {
 		printf ("\nMultipath FC HBA Statistics\n");
 		printf ("\n%s      HBA    rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
 		
 		foreach_hash_entry((void **)globals->fchash, FC_HSIZE, dsk_print_fc_iostats, fc_sort_by_path, 0, NULL); 
-	}
+	    }
 	
-	if (globals->wwnhash) {
+	    if (!IS_WINKI && globals->wwnhash) {
 		printf ("\nTarget WWN Statistics\n");
 		printf ("\n%s    FC Target WWN    rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
 		
 		foreach_hash_entry((void **)globals->wwnhash, WWN_HSIZE, dsk_print_wwn_iostats, wwn_sort_by_wwn, 0, NULL); 
-	}
+	    }
 	
-	if (percpu_stats) {
-            printf ("\nPer-CPU Statistics (for possible per-HBA statistics\n");
-	    printf ("\n%s      device rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
-            for (i = 0; i < MAXCPUS; i++) {
-                if (cpuinfop = FIND_CPUP(globals->cpu_hash, i)) {
+	    if (percpu_stats) {
+		printf ("\nPer-CPU Statistics (for possible per-HBA statistics\n");
+		printf ("\n%s      device rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+       		for (i = 0; i < MAXCPUS; i++) {
+                    if (cpuinfop = FIND_CPUP(globals->cpu_hash, i)) {
                         sprintf(cpustr, "cpu=%d", i);
                         calc_io_totals(&cpuinfop->iostats[0], NULL);
                         print_dev_iostats(&cpuinfop->iostats[0], cpustr, NULL, NULL, NULL, 0, NULL);
                         bzero(&cpuinfop->iostats[0], sizeof(iostats_t)*3);
-                }
-            }
+                    }
+        	}
+	    }
         }
 
         printf ("\nPhysical I/O Histogram\n");
 	print_io_histogram(globals->iotimes, NULL);
 
 	if (npid) {
+		update_perpid_sched_stats();
 		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, calc_pid_iototals, NULL, 0, NULL);
-		if (npid==ALL) {
-			printf ("\nAll tasks sorted by physical I/O\n\n");
-		} else {
-			printf ("\nTop %d Tasks sorted by Multipath I/O\n\n", npid);
+
+		if (!IS_WINKI) {
+			if (npid==ALL) {
+				printf ("\nAll tasks sorted by physical I/O\n\n");
+			} else {
+				printf ("\nTop %d Tasks sorted by Multipath I/O\n\n", npid);
+			}
+
+			BOLD ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
+			BOLD ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv      %s  Process\n", tlabel);
+
+			foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_miosum,  pid_sort_by_miocnt, npid, NULL);
 		}
-
-		BOLD ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-		BOLD ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv      PID  Process\n");
-
-		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_miosum,  pid_sort_by_miocnt, npid, NULL);
 
 		if (npid==ALL) {
 			printf ("\nAll tasks sorted by physical I/O\n\n");
@@ -1052,7 +1173,7 @@ dsk_print_report()
 		}
 
 		BOLD ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-		BOLD ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv      PID  Process\n");
+		BOLD ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv      %s  Process\n", tlabel);
 
 		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_iosum,  pid_sort_by_iocnt, npid, NULL);
 	}

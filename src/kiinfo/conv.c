@@ -23,6 +23,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "liki_v2.h"
 #include "liki_v3.h"
 #include "liki_extra.h"
+#include "winki.h"
 #include "globals.h"
 #include "developers.h"
 #include "kd_types.h"
@@ -36,7 +37,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 	p1->hrtime = trcinfop->cur_time;        \
 	p1->cpu = trcinfop->cpu;		\
 	p1->tgid = 0;				\
-	p1->spare = 0;			
+	p1->spare = 0;
+
+#define SET_COMMON_FIELDS_WINKI(trcinfop, p1, p2)	\
+	p1->cpu_seqno = 0;                      \
+	p1->id = p2->EventType; 		\
+	p1->cpu = trcinfop->cpu;		\
+	p1->pid = 0;	                        \
+	p1->tgid = 0;				\
+	p1->spare = 0;
 
 #define COPY_COMMON_FIELDS(p1, p2)     		\
 	memcpy(p1, p2, sizeof(common_t))
@@ -520,12 +529,13 @@ conv_block_rq_issue(void *arg1, void *arg2)
 	block_rq_issue_v1_t *v1_rec = (block_rq_issue_v1_t *)trcinfop->cur_rec;
 	block_rq_issue_v2_t *v2_rec = (block_rq_issue_v2_t *)trcinfop->cur_rec;
 	block_rq_issue_v3_t *v3_rec = (block_rq_issue_v3_t *)trcinfop->cur_rec;
+	DiskIo_Init_t *winki_rec = (DiskIo_Init_t *)trcinfop->cur_rec;
         block_rq_issue_t *rec_ptr = (block_rq_issue_t *)arg2;
 	char *ptr;
 
-	if (IS_LIKI_V5_PLUS) return trcinfop->cur_rec;
-
-	if (IS_LIKI_V3_PLUS) {
+	if (IS_LIKI_V5_PLUS) {
+		return trcinfop->cur_rec;
+	} else if (IS_LIKI_V3_PLUS) {
 		COPY_COMMON_FIELDS(rec_ptr, v3_rec);
 		rec_ptr->dev = v3_rec->dev;
 		rec_ptr->sector = v3_rec->sector;
@@ -538,9 +548,7 @@ conv_block_rq_issue(void *arg1, void *arg2)
 		rec_ptr->sync_in_flight = v3_rec->sync_in_flight;
 		rec_ptr->reclen = sizeof(block_rq_issue_t);
 		return rec_ptr;
-	}
-
-	if (IS_LIKI_V2) {
+	} else if (IS_LIKI_V2) {
 		CONV_COMMON_FIELDS_V1_V2(rec_ptr, v2_rec);
 		rec_ptr->dev = v2_rec->dev;
 		rec_ptr->sector = v2_rec->sector;
@@ -553,9 +561,7 @@ conv_block_rq_issue(void *arg1, void *arg2)
 		rec_ptr->sync_in_flight = v2_rec->sync_in_flight;
 		rec_ptr->reclen = sizeof(block_rq_issue_t);
 		return rec_ptr;
-	}
-
-	if (IS_LIKI_V1) {
+	} else if (IS_LIKI_V1) {
 		CONV_COMMON_FIELDS_V1_V2(rec_ptr, v1_rec);
 		rec_ptr->dev = v1_rec->dev;
 		rec_ptr->sector = v1_rec->sector;
@@ -568,29 +574,36 @@ conv_block_rq_issue(void *arg1, void *arg2)
 		rec_ptr->sync_in_flight = 0;
 		rec_ptr->reclen = sizeof(block_rq_issue_t);
 		return rec_ptr;
-	}
-
-	SET_COMMON_FIELDS(trcinfop, rec_ptr, ftrace_rec);
-	rec_ptr->reclen = sizeof(block_rq_issue_t);
-	ptr = (char *)ftrace_rec + block_rq_issue_attr[BLOCK_RQ_DEV].offset;
-	if (block_rq_issue_attr[BLOCK_RQ_DEV].size == 4) {
-		rec_ptr->dev = (uint32)(*ptr);
-	} else if (block_rq_issue_attr[BLOCK_RQ_DEV].size == 8) {
-		rec_ptr->dev = (uint64)(*ptr);
+#if 0
+	} else if (IS_WINKI) {
+		SET_COMMON_FIELDS_WINKI(trcinfop, rec_ptr, winki_rec, TT_BLOCK_RQ_ISSUE, winki_rec->IssuingThreadId, 0);
+		rec_ptr->reclen = sizeof(block_rq_issue_t);
+		rec_ptr->irp = winki_rec->irp;
+		return rec_ptr;
+#endif
 	} else {
-		FATAL(3302, "Unknown device size", "dev size:", block_rq_issue_attr[BLOCK_RQ_DEV].size);
-	}
+		SET_COMMON_FIELDS(trcinfop, rec_ptr, ftrace_rec);
+		rec_ptr->reclen = sizeof(block_rq_issue_t);
+		ptr = (char *)ftrace_rec + block_rq_issue_attr[BLOCK_RQ_DEV].offset;
+		if (block_rq_issue_attr[BLOCK_RQ_DEV].size == 4) {
+			rec_ptr->dev = (uint32)(*ptr);
+		} else if (block_rq_issue_attr[BLOCK_RQ_DEV].size == 8) {
+			rec_ptr->dev = (uint64)(*ptr);
+		} else {
+			FATAL(3302, "Unknown device size", "dev size:", block_rq_issue_attr[BLOCK_RQ_DEV].size);
+		}
 		
-	memcpy (&rec_ptr->dev, (char *)ftrace_rec + block_rq_issue_attr[BLOCK_RQ_DEV].offset, block_rq_issue_attr[BLOCK_RQ_DEV].size);
-	memcpy (&rec_ptr->sector, (char *)ftrace_rec + block_rq_issue_attr[BLOCK_RQ_SECTOR].offset, block_rq_issue_attr[BLOCK_RQ_SECTOR].size);
-	memcpy (&rec_ptr->nr_sectors, (char *)ftrace_rec + block_rq_issue_attr[BLOCK_RQ_NR_SECTOR].offset, block_rq_issue_attr[BLOCK_RQ_NR_SECTOR].size);
-	memcpy (&rec_ptr->bytes, (char *)ftrace_rec + block_rq_issue_attr[BLOCK_RQ_BYTES].offset, block_rq_issue_attr[BLOCK_RQ_BYTES].size);
-	/* memcpy (&rec_ptr->comm, (char *)ftrace_rec + block_rq_issue_attr[BLOCK_RQ_COMM].offset, block_rq_issue_attr[BLOCK_RQ_COMM].size); */
-	rec_ptr->cmd_flags = get_ioflags_from_rwbs((char *)ftrace_rec + block_rq_issue_attr[BLOCK_RQ_RWBS].offset);
-	rec_ptr->async_in_flight = 0;
-	rec_ptr->sync_in_flight = 0;
-
-	return rec_ptr;
+		memcpy (&rec_ptr->dev, (char *)ftrace_rec + block_rq_issue_attr[BLOCK_RQ_DEV].offset, block_rq_issue_attr[BLOCK_RQ_DEV].size);
+		memcpy (&rec_ptr->sector, (char *)ftrace_rec + block_rq_issue_attr[BLOCK_RQ_SECTOR].offset, block_rq_issue_attr[BLOCK_RQ_SECTOR].size);
+		memcpy (&rec_ptr->nr_sectors, (char *)ftrace_rec + block_rq_issue_attr[BLOCK_RQ_NR_SECTOR].offset, block_rq_issue_attr[BLOCK_RQ_NR_SECTOR].size);
+		memcpy (&rec_ptr->bytes, (char *)ftrace_rec + block_rq_issue_attr[BLOCK_RQ_BYTES].offset, block_rq_issue_attr[BLOCK_RQ_BYTES].size);
+		/* memcpy (&rec_ptr->comm, (char *)ftrace_rec + block_rq_issue_attr[BLOCK_RQ_COMM].offset, block_rq_issue_attr[BLOCK_RQ_COMM].size); */
+		rec_ptr->cmd_flags = get_ioflags_from_rwbs((char *)ftrace_rec + block_rq_issue_attr[BLOCK_RQ_RWBS].offset);
+		rec_ptr->async_in_flight = 0;
+		rec_ptr->sync_in_flight = 0;
+	
+		return rec_ptr;
+	}
 }
 
 void *
@@ -1418,6 +1431,9 @@ conv_common_rec(void *arg1, void *arg2)
 {
 	trace_info_t *trcinfop = (trace_info_t *)arg1;
 	kd_rec_t *ftrace_rec = (kd_rec_t *)trcinfop->cur_rec;
+	etw_common_t *winki_rec = (etw_common_t *)trcinfop->cur_rec;
+	etw_common_c002_t *c002_rec = (etw_common_c002_t *)trcinfop->cur_rec;
+	etw_common_c011_t *c011_rec = (etw_common_c011_t *)trcinfop->cur_rec;
 	common_v1_t *v1_rec = (common_v1_t *)trcinfop->cur_rec;
 	common_t *rec_ptr = (common_t *)arg2;
 
@@ -1426,6 +1442,24 @@ conv_common_rec(void *arg1, void *arg2)
 	if ((IS_LIKI_V1 || IS_LIKI_V2)) {
 		 CONV_COMMON_FIELDS_V1_V2(rec_ptr, v1_rec);
 		 return rec_ptr = (common_t *)trcinfop->cur_rec;
+	}
+
+	if (IS_WINKI) {
+		SET_COMMON_FIELDS_WINKI(trcinfop, rec_ptr, winki_rec);
+
+		if (winki_rec->ReservedHeaderField == 0xc002 || winki_rec->ReservedHeaderField == 0xc014) {
+			rec_ptr->hrtime = c002_rec->TimeStamp;
+			rec_ptr->pid = c002_rec->pid;
+			rec_ptr->tgid = c002_rec->tid;
+			rec_ptr->hrtime = c002_rec->TimeStamp;
+		} else if (winki_rec->ReservedHeaderField == 0xc011) {
+			rec_ptr->hrtime = c011_rec->TimeStamp;
+		} else {
+			printf ("*Unknown ReservedHeaderField: 0x%x\n", winki_rec->ReservedHeaderField);
+			hex_dump(winki_rec, 1);
+			return 0;
+		}
+		return rec_ptr;
 	}
 
 	SET_COMMON_FIELDS(trcinfop, rec_ptr, ftrace_rec);

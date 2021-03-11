@@ -24,6 +24,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <signal.h>
 #include "ki_tool.h"
 #include "liki.h"
+#include "winki.h"
 #include "globals.h"
 #include "developers.h"
 #include "info.h"
@@ -62,7 +63,6 @@ static void traced_sighandler(int sig)
 {
 	FATAL(1999, "Signal Caught", "signal:", sig);
 }
-
 
 ki_action_t *
 liki_action()
@@ -204,6 +204,28 @@ liki_action()
 
 	return liki_actions;
 }
+
+
+ki_action_t *
+winki_action()
+{
+	ki_action_t *winki_actions;
+	int i;
+
+	winki_actions = calloc(65536, sizeof(ki_action_t));
+	if (winki_actions == NULL) {
+		FATAL(errno,"Cannot allocate memory for ki_actions array", NULL, -1);
+	}
+
+	for (i = 0; i < 65536; i++) {
+		winki_actions[i].id = i;
+		strcpy(&winki_actions[i].subsys[0], "unknown");
+		strcpy(&winki_actions[i].event[0], "unknown");
+	}
+
+return winki_actions;
+}
+
 
 int
 put_fd_int(int fd, int value, char ignore_err)
@@ -477,7 +499,7 @@ traverse_dir(DIR *dir, char *dirname, char *parent, char *subsys)
 				FATAL(errno, "Unable to open file", fname, -1);
 			}
 
-			rtnptr = fgets((char *)&input_str, 511, event_file);
+			rtnptr = fgets((char *)&input_str, 1024, event_file);
 
 			if (strstr(input_str, "FORMAT TOO BIG")) {
 				sprintf (fname, "%s/%s", dirname, "id");
@@ -491,7 +513,7 @@ traverse_dir(DIR *dir, char *dirname, char *parent, char *subsys)
 				fclose(id_file);
 			
 			} else { 
-				rtnptr = fgets((char *)&input_str, 1024, event_file);
+				rtnptr = fgets((char *)&input_str, 511, event_file);
 
 				sscanf (&input_str[4], "%d", &id);
 
@@ -640,7 +662,7 @@ set_events_all(int value)
 {
 	int i;
 
-	for (i = 0; i < KI_MAXTRACECALLS; i++) {
+	for (i = 0; i < (IS_WINKI ? 65536 : KI_MAXTRACECALLS); i++) {
 		ki_actions[i].execute = value;
 	}
 }
@@ -785,9 +807,9 @@ set_events_options(void *v)
 				if (TRACE_CACHE_EVICT) ki_actions[TRACE_CACHE_EVICT].execute = 1;
 				if (TRACE_ANON_FAULT) ki_actions[TRACE_ANON_FAULT].execute = 1;
 				if (TRACE_FILEMAP_FAULT) ki_actions[TRACE_FILEMAP_FAULT].execute = 1;
-				if (TRACE_KERNEL_PAGEFAULT) ki_actions[TRACE_KERNEL_PAGEFAULT].execute = 0;
 #if 0
 These events cause panics on SLES 15
+				if (TRACE_KERNEL_PAGEFAULT) ki_actions[TRACE_KERNEL_PAGEFAULT].execute = 0;
 				if (TRACE_PAGE_FAULT_USER) ki_actions[TRACE_PAGE_FAULT_USER].execute = 0;
 				if (TRACE_PAGE_FAULT_KERNEL) ki_actions[TRACE_PAGE_FAULT_KERNEL].execute = 1;
 #endif
@@ -1213,6 +1235,8 @@ open_merged_file()
 
 	if (IS_LIKI) { 
 		ki_actions = liki_action();
+	} else if (IS_WINKI) {
+		ki_actions = winki_action();
 	} else {
 		/* we shouldn't get here */
         	sprintf(fname, "ids.%s", timestamp);
@@ -1280,9 +1304,63 @@ close_trace_files(int nfiles)
 	}
 }
 
+char *
+open_trace_file(char *fname, int cpu, int flags, mode_t mode)
+{
+	char *addr = NULL;
+	struct stat statbuf;
+
+	trace_files[cpu].cpu = cpu;
+	if (debug) printf ("Opening trace file %s\n", fname);
+	
+	if ((trace_files[cpu].fd = open(fname, flags, mode)) < 0) {
+		if (debug) { 
+			printf ("open of file %s failed - errno %d\n", fname, errno); 
+		}
+		trace_files[cpu].fd = 0;
+		return NULL;
+	}
+
+	if (fstat(trace_files[cpu].fd, &statbuf) != 0) {
+		if (debug) perror ("fstat() failed");
+		close(trace_files[cpu].fd);
+		trace_files[cpu].fd = 0;
+		return NULL;
+	}
+
+	if (statbuf.st_size == 0) {
+		if (flags == O_RDONLY) {
+			close(trace_files[cpu].fd);
+			trace_files[cpu].fd = 0;
+		}
+		trace_files[cpu].size = 0;
+		return NULL;
+	}
+
+	trace_files[cpu].size = statbuf.st_size;
+
+	addr = mmap(NULL, trace_files[cpu].size, PROT_READ, MAP_PRIVATE, trace_files[cpu].fd, 0);
+	if (addr == MAP_FAILED) {
+		printf ("Cannot mmap file %s - Errno %d\n", fname, errno);
+		close(trace_files[cpu].fd);
+		trace_files[cpu].fd = 0;
+		trace_files[cpu].size = 0;
+		return addr;
+	} else {
+		trace_files[cpu].header = (header_page_t *)addr;
+		trace_files[cpu].mmap_addr = addr;
+	}
+		
+	trace_files[cpu].save_fd = trace_files[cpu].fd;
+	
+	return addr;
+}
+
+
 
 int
-open_trace_files() {
+open_trace_files()
+{
 
 	int i, ncpus=0;
 	char fname[256];
@@ -1295,46 +1373,13 @@ open_trace_files() {
 	if (timestamp==NULL) return 0;
 
 	for (i = 0; i < MAXCPUS; i++) {
-		trace_files[i].cpu = i;
 		sprintf(fname, "ki.bin.%03d.%s", i, timestamp);
-		if (debug) printf ("Opening trace file %s\n", fname);
-	
-		if ((trace_files[i].fd = open(fname, O_RDONLY)) < 0) {
-			if (debug) perror ("open() failed");
-			trace_files[i].fd = 0;
+		if ((addr = open_trace_file(fname, i, O_RDONLY, 0666)) == NULL) {
+			/* unable to open or mmap file */
 			continue;
 		}
 
-	        if (fstat(trace_files[i].fd, &statbuf) != 0) {
-			if (debug) perror ("fstat() failed");
-			close(trace_files[i].fd);
-			trace_files[i].fd = 0;
-			continue;
-		}
-
-		if (statbuf.st_size == 0) {
-			close(trace_files[i].fd);
-			trace_files[i].fd = 0;
-			trace_files[i].size = 0;
-			continue;
-		}
-
-		trace_files[i].size = statbuf.st_size;
-
-		addr = mmap(NULL, trace_files[i].size, PROT_READ, MAP_PRIVATE, trace_files[i].fd, 0);
-		if (addr == MAP_FAILED) {
-			printf ("Cannot mmap file %s - Errno %d\n", fname, errno);
-			close(trace_files[i].fd);
-			trace_files[i].fd = 0;
-			trace_files[i].size = 0;
-			continue;
-		} else {
-			if (first_addr == NULL) first_addr = addr;
-			trace_files[i].header = (header_page_t *)addr;
-			trace_files[i].mmap_addr = addr;
-		}
-			
-		trace_files[i].save_fd = trace_files[i].fd;
+		if (first_addr == NULL) first_addr = addr;
 		ncpus = i+1;	
         }
 
@@ -1347,10 +1392,12 @@ open_trace_files() {
 
 	if (IS_LIKI) { 
 		ki_actions = liki_action();
+	} else if (IS_WINKI) {
+		ki_actions = winki_action();
 	} else {
         	sprintf(fname, "ids.%s", timestamp);
         	if ((id_fd = open(fname, O_RDONLY)) < 0) {
-			FATAL(errno, "Unable to ids.<timestamp> file.   Check timestamp used and permissions", fname, -1);
+			FATAL(errno, "Unable to open ids.<timestamp> file.   Check timestamp used and permissions", fname, -1);
         	}
 
 	        if (fstat(id_fd, &statbuf) != 0) {
@@ -1360,8 +1407,7 @@ open_trace_files() {
 			size = MIN(sizeof(ki_action_t)*KI_MAXTRACECALLS, statbuf.st_size);
 		}
 
-
-        	id_addr = mmap(NULL, size, PROT_READ, MAP_PRIVATE, id_fd, 0);
+        	id_addr = mmap(NULL, sizeof(ki_action_t)*KI_MAXTRACECALLS, PROT_READ, MAP_PRIVATE, id_fd, 0);
         	if (id_addr == MAP_FAILED) {
                 	FATAL(errno, "Cannot mmap file", fname, -1);
         	}
@@ -1378,6 +1424,7 @@ open_trace_files() {
 		close (id_fd);
 	}
 
+	printf ("NCPUS=%d\n", ncpus);
 	return ncpus;
 }
 
@@ -1389,7 +1436,9 @@ init_trace_files(int ncpus)
 {
 	int i, retry;
 	trace_info_t *trcinfop;
+	uint64	hdrtime;
 
+	if (debug) printf ("init_trace_files() ncpus=%d\n", ncpus);
 	for (i = 0; i < ncpus; i++) {
 		/* printf ("CPU[%d] fd: %d\n", i, trace_files[i].fd); */
 	    	if (trace_files[i].fd == 0) continue;
@@ -1411,14 +1460,23 @@ init_trace_files(int ncpus)
                         	trcinfop->next_event = (char *)trcinfop->header + HEADER_SIZE(trcinfop->header);
 				trcinfop->next_time = get_event_time(trcinfop, 0);
 				trcinfop->buffers++;
-	                        if (debug) printf ("CPU[%d] start time: 0x%llx %6.6f  len: %d vers: %d  0x%llx 0x%llx next_time: %6.6f\n", i,
+
+				if (debug) printf ("  CPU[%d] start time: 0x%llx %9.9f  len: %d vers: %d  hdr: 0x%llx next_event: 0x%llx next_time: 0x%llx\n", i,
                                 	trcinfop->header->time,
                                 	SECS(trcinfop->header->time),
                                 	trcinfop->header->commit,
 					trcinfop->header->version,
                                 	trcinfop->header,
 					trcinfop->next_event,
-       		                        SECS(trcinfop->next_time));
+					trcinfop->next_time);
+
+				if (IS_WINKI) {
+					etw_header_page_t *etw_headerp = (etw_header_page_t *)trcinfop->header;
+					if ((i==0) && (etw_headerp->time == 0ull)) {
+						winki_bufsz = etw_headerp->bufsz;
+					}
+				}
+					
                 	} else {
 			 	/* if there is no commit value, then skip to the next chunk */
                 		trcinfop->header = (header_page_t *)((char *)trcinfop->header + trcinfop->header->commit + HEADER_SIZE(trcinfop->header));

@@ -38,6 +38,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "html.h"
 #include "oracle.h"
 #include "hash.h"
+#include "kd_types.h"
 
 extern struct utsname  utsname;
 
@@ -124,8 +125,8 @@ parse_mem_info()
 	}
 
 	if ( (f = fopen(fname,"r")) == NULL) {
-		printf ("Unable to open file %s, errno %d\n", fname, errno);
-		printf ("Continuing without memory info.\n");
+		fprintf (stderr, "Unable to open file %s, errno %d\n", fname, errno);
+		fprintf (stderr, "Continuing without memory info.\n");
 		return;
 	}
 
@@ -166,8 +167,8 @@ parse_lsof()
 
 	sprintf (fname, "lsof.%s", timestamp);
         if ( (lsof = fopen(fname,"r")) == NULL) {
-                printf ("Unable to open file %s, errno %d\n", fname, errno);
-                printf ("  Continuing without file names\n");
+                fprintf (stderr, "Unable to open file %s, errno %d\n", fname, errno);
+                fprintf (stderr, "  Continuing without file names\n");
                 return;
         }
 
@@ -423,6 +424,45 @@ parse_lsof()
 	fclose(lsof);
 }
 
+int 
+parse_cpulist()
+{
+	FILE *f = NULL;
+	char fname[30];
+	char *rtnptr, *p, *pos;
+	int 	MHz;
+
+	if (is_alive) {
+		return 0;
+	} else {
+		sprintf (fname, "cpulist.%s", timestamp);
+	}
+
+        if ( (f = fopen(fname,"r")) == NULL) {
+                fprintf (stderr, "Unable to open file %s, errno %d\n", fname, errno);
+                fprintf (stderr, "Continuing without NODE reporting (all CPUs will be considered to be in NODE 0)\n");
+                return 0;
+        }
+
+	while (1) {
+		rtnptr = fgets((char *)&input_str, 511, f);
+		if (rtnptr == NULL)  {
+			/* stop if at the end of the file */
+			break;
+		}
+		if (p = strstr(input_str, "GenuineIntel")) {
+			pos = p+13;
+			sscanf (pos, "%d\n", &MHz);
+
+			globals->clk_mhz = MHz * 1.0;
+		}
+	}
+
+
+
+}
+
+
 /* parse_cpuinfo */
 void
 parse_cpuinfo()
@@ -444,8 +484,8 @@ parse_cpuinfo()
 	}
 
         if ( (f = fopen(fname,"r")) == NULL) {
-                printf ("Unable to open file %s, errno %d\n", fname, errno);
-                printf ("Continuing without NODE reporting (all CPUs will be considered to be in NODE 0)\n");
+                fprintf (stderr, "Unable to open file %s, errno %d\n", fname, errno);
+                fprintf (stderr, "Continuing without NODE reporting (all CPUs will be considered to be in NODE 0)\n");
                 return;
         }
 
@@ -639,8 +679,8 @@ parse_mpsched()
 
 	sprintf (fname, "mpsched.%s", timestamp);
         if ( (f = fopen(fname,"r")) == NULL) {
-                printf ("Unable to open file %s, errno %d\n", fname, errno);
-                printf ("Continuing without NODE reporting (all CPUs will be considered to be in NODE 0)\n");
+                fprintf (stderr, "Unable to open file %s, errno %d\n", fname, errno);
+                fprintf (stderr, "Continuing without NODE reporting (all CPUs will be considered to be in NODE 0)\n");
                 return;
         }
 
@@ -712,8 +752,8 @@ parse_mpscheds()
 
 	sprintf (fname, "mpscheds.%s", timestamp);
         if ( (f = fopen(fname,"r")) == NULL) {
-                printf ("Unable to open file %s, errno %d\n", fname, errno);
-                printf ("Continuing without HT reporting\n");
+                fprintf (stderr, "Unable to open file %s, errno %d\n", fname, errno);
+                fprintf (stderr, "Continuing without HT reporting\n");
                 return;
         }
 
@@ -884,8 +924,8 @@ parse_pself()
 
 	sprintf(fname, "ps-eLf.%s", timestamp);
         if ( (f = fopen(fname,"r")) == NULL) {
-                printf ("Unable to open file %s, errno %d\n", fname, errno);
-                printf ("Continuing without process names.\n");
+                fprintf (stderr, "Unable to open file %s, errno %d\n", fname, errno);
+                fprintf (stderr, "Continuing without process names.\n");
                 return;
         }
 
@@ -1162,8 +1202,8 @@ parse_mpath()
 	if (debug) fprintf (stderr, "parse mpath");	
 	sprintf(fname,"multipath-l.%s", timestamp);
         if ( (f = fopen(fname,"r")) == NULL) {
-                printf ("Unable to open file %s, errno %d\n", fname, errno);
-                printf ("Continuing without multipath names.\n");
+                fprintf (stderr, "Unable to open file %s, errno %d\n", fname, errno);
+                fprintf (stderr, "Continuing without multipath names.\n");
                 return;
         }
 
@@ -1403,7 +1443,9 @@ parse_kallsyms()
 	char module[255];
 	size_t len;
 	char *space;
+	int nsyms = 0;
 
+	globals->nsyms = 0;
 	if (debug) fprintf (stderr, "parse_kallsyms()\n");
 
 	if (timestamp) {
@@ -1422,20 +1464,20 @@ parse_kallsyms()
 	rtnptr = fgets((char *)&input_str, 511, kallsyms);
 	while (rtnptr != NULL) {
 		if ((rtnptr[17] == 't') || (rtnptr[17] == 'T')) { 
-			globals->nsyms++;
+			nsyms++;
 		}
 		rtnptr = fgets((char *)&input_str, 511, kallsyms);
 	}
 
 	fclose (kallsyms);
 
-	if (debug) fprintf (stderr, "nsyms = %d\n", globals->nsyms); 
-	globals->symtable = malloc (globals->nsyms * sizeof(symtable_t));
+	if (debug) fprintf (stderr, "nsyms = %d\n", nsyms); 
+	globals->symtable = calloc(sizeof(symtable_t), nsyms);
 	if (globals->symtable == NULL) {
 		fprintf (stderr, "parse_kallsyms():  malloc() failed\n");
 		return;
 	}
-	MALLOC_LOG(globals->symtable, globals->nsyms * sizeof(symtable_t));
+	MALLOC_LOG(globals->symtable, nsyms * sizeof(symtable_t));
 	
         if ( (kallsyms = fopen(fname,"r")) == NULL) {
                 fprintf (stderr, "Unable to open file %s, errno %d\n", fname, errno);
@@ -1475,16 +1517,16 @@ parse_kallsyms()
 	fclose (kallsyms);
 
 	/* now sort the table */
-	qsort (globals->symtable, globals->nsyms, sizeof(symtable_t), sym_sort_by_addr);
+	qsort (globals->symtable, nsyms, sizeof(symtable_t), sym_sort_by_addr);
 
 #if 0
-	if (debug) for (i=0; i < globals->nsyms; i++) {
+	for (i=0; i < nsyms; i++) {
 		fprintf (stderr, "[%d] 0x%llx %s %s\n", i, globals->symtable[i].addr, globals->symtable[i].nameptr, globals->symtable[i].module ? globals->symtable[i].module : "");
 	} 
 #endif
 
 	/* now, make a final pass looking for specifc symbol names and saving the index for quick lookups later */
-	for (i=0; i < globals->nsyms; i++) {
+	for (i=0; i < nsyms; i++) {
 		if (strcmp(globals->symtable[i].nameptr, "sleep_on_page") == 0)  pc_sleep_on_page = i; 
 		else if (strcmp(globals->symtable[i].nameptr, "migration_entry_wait") == 0)  pc_migration_entry_wait = i; 
 		else if (strcmp(globals->symtable[i].nameptr, "msleep") == 0)  pc_msleep = i; 
@@ -1508,6 +1550,8 @@ parse_kallsyms()
 		else if (strcmp(globals->symtable[i].nameptr, "__mutex_lock_slowpath") == 0)  pc_mutex_lock_slowpath = i; 
 		else if (strcmp(globals->symtable[i].nameptr, "pcc_cpufreq_target") == 0)  pc_pcc_cpufreq_target = i; 
 	}
+
+	globals->nsyms = nsyms;
 }
 
 /* parse maps file */
@@ -2021,8 +2065,8 @@ parse_scavuln(char print_flag)
 
 	if ( (f = fopen(fname,"r")) == NULL) {
 		/* 
-		printf ("Unable to open file %s, errno %d\n", fname, errno);
-		printf ("Continuing without memory info.\n");
+		fprintf (stderr, "Unable to open file %s, errno %d\n", fname, errno);
+		fprintf (stderr, "Continuing without memory info.\n");
 		*/
 		if (print_flag) printf ("runki from LinuxKI version 5.8 needed to capture Side-Channel Attack Mitigation information\n");
 		return;
@@ -2044,3 +2088,186 @@ parse_scavuln(char print_flag)
 	}
 }
 
+int
+parse_corelist() 
+{
+	int fd, ret, i = 0;
+	struct stat statbuf;
+	uint64 offset = 0, addr, size, len=0;
+	char *mapptr, *chr, *pos;
+	char fname[32];
+	cpu_info_t *cpuinfop, *scpuinfop;
+	pcpu_info_t *pcpuinfop;
+	int	cpu, ncores, nlcores;
+	int 	nlcpu = 0, ncpu = 0, nldom = 0;
+
+	globals->nldom = 1;
+
+        sprintf(fname, "corelist.%s", timestamp);
+
+	if ((fd = open(fname, O_RDONLY)) < 0)  {
+		fprintf(stderr, "Unable to open file %s for processing, continuing without core attributes\n", fname);
+		perror("open error");
+		return 0;
+	}
+
+	if ((ret = fstat(fd, &statbuf)) < 0) {
+		fprintf(stderr, "Unable to stat file %s for processing, continuing\n", fname);
+		perror("fstat error");
+		close(fd);
+		return 0;
+	}
+
+	if ((size = statbuf.st_size) == 0) {
+		fprintf(stderr, "PDB TXT file %s is empty\n", fname);
+		close(fd);
+		return 0;
+	}
+
+	size = statbuf.st_size;
+	mapptr = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
+        if (mapptr == MAP_FAILED) {
+                fprintf(stderr, "Unable to mmap file %s for processing\n", fname);
+                close(fd);
+                return 0;
+        }
+
+        close (fd);
+
+        if ((mapptr[0] != (char)0xff) || (mapptr[1] != (char)0xfe)) {
+                fprintf (stderr, "Invalid corelist file %s, skipping\n", fname);
+                return 0;
+        }
+
+        /* First pass is to count symbols */
+        chr = mapptr+2;
+        while (chr < mapptr + (size-20)) {
+                GET_WIN_LINE(util_str, chr);
+		/* printf ("util_str: %s\n", util_str); */
+
+		if (strncmp(util_str, "NumberOfCores=", 14) == 0) {
+			pos = strchr(util_str, '=') + 1;
+			sscanf (pos, "%d\n", &ncores);
+		} else if (strncmp(util_str, "NumberOfLogicalProcessors=", 26) == 0) {
+			pos = strchr(util_str, '=') + 1;
+			sscanf (pos, "%d\n", &nlcores);
+		} else if (strncmp(util_str, "SocketDesignation=", 18) == 0) {
+			nldom++;
+			globals->nldom = nldom;
+			if (nlcores > ncores) globals->HT_enabled = TRUE;
+
+			for (i = 0; i < ncores; i++) {
+				cpu = nlcpu;
+				nlcpu++;
+				ncpu++;
+
+				cpuinfop = GET_CPUP(&globals->cpu_hash, cpu);
+				cpuinfop->ldom = nldom - 1;
+				cpuinfop->cpu = cpu;
+				cpuinfop->pcpu_idx = cpu;
+
+				/* printf ("CPU: %d  Node: %d  Sibling: %d\n", cpuinfop->cpu, cpuinfop->ldom, cpu+1); */
+
+				/* in Windows HT pairs are adjacent */
+				if (globals->HT_enabled) {
+					cpuinfop->lcpu_sibling = cpu+1;
+		
+					pcpuinfop = GET_PCPUP(&globals->pcpu_hash, cpu);
+					pcpuinfop->lcpu1 = cpu;
+					pcpuinfop->lcpu2 = cpu+1;
+					pcpuinfop->last_time = 0;	
+
+					scpuinfop = GET_CPUP(&globals->cpu_hash, cpu+1);
+					scpuinfop->ldom = nldom - 1;
+					scpuinfop->cpu = cpu+1;
+					scpuinfop->lcpu_sibling = cpu;
+					scpuinfop->pcpu_idx = cpu;
+					/* printf ("CPU: %d  Node: %d  Sibling: %d\n", scpuinfop->cpu, scpuinfop->ldom, scpuinfop->lcpu_sibling); */
+					cpu++;
+					nlcpu++;
+				}
+			}
+		}
+        }
+
+	globals->nlcpu = nlcpu;
+	globals->ncpu = ncpu;
+
+	munmap(mapptr, size);
+	return 0;
+}
+
+long
+get_memkb(char *str) 
+{
+	char *p, *s;
+	p = s = str;
+	long size = 0;
+
+	while (*s != ' ') {
+		if (*s != ',') {
+			*p++ = *s;
+		}
+		s++;
+	}
+	*p = 0;
+	size = atol(str) * 1024;
+	return (size);
+}
+
+void 
+parse_systeminfo()
+{
+	FILE *f = NULL;
+	char fname[30];
+	char *rtnptr, *pos, *end;
+	int i, j;
+	int	cpu, ncores, nlcores;
+	float   ghz;
+
+	sprintf (fname, "systeminfo.%s", timestamp);
+
+        if ( (f = fopen(fname,"r")) == NULL) {
+                fprintf (stderr, "Unable to open file %s, errno %d\n", fname, errno);
+                fprintf (stderr, "Continuing without NODE reporting (all CPUs will be considered to be in NODE 0)\n");
+                return;
+        }
+
+	while (1) {
+		rtnptr = fgets((char *)&input_str, 511, f);
+		if (rtnptr == NULL) {
+			/* stop if at the end of the file */
+			break;
+		}
+
+		if (strncmp(input_str, "Host Name:", 10) == 0) {
+			pos=&input_str[10];
+			while (isspace(*pos)) pos++;
+			end = pos;
+			while (end && (*end != 0xa) && (*end != 0xd)) end++;
+			*end=0;
+			add_command(&globals->hostname, pos);
+		} else if (strncmp(input_str, "OS Version:", 11) == 0) {
+			pos=&input_str[11];
+			while (isspace(*pos)) pos++;
+			end = pos;
+			while (end && (*end != 0xa) && (*end != 0xd)) end++;
+			*end=0;
+			add_command(&globals->os_vers, pos);
+		} else if (strncmp(input_str, "System Model:", 13) == 0) {
+			pos=&input_str[13];
+			while (isspace(*pos)) pos++;
+			end = pos;
+			while (end && (*end != 0xa) && (*end != 0xd)) end++;
+			*end=0;
+			add_command(&globals->model, pos);
+		} else if (strncmp(input_str, "Total Physical Memory:", 22) == 0) {
+			pos=&input_str[22];
+			while (isspace(*pos)) pos++;
+			globals->memkb = get_memkb(pos);
+			return;
+		}
+	}
+	
+	fclose(f);
+}

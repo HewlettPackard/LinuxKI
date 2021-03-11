@@ -32,6 +32,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "ki_tool.h"
 #include "liki.h"
+#include "winki.h"
 #include "globals.h"
 #include "developers.h"
 #include "info.h"
@@ -104,8 +105,9 @@ load_liki_module()
 		sprintf (command,"/sbin/insmod /lib/modules/%s/misc/likit.ko 2>/dev/null", utsname.release);
 		if ((ret = system(command)) != 0) {
 			/* if the insmod fails, then we need to check the /opt/linuxki/modules
-		 	 * directory for the appropriate module.  We will first check
-			 * using the uname */
+		 	* directory for the appropriate module.  We will first check
+		 	* using the uname */
+
 			sprintf (command,  "/usr/sbin/insmod /opt/linuxki/likit.ko 2>/dev/null");
 			if ((ret = system(command)) != 0) {
 				FATAL(1001, "Unable to load likit.ko module", NULL, -1);

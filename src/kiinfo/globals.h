@@ -14,6 +14,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 /*   MACRO definitions	*/
 
+#define IS_FTRACE (globals->kiversion == 0)
 #define IS_LIKI	((globals->kiversion != 0xffffffff) && (globals->kiversion & 1))  /* if last bit is set, then trace is from liki module */
 #define IS_LIKI_V1 (globals->kiversion==1)
 #define IS_LIKI_V2 (globals->kiversion==3)
@@ -25,6 +26,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define IS_LIKI_V3_PLUS (IS_LIKI && globals->kiversion >= 5)
 #define IS_LIKI_V4_PLUS (IS_LIKI && globals->kiversion >= 7)
 #define IS_LIKI_V5_PLUS (IS_LIKI && globals->kiversion >= 9)
+
+#define WINKI_V1 0x10000
+#define WINKI_V2 0x20000
+#define IS_WINKI ((globals->kiversion != 0xffffffff) && (globals->kiversion & 0xffff0000))  /* if last bit is set, then trace is from liki module */
+#define IS_WINKI_V1  (globals->kiversion == WINKI_V1 )
+#define IS_WINKI_V2  (globals->kiversion == WINKI_V2 )
+#define IS_WINKI_V1_PLUS (IS_WINKI && globals->kiversion >= WINKI_V1)
+#define IS_WINKI_V2_PLUS (IS_WINKI && globals->kiversion >= WINKI_V2)
 
 #define STEAL_ON (IS_LIKI_V4_PLUS && globals->VM_guest)
 
@@ -153,6 +162,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define COOP_DETAIL_ENABLED	0x1000000000000ull
 #define MSR_FLAG		0x2000000000000ull
 #define DOCKTREE_FLAG		0x4000000000000ull
+#define ETLDUMP_FLAG		0x8000000000000ull
 
 #define SET_STAT(flag) (kiinfo_stats |= flag)
 #define CLEAR_STAT(flag) (kiinfo_stats &= ~flag)
@@ -207,6 +217,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define printmb_flag		(ISSET(PRINTMB_FLAG))
 #define kparse_flag		(ISSET(KPARSE_FLAG))
 #define kitracedump_flag	(ISSET(KITRACEDUMP_FLAG))
+#define etldump_flag		(ISSET(ETLDUMP_FLAG))
 #define likidump_flag		(ISSET(LIKIDUMP_FLAG))
 #define likimerge_flag		(ISSET(LIKIMERGE_FLAG))
 #define objdump_flag		(ISSET(OBJDUMP_FLAG))
@@ -316,6 +327,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define SCA_VULNERABLE	2
 
 #define STACK_CONTEXT(pc)   ((pc == STACK_CONTEXT_USER) || (pc == STACK_CONTEXT_KERNEL))
+#define WINKERN_ADDR(pc)    ((pc & 0xfffff80000000000) == 0xfffff80000000000)
 
 #define END_STACK 0xffffffffffffffffull
 #define NULL_STACK 0ull
@@ -330,7 +342,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define RELTIME 0		/* calulate time relative to the start of trace */
 #define ABSTIME 1		/* calculate time relative to the start of the syscall */
 #define CHECK_TIME_FILTER(hrtime) if (((hrtime - start_time) < start_filter) || ((hrtime - start_time) > end_filter)) return NULL;
-#define FILTER_START_TIME (is_alive ? (interval_start_time + start_filter) : (start_time + start_filter))
+#define FILTER_START_TIME ( is_alive ? (interval_start_time + start_filter) : (start_time + start_filter))
 
 #define CHECK_VINT_INTERVAL(hrtime)     if (((hrtime - interval_end)/1000000.0) >= (vint * 1.0) ) { \
 						interval_start =  interval_end;			\
@@ -411,6 +423,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #define REQ_NRBIT	32  /* should be 35, but need to expand the cmd_flags */
 #define GFP_NRBIT	32  
+#define IRQ_NRBIT	16
 
 /* special node numbers for sockets */
 #define TCP_NODE	1
@@ -418,6 +431,58 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define UNKNOWN_NODE	7
 
 
+/* winki thread wait reasons */
+#define Executive		0
+#define FreePage		1
+#define PageIn			2
+#define	PoolAllocation		3
+#define DelayAllocation		4
+#define Suspended		5
+#define UserRequest		6
+#define WrExecutive		7
+#define WrFreePage		8
+#define WrPageIn		9
+#define WrPoolAllocation	10
+#define WrDelayExecution	11
+#define WrSuspended		12
+#define WrUserRequest		13
+#define WrEventPair		14
+#define WrQueue			15
+#define WrLpcReceive		16
+#define WrLpcReply		17
+#define WrVirtualMemory		18
+#define WrPageOut		19
+#define	WrRendezvous		20
+#define WrKeyedEvent		21 
+#define WrTerminated		22
+#define WrProcessInSwap		23
+#define WrCpuRateControl	24
+#define WrCalloutStack		25
+#define WrKernel		26
+#define WrResource		27
+#define WrPushLock		28
+#define WrMutex			29
+#define WrQuantumEnd		30
+#define WrDispatchInt		31
+#define WrPreempted		32
+#define WrYieldExecution	33
+#define WrFastMutex		34
+#define WrGuardedMutex		35
+#define WrRundown		36
+#define WrAlertThreadId		37
+#define WrDeferredPreempt	38
+#define MaxThreadWaitReasons	39
+
+/* Thread States */
+#define Initialized		0
+#define Ready			1
+#define Running			2
+#define Standby			3
+#define Terminated		4
+#define Waiting			5
+#define Transition		6
+#define DeferredReady		7
+#define MaxThreadStates		10
 
 #define dev_major(num)  ((num & MAJOR_MASK) >> MAJOR_SHIFT)
 #define lun(num)        (num & LUN_MASK)
@@ -449,6 +514,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define GET_WWNDEVP(hashp, key)  (wwn_dev_t *)find_add_hash_entry((lle_t ***)hashp, DEV_HSIZE, key, DEV_HASH(key), sizeof(wwn_dev_t))
 #define GET_FDINFOP(hashp, key)  (fd_info_t *)find_add_hash_entry((lle_t ***)hashp, FD_HSIZE, key, FD_HASH(key), sizeof(fd_info_t))
 #define GET_SYSCALLP(hashp, key)  (syscall_info_t *)find_add_hash_entry((lle_t ***)hashp, SYSCALL_HASHSZ, key, SYSCALL_HASH(key), sizeof(syscall_info_t))
+#define GET_ADDR_TO_IDX_HASH_ENTRYP(hashp, key)  (addr_to_idx_hash_entry_t *)find_add_hash_entry((lle_t ***)hashp, ADDR_TO_IDX_HASHSZ, key, ADDR_TO_IDX_HASH(key), sizeof(addr_to_idx_hash_entry_t))
 #define GET_SCDWINFOP(hashp, key)  (scd_waker_info_t *)find_add_hash_entry((lle_t ***)hashp, WPID_HSIZE, key, WPID_HASH(key), sizeof(scd_waker_info_t))
 #define GET_SLPINFOP(hashp, key)  (slp_info_t *)find_add_hash_entry((lle_t ***)hashp, SLP_HSIZE, key, SLP_HASH(key), sizeof(slp_info_t))
 #define GET_RQINFOP(hashp, key)  (runq_info_t *)find_add_hash_entry((lle_t ***)hashp, CPU_HASHSZ, key, CPU_HASH(key), sizeof(runq_info_t))
@@ -585,7 +651,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #define ELFMAP_HSIZE 0x100
 #define ELFMAP_KEY(str) pathname_key(str)
-#define ELFMAP_HASH(key) (key % ELFMAP_HSIZE)
+#define ELFMAP_HASH(key) (key & (ELFMAP_HSIZE-1))
 
 #define SYSERR_HSIZE 0x40
 #define SYSERR_KEY(errno, syscallno)  (errno << 16 | syscallno)
@@ -594,18 +660,21 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define SYSERR_HASH(key)  ((SYSERR_SYSCALLNO(key) + SYSERR_ERRNO(key)) % SYSERR_HSIZE)
 
 #define SLP_HSIZE 0x20
-#define SLP_HASH(key)  ((key >> 9) % SLP_HSIZE)
+#define SLP_HASH(key)  ((key >> 9) & (SLP_HSIZE-1))
+
+#define PDB_HSIZE 0x400
+#define PDB_HASH(key) (key & (PDB_HSIZE-1))
 
 #define STKTRC_HSIZE 0x1000
-#define STKTRC_HASH(key)  (key & 0xfff)
+#define STKTRC_HASH(key)  (key & (STKTRC_HSIZE -1))
 
 #define FD lle.key
 #define FD_HSIZE 0x80
-#define FD_HASH(fd) (fd % FD_HSIZE)
+#define FD_HASH(fd) (fd & (FD_HSIZE-1))
 
 #define REG_HSIZE 0x20
 #define REG_HMASK (REG_HSIZE - 1)
-#define REG_HASH(key) ((key >> 17) % REG_HSIZE)
+#define REG_HASH(key) ((key >> 17) & (REG_HSIZE-1))
 
 /* used for devhash */
 #define DEV_HSIZE 0x100
@@ -752,6 +821,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define SYSCALL_NO(key) (key & 0xffff)
 #define SYSCALL_MODE(key) ((key >> 60) & 0xf) 
 #define SYSCALL_FSTYPE(key) ((key << 56) & 0xf)
+
+#define ADDR_TO_IDX_HASHSZ 0x20
+#define ADDR_TO_IDX_HASH(key)  ((key > 8) % ADDR_TO_IDX_HASHSZ)
 
 #define NOSYS   0
 #define OTHERFD 1
@@ -1061,6 +1133,7 @@ typedef struct elfmap_info {
 } elfmap_info_t;
 
 #define MAPCLASS	127
+#define DLL		126
 typedef struct vtxt_preg {
 	lle_t           lle;
 	uint64          p_vaddr;
@@ -1076,13 +1149,26 @@ typedef struct vtxt_preg {
 	short           p_type;
 } vtxt_preg_t;
 
-/*
-typedef struct map_info_struct {
-	map_entry_t *maptab;
-	char *mmapptr;
-	int nsyms;
-} map_info_t;
-*/
+#define MAX_STR_LEN	64
+typedef struct str_lle_entry {
+	struct str_lle_entry *next;
+	char key[MAX_STR_LEN];
+} strlle_t;
+
+typedef struct pdb_symidx {
+	uint64		symaddr;
+	char		*symptr;
+} pdb_symidx_t;
+
+typedef struct pdb_info {
+	strlle_t	strlle;
+	void 		*mapptr;
+	pdb_symidx_t	*symtab;
+	char 		*filename;
+	void 		*ControlImagePtr;
+	int		size;
+	int		nsyms;
+} pdb_info_t;
 
 typedef struct stktrc_lle_entry {
         struct stktrc_lle_entry *next;
@@ -1097,11 +1183,6 @@ typedef struct stktrc_info {
         int             cnt;
 	int 		state;
 } stktrc_info_t;
-
-typedef struct print_stktrc_info_args {
-	struct sched_info *schedp;
-	uint64		warnflag;
-} print_stktrc_args_t;
 
 typedef struct print_pc_info_args {
 	FILE 		*pidfile;
@@ -1173,7 +1254,9 @@ typedef struct iostats {
 	uint32		error_cnt;
 } iostats_t;
 
-/*  Structure definitions */
+typedef struct win_service {
+	lle_t		lle;
+} win_service_t;
 
 struct arg_info {
 	uint64            arg0;
@@ -1292,6 +1375,7 @@ typedef struct pid_info {
 	void *vtxt_pregp;		/* struct vtxt_preg */
 	void *mapinfop;			/* struct vtxt_preg */	
 	void **pgcache_hash;		/* struct pgcache */
+	void *win_services;		/* struct win_service */
 
 	/* information saved on sys_enter */
 	short 		*syscall_index;
@@ -1299,7 +1383,10 @@ typedef struct pid_info {
 	char 		*last_exec_fname;
 	uint64		last_syscall_time;
 	uint64 		last_syscall_args[MAXARGS];
-	int32		last_syscall_id;
+	uint64		last_syscall_id;
+
+	/* needed for Windows as system calls can be "nested" */
+	void		*win_active_syscalls;
 
 	/* used for filemap cache stats */
 	uint32		cache_insert_cnt;
@@ -1308,6 +1395,7 @@ typedef struct pid_info {
 	/* information saved on sched_switch when going to SLEEP */
 	uint64		last_stack_depth;
 	uint64		last_stktrc[LEGACY_STACK_DEPTH];	
+	uint64 		last_sleep_delta;		/* needed for WinKI */
 
 	/* global pid information */
 	uint32		syscall_cnt;
@@ -1329,6 +1417,12 @@ typedef struct pid_info {
 	struct fd_stats  fdstats; 	/* pointer to an array of fdstats */
 	struct sd_stats  netstats;
 } pid_info_t;
+
+typedef struct print_stktrc_info_args {
+	struct sched_info *schedp;
+	struct pid_info *pidp;
+	uint64		warnflag;
+} print_stktrc_args_t;
 
 typedef struct args_info {
 	lle_t                   lle;                    /* key = arg value */
@@ -1785,7 +1879,7 @@ typedef struct io_req {
 	uint32		requeue_cnt;
 	char		seq_flag;
 } io_req_t;
-	
+
 typedef struct dev_info {
 	lle_t		lle;
 	struct io_req	**ioq_hash;
@@ -1796,6 +1890,7 @@ typedef struct dev_info {
 	uint64		wwn;		/* WWN of path from ll -R */
 	char		*pathname;      /* target path from ll -R */
 	void		*mdevinfop;	/* pointer to mapper device */
+	void		*wsysconfigp;	/* pointer wo windows physdisk SysConfig rec */
 	void		*siblingp;	/* points to sibling device */
 	void		*fcinfop;	/* points to FC HBA info */
 
@@ -1880,6 +1975,18 @@ struct syscall_info {
 	void			**slp_hash;
 	struct iov_stats	*iov_stats;
 };
+
+struct win_syscall_save_entry {
+	void *	next;
+	uint64  starttime;
+	uint64  addr;
+	int	nested;
+};
+
+typedef struct addr_to_idx_hash_entry {
+	lle_t			lle;
+	uint64			idx;
+} addr_to_idx_hash_entry_t;
 
 #define MAX_FLT_TYPES	10
 #define FLT_READ	0
@@ -2020,6 +2127,7 @@ typedef struct server_info {
 	char *subdir;
 	char *hostname;
 	char *os_vers;
+	char *model;
 	pid_info_t **pid_hash;		/* perpid information */
 	cpu_info_t **cpu_hash;		/* per-lcpu information */
 	pcpu_info_t **pcpu_hash;	/* per-pcpu information */
@@ -2045,18 +2153,23 @@ typedef struct server_info {
 	void **devhash;			/* struct dev_info */
 	void *iotimes;			/* struct iotimes */
 	void **elfmap_hash;		/* struct elfmap_info_t */
+	void **pdbmap_hash;   		/* Windows PDB Hash Table */
+	void *vtxt_pregp;
 	struct iostats	iostats[3];     /* TOTAL=0/READ=1/WRITE=2 */
 	struct sd_stats netstats;	/* network stats */
 	void **mdevhash;		/* struct dev_info */
 	void **fchash;
 	void **wwnhash;			/* struct dev_info */
 	void **ctx_hash;		/* struct ctx_info_t */
+	void **win_syscall_hash;	/* struct addr_to_idx_hash_entry_t */
+	void **win_dpc_hash;		/* struct addr_to_idx_hash_entry_t */
 	short *syscall_index_32;
 	short *syscall_index_64;
 	/* for optional irq processing */
 	struct irq_info	*irqp;
 	struct irq_info	*softirqp;
 	void **irqname_hash;		
+	void **dpcname_hash;		
 	symtable_t *symtable;
 
 	/* for block_rq cmd_flags interpretation.  */
@@ -2171,6 +2284,7 @@ typedef struct logio_stats logio_stats_t;
 typedef struct ora_stats ora_stats_t;
 typedef struct arg_info arg_info_t;
 typedef struct irq_info irq_info_t;
+typedef struct win_syscall_save_entry win_syscall_save_t;
 
 /* Global Varibles */
 
@@ -2219,6 +2333,8 @@ extern char line[];		/* used for HTML processing */
 extern int  lineno;		/* used for GREY line processing (HTML) and cursors */
 extern int  col;		/* used for cursors */
 extern uint64 warn0;
+extern char *tlabel;
+extern char *plabel;
 
 extern uint64 idle_pc;
 extern uint64 ogetblk_pc;
@@ -2291,14 +2407,21 @@ extern char *kr_name_index[];
 extern char *kpdata_name_index[];
 extern char *socktype_name_index[];
 extern warnmsg_t warnmsg[];
-extern syscall_arg_list_t syscall_arg_list[];
+extern syscall_arg_list_t *syscall_arg_list;
+extern syscall_arg_list_t linux_syscall_arg_list[];
+extern syscall_arg_list_t win_syscall_arg_list[];
 extern ks_action_t ks_actions[];
 extern arg_action_t arg_actions[];
 extern short syscall_index_x86_64[];
 extern short syscall_index_x86_32[];
 extern short syscall_index_aarch_64[];
 extern short syscall_index_ppc64le[];
+extern short syscall_index_win[];
 extern int cpu2ldom[MAXCPUS*2][2];
+extern char *win_thread_state[];
+extern char *win_thread_mode[];
+extern char *win_thread_wait_reason[];
+extern char *win_irq_flags[];
 
 extern void hex_dump(void *, int);
 extern int incr_trc_stats(void *, void *);

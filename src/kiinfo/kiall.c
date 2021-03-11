@@ -28,6 +28,11 @@
 #include "conv.h"
 #include "kprint.h"
 
+#include "Thread.h"
+#include "PerfInfo.h"
+#include "DiskIo.h"
+#include "winki_util.h"
+
 int kiall_dummy_func(uint64, int, void *);
 int kiall_generic_func(void *, void *);
 int kiall_print_report(void *);
@@ -36,6 +41,104 @@ int kiall_ftrace_print_func(void *, void *);
 uint64 last_save_time = 0;
 int itimes_fd = -1;
 
+static inline void
+kiall_winki_trace_funcs()
+{
+        int i;
+
+        for (i = 0; i < 65536; i++) {
+                ki_actions[i].id = i;
+                ki_actions[i].func = NULL;
+                ki_actions[i].execute = 0;
+        }
+
+        strcpy(&ki_actions[0].subsys[0], "EventTrace");
+        strcpy(&ki_actions[0].event[0], "Header");
+        ki_actions[0].func = winki_header_func;
+        ki_actions[0].execute = 1;
+
+        strcpy(&ki_actions[0x524].subsys[0], "Thread");
+        strcpy(&ki_actions[0x524].event[0], "Cswitch");
+        ki_actions[0x524].func=thread_cswitch_func;
+        ki_actions[0x524].execute = 1;
+
+        strcpy(&ki_actions[0x532].subsys[0], "Thread");
+        strcpy(&ki_actions[0x532].event[0], "ReadyThread");
+        ki_actions[0x532].func=thread_readythread_func;
+	        ki_actions[0x532].execute = 1;
+
+        strcpy(&ki_actions[0x548].subsys[0], "Thread");
+        strcpy(&ki_actions[0x548].event[0], "SetName");
+        ki_actions[0x548].func=thread_setname_func;
+        ki_actions[0x548].execute = 1;
+
+        strcpy(&ki_actions[0xf33].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf33].event[0], "SysClEnter");
+        ki_actions[0xf33].func=perfinfo_sysclenter_func;
+        ki_actions[0xf33].execute = 1;
+
+        strcpy(&ki_actions[0xf34].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf34].event[0], "SysClExit");
+        ki_actions[0xf34].func=perfinfo_sysclexit_func;
+        ki_actions[0xf34].execute = 1;
+
+        strcpy(&ki_actions[0x10a].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10a].event[0], "Read");
+        ki_actions[0x10a].func=diskio_readwrite_func;
+        ki_actions[0x10a].execute = 1;
+
+        strcpy(&ki_actions[0x10b].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10b].event[0], "Write");
+        ki_actions[0x10b].func=diskio_readwrite_func;
+        ki_actions[0x10b].execute = 1;
+
+        strcpy(&ki_actions[0x10c].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10c].event[0], "ReadInit");
+        ki_actions[0x10c].func=diskio_init_func;
+        ki_actions[0x10c].execute = 1;
+
+	        strcpy(&ki_actions[0x10d].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10d].event[0], "WriteInit");
+        ki_actions[0x10d].func=diskio_init_func;
+        ki_actions[0x10d].execute = 1;
+
+        strcpy(&ki_actions[0x10e].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10e].event[0], "FlushBuffers");
+        ki_actions[0x10e].func=diskio_flush_func;
+        ki_actions[0x10e].execute = 1;
+
+        strcpy(&ki_actions[0xf2e].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf2e].event[0], "SampleProfile");
+        ki_actions[0xf2e].func=perfinfo_profile_func;
+        ki_actions[0xf2e].execute = 1;
+
+        strcpy(&ki_actions[0xf32].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf32].event[0], "ISR-MSI");
+        ki_actions[0xf32].func=perfinfo_isr_func;
+        ki_actions[0xf32].execute = 1;
+
+        strcpy(&ki_actions[0xf42].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf42].event[0], "ThreadedDPC");
+        ki_actions[0xf42].func=perfinfo_dpc_func;
+        ki_actions[0xf42].execute = 1;
+
+        strcpy(&ki_actions[0xf43].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf43].event[0], "ISR");
+        ki_actions[0xf43].func=perfinfo_isr_func;
+        ki_actions[0xf43].execute = 1;
+
+        strcpy(&ki_actions[0xf44].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf44].event[0], "DPC");
+        ki_actions[0xf44].func=perfinfo_dpc_func;
+        ki_actions[0xf44].execute = 1;
+
+
+        strcpy(&ki_actions[0xf45].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf45].event[0], "TimeDPC");
+        ki_actions[0xf45].func=perfinfo_dpc_func;
+        ki_actions[0xf45].execute = 1;
+}
+
 /*
  ** The initialisation function
  */
@@ -43,6 +146,7 @@ void
 kiall_init_func(void *v)
 {
         int i, ret;
+	char piddir[8];
 
 	if (debug) printf ("kiall_init_func()\n");
         process_func = kiall_process_func;
@@ -61,6 +165,36 @@ kiall_init_func(void *v)
         for (i = 0; i < KI_MAXTRACECALLS; i++) {
                 ki_actions[i].execute = 0;
         }
+
+        if (HTML) {
+		sprintf (piddir, "%sS", tlabel);
+                ret = mkdir(piddir, 0777);
+                if (ret && (errno != EEXIST)) {
+                        fprintf (stderr, "Unable to make PIDS directory, errno %d\n", errno);
+                        fprintf (stderr, "  Continuing...\n");
+			CLEAR(PIDTREE_FLAG);
+		}
+	
+		/* for Docker/Contanter kparse data */
+               	ret = mkdir("CIDS", 0777);
+               	if (ret && (errno != EEXIST)) {
+                       	fprintf (stderr, "Unable to make CIDS directory, errno %d\n", errno);
+                       	fprintf (stderr, "  Continuing...\n");
+			CLEAR(DOCKTREE_FLAG);
+		}
+        }
+
+        if (IS_WINKI) {
+                kiall_winki_trace_funcs();
+
+                parse_systeminfo();
+                parse_cpulist();
+                parse_corelist();
+
+                return;
+        }
+
+
         /* go ahead and initialize the trace functions, but do not set the execute field */
         ki_actions[TRACE_BLOCK_RQ_ISSUE].func = block_rq_issue_func;
         ki_actions[TRACE_BLOCK_RQ_INSERT].func = block_rq_insert_func;
@@ -185,24 +319,6 @@ kiall_init_func(void *v)
         	parse_jstack();
 		if (IS_LIKI) foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, load_perpid_mapfile, NULL, 0, NULL);
 	}
-
-        if (HTML) {
-                ret = mkdir("PIDS", 0777);
-                if (ret && (errno != EEXIST)) {
-                        fprintf (stderr, "Unable to make PIDS directory, errno %d\n", errno);
-                        fprintf (stderr, "  Continuing...\n");
-			CLEAR(PIDTREE_FLAG);
-		}
-	
-		/* for Docker/Contanter kparse data */
-               	ret = mkdir("CIDS", 0777);
-               	if (ret && (errno != EEXIST)) {
-                       	fprintf (stderr, "Unable to make CIDS directory, errno %d\n", errno);
-                       	fprintf (stderr, "  Continuing...\n");
-			CLEAR(DOCKTREE_FLAG);
-		}
-        }
-
 
 	/*
 	** For visualization kipid charts we create a VIS/<PID> directory to
@@ -601,6 +717,9 @@ kiall_print_report(void *v)
 	print_cpu_buf_info();
 	close_csv_file(wait_csvfile);
 
+	/* The rest of the reports are not ready yet */
+	if (IS_WINKI) return 0;
+
 	sprintf(fname, "kifile.%s.txt", timestamp);
 	if (freopen(fname, "w", stdout) == NULL) {
 		fprintf (stderr, "Unable to rename stdout to %s (errno: %d)\n", fname, errno);
@@ -621,7 +740,7 @@ kiall_print_report(void *v)
 		fprintf (stderr, "Unable to rename stdout to %s (errno: %d)\n", fname, errno);
 		return 0;
 	}
-        printf("Command line: %s -kisock nsock=30 -ts %s\n\n", cmdstr, timestamp);
+        printf("Command line: %s -kisock nsock=30, -ts %s\n\n", cmdstr, timestamp);
         printf ("%s (%s)\n\n", tool_name, tool_version);
 	parse_uname(1);
 	nfile=30;

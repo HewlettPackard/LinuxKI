@@ -12,6 +12,14 @@ with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 ***************************************************************************/
 
+#define UNIX_TIME_START 0x019DB1DED53E8000ull //January 1, 1970 (start of Unix epoch) in "ticks"
+#define TICKS_PER_SECOND  10000000ull //a tick is 100ns
+/* #define CONVERT_WIN_TIME(timestamp)   ((((timestamp - UNIX_TIME_START) / TICKS_PER_SECOND) * 1000000000) + ((timestamp - UNIX_TIME_START) % TICKS_PER_SECOND * 100ull))
+*/
+
+/* Convert from windows timestamp to nanoseconds */
+#define CONVERT_WIN_TIME(timestamp) ((timestamp*1000000000)/winki_hdr->PerfFreq)
+
 #define KD_ID kdrec.id
 #define KD_PID kdrec.pid
 #define KD_FLAGS kdrec.flags
@@ -19,15 +27,99 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define KD_CPU trcinfop->cpu
 #define MAXARGS 6
 #define TASK_COMM_LEN 16
-#define PRINT_COMMON_FIELDS(rec_ptr)  {													\
+
+
+#define PRINT_WIN_FMTTIME(wintime) {	\
+		struct timespec curtime;										\
+		char timebuf[30];											\
+															\
+		curtime.tv_sec = (wintime - UNIX_TIME_START) / TICKS_PER_SECOND;					\
+		curtime.tv_nsec = ((wintime - UNIX_TIME_START) % TICKS_PER_SECOND) * 100;				\
+		ctime_r(&curtime.tv_sec, timebuf);									\
+		timebuf[19] = 0;											\
+		printf ("%s.%09lld", timebuf, curtime.tv_nsec);								\
+}
+
+#define PRINT_WIN_FILENAME(str)	{											\
+	uint16 *chr = str;												\
+	while (chr[0] != 0) {												\
+		printf ("%c", chr[0]);											\
+		chr++;													\
+	}														\
+}
+
+#define PRINT_WIN_NAME2(chr)	{										\
+	while (chr[0] != 0) {												\
+		printf ("%c", chr[0]);											\
+		chr++;													\
+	}														\
+	chr++;														\
+}
+
+#define PRINT_WIN_NAME2_STR(str, chr) {				\
+	int k = 0;						\
+	char *ptr = str;					\
+	while (chr[0] != 0) {					\
+		if (ptr) ptr[k++] = chr[0];			\
+		chr++;						\
+	}							\
+	if (ptr) ptr[k] = 0;					\
+	chr++;							\
+}
+
+#define GET_WIN_LINE(str, chr) {				\
+	int k = 0;						\
+	char *ptr = str;					\
+	while (chr[0] != (char)0xa) {				\
+		if (ptr) ptr[k++] = chr[0];			\
+		chr++;						\
+		chr++;						\
+	}							\
+	if (ptr) ptr[k] = 0;					\
+	chr++;							\
+	chr++;							\
+}
+
+#define GET_WIN_NEXT_NAME(chr) {				\
+	while (chr[0] != 0) {					\
+		chr++;						\
+	}							\
+	chr++;							\
+}
+
+#define PRINT_WIN_STKTRC2(pidp, stkinfop) {										\
+	int i;														\
+	for (i = 0; i < stkinfop->depth; i++) {										\
+		print_win_sym(stkinfop->Stack[i], pidp); 								\
+	}														\
+}
+
+#define PRINT_TIME_DIFF(start, end)												\
+	if (IS_WINKI) {														\
+		printf ("%12.06f", ((end - start)*1.0)/winki_hdr->PerfFreq);							\
+	} else { 														\
+		printf ("%12.06f", (end - start) / 1000000000.0);							\
+	}
+	
+#define PRINT_TIME(hrtime) { \
+	if (IS_WINKI) {															\
 		if (abstime_flag) {													\
-			printf ("%12.09f", rec_ptr->hrtime / 1000000000.0);								\
-		} else if ((fmttime_flag || epoch_flag) && (IS_LIKI_V3_PLUS || is_alive)) {							\
+			printf ("%12.09f", (hrtime*1.0)/winki_hdr->PerfFreq);								\
+		} else if (fmttime_flag || epoch_flag) {										\
+			/* TBD Just use abstime for now */										\
+			printf ("%12.09f", (hrtime*1.0)/winki_hdr->PerfFreq);								\
+		} else {														\
+			printf ("%12.06f", ((hrtime - winki_start_time)*1.0)/winki_hdr->PerfFreq);						\
+		} 															\
+	} else {															\
+		if (abstime_flag) {													\
+			printf ("%12.09f", hrtime / 1000000000.0);									\
+		} else if ((fmttime_flag || epoch_flag) && (IS_LIKI_V3_PLUS || is_alive)) {						\
 			struct timespec curtime, delta_ts;										\
 			uint64 delta, dnsecs, dsecs;											\
 			char timebuf[30];												\
 																	\
-			delta = rec_ptr->hrtime - start_time;										\
+			delta = hrtime - start_time;											\
 			dnsecs = delta % 1000000000;											\
 			dsecs = delta / 1000000000;											\
 			if ((begin_time.tv_nsec + dnsecs) > 1000000000) {								\
@@ -45,18 +137,54 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 				printf ("%lld.%09lld", curtime.tv_sec, curtime.tv_nsec / 1000);						\
 			}														\
 		} else {														\
-			printf ("%12.06f", (rec_ptr->hrtime - start_time) / 1000000000.0);						\
+			printf ("%12.06f", (hrtime - start_time) / 1000000000.0);							\
 		}															\
+	}																\
+}
+
+#define PRINT_COMMON_FIELDS(rec_ptr)  {													\
+		PRINT_TIME(rec_ptr->hrtime);												\
 		printf ("%ccpu=%d", fsep, rec_ptr->cpu);										\
 		if (seqcnt_flag) printf ("%cseqcnt=%lld ", fsep, rec_ptr->cpu_seqno);							\
 		printf ("%cpid=%d%ctgid=%d", fsep, rec_ptr->pid, fsep, rec_ptr->tgid);							\
-	}
+}
+
+#define PRINT_COMMON_FIELDS_C002(p) {													\
+        PRINT_TIME(p->TimeStamp);													\
+        printf ("%ccpu=%d", fsep, trcinfop->cpu);											\
+        printf ("%ctid=%d%cpid=%d", fsep, p->tid, fsep, p->pid);       /* Windows uses PID/TID rather than TGID/TID */			\
+	/* printf ("%cver=%d", fsep, p->TraceVersion);			 */								\
+        /* printf ("%cid=0x%x", fsep, p->EventType);			 */								\
+        PRINT_EVENT(p->EventType);													\
+}
+
+#define PRINT_COMMON_FIELDS_C011(p, tid, pid) {												\
+        PRINT_TIME(p->TimeStamp);													\
+        printf ("%ccpu=%d", fsep, trcinfop->cpu);											\
+        printf ("%ctid=%d%cpid=%d", fsep, tid, fsep, pid);       /* Windows uses PID/TID rather than TGID/TID */			\
+	/* printf ("%cver=%d", fsep, p->TraceVersion); */										\
+        /* printf ("%cid=0x%x", fsep, p->EventType); */											\
+        PRINT_EVENT(p->EventType);													\
+}
+
+#define PRINT_COMMON_FIELDS_C014(p) {													\
+        PRINT_TIME(p->TimeStamp);													\
+        printf ("%ccpu=%d", fsep, trcinfop->cpu);											\
+        printf ("%ctid=%d%cpid=%d", fsep, 0, fsep, 0);       /* Windows uses PID/TID rather than TGID/TID */				\
+	printf ("%cProvider", fsep, p->EventType);												\
+	printf ("%cid=%d", fsep, p->EventType);												\
+	printf ("%cver=%d", fsep, p->TraceVersion);			 								\
+}
+
 #define PRINT_KD_REC(rec_ptr)												\
 		printf ("%12.06f%ccpu=%d%cpid=%d", 									\
 			abstime_flag ? KD_CUR_TIME / 1000000000.0 : (KD_CUR_TIME - start_time) / 1000000000.0,		\
 			fsep, KD_CPU,											\
 			fsep, rec_ptr->KD_PID)
-#define PRINT_EVENT(id) printf ("%c%s", fsep, ki_actions[id].event)
+
+#define PRINT_EVENT(id) if (IS_WINKI) printf ("%c%s%c%s", fsep, ki_actions[id].subsys, fsep, ki_actions[id].event);	\
+			else printf ("%c%s", fsep, ki_actions[id].event); 
+
 #define PRINT_SYSCALL(pidp, num) if ((pidp->syscall_index == NULL) || (num > MAXSYSCALLS)) {				\
 					printf ("[%d]", num);				\
 				} else {							\

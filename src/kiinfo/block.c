@@ -21,6 +21,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <sys/types.h>
 #include "ki_tool.h"
 #include "liki.h"
+#include "winki.h"
 #include "developers.h"
 #include "kd_types.h"
 #include "globals.h"
@@ -85,9 +86,11 @@ incr_issue_iostats (block_rq_issue_t *rec_ptr, iostats_t *statp, int *rndio_flag
 {
 	if (statp->qlen > 0) {
 		statp->issue_cnt++;
-		statp->qlen--;
-		statp->cum_qlen+=statp->qlen;
-		statp->qops++;
+		if (statp->qlen > 0) { 
+			statp->qlen--;
+			statp->cum_qlen+=statp->qlen;
+			statp->qops++;
+		}
 	}
 
 	statp->cum_async_inflight += rec_ptr->async_in_flight;
@@ -109,7 +112,7 @@ incr_compl_iostats(block_rq_complete_t *rec_ptr, iostats_t *statp, uint64 qtm, u
 	return 0;
 }
 
-static inline int
+int
 incr_io_histogram(uint32 *io_times, int rw, uint64 svtm)
 {
 	uint64 elapsed_time = svtm / 1000000;		/* elapsed time is in msecs */
@@ -311,7 +314,7 @@ block_dev_complete_stats(block_rq_complete_t *rec_ptr, uint64 qtm, uint64 svtm)
 	rw = reqop(rec_ptr->cmd_flags); 
 	if ((rw > IO_WRITE) || INVALID_SECTOR(rec_ptr->sector)) return;
 
-	dev = DEV(rec_ptr->dev);
+	dev = rec_ptr->dev;
         devinfop = GET_DEVP(DEVHASHP(globals,dev),DEV(dev));
 	
 	incr_compl_iostats(rec_ptr, &devinfop->iostats[rw], qtm, svtm);
@@ -373,9 +376,6 @@ block_perpid_requeue_stats(block_rq_requeue_t *rec_ptr, pid_info_t *pidp)
 
 	devinfop = GET_DEVP(DEVHASHP(pidp, dev),dev); 
 	devinfop->iostats[rw].requeue_cnt++;
-	if (devinfop->iostats[rw].qlen > 0) { 
-		devinfop->iostats[rw].qlen--;
-	}
 }
 
 static inline void
@@ -497,16 +497,23 @@ block_global_issue_stats(block_rq_issue_t *rec_ptr)
 }
 
 static inline void
-block_perpid_issue_stats(block_rq_issue_t *rec_ptr, pid_info_t *pidp) 
+block_perpid_issue_stats(block_rq_issue_t *rec_ptr, pid_info_t *insert_pidp, pid_info_t *issue_pidp) 
 {
 	dev_info_t *devinfop;
 	iostats_t *iostatsp;
 	io_req_t *ioreqp;
 	uint32 rw;
 	uint64 dev = DEV(rec_ptr->dev);
+	pid_info_t *pidp;
 
-	if (pidp == NULL) return;
         if ((nomapper_flag) && (dev_major(dev) == MAPPER_MAJOR)) return;
+
+	/* is the insert PID unless its is 0 or -1 */
+	if ((insert_pidp->PID == 0) || (insert_pidp->PID == -1)) {
+		pidp = issue_pidp;
+	} else {
+		pidp = insert_pidp;
+	}
 
 	rw = reqop(rec_ptr->cmd_flags); 
 	if ((rw > IO_WRITE) || INVALID_SECTOR(rec_ptr->sector)) return;
@@ -730,7 +737,7 @@ block_rq_issue_func(void *a, void *v)
                 }
 
 		if (perdsk_stats) block_dev_issue_stats(rec_ptr); 
-		if (perpid_stats) block_perpid_issue_stats(rec_ptr, pidp);
+		if (perpid_stats) block_perpid_issue_stats(rec_ptr, insert_pidp, pidp);
 		if (global_stats) block_global_issue_stats(rec_ptr);
 	} else if (filter_flag) {
 		/* if there are filters but no ioreqp, then just return */

@@ -34,6 +34,7 @@ extern int    info_alarm_func(void *);
 extern int    info_syscall_func(uint64, int, void *);
 extern int    info_dummy_func(uint64, int, void *);
 
+extern void	HT_switch_stats(int, uint64, uint64, int, int);
 extern void  	sched_HT_swtch(uint64);
 extern void  	sched_HT_resume(uint64);
 extern int  	sched_swtch_func(uint64, int, void*);
@@ -52,6 +53,7 @@ extern int 	clear_pid_sched_stats(void *, void *);
 extern int 	clear_pid_stats(void *, void *);
 extern int 	clear_pid_hc_info(void *, void *);
 extern int 	clear_syscall_info(void *, void *);
+extern int	update_cpu_last_pid(int, int);
 
 extern int	clean_pid(void *, void *);
 
@@ -68,6 +70,8 @@ extern void 	sleep_report(void *, void *, int (*funct)(const void *, const void 
 extern int      sched_report(void *, FILE *, FILE *, FILE *);
 extern void     sched_coop_syscall(void *, void *, uint64);
 extern uint64   sched_get_runtime(void *);
+void		update_coop_stats(sched_info_t *, sched_info_t *, pid_info_t *, pid_info_t *, uint64, int, int );
+void		incr_setrq_stats(setrq_info_t ***, uint64, uint64, uint64);
 extern int      print_wakeup_pids(void *, void *);
 extern int      clear_slp_info(void *, void *);
 extern int      print_slp_info(void *, void *);
@@ -81,6 +85,8 @@ extern int	sched_print_accumtm(void *);
 extern int	sched_print_pertid_accumtm(void *, void *);
 extern int	sched_print_tid_accumtm(void *);
 extern void	sched_mpschedinfo_init();
+extern void 	sched_rqhist_wakeup(int, pid_info_t *, int, uint64);
+extern void 	sched_rqhist_resume(int, pid_info_t *, int, uint64);
 extern void	cpu_missed_buffer(void *);
 extern void	pid_missed_buffer(void *, void *);
 extern int      kp_print_sleep_pids(void *, void *);
@@ -122,6 +128,8 @@ extern int    print_stealtime_pids(uint64 *);
 extern int    print_sys_runtime_pids(uint64 *);
 extern void   print_futex_summary(uint64 *);
 
+extern void irq_entry_update_stats(uint64, int, int, int, int);
+extern uint64 irq_exit_update_stats(uint64, int, int, int, int);
 extern void print_percpu_irq_stats(int);
 extern void print_global_irq_stats(int);
 extern void print_global_hardirq_stats(void *);
@@ -216,6 +224,9 @@ extern int    pid_report_func(void *);
 extern int    pid_print_report(void *);
 extern int    pid_bufmiss_func(void *, void *);
 extern void   parse_dmidecode();
+extern void    parse_systeminfo();   /* WinKI */
+extern int    parse_cpulist();   /* WinKI */
+extern int   parse_corelist();	 /* WinKI */
 extern void   parse_cpuinfo();
 extern void   parse_cpumaps();
 extern void   parse_mpsched();
@@ -297,6 +308,7 @@ extern int    dsk_alarm_func(void *);
 extern int    dsk_bucket_adjust();
 extern int    dsk_print_dev_iostats(void *, void *);
 extern int    dsk_print_dev_iostats_total(void *, void *);
+extern int    incr_io_histogram(uint32 *, int, uint64);
 extern int    sum_iostat(void *, void *);
 extern int    sum_iostats(void *, void *);
 
@@ -343,6 +355,7 @@ extern int    hc_print_pc2(void *, void *);
 extern int    hc_clear_pc(void *, void *);
 extern int    hc_print_stktrc(void *, void *);
 extern int    hc_missed_hc(uint64, uint64, void *);
+extern void   hc_update_sched_state(sched_info_t *, int, uint64);
 extern int    need_IDLE();
 extern int    print_hc_stktrc(void *, void *); 
 
@@ -470,8 +483,14 @@ extern void	add_command(char **, char *);
 extern void	add_string(char **, char *);
 extern void	repl_command(char **, char *);
 extern void	putstr(char **, char *);
+extern void     incr_syscall_stats(void *, uint64, uint64, int);
+extern int	push_win_syscall(void *, uint64, uint64);
+extern int	pop_win_syscall(void *, uint64 *, uint64 *);
+extern void	winki_save_stktrc(void *, void *, void *);
+extern void	update_pid_ids(int, int);
 extern int	get_status_int(int, char *);
 extern int	get_command(void *, void *);
+extern int	inherit_command(void *, void *);
 extern int      get_pid_cgroup(void *, void *);
 extern int	get_devname(void *, void *);
 extern int	get_pathname(void *, void *);
@@ -479,6 +498,7 @@ extern int	get_devinfo(void *, void *);
 extern int	get_filename(void *, void *);
 extern void	print_ip_port(void *, int, FILE *);
 extern void	print_ip_port_v6(void *, int, FILE *);
+extern void	print_ip_v6(void *, FILE *);
 extern void	printstr_ip_port_v6(char *, void *, int);
 extern void	cp_sockaddr(void **, void *);
 extern void	cp_sockip(void **, void *);
@@ -533,6 +553,7 @@ extern char     *gfp_flags_str(unsigned int);
 extern char	*reqop_name(uint64);
 extern int	reqop(uint64);
 extern void	print_cpu_buf_info();
+extern char	*irqflags(uint32);
 
 
 extern int	check_filter(void *, uint64);
@@ -548,6 +569,7 @@ extern char ts_begin_marker[];
 extern char ts_end_marker[];
 extern char *bkfname;
 extern char *sysignore;
+extern char *pdbfiles;
 extern char *edusfname;
 extern char *jstackfname;
 extern char *objfile;
@@ -586,6 +608,7 @@ extern uint32 trace_bufsize;
 extern uint32 trace_segments;
 extern char *tag;
 extern char *debug_dir;
+extern char *etl_filename;
 extern uint64 itime;
 
 extern int runq_detail_time;

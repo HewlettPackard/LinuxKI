@@ -50,6 +50,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <curses.h>
 #include "live.h"
 
+#include "winki.h"
+#include "Pdb.h"
+#include "Thread.h"
+#include "PerfInfo.h"
+#include "DiskIo.h"
+#include "winki_util.h"
+
 extern struct utsname  utsname;
 
 #define LINES_AVAIL ((LINES-1)-lineno) 
@@ -238,7 +245,7 @@ print_global_header()
 	print_top_line();
 	lineno++;
 
-	mvprintw (lineno++,0, "Server           Linux Version                         CPUs   HT Nodes    Memory");
+	mvprintw (lineno++,0, "Server           OS Version                            CPUs   HT Nodes    Memory");
 	mvprintw (lineno++,0, "%-16s %-36s %5d %4s %5d %8dM", 
 		globals->hostname,
 		globals->os_vers,
@@ -248,6 +255,104 @@ print_global_header()
 		globals->memkb / 1024);
 }
 
+static inline void
+live_winki_trace_funcs()
+{
+	int i;
+
+        for (i = 0; i < 65536; i++) {
+                ki_actions[i].id = i;
+                ki_actions[i].func = NULL;
+                ki_actions[i].execute = 0;
+        }
+
+        strcpy(&ki_actions[0].subsys[0], "EventTrace");
+        strcpy(&ki_actions[0].event[0], "Header");
+        ki_actions[0].func = winki_header_func;
+        ki_actions[0].execute = 1;
+
+        strcpy(&ki_actions[0x524].subsys[0], "Thread");
+        strcpy(&ki_actions[0x524].event[0], "Cswitch");
+        ki_actions[0x524].func=thread_cswitch_func;
+        ki_actions[0x524].execute = 1;
+
+        strcpy(&ki_actions[0x532].subsys[0], "Thread");
+        strcpy(&ki_actions[0x532].event[0], "ReadyThread");
+        ki_actions[0x532].func=thread_readythread_func;
+                ki_actions[0x532].execute = 1;
+
+        strcpy(&ki_actions[0x548].subsys[0], "Thread");
+        strcpy(&ki_actions[0x548].event[0], "SetName");
+        ki_actions[0x548].func=thread_setname_func;
+        ki_actions[0x548].execute = 1;
+
+        strcpy(&ki_actions[0xf33].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf33].event[0], "SysClEnter");
+        ki_actions[0xf33].func=perfinfo_sysclenter_func;
+        ki_actions[0xf33].execute = 1;
+
+        strcpy(&ki_actions[0xf34].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf34].event[0], "SysClExit");
+        ki_actions[0xf34].func=perfinfo_sysclexit_func;
+        ki_actions[0xf34].execute = 1;
+
+        strcpy(&ki_actions[0x10a].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10a].event[0], "Read");
+        ki_actions[0x10a].func=diskio_readwrite_func;
+        ki_actions[0x10a].execute = 1;
+
+        strcpy(&ki_actions[0x10b].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10b].event[0], "Write");
+        ki_actions[0x10b].func=diskio_readwrite_func;
+        ki_actions[0x10b].execute = 1;
+
+        strcpy(&ki_actions[0x10c].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10c].event[0], "ReadInit");
+        ki_actions[0x10c].func=diskio_init_func;
+        ki_actions[0x10c].execute = 1;
+
+                strcpy(&ki_actions[0x10d].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10d].event[0], "WriteInit");
+        ki_actions[0x10d].func=diskio_init_func;
+        ki_actions[0x10d].execute = 1;
+
+        strcpy(&ki_actions[0x10e].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10e].event[0], "FlushBuffers");
+        ki_actions[0x10e].func=diskio_flush_func;
+        ki_actions[0x10e].execute = 1;
+
+        strcpy(&ki_actions[0xf2e].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf2e].event[0], "SampleProfile");
+        ki_actions[0xf2e].func=perfinfo_profile_func;
+        ki_actions[0xf2e].execute = 1;
+
+        strcpy(&ki_actions[0xf32].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf32].event[0], "ISR-MSI");
+        ki_actions[0xf32].func=perfinfo_isr_func;
+        ki_actions[0xf32].execute = 1;
+
+        strcpy(&ki_actions[0xf42].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf42].event[0], "ThreadedDPC");
+        ki_actions[0xf42].func=perfinfo_dpc_func;
+        ki_actions[0xf42].execute = 1;
+
+        strcpy(&ki_actions[0xf43].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf43].event[0], "ISR");
+        ki_actions[0xf43].func=perfinfo_isr_func;
+        ki_actions[0xf43].execute = 1;
+
+        strcpy(&ki_actions[0xf44].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf44].event[0], "DPC");
+        ki_actions[0xf44].func=perfinfo_dpc_func;
+        ki_actions[0xf44].execute = 1;
+
+
+        strcpy(&ki_actions[0xf45].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf45].event[0], "TimeDPC");
+        ki_actions[0xf45].func=perfinfo_dpc_func;
+        ki_actions[0xf45].execute = 1;
+
+}
 
 /*
  ** The initialization function
@@ -272,42 +377,47 @@ live_init_func(void *v)
 	noecho();
 	clear();
 
-	/* go ahead and initialize the trace functions, but do not set the execute field */
-	ki_actions[TRACE_BLOCK_RQ_ISSUE].func = block_rq_issue_func;
-	ki_actions[TRACE_BLOCK_RQ_INSERT].func = block_rq_insert_func;
-	ki_actions[TRACE_BLOCK_RQ_COMPLETE].func = block_rq_complete_func;
-	ki_actions[TRACE_BLOCK_RQ_REQUEUE].func = block_rq_requeue_func;
-	ki_actions[TRACE_BLOCK_RQ_ABORT].func = block_rq_abort_func;
-	ki_actions[TRACE_SYS_EXIT].func = sys_exit_func;
-	ki_actions[TRACE_SYS_ENTER].func = sys_enter_func;
-	ki_actions[TRACE_SCHED_SWITCH].func = sched_switch_func;
-	ki_actions[TRACE_SCHED_WAKEUP_NEW].func = sched_wakeup_func;
-	ki_actions[TRACE_SCHED_WAKEUP].func = sched_wakeup_func;
-	ki_actions[TRACE_HARDCLOCK].func = hardclock_func;
-	ki_actions[TRACE_IRQ_HANDLER_ENTRY].func = irq_handler_entry_func;
-	ki_actions[TRACE_IRQ_HANDLER_EXIT].func = irq_handler_exit_func;
-	ki_actions[TRACE_SOFTIRQ_ENTRY].func = softirq_entry_func;
-	ki_actions[TRACE_SOFTIRQ_EXIT].func = softirq_exit_func;
-	ki_actions[TRACE_CACHE_INSERT].func = cache_insert_func;
-	ki_actions[TRACE_CACHE_EVICT].func = cache_evict_func;
-	ki_actions[TRACE_POWER_START].func = power_start_func;
-       	ki_actions[TRACE_POWER_END].func = power_end_func;
-       	ki_actions[TRACE_POWER_FREQ].func = power_freq_func;
-       	ki_actions[TRACE_CPU_FREQ].func = cpu_freq_func;
-       	ki_actions[TRACE_CPU_IDLE].func = cpu_idle_func;
-	ki_actions[TRACE_SOFTIRQ_RAISE].func = kparse_generic_func;
-       	ki_actions[TRACE_SCSI_DISPATCH_CMD_START].func = kparse_generic_func;
-       	ki_actions[TRACE_SCSI_DISPATCH_CMD_DONE].func = kparse_generic_func;
-       	ki_actions[TRACE_LISTEN_OVERFLOW].func = kparse_generic_func;
-       	if (IS_LIKI_V4_PLUS) {
-               	ki_actions[TRACE_WALLTIME].func = trace_startup_func;
-       	} else if (IS_LIKI) {
-               	ki_actions[TRACE_WALLTIME].func = trace_walltime_func;
+	if (IS_WINKI) {
+		live_winki_trace_funcs();
 	} else {
-        	/* We will disgard the trace records until the Marker is found */
-               	set_events_all(0);
-               	ki_actions[TRACE_PRINT].func = live_ftrace_print_func;
-               	ki_actions[TRACE_PRINT].execute = 1;
+
+		/* go ahead and initialize the trace functions, but do not set the execute field */
+		ki_actions[TRACE_BLOCK_RQ_ISSUE].func = block_rq_issue_func;
+		ki_actions[TRACE_BLOCK_RQ_INSERT].func = block_rq_insert_func;
+		ki_actions[TRACE_BLOCK_RQ_COMPLETE].func = block_rq_complete_func;
+		ki_actions[TRACE_BLOCK_RQ_REQUEUE].func = block_rq_requeue_func;
+		ki_actions[TRACE_BLOCK_RQ_ABORT].func = block_rq_abort_func;
+		ki_actions[TRACE_SYS_EXIT].func = sys_exit_func;
+		ki_actions[TRACE_SYS_ENTER].func = sys_enter_func;
+		ki_actions[TRACE_SCHED_SWITCH].func = sched_switch_func;
+		ki_actions[TRACE_SCHED_WAKEUP_NEW].func = sched_wakeup_func;
+		ki_actions[TRACE_SCHED_WAKEUP].func = sched_wakeup_func;
+		ki_actions[TRACE_HARDCLOCK].func = hardclock_func;
+		ki_actions[TRACE_IRQ_HANDLER_ENTRY].func = irq_handler_entry_func;
+		ki_actions[TRACE_IRQ_HANDLER_EXIT].func = irq_handler_exit_func;
+		ki_actions[TRACE_SOFTIRQ_ENTRY].func = softirq_entry_func;
+		ki_actions[TRACE_SOFTIRQ_EXIT].func = softirq_exit_func;
+		ki_actions[TRACE_CACHE_INSERT].func = cache_insert_func;
+		ki_actions[TRACE_CACHE_EVICT].func = cache_evict_func;
+		ki_actions[TRACE_POWER_START].func = power_start_func;
+       		ki_actions[TRACE_POWER_END].func = power_end_func;
+       		ki_actions[TRACE_POWER_FREQ].func = power_freq_func;
+       		ki_actions[TRACE_CPU_FREQ].func = cpu_freq_func;
+       		ki_actions[TRACE_CPU_IDLE].func = cpu_idle_func;
+		ki_actions[TRACE_SOFTIRQ_RAISE].func = kparse_generic_func;
+       		ki_actions[TRACE_SCSI_DISPATCH_CMD_START].func = kparse_generic_func;
+       		ki_actions[TRACE_SCSI_DISPATCH_CMD_DONE].func = kparse_generic_func;
+       		ki_actions[TRACE_LISTEN_OVERFLOW].func = kparse_generic_func;
+       		if (IS_LIKI_V4_PLUS) {
+               		ki_actions[TRACE_WALLTIME].func = trace_startup_func;
+       		} else if (IS_LIKI) {
+               		ki_actions[TRACE_WALLTIME].func = trace_walltime_func;
+		} else {
+        		/* We will disgard the trace records until the Marker is found */
+               		set_events_all(0);
+               		ki_actions[TRACE_PRINT].func = live_ftrace_print_func;
+               		ki_actions[TRACE_PRINT].execute = 1;
+		}
 	}
 
 	/* set initial trace flags and functions */
@@ -339,13 +449,20 @@ live_init_func(void *v)
 		/* events already set above */
         }
 
-	parse_cpuinfo();
-	parse_mem_info();
-	parse_uname(0);
-	parse_kallsyms();
-	parse_devices();
-	parse_docker_ps();
-        parse_ll_R();
+	if (IS_WINKI) {
+		parse_systeminfo();
+		parse_cpulist();
+		parse_corelist();
+
+	} else {
+		parse_cpuinfo();
+		parse_mem_info();
+		parse_uname(0);
+		parse_kallsyms();
+		parse_devices();
+		parse_docker_ps();
+        	parse_ll_R();
+	}
 
 	if (is_alive) {
 		parse_cpumaps();
@@ -363,7 +480,7 @@ live_init_func(void *v)
 		FATAL(err, "pthread_create failure", NULL, -1);
 	}
 
-	if (timestamp) {
+	if (timestamp && !IS_WINKI) {
 		parse_mpsched();
 		parse_proc_cgroup();
 		parse_pself();
@@ -549,7 +666,7 @@ print_stktrc_info_live(void *arg1, void *arg2)
 	vtxt_preg_t *pregp;
 	float avg, wpct;
 	int i, namelen;
-	uint64 key, offset;
+	uint64 key, offset, symaddr;
 	char *sym, *dsym;
 	char symname[256];
 	
@@ -561,7 +678,21 @@ print_stktrc_info_live(void *arg1, void *arg2)
 		if (LINES_AVAIL <= 0) break;
                 key = stktrcp->stklle.key[i];
 		
-		if (key == STACK_CONTEXT_USER) {
+		if (IS_WINKI) {
+                        pidp = stktrcp->pidp;
+                        pregp = get_win_pregp(key, pidp);
+                        if (pregp) {
+                                sym = win_symlookup(pregp, key, &symaddr);
+                        }
+
+                        if (sym) {
+                                sprintf (symname, "  %s", sym);
+                        } else if (pregp) {
+                                sprintf (symname, "  [%s]", pregp->filename);
+                        } else {
+                                sprintf (symname, "  0x%llx", key);
+                        }
+                } else if (key == STACK_CONTEXT_USER) {
                         sprintf (symname, "|");
                 } else if ((globals->symtable) && (key < globals->nsyms-1)) {
                         if (globals->symtable[key].nameptr) {
@@ -577,7 +708,7 @@ print_stktrc_info_live(void *arg1, void *arg2)
                                 pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
                         }
 
-                        if (pregp = find_vtext_preg(pidp, key)) {
+                        if (pregp = find_vtext_preg(pidp->vtxt_pregp, key)) {
                                 if (sym = symlookup(pregp, key, &offset)) {
                                 	sprintf (symname, "%s", sym);
 				} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
@@ -617,7 +748,7 @@ print_hc_stktrc_live(void *arg1, void *arg2)
 	vtxt_preg_t *pregp;
 	float wpct;
 	int i, namelen;
-	uint64 key, offset;
+	uint64 key, offset, symaddr;
 	char *sym, *dsym;
 	char symname[256];
 	
@@ -630,8 +761,22 @@ print_hc_stktrc_live(void *arg1, void *arg2)
         for (i=0;i<stktrcp->stklen; i++) {
 		if (LINES_AVAIL <= 0) break;
                 key = stktrcp->stklle.key[i];
-		
-		if (key == STACK_CONTEXT_USER) {
+
+		if (IS_WINKI) {
+                        pidp = stktrcp->pidp;
+                        pregp = get_win_pregp(key, pidp);
+                        if (pregp) {
+                                sym = win_symlookup(pregp, key, &symaddr);
+                        }
+
+                        if (sym) {
+                                sprintf (symname, "  %s", sym);
+                        } else if (pregp) {
+                                sprintf (symname, "  [%s]", pregp->filename);
+                        } else {
+                                sprintf (symname, "  0x%llx", key);
+                        }
+                } else if (key == STACK_CONTEXT_USER) {
                         sprintf (symname, "|");
                 } else if ((globals->symtable) && (key < globals->nsyms-1)) {
                         if (globals->symtable[key].nameptr) {
@@ -647,7 +792,7 @@ print_hc_stktrc_live(void *arg1, void *arg2)
                                 pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
                         }
 
-                        if (pregp = find_vtext_preg(pidp, key)) {
+                        if (pregp = find_vtext_preg(pidp->vtxt_pregp, key)) {
                                 if (sym = symlookup(pregp, key, &offset)) {
                                 	sprintf (symname, "%s", sym);
 				} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
@@ -684,17 +829,28 @@ int
 print_slp_info_live (void *arg1, void *arg2)
 {
 	slp_info_t *slpinfop = arg1;
-        uint64 idx;
+        uint64 idx, symaddr;
+	char *sym = NULL, *symfile = NULL;
+	vtxt_preg_t *pregp = NULL;
 
         if (slpinfop->count == 0) return 0;
-        idx = slpinfop->lle.key;
+	if (IS_WINKI) {
+		/* We should be in kernel space here */
+		if (pregp = get_win_pregp(slpinfop->lle.key, NULL)) {
+			sym = win_symlookup(pregp, slpinfop->lle.key, &symaddr);
+			symfile = pregp->filename;
+		}
+	} else {
+		idx = slpinfop->lle.key;
+		if (idx > globals->nsyms-1) idx = UNKNOWN_SYMIDX;
+	}
 
         mvprintw(lineno++, col, "%8d %11.6f %9.3f %9.3f  %s",
                         slpinfop->count,
                         SECS(slpinfop->sleep_time),
                         MSECS(slpinfop->sleep_time / slpinfop->count),
                         MSECS(slpinfop->max_time),
-                        idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr); 
+			IS_WINKI ? (sym ? sym : (symfile ? symfile : "unknown")) : (idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr));
         return 0;
 }
 
@@ -702,16 +858,29 @@ int
 print_slpinfo_scall_live (void *arg1, void *arg2)
 {
 	slp_info_t *slpinfop = arg1;
-        uint64 idx;
+        uint64 idx, symaddr;
+	char *sym = NULL, *symfile = NULL;
+	vtxt_preg_t *pregp = NULL;
+
 
         if (slpinfop->count == 0) return 0;
-        idx = slpinfop->lle.key;
 
-        mvprintw(lineno++, 0, "      Sleep Func %9d          %11.6f %10.6f  %s",
+	if (IS_WINKI) {
+		/* We should be in kernel space here */
+		if (pregp = get_win_pregp(slpinfop->lle.key, NULL)) {
+			sym = win_symlookup(pregp, slpinfop->lle.key, &symaddr);
+			symfile = pregp->filename;
+		}
+	} else {
+		idx = slpinfop->lle.key;
+		if (idx > globals->nsyms-1) idx = UNKNOWN_SYMIDX;
+	}
+
+        mvprintw(lineno++, 0, "      Sleep Func             %9d          %11.6f %10.6f  %s",
                         slpinfop->count,
                         SECS(slpinfop->sleep_time),
                         SECS(slpinfop->sleep_time / slpinfop->count),
-                        idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr);
+			IS_WINKI ? (sym ? sym : (symfile ? symfile : "unknown")) : (idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr));
         return 0;
 }
 
@@ -919,25 +1088,28 @@ print_syscall_info_live(void *arg1, void *arg2)
 
         syscall_index = (SYSCALL_MODE(syscallp->lle.key) == ELF32) ? globals->syscall_index_32 : globals->syscall_index_64;
 
-        mvprintw (lineno++, 0, "%-18s%8d %8.1f %11.6f %10.6f %10.6f %7d", 
+        mvprintw (lineno++, 0, "%-30s%8d %8.1f %11.6f %10.6f", 
                 syscall_arg_list[syscall_index[SYSCALL_NO(syscallp->lle.key)]].name,
                 statp->count,
                 statp->count / secs,
                 SECS(statp->total_time),
-                SECS(statp->total_time / statp->count),
-                SECS(statp->max_time),
-                statp->errors);
+                SECS(statp->total_time / statp->count));
 
-        if ((COLS > 95) && statp->bytes && statp->count)  {
-                printw (" %7lld %8.1f",
-                        (statp->bytes) / MAX((statp->count - statp->errors), statp->count),
-                        (statp->bytes) / (secs * 1024.0));
+        if (COLS > 107) {
+                printw (" %10.6f %7d",
+                	SECS(statp->max_time),
+                	statp->errors);
+		if (statp->bytes && statp->count) {
+                	printw (" %7lld %8.1f",
+                        	(statp->bytes) / MAX((statp->count - statp->errors), statp->count),
+                       		(statp->bytes) / (secs * 1024.0));
+		}
         }
 
 	if (scdetail_flag) {
 		if (LINES_AVAIL < 4) return 0;
                 if (sstatp->T_sleep_time && sstatp->C_sleep_cnt) {
-                        mvprintw (lineno++, 0, "   %-15s%8d %8.1f %11.6f %10.6f", 
+                        mvprintw (lineno++, 0, "   %-27s%8d %8.1f %11.6f %10.6f", 
                                 "SLEEP",
                                 sstatp->C_sleep_cnt,
                                 sstatp->C_sleep_cnt/secs,
@@ -953,12 +1125,12 @@ print_syscall_info_live(void *arg1, void *arg2)
                 }
 
 		if (sstatp->T_runq_time) 
-                        mvprintw (lineno++, 0, "   %-15s                  %11.6f", 
+                        mvprintw (lineno++, 0, "   %-27s                  %11.6f", 
                                 "RUNQ",
                                 SECS(sstatp->T_runq_time));
 
                 if (sstatp->T_run_time &&  (sstatp->T_run_time != statp->total_time) )
-                        mvprintw (lineno++, 0, "   %-15s                  %11.6f", 
+                        mvprintw (lineno++, 0, "   %-27s                  %11.6f", 
                                 "CPU",
                                 SECS(sstatp->T_run_time));
 
@@ -966,7 +1138,7 @@ print_syscall_info_live(void *arg1, void *arg2)
                		iovstatp = syscallp->iov_stats;
                		tot_cnt = iovstatp->rd_cnt + iovstatp->wr_cnt;
                 	if (iovstatp->rd_cnt)
-                        	mvprintw (lineno++, 0, "   %-15s%8d %8.1f %11s %10.6f %10.6f %7s %7lld %8.1f", 
+                        	mvprintw (lineno++, 0, "   %-27s%8d %8.1f %11s %10.6f %10.6f %7s %7lld %8.1f", 
                                         "AIO Reads",
                                         iovstatp->rd_cnt,
                                         iovstatp->rd_cnt/secs,
@@ -977,7 +1149,7 @@ print_syscall_info_live(void *arg1, void *arg2)
                                         iovstatp->rd_bytes / iovstatp->rd_cnt,
                                         (iovstatp->rd_bytes) / (secs * 1024.0));
                 	if (iovstatp->wr_cnt)
-                        	mvprintw (lineno++, 0, "   %-15s%8d %8.1f %11s %10.6f %10.6f %7s %7lld %8.1f",
+                        	mvprintw (lineno++, 0, "   %-27s%8d %8.1f %11s %10.6f %10.6f %7s %7lld %8.1f",
                                         "AIO Writes",
                                         iovstatp->wr_cnt,
                                         iovstatp->wr_cnt/secs,
@@ -1161,8 +1333,8 @@ print_socket_detail_live(sd_stats_t *statsp, struct sockaddr_in6 *lsock, struct 
 		printw (" Last PID: %d\n", statsp->last_pid);
 	}
 	
-	mvprintw (lineno++, 0, "System Call Name     Count     Rate     ElpTime        Avg        Max    Errs");
-        if (COLS > 95) printw ("    AvSz     KB/s");
+	mvprintw (lineno++, 0, "System Call Name                 Count     Rate     ElpTime        Avg");
+        if (COLS > 107) printw ("        Max    Errs    AvSz     KB/s");
 	foreach_hash_entry((void **)syscallp, SYSCALL_HASHSZ, print_syscall_info_live, syscall_sort_by_time, LINES_AVAIL, NULL);
 }
 
@@ -1252,7 +1424,7 @@ print_pid_header(pid_info_t *pidp)
 			SECS(statp->T_run_time),
 			SECS(statp->T_sys_time),
 			SECS(statp->T_user_time));
-		if (COLS > 96) {
+		if (COLS > 96 && !IS_WINKI) {
 			printw ("   StealTime  : %9.6f", SECS(statp->T_stealtime));
 		}
 		mvprintw (lineno++, 0, "SleepTime  : %9.6f  Sleep Cnt : %9d   Wakeup Cnt : %9d",
@@ -1373,8 +1545,8 @@ print_pidfile_window()
 		return 0;
 	}
 
-	mvprintw (lineno++, 0, "System Call Name     Count     Rate     ElpTime        Avg        Max    Errs");
-        if (COLS > 95) printw ("    AvSz     KB/s");
+	mvprintw (lineno++, 0, "System Call Name                 Count     Rate     ElpTime        Avg");
+        if (COLS > 107) printw ("        Max    Errs    AvSz     KB/s");
 
 	if (is_alive) foreach_hash_entry(pidp->fdhash, FD_HSIZE, get_filename, NULL, 0, pidp);
 	foreach_hash_entry((void **)pidp->fdhash, FD_HSIZE, print_fd_info_live,
@@ -1403,7 +1575,7 @@ print_pidhc_window()
 	print_pid_header(pidp);
 	lineno++;
 
-	if (!IS_LIKI) {
+	if (IS_FTRACE) {
 		mvprintw (lineno++, 0, " *** No Hardclock Tracing with Ftrace ***");
 		return 0;
 	}
@@ -1413,17 +1585,17 @@ print_pidhc_window()
 	print_pc_args.hcinfop = hcinfop;
 	print_pc_args.warnflagp = NULL;
 	print_pc_args.pidfile = NULL;
-	if (IS_LIKI && hcinfop && hcinfop->pc_hash) {
+	if (!IS_FTRACE && hcinfop && hcinfop->pc_hash) {
 		mvprintw (lineno++, 0, "---- Top Hardclock Functions ----");
 	        mvprintw (lineno++, 0, "   Count     Pct  State  Function");
 		nlines = LINES_AVAIL / 2;
         	foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc, pc_sort_by_count, nlines, (void *)&print_pc_args);
 	}
 
-	if (IS_LIKI && (LINES_AVAIL > 3) && hcinfop &&  hcinfop->hc_stktrc_hash ) {
+	if (!IS_FTRACE && (LINES_AVAIL > 3) && hcinfop &&  hcinfop->hc_stktrc_hash ) {
 		lineno++;
 		mvprintw (lineno++, 0, "---- Top Hardclock Stack Traces ----");
-		mvprintw (lineno++, 0, "   count    Pct  Stack trace");
+		mvprintw (lineno++, 0, "   count    pct  Stack trace");
 		foreach_hash_entry((void **)hcinfop->hc_stktrc_hash, STKTRC_HSIZE, print_hc_stktrc_live, stktrc_sort_by_cnt, LINES_AVAIL, (void *)hcinfop);
 	}
 		
@@ -1446,7 +1618,7 @@ print_pidwait_window()
 	lineno=0;
 	clear();
 	print_pid_header(pidp);
-	if (!IS_LIKI) {
+	if (IS_FTRACE) {
 		lineno++;
 		mvprintw (lineno++, 0, " *** No Sleep Functions with Ftrace ***");
 		return 0;
@@ -1550,7 +1722,7 @@ print_pidcoop_window()
 		if ((schedp->sched_stats.C_wakeup_cnt != 0) && LINES_AVAIL > 3) {
 			lineno++;
 			mvprintw(lineno++, col, "Tasks woken up by this task");
-			mvprintw(lineno++, col, "     PID    Count   SlpPcnt     Slptime  Command");
+			mvprintw(lineno++, col, "     %s    Count   SlpPcnt     Slptime  Command", tlabel);
 			coopinfo.which = WAKER;
 			coopinfo.cnt = schedp->sched_stats.C_wakeup_cnt;
 			foreach_hash_entry((void **)schedp->setrq_tgt_hash, WPID_HSIZE,
@@ -1561,7 +1733,7 @@ print_pidcoop_window()
 		if ((schedp->sched_stats.C_setrq_cnt != 0) && LINES_AVAIL > 3) {
 			lineno++;
 			mvprintw(lineno++, col, "Tasks that have woken up this task");
-			mvprintw(lineno++, col, "     PID    Count   SlpPcnt     Slptime  Command");
+			mvprintw(lineno++, col, "     %s    Count   SlpPcnt     Slptime  Command", tlabel);
 			coopinfo.which = SLEEPER;
 			coopinfo.cnt = schedp->sched_stats.C_setrq_cnt;
 			coopinfo.total_slp_time =  schedp->sched_stats.T_sleep_time;
@@ -1590,8 +1762,8 @@ print_pidscall_window()
 	if ((LINES_AVAIL > 4) && pidp->scallhash) {
 		lineno++;
 		mvprintw (lineno++, 0, "----------------------------- Top System Calls ------------------------------");
-		mvprintw (lineno++, 0, "System Call Name     Count     Rate     ElpTime        Avg        Max    Errs");
-        	if (COLS > 95) printw ("    AvSz     KB/s");
+	        mvprintw (lineno++, 0, "System Call Name                 Count     Rate     ElpTime        Avg");
+                if (COLS > 107) printw ("        Max    Errs    AvSz     KB/s");
 		foreach_hash_entry((void **)pidp->scallhash, SYSCALL_HASHSZ, print_syscall_info_live, syscall_sort_by_time, LINES_AVAIL, NULL);
 	}
 }
@@ -1649,7 +1821,7 @@ print_pid_window()
 	print_pc_args.hcinfop = hcinfop;
 	print_pc_args.warnflagp = NULL;
 	print_pc_args.pidfile = NULL;
-	if (!IS_LIKI) {
+	if (IS_FTRACE) {
 		lineno++;
 		mvprintw(lineno++, 0, "*** No Hardclock Traces with Ftrace ***");
 	} else if (hcinfop && hcinfop->pc_hash && (LINES_AVAIL > 3)) {
@@ -1660,7 +1832,7 @@ print_pid_window()
         	foreach_hash_entry((void **)hcinfop->pc_hash, PC_HSIZE, hc_print_pc, pc_sort_by_count, nlines, (void *)&print_pc_args);
 	}
 
-	if (!IS_LIKI) {
+	if (IS_FTRACE) {
 		lineno++;
 		mvprintw(lineno++, 0, "*** No Sleep Functions with Ftrace ***");
 	} else if (pidp->slp_hash && schedp && (LINES_AVAIL > 3)) {
@@ -1689,8 +1861,8 @@ print_pid_window()
 	if ((LINES_AVAIL > 3) && pidp->scallhash) {
 		lineno++;
 		mvprintw (lineno++, 0, "----------------------------- Top System Calls ------------------------------");
-		mvprintw (lineno++, 0, "System Call Name     Count     Rate     ElpTime        Avg        Max    Errs");
-        	if (COLS > 95) printw ("    AvSz     KB/s");
+		mvprintw (lineno++, 0, "System Call Name                 Count     Rate     ElpTime        Avg");
+        	if (COLS > 107) printw ("        Max    Errs    AvSz     KB/s");
 		foreach_hash_entry((void **)pidp->scallhash, SYSCALL_HASHSZ, print_syscall_info_live, syscall_sort_by_time, LINES_AVAIL, NULL);
 	}
 }
@@ -2033,7 +2205,7 @@ print_iotop_window()
 	if ((LINES_AVAIL>2) && globals->pid_hash) {
 		lineno++;
 		mvprintw(lineno++, 0, "----------------- Top Tasks Performing I/O ---------------------");
-		mvprintw(lineno++, 0, "     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process");
+		mvprintw(lineno++, 0, "     Cnt      r/s      w/s    KB/sec    Avserv      %s  Process", tlabel);
 		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_iosum_live,  pid_sort_by_iocnt, LINES_AVAIL, NULL);
 	}
 }
@@ -2052,14 +2224,23 @@ print_irq_entry_live(void *arg1, void *arg2)
         if (*irqtypep == HARDIRQ) {
                 irqname_entry = (irq_name_t *)find_entry((lle_t **)globals->irqname_hash, irq, IRQ_HASH(irq));
                 if (irqname_entry) {
-                        mvprintw (lineno, col, "%4d %-16s", irq, irqname_entry->name);
+                        mvprintw (lineno, col, "%4d %-32s", irq, irqname_entry->name);
                 } else {
-                        mvprintw (lineno, col, "%4d %-16s", irq, " ");
+                        mvprintw (lineno, col, "%4d %-32s", irq, " ");
                 }
-		ncol+=22;
-        } else {
-                mvprintw (lineno, col, "%3d %-11s", irq, softirq_name[irq]);
-		ncol+=16;
+		ncol+=38;
+        } else if (IS_WINKI) {
+		irqname_entry = (irq_name_t *)find_entry((lle_t **)globals->dpcname_hash, irq, IRQ_HASH(irq));
+                if (irqname_entry) {
+                        mvprintw (lineno, col, "%4d %-32s", irq, irqname_entry->name);
+                } else {
+                        mvprintw (lineno, col, "%4d %-32s", irq, " ");
+                }
+		ncol+=38;
+
+	} else {
+                mvprintw (lineno, col, "%4d %-32s", irq, softirq_name[irq]);
+		ncol+=38;
         }
 
         mvprintw(lineno, ncol, "%8d %11.6f %12.3f", irqentryp->count, SECS(irqentryp->total_time),
@@ -2083,7 +2264,7 @@ print_select_irq_window()
 	int irqtype;
 	int header_lineno;
 	int cpu, irq;
-	char *name;
+	char *name = " ";
 
 	if (is_alive) { 
 		update_cpu_times(end_time);
@@ -2109,7 +2290,13 @@ print_select_irq_window()
 	} else if (cursirq > 0) {
 		irq = cursirq;
 		irqinfop = globals->softirqp;
-		if (irq < 10) name = softirq_name[irq];
+		if (IS_WINKI) {
+			if (irqnamep = FIND_IRQNAMEP(globals->dpcname_hash, irq)) {
+				name = irqnamep->name;
+			}
+		} else {
+			if (irq < 10) name = softirq_name[irq];
+		}
 		irqtype = SOFTIRQ;
 	}
 
@@ -2174,8 +2361,8 @@ print_irq_window()
 	header_lineno = lineno;
 	lineno++;
 	col = 0;
-	mvprintw(lineno++, col, "----------------------- Hard IRQs ---------------------");
-	mvprintw(lineno++, col, " IRQ Name                Count     ElpTime   Avg(usecs)");
+	mvprintw(lineno++, col, "------------------------------- Hard IRQs -----------------------------");
+	mvprintw(lineno++, col, " IRQ Name                                Count     ElpTime   Avg(usecs)");
 	irqinfop = globals->irqp;
 	if (irqinfop && (LINES_AVAIL > 3)) {
 		irqtype = HARDIRQ;
@@ -2185,14 +2372,16 @@ print_irq_window()
 			
 	lineno = header_lineno;
 	lineno++;
-	col=58;
-	mvprintw(lineno++, col, "-------------------- Soft IRQs ------------------");
-	mvprintw(lineno++, col, "IRQ Name           Count     ElpTime   Avg(usecs)");
-	irqinfop = globals->softirqp;
-	if (irqinfop && (LINES_AVAIL > 3)) {
-		irqtype = SOFTIRQ;
-		foreach_hash_entry((void **)irqinfop->irq_entry_hash, IRQ_HSIZE,
-                                        print_irq_entry_live, irq_sort_by_time, 0, &irqtype);
+	col=75;
+	if (COLS > 146) {
+		mvprintw(lineno++, col, "------------------------------- Soft IRQs -----------------------------");
+		mvprintw(lineno++, col, " IRQ Name                                Count     ElpTime   Avg(usecs)");
+		irqinfop = globals->softirqp;
+		if (irqinfop && (LINES_AVAIL > 3)) {
+			irqtype = SOFTIRQ;
+			foreach_hash_entry((void **)irqinfop->irq_entry_hash, IRQ_HSIZE,
+                                        	print_irq_entry_live, irq_sort_by_time, 0, &irqtype);
+		}
 	}
 }
 
@@ -2319,7 +2508,7 @@ print_select_cpu_window()
 		lineno++;
 		col=0;
 		mvprintw(lineno++, col, "----------------------- Hard IRQs ---------------------");
-		mvprintw(lineno++, col, "IRQ Name                Count      ElpTime   Avg(usecs)");
+		mvprintw(lineno++, col, "IRQ Name                Count      ElpTime");
 		irqinfop = cpuinfop->irqp;
 		if (irqinfop) {
 			irqtype = HARDIRQ;
@@ -2330,8 +2519,8 @@ print_select_cpu_window()
 		saved_lineno = lineno;
 		lineno = irqheader_lineno+1;
 		col=57;
-		mvprintw(lineno++, col, "-------------------- Soft IRQs ------------------");
-		mvprintw(lineno++, col, "IRQ Name           Count     ElpTime   Avg(usecs)");
+		mvprintw(lineno++, col, "------------- Soft IRQs ------------");
+		mvprintw(lineno++, col, "IRQ Name           Count     ElpTime");
 		irqinfop = cpuinfop->softirqp;
 		if (irqinfop) {
 			irqtype = SOFTIRQ;
@@ -2347,7 +2536,7 @@ print_select_cpu_window()
 	if (is_alive && (LINES_AVAIL > 3)) {
 		lineno++;
 		mvprintw (lineno++, 0, "----------------------- Top Tasks by Hardclock Count ------------------------");
-		mvprintw (lineno++, 0, "   Count    USER     SYS    INTR    PID  Command");
+		mvprintw (lineno++, 0, "   Count    USER     SYS    INTR    %s  Command", tlabel);
 		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
                            print_pid_hc_live, pid_sort_by_totalhc, LINES_AVAIL, NULL);
 	}
@@ -2480,7 +2669,7 @@ print_select_dsk_window()
         if (is_alive && (LINES_AVAIL>2) && globals->pid_hash) {
                 lineno++;
 		mvprintw(lineno++, 0, "-------- Top Tasks Performing I/O to device /dev/%s ---------", devinfop->devname);
-                mvprintw(lineno++, 0, "     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process");
+                mvprintw(lineno++, 0, "     Cnt      r/s      w/s    KB/sec    Avserv      %s  Process", tlabel);
                 foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_iosum_live,  pid_sort_by_iocnt, LINES_AVAIL, NULL);
         } else if (!is_alive) {
                 lineno++;
@@ -2536,7 +2725,7 @@ print_select_docker_window()
 	if (LINES_AVAIL > 3) {
 		lineno++;
 		mvprintw (lineno++,0,"Top Tasks sorted by CPU time");
-		mvprintw (lineno++,0,"   PID  busy%%   sys%%  user%%  runq%%   slp%%   stl%%");
+		mvprintw (lineno++,0,"   %s  busy%%   sys%%  user%%  runq%%   slp%%   stl%%", tlabel);
 		if (COLS > 100) printw ("     IOPS     MB/s");
 		if (COLS > 120) printw ("   NetOPS  NetMB/s");
 		printw ("  Command");
@@ -2546,7 +2735,7 @@ print_select_docker_window()
         if (LINES_AVAIL > 3) {
                 lineno++;
                 mvprintw(lineno++, 0, "Top Tasks sorted by I/O");
-                mvprintw(lineno++, 0, "     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process");
+                mvprintw(lineno++, 0, "     Cnt      r/s      w/s    KB/sec    Avserv      %s  Process", tlabel);
                 foreach_hash_entry((void **)dockerp->dkpid_hash, PID_HASHSZ, live_dkpid_io_summary,  dkpid_sort_by_iocnt, LINES_AVAIL, NULL);
         }
 	return 0;
@@ -2738,7 +2927,7 @@ print_file_window()
 	lineno++;
 	
 	mvprintw(lineno++, 0,"-------------------------- Global File Activity ------------------------------");
-	mvprintw (lineno++, 0,"System Call Name     Count     Rate     ElpTime        Avg        Max    Errs");
+	mvprintw (lineno++, 0,"System Call Name                 Count     Rate     ElpTime        Avg        Max    Errs");
         if (COLS > 95) printw ("    AvSz     KB/s");
 	foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, print_fdata_live,
                    (int (*)())fdata_sort_by_syscalls,
@@ -3014,7 +3203,7 @@ print_wait_window()
 
 	print_global_header();	
 	
-	if (!IS_LIKI) {
+	if (IS_FTRACE) {
 		lineno++;
 		mvprintw(lineno++, 0, "*** No Sleep Functions with Ftrace ***");
 		return 0;
@@ -3051,7 +3240,7 @@ print_hc_window()
 	print_global_header();	
 	lineno++;
 
-	if (!IS_LIKI) {
+	if (IS_FTRACE) {
 		lineno++;
 		mvprintw(lineno++, 0, "*** No Hardclock Traces with Ftrace ***");
 		return 0;
@@ -3087,10 +3276,10 @@ print_hc_window()
 		foreach_hash_entry((void **)hcinfop->hc_stktrc_hash, STKTRC_HSIZE, print_hc_stktrc_live, stktrc_sort_by_cnt, nlines-3, (void *)hcinfop);
 	}
 
-	if (IS_LIKI && (LINES_AVAIL > 3)) {
+	if (!IS_FTRACE && (LINES_AVAIL > 3)) {
 		lineno++;
 		mvprintw(lineno++, 0, "----------------------- Top Tasks by Hardclock Count ------------------------");
-		mvprintw(lineno++, 0, "   Count    USER     SYS    INTR    PID  Command");
+		mvprintw(lineno++, 0, "   Count    USER     SYS    INTR    %s  Command", tlabel);
 		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
                            print_pid_hc_live, pid_sort_by_totalhc, LINES_AVAIL, NULL);
 	}
@@ -3209,7 +3398,7 @@ print_main_window()
 	if (LINES_AVAIL > 3) {
 		lineno++;
 		mvprintw (lineno++,0,"Top tasks sorted by CPU time");
-		mvprintw (lineno++,0,"   PID  busy%%   sys%%  user%%  runq%%   slp%%   stl%%");
+		mvprintw (lineno++,0,"   %s  busy%%   sys%%  user%%  runq%%   slp%%   stl%%", tlabel);
 		if (COLS > 100) printw ("     IOPS     MB/s");
 		if (COLS > 120) printw ("   NetOPS  NetMB/s");
 		printw ("  Command");
@@ -3782,7 +3971,7 @@ select_irq_window(int win, int prompt)
 		if ((strlen(str) > 0) && (ret != ERR)) {
 			irqnum = strtol(str, NULL, 10);
 			if (irqnum >= 0) {
-				if ((irqtype == 's') && (irqnum < 10)) {
+				if ((irqtype == 's') && (irqnum < 32768)) {
 					valid = TRUE;
 				} else if ((irqtype == 'h') && (irqnum < 32768 )) {
 					valid = TRUE;

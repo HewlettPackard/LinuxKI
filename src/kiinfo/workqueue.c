@@ -23,6 +23,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "ki_tool.h"
 #include "liki.h"
 #include "liki_extra.h"
+#include "winki.h"
 #include "globals.h"
 #include "hash.h"
 #include "developers.h"

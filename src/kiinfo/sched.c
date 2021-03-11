@@ -25,6 +25,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <linux/kdev_t.h>
 #include "ki_tool.h"
 #include "liki.h"
+#include "winki.h"
 #include "globals.h"
 #include "developers.h"
 #include "kd_types.h"
@@ -191,7 +192,7 @@ update_sched_time(void *arg, uint64 curtime)
 	if (statp->last_cur_time) {
 		delta = curtime - statp->last_cur_time;
 	} else {
-		delta = curtime - FILTER_START_TIME;
+		delta = curtime - (IS_WINKI ? CONVERT_WIN_TIME(winki_start_time) : FILTER_START_TIME);
 	}
 	
 	statp->last_cur_time = curtime;
@@ -332,7 +333,19 @@ update_pid_sched_stats(void *arg1, void *arg2)
 	pid_info_t *pidp = (pid_info_t *)arg1;
 	sched_info_t *schedp = pidp->schedp;
 	sched_stats_t *statp;
+	pid_info_t *tgidp;
 	uint64 delta;
+
+	if (pidp->tgid) {
+		tgidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
+		if ((pidp->cmd == NULL) && (tgidp->cmd)) {
+			add_command(&pidp->cmd, tgidp->cmd);
+		}
+		
+		if ((pidp->hcmd == NULL) && (tgidp->hcmd)) {
+			add_command(&pidp->cmd, tgidp->cmd);
+		}
+	}
 
 	if (schedp) {
 		statp = &schedp->sched_stats;
@@ -354,13 +367,11 @@ update_perpid_sched_stats()
 
 
 void
-update_slp_info(void *arg1, void *arg2, int old_state, int new_state, uint64 delta, uint64 wpid)
+update_slp_info(pid_info_t *pidp, void *arg2, uint64 delta, uint64 wpid)
 {
-        pid_info_t *pidp = arg1;
         slp_info_t ***slp_hash = arg2;
         slp_info_t *slpinfop;
         uint64          key;
-        int     start;
 
         if (pidp->last_stack_depth == 0) return;
 
@@ -418,11 +429,21 @@ update_stktrc_info(uint64 last_stktrc[], uint64 stack_depth, void ***arg2, uint6
 }
 
 void
-incr_setrq_stats (setrq_info_t ***setrq_hashp, uint64 pid) 
+incr_setrq_stats (setrq_info_t ***setrq_hashp, uint64 pid, uint64 old_state, uint64 delta) 
 {
 	setrq_info_t *setrq_infop;
+
 	setrq_infop = GET_SETRQP(setrq_hashp, pid);
 	setrq_infop->cnt++;
+	if (old_state == UNKNOWN) {
+		setrq_infop->unknown_time +=delta;
+		return;
+	} else if (!(old_state & SWTCH)) {
+		return;
+	} else {
+		setrq_infop->sleep_time+=delta;
+	}
+
 	return;
 }
 
@@ -456,6 +477,9 @@ update_coop_stats(sched_info_t *w_schedp, sched_info_t *s_schedp, pid_info_t *pi
     coop_scall_t *ws_scallp;
     coop_scall_t *ww_scallp;
    
+    if (!(old_state & SWTCH))  return;
+    if (!coop_detail_enabled) return;
+
     if (globals->nsyms==0) return;
 
     w_pid = pidp->lle.key;
@@ -476,16 +500,6 @@ update_coop_stats(sched_info_t *w_schedp, sched_info_t *s_schedp, pid_info_t *pi
 
     if (which == SLEEPER) {
         setrq_info_t *slpr_setrqp = GET_SETRQP(&s_schedp->setrq_src_hash, w_pid);
-
-        if (old_state == UNKNOWN) {
-                slpr_setrqp->unknown_time +=delta;
-                return;
-        }
-
-	if (!(old_state & SWTCH))  return;
-
-        slpr_setrqp->sleep_time+=delta;  /* the cnt++ happens in incrt_setrq_stats()  */
-        if (!coop_detail_enabled) return;
 
 	syscallno = pidp->last_syscall_time ? SYSCALL_NO(pidp->last_syscall_id) : SYSCALL_NO(DUMMY_SYSCALL);
         sw_scallp = GET_COOP_SCALLP(&slpr_setrqp->coop_scall_hash, syscallno);
@@ -517,14 +531,6 @@ update_coop_stats(sched_info_t *w_schedp, sched_info_t *s_schedp, pid_info_t *pi
 
         setrq_info_t *waker_setrqp = GET_SETRQP(&w_schedp->setrq_tgt_hash, s_pid);
 
-        if (old_state == UNKNOWN) {
-                waker_setrqp->unknown_time +=delta;
-                return;
-        }
-
-	if (!(old_state & SWTCH))   return;
-
-        waker_setrqp->sleep_time += delta;
 	if (tpidp->cmd && (strcmp("kiinfo", tpidp->cmd) != 0))
 		w_schedp->sched_stats.T_total_waited4_time += delta;
 
@@ -597,24 +603,26 @@ incr_runq_stats(runq_info_t *rqinfop, int old_state, uint64 time, int migrated, 
 }
 
 void
-sched_rqhist_wakeup(void *arg1, int old_state, sched_info_t *schedp, uint64 runq_time)
+sched_rqhist_wakeup(int cpu, pid_info_t *pidp, int old_state, uint64 runq_time)
 {
-        sched_wakeup_t *rec_ptr = arg1;
 	cpu_info_t *prev_cpuinfop, *cpuinfop;
-	pid_info_t *pidp;
-	sched_info_t *gschedp, *prev_cschedp, *cschedp;
+	sched_info_t *schedp, *gschedp, *prev_cschedp, *cschedp;
         runq_info_t *prev_rqinfop, *rqinfop, *grqinfop, *prev_crqinfop, *crqinfop, *trqinfop;
 
-        int time;
-        int cpu, prev_cpu, migrated=0;
+        int time = 0;
+        int prev_cpu, migrated=0;
         int ldom_migrated=0;
         double reltime;
 
-	cpu = rec_ptr->target_cpu;
-	/* if (debug) fprintf (stderr, "sched_rqhist_wakeup() - rec_ptr=0x%llx schedp=0x%llx CPU=%d\n", rec_ptr, schedp, runq_time, cpu); */
+	/* if (debug) fprintf (stderr, "sched_rqhist_wakeup() - PID=%d pidp=0x%llx schedp=0x%llx CPU=%d\n", pidp->PID, pidp, schedp, runq_time, cpu); */
+
+	/* likely first wakeup for a PID has no value for schedp->cpu */
+	schedp = GET_ADD_SCHEDP(&pidp->schedp);
 	if (schedp->cpu == -1) schedp->cpu = cpu; 
 	prev_cpu = schedp->cpu;
-	pidp = GET_PIDP(&globals->pid_hash, rec_ptr->target_pid);
+
+	if (cpu == -1) return;
+
 	cpuinfop = GET_CPUP(&globals->cpu_hash, cpu);
 	prev_cpuinfop = GET_CPUP(&globals->cpu_hash, prev_cpu);
         if (cpu != prev_cpu) {
@@ -624,6 +632,7 @@ sched_rqhist_wakeup(void *arg1, int old_state, sched_info_t *schedp, uint64 runq
                 migrated = 1;
         }
 
+        time = runq_time / 1000;
         if (perpid_stats && !kparse_flag) {
                 trqinfop = GET_ADD_RQINFOP(&schedp->rqinfop);
                 incr_runq_stats (trqinfop, old_state, time, migrated, ldom_migrated);
@@ -653,29 +662,26 @@ sched_rqhist_wakeup(void *arg1, int old_state, sched_info_t *schedp, uint64 runq
 	}
 }
 
-
 void
-sched_rqhist_resume(void *arg1, int old_state, sched_info_t *schedp, uint64 runq_time)
+sched_rqhist_resume(int cpu, pid_info_t *pidp, int old_state, uint64 runq_time)
 {
-        sched_switch_t *rec_ptr = arg1;
 	cpu_info_t *prev_cpuinfop, *cpuinfop;
-	pid_info_t *pidp;
-	sched_info_t *gschedp, *prev_cschedp, *cschedp;
+	sched_info_t *schedp, *gschedp, *prev_cschedp, *cschedp;
         runq_info_t *prev_rqinfop, *rqinfop, *grqinfop, *prev_crqinfop, *crqinfop, *trqinfop;
 
-        int time;
-        int cpu, prev_cpu, migrated=0;
+        int time = 0;
+        int prev_cpu, migrated=0;
         int ldom_migrated=0;
         double reltime;
 
 	if ((old_state & RUNQ) == 0) return; 
 
-	/* if (debug) printf ("sched_rqhist_resume() - rec_ptr=0x%llx schedp=0x%llx old_state: 0x%x runq_time: %lld\n", rec_ptr, schedp, old_state, runq_time);  */
+	/* if (debug) printf ("sched_rqhist_resume() - PID=%d pidp=0x%llx schedp=0x%llx old_state: 0x%x runq_time: %lld\n", pidp->PID, pidp, schedp, old_state, runq_time);  */
 
-	cpu = rec_ptr->cpu;
+	schedp = GET_ADD_SCHEDP(&pidp->schedp);
 	if (schedp->cpu == -1) schedp->cpu = cpu; 
 	prev_cpu = schedp->cpu;
-	pidp = GET_PIDP(&globals->pid_hash, rec_ptr->next_pid);
+
 	cpuinfop = GET_CPUP(&globals->cpu_hash, cpu);
 	prev_cpuinfop = GET_CPUP(&globals->cpu_hash, prev_cpu);
         if (cpu != prev_cpu) {
@@ -685,28 +691,13 @@ sched_rqhist_resume(void *arg1, int old_state, sched_info_t *schedp, uint64 runq
                 migrated = 1;
         }
 
-	time = runq_time / 1000;
-	if (time > rqwait) {
-		PRINT_COMMON_FIELDS(rec_ptr);
-		PRINT_EVENT(rec_ptr->id);
-		printf (" RUNQ Delay! %6.3fms next_pid=%d prev_state=%s prio=%d",
-			MSECS(runq_time), 
-			rec_ptr->next_pid,
-			rec_ptr->prev_state ? "SLEEPING" : "PREEMPTED", 
-			rec_ptr->next_prio);
-		if (pidp->last_syscall_time && (pidp->last_syscall_id >= 0))  {
-			printf (" lsyscall=");
-			PRINT_SYSCALL(pidp, pidp->last_syscall_id); 
-		}
-		printf ("\n");
-	}
-
 /*
 ** ldom_migrated = 0 means no migration
 ** ldom_migrated = 1 means migrated in
 ** ldom_migrated = 2 means no migration
 ** ldom_migrated = 3 mean migrated out
 */
+        time = runq_time / 1000;
 
         if (perpid_stats && !kparse_flag) {
                 trqinfop = GET_ADD_RQINFOP(&schedp->rqinfop);
@@ -736,9 +727,32 @@ sched_rqhist_resume(void *arg1, int old_state, sched_info_t *schedp, uint64 runq
 		incr_runq_migr (grqinfop, migrated, ldom_migrated+2);
 	}
 
+}
+
+void
+check_rq_delay(sched_switch_t *rec_ptr, pid_info_t *pidp, uint64 runq_time)
+{
+	int time = 0;
+
+	time = runq_time / 1000;
+	if (time > rqwait) {
+		PRINT_COMMON_FIELDS(rec_ptr);
+		PRINT_EVENT(rec_ptr->id);
+		printf (" RUNQ Delay! %6.3fms next_pid=%d prev_state=%s prio=%d",
+			MSECS(runq_time), 
+			rec_ptr->next_pid,
+			rec_ptr->prev_state ? "SLEEPING" : "PREEMPTED", 
+			rec_ptr->next_prio);
+		if (pidp->last_syscall_time && (pidp->last_syscall_id >= 0))  {
+			printf (" lsyscall=");
+			PRINT_SYSCALL(pidp, pidp->last_syscall_id); 
+		}
+		printf ("\n");
+	}
+
 #if DEBUG
 	if (debug && (time > 2000)) {
-			printf ("sched_rqhist_resume() : delay > 2ms : ");
+			printf ("check_rq_delay() : delay > 2ms : ");
 			PRINT_COMMON_FIELDS(rec_ptr);
 			printf (" delay=%6.3fms next_pid=%d, lastcpu=%d resumed on cpu=%d", 
 				SECS(runq_time), rec_ptr->next_pid, prev_cpu, cpu);
@@ -891,16 +905,16 @@ sched_wakeup_func(void *a, void *v)
 		     * MR: I think this is a bug.   No need to increment RunQ stats on the wakeup.  We'll do it on the resume
 		     */
 		    if (runq_histogram)  {
-			    sched_rqhist_wakeup(rec_ptr, old_state, tschedp, 0);
+			    sched_rqhist_wakeup(rec_ptr->target_cpu, tpidp, old_state, 0);
 		    }
 
 		    update_sched_cpu(tschedp, rec_ptr->target_cpu);
 
-		    if (sleep_stats) update_slp_info(tpidp, &tpidp->slp_hash, old_state, new_state, delta, 0);
+		    if (sleep_stats) update_slp_info(tpidp, &tpidp->slp_hash, delta, 0);
 		    if (stktrc_stats) update_stktrc_info(&tpidp->last_stktrc[0], tpidp->last_stack_depth, &tpidp->stktrc_hash, delta, tpidp);
 		    if (global_stats) {
 			gschedp = GET_ADD_SCHEDP(&globals->schedp);
-			if (sleep_stats) update_slp_info(tpidp, &globals->slp_hash, old_state, new_state, delta, 0);
+			if (sleep_stats) update_slp_info(tpidp, &globals->slp_hash, delta, 0);
 		        if (stktrc_stats) update_stktrc_info(&tpidp->last_stktrc[0], tpidp->last_stack_depth, &globals->stktrc_hash, delta, NULL);
 			update_sched_state(gschedp, SWTCH, RUNQ, delta);
 		    }
@@ -915,7 +929,7 @@ sched_wakeup_func(void *a, void *v)
 	        	delta = update_sched_time(sstatp, rec_ptr->hrtime);
         		update_sched_state(sstatp, old_state, sstatp->state, delta);
 
-                        if (sleep_stats || scdetail_flag) update_slp_info(tpidp, &tsyscallp->slp_hash, old_state, RUNQ | SYS, delta, rec_ptr->pid);
+                        if (sleep_stats || scdetail_flag) update_slp_info(tpidp, &tsyscallp->slp_hash, delta, rec_ptr->pid);
 
 			/* update per-FD syscall statistics */
         		if (perfd_stats && (KS_ACTION(tpidp, tpidp->last_syscall_id).scallop & FILEOP)) {
@@ -930,7 +944,7 @@ sched_wakeup_func(void *a, void *v)
 
 		        		delta = update_sched_time(sstatp, rec_ptr->hrtime);
        		 			update_sched_state(sstatp, old_state, sstatp->state, delta);
-					if (sleep_stats || scdetail_flag) update_slp_info(tpidp, &tsyscallp->slp_hash, old_state, sstatp->state, delta, 0);
+					if (sleep_stats || scdetail_flag) update_slp_info(tpidp, &tsyscallp->slp_hash, delta, 0);
 
 					/* update globals syscall slpinfo */
 					if (global_stats && (sleep_stats || scdetail_flag)) {
@@ -952,13 +966,13 @@ sched_wakeup_func(void *a, void *v)
 							fdsyscallp = GET_SYSCALLP(&sdatap->syscallp, SYSCALL_KEY(tpidp->elf, 0ul, tpidp->last_syscall_id));
 							fd_sstatp = &fdsyscallp->sched_stats;
 							update_sched_state(fd_sstatp, old_state, sstatp->state, delta);
-							update_slp_info(tpidp, &fdsyscallp->slp_hash, old_state, sstatp->state, delta, 0);
+							update_slp_info(tpidp, &fdsyscallp->slp_hash, delta, 0);
 						} else {
 							fdatap = GET_FDATAP(&globals->fdata_hash, tfdinfop->dev, tfdinfop->node);
 							fdsyscallp = GET_SYSCALLP(&fdatap->syscallp, SYSCALL_KEY(tpidp->elf, 0ul, tpidp->last_syscall_id));
 							fd_sstatp = &fdsyscallp->sched_stats;
 							update_sched_state(fd_sstatp, old_state, sstatp->state, delta);
-							update_slp_info(tpidp, &fdsyscallp->slp_hash, old_state, sstatp->state, delta, 0);
+							update_slp_info(tpidp, &fdsyscallp->slp_hash, delta, 0);
 						}
 					}
 				}
@@ -976,7 +990,7 @@ sched_wakeup_func(void *a, void *v)
 			tstatp->C_uflt_sleep_cnt++;
 			old_state = tstatp->state;
 
-			if (sleep_stats) update_slp_info(tpidp, &tpidp->user_slp_hash, old_state, tstatp->state, delta, rec_ptr->pid);
+			if (sleep_stats) update_slp_info(tpidp, &tpidp->user_slp_hash, delta, rec_ptr->pid);
 		    }
 		    tpidp->last_stack_depth = 0;
 		}
@@ -990,11 +1004,13 @@ sched_wakeup_func(void *a, void *v)
         if (coop_stats && (rec_ptr->target_pid != rec_ptr->pid)) { 
 		tpidp = GET_PIDP(&globals->pid_hash, rec_ptr->target_pid);
                 if (schedp && rec_ptr->target_pid) {
-                        incr_setrq_stats((setrq_info_t ***)&schedp->setrq_tgt_hash, rec_ptr->target_pid);
+                        incr_setrq_stats((setrq_info_t ***)&schedp->setrq_tgt_hash, rec_ptr->target_pid, 
+					coop_old_state, coop_delta);
 			update_coop_stats(schedp, tschedp, pidp, tpidp, coop_delta, coop_old_state, WAKER);
                 }
                 if (tschedp)  {
-                        incr_setrq_stats((setrq_info_t ***)&tschedp->setrq_src_hash, rec_ptr->pid);
+                        incr_setrq_stats((setrq_info_t ***)&tschedp->setrq_src_hash, rec_ptr->pid,
+					coop_old_state, coop_delta);
 			update_coop_stats(schedp, tschedp, pidp, tpidp, coop_delta, coop_old_state, SLEEPER);
                 }
         }
@@ -1054,32 +1070,27 @@ sched_idle_timing_swtch(void *a)
 }
 
 void
-sched_HT_switch(void *a)
+HT_switch_stats(int cpu, uint64 hrtime, uint64 starttime, int pid, int next_pid)
 {
-        sched_switch_t *rec_ptr = (sched_switch_t *)a;
-	int cpu, lcpu1, lcpu2;
+	int lcpu1, lcpu2;
 	int i, j;
-	uint64 hrtime, timedelta;
+	uint64 timedelta;
         uint64 di_time, sys_max_di_time, pset_max_di_time, ldom_max_di_time;
         uint64 sys_max_di_usecs, pset_max_di_usecs, ldom_max_di_usecs;
         cpu_info_t *cpuinfop, *sibinfop, *tmp_cpu1infop, *tmp_cpu2infop;
         pcpu_info_t *pcpuinfop, *tmp_pcpuinfop;
 
-
-	cpu  = rec_ptr->cpu;
-	hrtime = rec_ptr->hrtime;
-		
 	cpuinfop = GET_CPUP(&globals->cpu_hash, cpu);
 	sibinfop = GET_CPUP(&globals->cpu_hash, cpuinfop->lcpu_sibling);
 	pcpuinfop = GET_PCPUP(&globals->pcpu_hash, cpuinfop->pcpu_idx);
 
 	if (pcpuinfop->last_time == 0) {
-		pcpuinfop->last_time = FILTER_START_TIME;
+		pcpuinfop->last_time = starttime;
 	}
 
 	timedelta = hrtime - pcpuinfop->last_time;
 
-	if (rec_ptr->pid) {
+	if (pid) {
 		/* LCPU was BUSY */
                 if (sibinfop->lcpu_state == LCPU_UNKNOWN) {
                         pcpuinfop->unknown_busy += timedelta;
@@ -1107,7 +1118,7 @@ sched_HT_switch(void *a)
 
 	pcpuinfop->last_time = hrtime;	
 
-        if (rec_ptr->next_pid && (sibinfop->lcpu_state == LCPU_BUSY)) {
+        if (next_pid && (sibinfop->lcpu_state == LCPU_BUSY)) {
             /* HT CPU Pair is becoming double busy */
             pcpuinfop->last_db_time = hrtime;
 
@@ -1169,20 +1180,28 @@ sched_HT_switch(void *a)
                         }
                 }
             }
-        } else if ((rec_ptr->next_pid == 0) && (sibinfop->lcpu_state == LCPU_IDLE)) {
+        } else if ((next_pid == 0) && (sibinfop->lcpu_state == LCPU_IDLE)) {
 		/* HT CPU Pair has just become double idle */
 		pcpuinfop->last_di_time = hrtime;
 	}
 	
 	/* update LCPU time and state*/
-	if (rec_ptr->next_pid) {
+	if (next_pid) {
 		cpuinfop->lcpu_state = LCPU_BUSY;
 	} else {
 		cpuinfop->lcpu_state = LCPU_IDLE;
 	}
 }
 
-static inline int		
+void
+sched_HT_switch(void *a)
+{
+        sched_switch_t *rec_ptr = (sched_switch_t *)a;
+
+	HT_switch_stats(rec_ptr->cpu, rec_ptr->hrtime, FILTER_START_TIME, rec_ptr->pid, rec_ptr->next_pid);
+}
+
+int		
 update_cpu_last_pid(int cpu, int pid)
 {
 	cpu_info_t *cpuinfop;
@@ -1678,16 +1697,18 @@ sched_switch_func(void *a, void *v)
 		update_sched_state(tstatp, old_state, tstatp->state, delta);
 		update_swon_msr_stats(rec_ptr, tstatp);
 
-		if (sleep_stats) update_slp_info(tpidp, &tpidp->slp_hash, old_state, tstatp->state, delta, 0);
+		if (sleep_stats) update_slp_info(tpidp, &tpidp->slp_hash, delta, 0);
 		if (global_stats) {
 			gschedp = GET_ADD_SCHEDP(&globals->schedp);
 			/* update_sched_state(&gschedp->sched_stats, old_state, tstatp->state, delta); */
-			if (sleep_stats) update_slp_info(tpidp, &globals->slp_hash, old_state, tstatp->state, delta, 0);
+			if (sleep_stats) update_slp_info(tpidp, &globals->slp_hash, delta, 0);
 		}
 
 		/* update runq stats */
 		if (runq_histogram)  {
-			sched_rqhist_resume(rec_ptr, old_state, tschedp, delta);
+			/* this must be called before update_sched_cpu() */
+			sched_rqhist_resume(rec_ptr->cpu, tpidp, old_state, delta);
+			check_rq_delay(rec_ptr, tpidp, delta);
 		}
 
 		update_sched_prio(tschedp, rec_ptr->next_prio);
@@ -1706,7 +1727,7 @@ sched_switch_func(void *a, void *v)
 	        	delta = update_sched_time(sstatp, rec_ptr->hrtime);
         		update_sched_state(sstatp, old_state, sstatp->state, delta);
 
-			if (sleep_stats || scdetail_flag) update_slp_info(tpidp, &tsyscallp->slp_hash, old_state, sstatp->state, delta, 0);
+			if (sleep_stats || scdetail_flag) update_slp_info(tpidp, &tsyscallp->slp_hash, delta, 0);
 
 			if (KS_ACTION(tpidp, tpidp->last_syscall_id).scallop & FILEOP) {
 				fd = tpidp->last_syscall_args[0];
@@ -1723,7 +1744,7 @@ sched_switch_func(void *a, void *v)
 					delta = update_sched_time(sstatp, rec_ptr->hrtime);
         				update_sched_state(sstatp, old_state, sstatp->state, delta);
 
-					if (sleep_stats || scdetail_flag) update_slp_info(tpidp, &tsyscallp->slp_hash, old_state, sstatp->state, delta, 0);
+					if (sleep_stats || scdetail_flag) update_slp_info(tpidp, &tsyscallp->slp_hash, delta, 0);
 
 					/* update globals syscall slpinfo */
 					if (global_stats && (sleep_stats || scdetail_flag)) {
@@ -1744,13 +1765,13 @@ sched_switch_func(void *a, void *v)
 							fdsyscallp = GET_SYSCALLP(&sdatap->syscallp, SYSCALL_KEY(tpidp->elf, 0ul, tpidp->last_syscall_id));
 							fd_sstatp = &fdsyscallp->sched_stats;
 							update_sched_state(fd_sstatp, old_state, sstatp->state, delta);
-							update_slp_info(tpidp, &fdsyscallp->slp_hash, old_state, sstatp->state, delta, 0);
+							update_slp_info(tpidp, &fdsyscallp->slp_hash, delta, 0);
 						} else {
 						 	fdatap = GET_FDATAP(&globals->fdata_hash, tfdinfop->dev, tfdinfop->node);
 							fdsyscallp = GET_SYSCALLP(&fdatap->syscallp, SYSCALL_KEY(tpidp->elf, 0ul, tpidp->last_syscall_id));
 							fd_sstatp = &fdsyscallp->sched_stats;
 							update_sched_state(fd_sstatp, old_state, sstatp->state, delta);
-							update_slp_info(tpidp, &fdsyscallp->slp_hash, old_state, sstatp->state, delta, 0);
+							update_slp_info(tpidp, &fdsyscallp->slp_hash, delta, 0);
 						}
 					}
 				}

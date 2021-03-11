@@ -46,19 +46,124 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "json.h"
 #include "futex.h"
 
+#include "Thread.h"
+#include "PerfInfo.h"
+#include "DiskIo.h"
+#include "winki_util.h"
+
+
 int pid_bufmiss_func(void *, void *);
 int pid_print_report(void *);
 
 int pid_ftrace_print_func(void *, void *);
 
+static inline void
+pid_winki_trace_funcs()
+{
+        int i;
+
+        for (i = 0; i < 65536; i++) {
+                ki_actions[i].id = i;
+                ki_actions[i].func = NULL;
+                ki_actions[i].execute = 0;
+        }
+
+        strcpy(&ki_actions[0].subsys[0], "EventTrace");
+        strcpy(&ki_actions[0].event[0], "Header");
+        ki_actions[0].func = winki_header_func;
+        ki_actions[0].execute = 1;
+
+        strcpy(&ki_actions[0x524].subsys[0], "Thread");
+        strcpy(&ki_actions[0x524].event[0], "Cswitch");
+        ki_actions[0x524].func=thread_cswitch_func;
+        ki_actions[0x524].execute = 1;
+
+        strcpy(&ki_actions[0x532].subsys[0], "Thread");
+        strcpy(&ki_actions[0x532].event[0], "ReadyThread");
+        ki_actions[0x532].func=thread_readythread_func;
+        ki_actions[0x532].execute = 1;
+
+        strcpy(&ki_actions[0x548].subsys[0], "Thread");
+        strcpy(&ki_actions[0x548].event[0], "SetName");
+        ki_actions[0x548].func=thread_setname_func;
+        ki_actions[0x548].execute = 1;
+
+        strcpy(&ki_actions[0xf33].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf33].event[0], "SysClEnter");
+        ki_actions[0xf33].func=perfinfo_sysclenter_func;
+        ki_actions[0xf33].execute = 1;
+
+        strcpy(&ki_actions[0xf34].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf34].event[0], "SysClExit");
+        ki_actions[0xf34].func=perfinfo_sysclexit_func;
+        ki_actions[0xf34].execute = 1;
+
+        strcpy(&ki_actions[0x10a].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10a].event[0], "Read");
+        ki_actions[0x10a].func=diskio_readwrite_func;
+        ki_actions[0x10a].execute = 1;
+
+        strcpy(&ki_actions[0x10b].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10b].event[0], "Write");
+        ki_actions[0x10b].func=diskio_readwrite_func;
+        ki_actions[0x10b].execute = 1;
+
+        strcpy(&ki_actions[0x10c].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10c].event[0], "ReadInit");
+        ki_actions[0x10c].func=diskio_init_func;
+        ki_actions[0x10c].execute = 1;
+
+        strcpy(&ki_actions[0x10d].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10d].event[0], "WriteInit");
+        ki_actions[0x10d].func=diskio_init_func;
+        ki_actions[0x10d].execute = 1;
+
+        strcpy(&ki_actions[0x10e].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10e].event[0], "FlushBuffers");
+        ki_actions[0x10e].func=diskio_flush_func;
+        ki_actions[0x10e].execute = 1;
+
+	strcpy(&ki_actions[0xf2e].subsys[0], "PerfInfo");
+	strcpy(&ki_actions[0xf2e].event[0], "SampleProfile");
+	ki_actions[0xf2e].func=perfinfo_profile_func;
+	ki_actions[0xf2e].execute = 1;
+
+	strcpy(&ki_actions[0xf32].subsys[0], "PerfInfo");
+	strcpy(&ki_actions[0xf32].event[0], "ISR-MSI");
+	ki_actions[0xf32].func=perfinfo_isr_func;
+	ki_actions[0xf32].execute = 1;
+
+	strcpy(&ki_actions[0xf42].subsys[0], "PerfInfo");
+	strcpy(&ki_actions[0xf42].event[0], "ThreadedDPC");
+	ki_actions[0xf42].func=perfinfo_dpc_func;
+	ki_actions[0xf42].execute = 1;
+
+	strcpy(&ki_actions[0xf43].subsys[0], "PerfInfo");
+	strcpy(&ki_actions[0xf43].event[0], "ISR");
+	ki_actions[0xf43].func=perfinfo_isr_func;
+	ki_actions[0xf43].execute = 1;
+
+	strcpy(&ki_actions[0xf44].subsys[0], "PerfInfo");
+	strcpy(&ki_actions[0xf44].event[0], "DPC");
+	ki_actions[0xf44].func=perfinfo_dpc_func;
+	ki_actions[0xf44].execute = 1;
+
+	strcpy(&ki_actions[0xf45].subsys[0], "PerfInfo");
+	strcpy(&ki_actions[0xf45].event[0], "TimeDPC");
+	ki_actions[0xf45].func=perfinfo_dpc_func;
+	ki_actions[0xf45].execute = 1;
+}
+
 /*
  ** The initialization function
  */ 
+
 void
 pid_init_func(void *v)
 {
 	int i;
 	int ret;
+	char piddir[8];
 	if (debug) printf ("pid_init_func()\n");
 
 	process_func =  NULL;
@@ -69,6 +174,25 @@ pid_init_func(void *v)
         alarm_func = pid_alarm_func;
 	filter_func = trace_filter_func;
 	report_func_arg  = filter_func_arg;
+
+	sprintf (piddir, "%sS", tlabel);
+	if (pidtree) {
+                ret = mkdir(piddir, 0777);
+                if (ret && (errno != EEXIST)) {
+	                fprintf (stderr, "Unable to make %s directory, errno %d\n", piddir, errno);
+                        fprintf (stderr, "  Continuing... it may alreaady exist \n");
+			CLEAR(PIDTREE_FLAG);
+                }
+        }
+
+	if (IS_WINKI) {
+		pid_winki_trace_funcs();
+
+		parse_systeminfo();
+		parse_cpulist();
+		parse_corelist();
+		return;
+	} 
 
 	/* go ahead and initialize the trace functions, but do not set the execute field */
 	ki_actions[TRACE_BLOCK_RQ_ISSUE].func = block_rq_issue_func;
@@ -171,16 +295,6 @@ pid_init_func(void *v)
 	parse_jstack();
 	if (objfile) load_elf(objfile, &objfile_preg);
 	if (IS_LIKI) foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, load_perpid_mapfile, NULL, 0, NULL);
-
-	if (pidtree) {
-                ret = mkdir("PIDS", 0777);
-                if (ret && (errno != EEXIST)) {
-	                fprintf (stderr, "Unable to make PIDS directory, errno %d\n", errno);
-                        fprintf (stderr, "  Continuing... it may alreaady exist \n");
-			CLEAR(PIDTREE_FLAG);
-                }
-        }
-
 
       /*
       ** For visualization kipid charts we create a VIS/<PID> directory to hold copy (link actually) 
@@ -434,7 +548,7 @@ print_syscall_info(void *arg1, void *arg2)
 
 	syscall_index = (SYSCALL_MODE(syscallp->lle.key) == ELF32) ? globals->syscall_index_32 : globals->syscall_index_64;
 	 
-	pid_printf (pidfile, "%s%-18s%8d %8.1f %11.6f %10.6f %10.6f %7d", tab,
+	pid_printf (pidfile, "%s%-30s%8d %8.1f %11.6f %10.6f %10.6f %7d", tab,
 		syscall_arg_list[syscall_index[SYSCALL_NO(syscallp->lle.key)]].name,
 		statp->count,
 		statp->count / secs,
@@ -453,7 +567,7 @@ print_syscall_info(void *arg1, void *arg2)
 
 	if (scdetail_flag) {
  		if (sstatp->T_sleep_time && sstatp->C_sleep_cnt) {
-			pid_printf (pidfile, "%s   %-15s%8d %8.1f %11.6f %10.6f\n", tab,
+			pid_printf (pidfile, "%s   %-27s%8d %8.1f %11.6f %10.6f\n", tab,
 				"SLEEP",
 				sstatp->C_sleep_cnt,
 				sstatp->C_sleep_cnt/secs,
@@ -461,7 +575,7 @@ print_syscall_info(void *arg1, void *arg2)
 				SECS(sstatp->T_sleep_time / sstatp->C_sleep_cnt));
 
 
-			if (IS_LIKI && syscallp->slp_hash) {
+			if ((IS_LIKI || IS_WINKI) && syscallp->slp_hash) {
 				lvararg.arg1 = pidfile;
 				lvararg.arg2 = NULL;
 				foreach_hash_entry_l((void **)syscallp->slp_hash,
@@ -472,12 +586,12 @@ print_syscall_info(void *arg1, void *arg2)
 		}
 	
 		if (sstatp->T_runq_time)
-			pid_printf (pidfile, "%s   %-15s                  %11.6f\n",  tab,
+			pid_printf (pidfile, "%s   %-27s                  %11.6f\n",  tab,
 				"RUNQ",
 				SECS(sstatp->T_runq_time));
 
 		if (sstatp->T_run_time &&  (sstatp->T_run_time != statp->total_time) )
-			pid_printf (pidfile, "%s   %-15s                  %11.6f\n",  tab,
+			pid_printf (pidfile, "%s   %-27s                  %11.6f\n",  tab,
 				"CPU",
 				SECS(sstatp->T_run_time));
 	}
@@ -486,7 +600,7 @@ print_syscall_info(void *arg1, void *arg2)
 		iovstatp = syscallp->iov_stats;
 		tot_cnt = iovstatp->rd_cnt + iovstatp->wr_cnt;
 		if (iovstatp->rd_cnt) 
-			pid_printf (pidfile, "%s   %-15s%8d %8.1f %11s %10.6f %10.6f %7s %7lld %8.1f\n", tab,
+			pid_printf (pidfile, "%s   %-27s%8d %8.1f %11s %10.6f %10.6f %7s %7lld %8.1f\n", tab,
 					"AIO Reads",
 					iovstatp->rd_cnt,
 					iovstatp->rd_cnt/secs,
@@ -497,7 +611,7 @@ print_syscall_info(void *arg1, void *arg2)
 					iovstatp->rd_bytes / iovstatp->rd_cnt,
 					(iovstatp->rd_bytes) / (secs * 1024.0));
 		if (iovstatp->wr_cnt) 
-			pid_printf (pidfile, "%s   %-15s%8d %8.1f %11s %10.6f %10.6f %7s %7lld %8.1f\n", tab,
+			pid_printf (pidfile, "%s   %-27s%8d %8.1f %11s %10.6f %10.6f %7s %7lld %8.1f\n", tab,
 					"AIO Writes",
 					iovstatp->wr_cnt,
 					iovstatp->wr_cnt/secs,
@@ -518,7 +632,7 @@ pid_syscall_report(pid_info_t *pidp, FILE *pidfile) {
 	if (pidp->syscall_cnt == 0) return;
 
 	pid_printf (pidfile, "\n%s******** SYSTEM CALL REPORT ********\n", tab);
-	pid_printf (pidfile, "%sSystem Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n", tab);
+	pid_printf (pidfile, "%sSystem Call Name                 Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n", tab);
 
 	vararg.arg1 = pidfile;
 	vararg.arg2 = pidp;
@@ -638,7 +752,7 @@ print_fd_info(void *arg1, void *arg2)
 
 	pid_printf (pidfile, "\n");
 	
-	pid_printf (pidfile, "%sSystem Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n", tab);
+	pid_printf (pidfile, "%sSystem Call Name                 Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n", tab);
 	foreach_hash_entry((void **)fdinfop->syscallp, SYSCALL_HASHSZ, print_syscall_info, syscall_sort_by_time, 0, vararg);
 	pid_printf (pidfile, "\n");
 
@@ -800,7 +914,9 @@ pid_report(void *arg1, void *v)
 	FILE *pidfile;
 
 	dockerp = pidp->dockerp;
-	if (pidp->num_tr_recs == 0) return 0;
+
+	/* we can remove the check for IS_WINKI when we do the trc stats */
+	if (!IS_WINKI && pidp->num_tr_recs == 0) return 0;
 	if ((pidp->PID == -1) || (pidp->PID==0)) return 0;
 
 	if (!check_filter(f->f_P_pid, (uint64)pidp->PID) &&
@@ -812,7 +928,7 @@ pid_report(void *arg1, void *v)
 	/* fprintf (stderr, "pid_report() PID=%d\n", pidp->PID); */
 
         if (pidtree) {
-                sprintf (pid_fname, "PIDS/%d", (int)pidp->PID);
+                sprintf (pid_fname, "%sS/%d", tlabel, (int)pidp->PID);
                 if ((pidfile = fopen(pid_fname, "w")) == NULL) {
                         fprintf (stderr, "Unable to open PID file %s, errno %d\n", pid_fname, errno);
                         fprintf (stderr, "  Continuing without PID output\n");
@@ -834,7 +950,7 @@ pid_report(void *arg1, void *v)
 		sprintf (vis_fname, "VIS/%d/pid_detail.html", (int)pidp->PID);
 		sprintf (vis_tl_fname, "VIS/%d/pid_timeline.html", (int)pidp->PID);
 		sprintf (wtree_fname, "VIS/%d/pid_wtree.html", (int)pidp->PID);
-                sprintf(sym_pid_fname, "../../PIDS/%d", (int)pidp->PID);
+                sprintf(sym_pid_fname, "../../%sS/%d", tlabel, (int)pidp->PID);
                 sprintf(sym_detail_fname, "VIS/%d/detail.txt", (int)pidp->PID);
 
 		ret = mkdir(vis_dir, 0777);
@@ -889,8 +1005,7 @@ pid_report(void *arg1, void *v)
 		pid_wtree_jsonfile = NULL;
         }
 
-
-	pid_printf (pidfile, "\nPID %d  %s", (int)pidp->PID, (char *)pidp->cmd);
+	pid_printf (pidfile, "\n%s %d  %s", tlabel, (int)pidp->PID, (char *)pidp->cmd);
 	if (pidp->hcmd) pid_printf (pidfile, "  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) pid_printf (pidfile, "  (%s)", pidp->thread_cmd);
 
@@ -903,7 +1018,7 @@ pid_report(void *arg1, void *v)
 	if (pidp->tgid && (pidp->tgid != pidp->PID)) {
 		tgidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
 		dockerp = tgidp->dockerp;
-		pid_printf (pidfile, "  TGID %d  %s\n", tgidp->PID, (char *)tgidp->cmd);
+		pid_printf (pidfile, "  %s %d  %s\n", plabel, tgidp->PID, (char *)tgidp->cmd);
 	}
 	if (pidp->nlwp > 1) {
 		pid_printf (pidfile, "    NLWP: %d\n", pidp->nlwp);
@@ -963,7 +1078,7 @@ pid_report(void *arg1, void *v)
 
 	csv_printf (pid_csvfile, "\n");
 
-	/* fprintf (stderr, "pid_report() PID=%d - completed\n", pidp->PID);  */
+	/* fprintf (stderr, "pid_report() %s=%d - completed\n", label, pidp->PID);  */
 
 	return 0;
 }
@@ -1029,10 +1144,6 @@ sid_report(void *v)
         return;
 }
 
-
-
-
-
 int
 pid_print_report(void *v)
 {
@@ -1043,6 +1154,8 @@ pid_print_report(void *v)
 		update_perpid_sched_stats();
 	}
 	if (IS_LIKI && !kiall_flag) foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, load_perpid_mapfile, NULL, 0, NULL);
+
+	update_perpid_sched_stats();
 
 	if (oracle) {
 		sid_report(v);
@@ -1060,7 +1173,7 @@ pid_print_report(void *v)
 
         	foreach_hash_entry_mt((void **)globals->pid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))pid_report,
-                           (int (*)()) pid_sort_by_trace_recs,
+                           (int (*)()) pid_sort_by_runtime,
                            0, v);
 
 		if (is_alive) {

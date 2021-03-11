@@ -209,14 +209,13 @@ calc_docker_totals(void *arg1, void *arg2)
 		/* Use TGID dockerp if its exists */
 		if (pidp->tgid) {
 			tgidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
-			if (tgidp->dockerp) { 
+			if (tgidp->dockerp) {
 				dockerp = tgidp->dockerp;
 			} else {
-                		dockerp = GET_DOCKERP(&globals->docker_hash, 0);
+				dockerp = GET_DOCKERP(&globals->docker_hash, 0);
 			}
 		} else {
-		
-			dockerp = GET_DOCKERP(&globals->docker_hash, 0);
+                	dockerp = GET_DOCKERP(&globals->docker_hash, 0);
 		}
 
                 dkpidp = GET_DKPIDP(&dockerp->dkpid_hash, pidp->PID);

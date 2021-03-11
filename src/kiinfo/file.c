@@ -35,11 +35,135 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "msgcat.h"
 #include "conv.h"
 
-int file_ftrace_print_func(void *, void *);
+#include "FileIo.h"
+#include "DiskIo.h"
+#include "SysConfig.h"
+#include "Process.h"
+#include "Image.h"
+#include "winki_util.h"
 
+int file_ftrace_print_func(void *, void *);
 /*
  ** The initialisation function
  */
+
+static inline void
+file_win_trace_funcs()
+{
+	int i;
+	
+	for (i = 0; i < 65536; i++) {
+		ki_actions[i].id = i;
+		ki_actions[i].func = NULL;
+		ki_actions[i].execute = 0;
+	}
+
+        strcpy(&ki_actions[0].subsys[0], "EventTrace");
+        strcpy(&ki_actions[0].event[0], "Header");
+        ki_actions[0].func = winki_header_func;
+        ki_actions[0].execute = 1;
+
+        strcpy(&ki_actions[0x400].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x400].event[0], "FileName");
+        ki_actions[0x400].func=print_fileio_name_func; 
+        strcpy(&ki_actions[0x420].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x420].event[0], "FileCreate");
+        ki_actions[0x420].func=print_fileio_name_func;
+
+        strcpy(&ki_actions[0x423].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x423].event[0], "FileDelete");
+        ki_actions[0x423].func=print_fileio_name_func;
+
+        strcpy(&ki_actions[0x424].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x424].event[0], "FileRundown");
+        ki_actions[0x424].func=print_fileio_name_func;
+
+        strcpy(&ki_actions[0x440].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x440].event[0], "Create");
+        ki_actions[0x440].func=print_fileio_create_func;
+
+        strcpy(&ki_actions[0x441].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x441].event[0], "Cleanup");
+        ki_actions[0x441].func=print_fileio_simpleop_func;
+
+        strcpy(&ki_actions[0x442].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x442].event[0], "Close");
+        ki_actions[0x442].func=print_fileio_simpleop_func;
+
+        strcpy(&ki_actions[0x443].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x443].event[0], "Read");
+        ki_actions[0x443].func=print_fileio_readwrite_func;
+
+        strcpy(&ki_actions[0x444].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x444].event[0], "Write");
+        ki_actions[0x444].func=print_fileio_readwrite_func;
+
+        strcpy(&ki_actions[0x445].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x445].event[0], "SetInfo");
+        ki_actions[0x445].func=print_fileio_info_func;
+
+        strcpy(&ki_actions[0x446].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x446].event[0], "Delete");
+        ki_actions[0x446].func=print_fileio_info_func;
+
+        strcpy(&ki_actions[0x447].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x447].event[0], "Rename");
+        ki_actions[0x447].func=print_fileio_info_func;
+
+        strcpy(&ki_actions[0x448].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x448].event[0], "DirEnum");
+        ki_actions[0x448].func=print_fileio_direnum_func;
+
+        strcpy(&ki_actions[0x449].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x449].event[0], "Flush");
+        ki_actions[0x449].func=print_fileio_simpleop_func;
+
+        strcpy(&ki_actions[0x44a].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x44a].event[0], "QueryInfo");
+        ki_actions[0x44a].func=print_fileio_info_func;
+
+        strcpy(&ki_actions[0x44b].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x44b].event[0], "FSControl");
+        ki_actions[0x44b].func=print_fileio_info_func;
+
+        strcpy(&ki_actions[0x44c].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x44c].event[0], "OperationEnd");
+        ki_actions[0x44c].func=print_fileio_opend_func;
+
+        strcpy(&ki_actions[0x44d].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x44d].event[0], "DirNotify");
+        ki_actions[0x44d].func=print_fileio_direnum_func;
+
+        strcpy(&ki_actions[0x44f].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x44f].event[0], "DeletePath");
+        ki_actions[0x44f].func=print_fileio_name_func;
+
+        strcpy(&ki_actions[0x450].subsys[0], "FileIo");
+        strcpy(&ki_actions[0x450].event[0], "RenamePath");
+        ki_actions[0x450].func=print_fileio_name_func;
+
+        strcpy(&ki_actions[0xb0f].subsys[0], "SysConfig");
+        strcpy(&ki_actions[0xb0f].event[0], "Services");
+        ki_actions[0xb0f].func=sysconfig_services_func;
+        ki_actions[0xb0f].execute = 1;
+
+        strcpy(&ki_actions[0x30a].subsys[0], "Process");
+        strcpy(&ki_actions[0x30a].event[0], "Load");
+        ki_actions[0x30a].func=process_load_func;
+        ki_actions[0x30a].execute = 1;
+
+        strcpy(&ki_actions[0x1403].subsys[0], "Image");
+        strcpy(&ki_actions[0x1403].event[0], "DCStart");
+        ki_actions[0x1403].func=image_dcstart_func;
+        ki_actions[0x1403].execute = 1;
+
+        strcpy(&ki_actions[0x1404].subsys[0], "Image");
+        strcpy(&ki_actions[0x1404].event[0], "DCEnd");
+        ki_actions[0x1404].func=image_dcstart_func;
+        ki_actions[0x1404].execute = 1;
+}
+
+
 void
 file_init_func(void *v)
 {
@@ -50,22 +174,35 @@ file_init_func(void *v)
 	filter_func = info_filter_func;   /* no filter func for kifile, use generic */
         bufmiss_func = pid_bufmiss_func;
 
-        /* go ahead and initialize the trace functions, but do not set the execute field */
-        ki_actions[TRACE_SYS_EXIT].func = sys_exit_func;
-        ki_actions[TRACE_SYS_ENTER].func = sys_enter_func;
-        ki_actions[TRACE_SCHED_SWITCH].func = sched_switch_func;
-        ki_actions[TRACE_SCHED_WAKEUP_NEW].func = sched_wakeup_func;
-        ki_actions[TRACE_SCHED_WAKEUP].func = sched_wakeup_func;
-        ki_actions[TRACE_CACHE_INSERT].func = cache_insert_func;
-        ki_actions[TRACE_CACHE_EVICT].func = cache_evict_func;
-        if (IS_LIKI_V4_PLUS)
-                ki_actions[TRACE_WALLTIME].func = trace_startup_func;
-        else
-                ki_actions[TRACE_WALLTIME].func = trace_walltime_func;
+	if (IS_WINKI) {
+		file_win_trace_funcs();
+	} else {
+	        /* go ahead and initialize the trace functions, but do not set the execute field */
+		ki_actions[TRACE_SYS_EXIT].func = sys_exit_func;
+		ki_actions[TRACE_SYS_ENTER].func = sys_enter_func;
+		ki_actions[TRACE_SCHED_SWITCH].func = sched_switch_func;
+		ki_actions[TRACE_SCHED_WAKEUP_NEW].func = sched_wakeup_func;
+		ki_actions[TRACE_SCHED_WAKEUP].func = sched_wakeup_func;
+		ki_actions[TRACE_CACHE_INSERT].func = cache_insert_func;
+		ki_actions[TRACE_CACHE_EVICT].func = cache_evict_func;
+		if (IS_LIKI_V4_PLUS)
+			ki_actions[TRACE_WALLTIME].func = trace_startup_func;
+		else
+			ki_actions[TRACE_WALLTIME].func = trace_walltime_func;
 
-	if (is_alive) {
-		if (set_events_options(filter_func_arg) == 0) {
-			/* if no filters, set up default tracing */
+		if (is_alive) {
+			if (set_events_options(filter_func_arg) == 0) {
+				/* if no filters, set up default tracing */
+				ki_actions[TRACE_SYS_EXIT].execute = 1;
+				ki_actions[TRACE_SYS_ENTER].execute = 1;
+				ki_actions[TRACE_WALLTIME].execute = 1;
+				if (scdetail_flag) {
+					ki_actions[TRACE_SCHED_SWITCH].execute = 1;
+					ki_actions[TRACE_SCHED_WAKEUP].execute = 1;
+					ki_actions[TRACE_SCHED_WAKEUP_NEW].execute = 1;
+				}
+			}
+		} else if (IS_LIKI) {
 			ki_actions[TRACE_SYS_EXIT].execute = 1;
 			ki_actions[TRACE_SYS_ENTER].execute = 1;
 			ki_actions[TRACE_WALLTIME].execute = 1;
@@ -74,34 +211,25 @@ file_init_func(void *v)
 				ki_actions[TRACE_SCHED_WAKEUP].execute = 1;
 				ki_actions[TRACE_SCHED_WAKEUP_NEW].execute = 1;
 			}
+			ki_actions[TRACE_CACHE_INSERT].execute = 1;
+			ki_actions[TRACE_CACHE_EVICT].execute = 1;
+		} else {
+			set_events_all(0);
+	       	 	ki_actions[TRACE_PRINT].func = file_ftrace_print_func;
+			ki_actions[TRACE_PRINT].execute = 1;
 		}
-	} else if (IS_LIKI) {
-		ki_actions[TRACE_SYS_EXIT].execute = 1;
-		ki_actions[TRACE_SYS_ENTER].execute = 1;
-		ki_actions[TRACE_WALLTIME].execute = 1;
-		if (scdetail_flag) {
-			ki_actions[TRACE_SCHED_SWITCH].execute = 1;
-			ki_actions[TRACE_SCHED_WAKEUP].execute = 1;
-			ki_actions[TRACE_SCHED_WAKEUP_NEW].execute = 1;
-		}
-		ki_actions[TRACE_CACHE_INSERT].execute = 1;
-		ki_actions[TRACE_CACHE_EVICT].execute = 1;
-	} else {
-		set_events_all(0);
-        	ki_actions[TRACE_PRINT].func = file_ftrace_print_func;
-        	ki_actions[TRACE_PRINT].execute = 1;
-	}
 
-        parse_kallsyms();
+	        parse_kallsyms();
+		if (timestamp) {
+			parse_lsof();
+			parse_pself();
+			parse_edus();
+			parse_jstack();
+		}
+	}
 	if (timestamp) {
-        	parse_lsof();
-        	parse_pself();
-        	parse_edus();
-		parse_jstack();
-
-		file_csvfile = open_csv_file("kifile", 1);
+			file_csvfile = open_csv_file("kifile", 1);
 	}
-
 }
 
 int
@@ -205,7 +333,7 @@ int file_print_fdata(void *arg1, void *arg2)
         lineno++;
 
         if (scallflagp && *scallflagp) {
-                printf("%sSystem Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n", tab);
+                printf("%sSystem Call Name                 Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\n", tab);
 			vararg.arg1 = NULL;
 			vararg.arg2 = NULL;
                         foreach_hash_entry((void **)fdatap->syscallp, SYSCALL_HASHSZ,

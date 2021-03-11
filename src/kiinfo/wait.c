@@ -33,10 +33,55 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "html.h"
 #include "conv.h"
 
+#include "Thread.h"
+#include "PerfInfo.h"
+#include "winki_util.h"
 
 int wait_dummy_func(void *, void *);
 void wait_init_func(void *);
 int wait_ftrace_print_func(void *, void *);
+
+static inline void
+wait_winki_trace_funcs()
+{
+	int i;
+
+	for (i = 0; i < 65536; i++) {
+		ki_actions[i].id = i;
+		ki_actions[i].func = NULL;
+		ki_actions[i].execute = 0;
+	}
+
+        strcpy(&ki_actions[0].subsys[0], "EventTrace");
+        strcpy(&ki_actions[0].event[0], "Header");
+        ki_actions[0].func = winki_header_func;
+        ki_actions[0].execute = 1;
+
+        strcpy(&ki_actions[0x524].subsys[0], "Thread");
+        strcpy(&ki_actions[0x524].event[0], "Cswitch");
+        ki_actions[0x524].func=thread_cswitch_func;
+        ki_actions[0x524].execute = 1;
+
+        strcpy(&ki_actions[0x532].subsys[0], "Thread");
+        strcpy(&ki_actions[0x532].event[0], "ReadyThread");
+        ki_actions[0x532].func=thread_readythread_func;
+        ki_actions[0x532].execute = 1;
+
+        strcpy(&ki_actions[0x548].subsys[0], "Thread");
+        strcpy(&ki_actions[0x548].event[0], "SetName");
+        ki_actions[0x548].func=thread_setname_func;
+        ki_actions[0x548].execute = 1;
+
+        strcpy(&ki_actions[0xf33].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf33].event[0], "SysClEnter");
+        ki_actions[0xf33].func=perfinfo_sysclenter_func;
+        ki_actions[0xf33].execute = 1;
+
+        strcpy(&ki_actions[0xf34].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf34].event[0], "SysClExit");
+        ki_actions[0xf34].func=perfinfo_sysclexit_func;
+        ki_actions[0xf34].execute = 1;
+}
 
 /*
  ** The initialisation function
@@ -48,17 +93,24 @@ wait_init_func(void *v)
 
 	if (debug) printf ("wait_init_func()\n");
 
-        if (!IS_LIKI) {
-                printf ("No switch functions or stack traces captured\n\n");
-                _exit(0);
-        }
-
         process_func = NULL;
         print_func = wait_print_func;
         report_func = wait_report_func;
         bufmiss_func = pid_bufmiss_func;
         bufmiss_func =  NULL;
 	filter_func = info_filter_func;   /* no filter func for kiwait, use generic */
+
+	if (IS_WINKI) {
+		wait_winki_trace_funcs();
+
+		parse_systeminfo();	
+		parse_cpulist();
+		parse_corelist();
+		return;
+	} else if (!IS_LIKI) {
+                printf ("No switch functions or stack traces captured\n\n");
+                _exit(0);
+        }
 
         /* go ahead and initialize the trace functions, but do not set the execute field */
 	ki_actions[TRACE_SYS_EXIT].func = sys_exit_func;
@@ -217,6 +269,7 @@ print_global_swtch_stktraces()
 	gschedp = (sched_info_t *)find_add_info((void **)&globals->schedp, sizeof(sched_info_t));
 
 	print_stktrc_args.schedp = gschedp;
+	print_stktrc_args.pidp = NULL;
 	print_stktrc_args.warnflag = 0;
 
 	vararg.arg1 = NULL;
@@ -256,8 +309,8 @@ print_pid_swtch_summary(void *arg1, void *arg2)
 	if (pidp->thread_cmd) printf("  (%s)", pidp->thread_cmd);
 	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 
-	if (cluster_flag) { DSPACE; SERVER_URL_FIELD_BRACKETS(globals) };
-	NL; 
+	if (cluster_flag) { DSPACE; SERVER_URL_FIELD_BRACKETS(globals) }
+        NL;
 
         return 0;
 }
@@ -293,6 +346,7 @@ int
 print_pid_sleeps (void *arg1, void *arg2)
 {
 	pid_info_t *pidp = (pid_info_t *)arg1;
+	pid_info_t *tgidp;
         sched_info_t *schedp;
         sched_stats_t *statp;
 
@@ -304,7 +358,7 @@ print_pid_sleeps (void *arg1, void *arg2)
 
         printf ("---------------------------------------------------\n");
 
-        printf ("PID %ld  %s",
+        printf ("%s %ld  %s", tlabel,
                         pidp->PID,
                         pidp->cmd);
 
@@ -312,6 +366,13 @@ print_pid_sleeps (void *arg1, void *arg2)
 	if (pidp->thread_cmd) printf("  (%s)", pidp->thread_cmd);
 	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 	printf ("\n");
+
+	if (pidp->tgid) { 
+		tgidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
+        	printf ("  %s %ld  %s\n", plabel,
+                        tgidp->PID,
+                        tgidp->cmd);
+	}
 
         printf ("%sRunTime    : %9.6f  SysTime   : %9.6f   UserTime   : %9.6f\n",  tab,
                 SECS(statp->T_run_time),
@@ -343,7 +404,7 @@ print_pid_sleeps (void *arg1, void *arg2)
 void
 print_perpid_sleeps()
 {
-        printf ("\n********* PER-PID SCHEDULER ACTIVITY REPORTS ********\n");
+        printf ("\n********* PER-%s SCHEDULER ACTIVITY REPORTS ********\n", tlabel);
         foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_pid_sleeps,
                                    pid_sort_by_sleep_cnt,
@@ -351,7 +412,7 @@ print_perpid_sleeps()
 	printf ("\n");
 
 	if (wait_csvfile) {
-        	csv_printf (wait_csvfile, "PID,Command,TotSlps,TotSlpTime,Function,Count,%%Count,SlpTime,%%SlpTime,%%TotTime,AvgSlpTime,MaxSlpTime\n");
+        	csv_printf (wait_csvfile, "%s,Command,TotSlps,TotSlpTime,Function,Count,%%Count,SlpTime,%%SlpTime,%%TotTime,AvgSlpTime,MaxSlpTime\n", tlabel);
         	foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_sleeps_csv, pid_sort_by_sleep_cnt, 0, NULL);
 	}
 }
@@ -368,8 +429,8 @@ wait_print_report(void *v)
         sleep_report(globals->slp_hash, (sched_info_t *)globals->schedp, slp_sort_by_count, NULL);
 	print_global_swtch_stktraces();
 	if (npid)  {
+		update_perpid_sched_stats();
 		if (is_alive) {
-			update_perpid_sched_stats();
 			foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, get_command, NULL, 0, NULL);	
 		}
 		if (IS_LIKI) foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, load_perpid_mapfile, NULL, 0, NULL);

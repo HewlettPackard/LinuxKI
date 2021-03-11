@@ -35,6 +35,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "json.h"
 #include "conv.h"
 
+#include "winki.h"
+#include "SysConfig.h"
+#include "Image.h"
+#include "Pdb.h"
+#include "PerfInfo.h"
+#include "Thread.h"
+#include "winki_util.h"
+
 extern int pc_sleep_on_page;
 extern int pc_migration_entry_wait;
 extern int pc_msleep;
@@ -55,6 +63,107 @@ int runq_ftrace_print_func(void *, void *);
 #define SCHED_SOFTIRQ 7
 #define RCU_SOFTIRQ 9
 
+static inline void
+runq_winki_trace_funcs()
+{
+	int i;
+
+        for (i = 0; i < 65536; i++) {
+                ki_actions[i].id = i;
+                ki_actions[i].func = NULL;
+                ki_actions[i].execute = 0;
+        }
+
+        strcpy(&ki_actions[0].subsys[0], "EventTrace");
+        strcpy(&ki_actions[0].event[0], "Header");
+        ki_actions[0].func = winki_header_func;
+        ki_actions[0].execute = 1;
+
+        strcpy(&ki_actions[0x501].subsys[0], "Thread");
+        strcpy(&ki_actions[0x501].event[0], "Start");
+        ki_actions[0x501].func=print_thread_group1_func;
+        ki_actions[0x501].execute = 0;
+
+        strcpy(&ki_actions[0x502].subsys[0], "Thread");
+        strcpy(&ki_actions[0x502].event[0], "End");
+        ki_actions[0x502].func=print_thread_group1_func;
+        ki_actions[0x502].execute = 0;
+
+        strcpy(&ki_actions[0x503].subsys[0], "Thread");
+        strcpy(&ki_actions[0x503].event[0], "DCStart");
+        ki_actions[0x503].func=print_thread_group1_func;
+        ki_actions[0x503].execute = 0;
+
+        strcpy(&ki_actions[0x504].subsys[0], "Thread");
+        strcpy(&ki_actions[0x504].event[0], "DCEnd");
+        ki_actions[0x504].func=print_thread_group1_func;
+        ki_actions[0x504].execute = 0;
+
+        strcpy(&ki_actions[0x524].subsys[0], "Thread");
+        strcpy(&ki_actions[0x524].event[0], "Cswitch");
+        ki_actions[0x524].func=thread_cswitch_func;
+        ki_actions[0x524].execute = 1;
+
+        strcpy(&ki_actions[0x532].subsys[0], "Thread");
+        strcpy(&ki_actions[0x532].event[0], "ReadyThread");
+        ki_actions[0x532].func=thread_readythread_func;
+        ki_actions[0x532].execute = 1;
+
+        strcpy(&ki_actions[0x542].subsys[0], "Thread");
+        strcpy(&ki_actions[0x542].event[0], "AutoBoostSetFloor");
+        ki_actions[0x542].func=print_thread_autoboost_func;
+        ki_actions[0x542].execute = 0;
+
+        strcpy(&ki_actions[0x543].subsys[0], "Thread");
+        strcpy(&ki_actions[0x543].event[0], "AutoBoostClearFloor");
+        ki_actions[0x543].func=print_thread_autoboost_func;
+        ki_actions[0x543].execute = 0;
+
+        strcpy(&ki_actions[0x544].subsys[0], "Thread");
+        strcpy(&ki_actions[0x544].event[0], "AutoBoostEntryExhaustion");
+        ki_actions[0x544].func=print_thread_autoboost_func;
+        ki_actions[0x544].execute = 0;
+
+        strcpy(&ki_actions[0x548].subsys[0], "Thread");
+        strcpy(&ki_actions[0x548].event[0], "SetName");
+        ki_actions[0x548].func=thread_setname_func;
+        ki_actions[0x548].execute = 1;
+
+        strcpy(&ki_actions[0xf33].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf33].event[0], "SysClEnter");
+        ki_actions[0xf33].func=perfinfo_sysclenter_func;
+        ki_actions[0xf33].execute = 1;
+
+        strcpy(&ki_actions[0xf34].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf34].event[0], "SysClExit");
+        ki_actions[0xf34].func=perfinfo_sysclexit_func;
+        ki_actions[0xf34].execute = 1;
+
+        strcpy(&ki_actions[0xf32].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf32].event[0], "ISR-MSI");
+        ki_actions[0xf32].func=perfinfo_isr_func;
+        ki_actions[0xf32].execute = 1;
+
+        strcpy(&ki_actions[0xf42].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf42].event[0], "ThreadedDPC");
+        ki_actions[0xf42].func=perfinfo_dpc_func;
+        ki_actions[0xf42].execute = 1;
+
+        strcpy(&ki_actions[0xf43].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf43].event[0], "ISR");
+        ki_actions[0xf43].func=perfinfo_isr_func;
+        ki_actions[0xf43].execute = 1;
+
+        strcpy(&ki_actions[0xf44].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf44].event[0], "DPC");
+        ki_actions[0xf44].func=perfinfo_dpc_func;
+        ki_actions[0xf44].execute = 1;
+
+        strcpy(&ki_actions[0xf45].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf45].event[0], "TimeDPC");
+        ki_actions[0xf45].func=perfinfo_dpc_func;
+        ki_actions[0xf45].execute = 1;
+}
 
 /*
 ** The initialization function
@@ -73,76 +182,84 @@ runq_init_func(void *v)
         alarm_func = runq_alarm_func;
         filter_func = info_filter_func;   /* no filter func for kirunq, use generic */
 
-        ki_actions[TRACE_SYS_EXIT].func = sys_exit_func;
-        ki_actions[TRACE_SYS_ENTER].func = sys_enter_func;
-        ki_actions[TRACE_SCHED_SWITCH].func = sched_switch_func;
-        ki_actions[TRACE_SCHED_WAKEUP_NEW].func = sched_wakeup_func;
-        ki_actions[TRACE_SCHED_WAKEUP].func = sched_wakeup_func;	
-	ki_actions[TRACE_POWER_START].func = power_start_func;
-	ki_actions[TRACE_POWER_END].func = power_end_func;
-	ki_actions[TRACE_POWER_FREQ].func = power_freq_func;
-	ki_actions[TRACE_CPU_FREQ].func = cpu_freq_func;
-	ki_actions[TRACE_CPU_IDLE].func = cpu_idle_func;
-	ki_actions[TRACE_IRQ_HANDLER_ENTRY].func = irq_handler_entry_func;
-	ki_actions[TRACE_IRQ_HANDLER_EXIT].func = irq_handler_exit_func;
-	ki_actions[TRACE_SOFTIRQ_ENTRY].func = softirq_entry_func;
-	ki_actions[TRACE_SOFTIRQ_EXIT].func = softirq_exit_func;
-	if (IS_LIKI_V4_PLUS)
-                ki_actions[TRACE_WALLTIME].func = trace_startup_func;
-        else
-                ki_actions[TRACE_WALLTIME].func = trace_walltime_func;
+	if (IS_WINKI) {
+		runq_winki_trace_funcs();
 
-	if (is_alive) {
-                ki_actions[TRACE_WALLTIME].execute = 1;
-		if (set_events_options(filter_func_arg) == 0) {
+		parse_systeminfo();
+		parse_cpulist();
+		parse_corelist();
+	} else {
+		ki_actions[TRACE_SYS_EXIT].func = sys_exit_func;
+		ki_actions[TRACE_SYS_ENTER].func = sys_enter_func;
+        	ki_actions[TRACE_SCHED_SWITCH].func = sched_switch_func;
+		ki_actions[TRACE_SCHED_WAKEUP_NEW].func = sched_wakeup_func;
+		ki_actions[TRACE_SCHED_WAKEUP].func = sched_wakeup_func;	
+		ki_actions[TRACE_POWER_START].func = power_start_func;
+		ki_actions[TRACE_POWER_END].func = power_end_func;
+		ki_actions[TRACE_POWER_FREQ].func = power_freq_func;
+		ki_actions[TRACE_CPU_FREQ].func = cpu_freq_func;
+		ki_actions[TRACE_CPU_IDLE].func = cpu_idle_func;
+		ki_actions[TRACE_IRQ_HANDLER_ENTRY].func = irq_handler_entry_func;
+		ki_actions[TRACE_IRQ_HANDLER_EXIT].func = irq_handler_exit_func;
+		ki_actions[TRACE_SOFTIRQ_ENTRY].func = softirq_entry_func;
+		ki_actions[TRACE_SOFTIRQ_EXIT].func = softirq_exit_func;
+		if (IS_LIKI_V4_PLUS)
+			ki_actions[TRACE_WALLTIME].func = trace_startup_func;
+		else
+			ki_actions[TRACE_WALLTIME].func = trace_walltime_func;
+
+		if (is_alive) {
+			ki_actions[TRACE_WALLTIME].execute = 1;
+			if (set_events_options(filter_func_arg) == 0) {
+				ki_actions[TRACE_SYS_EXIT].execute = 1;
+                		ki_actions[TRACE_SYS_ENTER].execute = 1;
+                		ki_actions[TRACE_SCHED_SWITCH].execute = 1;
+                		ki_actions[TRACE_SCHED_WAKEUP_NEW].execute = 1;
+                		ki_actions[TRACE_SCHED_WAKEUP].execute = 1;
+				ki_actions[TRACE_POWER_FREQ].execute = 1;
+				ki_actions[TRACE_IRQ_HANDLER_ENTRY].execute = 1;
+				ki_actions[TRACE_IRQ_HANDLER_EXIT].execute = 1;
+				ki_actions[TRACE_SOFTIRQ_ENTRY].execute = 1;
+				ki_actions[TRACE_SOFTIRQ_EXIT].execute = 1;
+			}
+		} else if (IS_LIKI) {
                 	ki_actions[TRACE_SYS_EXIT].execute = 1;
                 	ki_actions[TRACE_SYS_ENTER].execute = 1;
                 	ki_actions[TRACE_SCHED_SWITCH].execute = 1;
                 	ki_actions[TRACE_SCHED_WAKEUP_NEW].execute = 1;
                 	ki_actions[TRACE_SCHED_WAKEUP].execute = 1;
+			ki_actions[TRACE_POWER_START].execute = 1;
+			ki_actions[TRACE_POWER_END].execute = 1;
 			ki_actions[TRACE_POWER_FREQ].execute = 1;
 			ki_actions[TRACE_IRQ_HANDLER_ENTRY].execute = 1;
 			ki_actions[TRACE_IRQ_HANDLER_EXIT].execute = 1;
 			ki_actions[TRACE_SOFTIRQ_ENTRY].execute = 1;
 			ki_actions[TRACE_SOFTIRQ_EXIT].execute = 1;
+                	ki_actions[TRACE_WALLTIME].execute = 1;
+		} else {
+			set_events_all(0);
+        		ki_actions[TRACE_PRINT].func = runq_ftrace_print_func;
+        		ki_actions[TRACE_PRINT].execute = 1;
 		}
-	} else if (IS_LIKI) {
-                ki_actions[TRACE_SYS_EXIT].execute = 1;
-                ki_actions[TRACE_SYS_ENTER].execute = 1;
-                ki_actions[TRACE_SCHED_SWITCH].execute = 1;
-                ki_actions[TRACE_SCHED_WAKEUP_NEW].execute = 1;
-                ki_actions[TRACE_SCHED_WAKEUP].execute = 1;
-		ki_actions[TRACE_POWER_START].execute = 1;
-		ki_actions[TRACE_POWER_END].execute = 1;
-		ki_actions[TRACE_POWER_FREQ].execute = 1;
-		ki_actions[TRACE_IRQ_HANDLER_ENTRY].execute = 1;
-		ki_actions[TRACE_IRQ_HANDLER_EXIT].execute = 1;
-		ki_actions[TRACE_SOFTIRQ_ENTRY].execute = 1;
-		ki_actions[TRACE_SOFTIRQ_EXIT].execute = 1;
-                ki_actions[TRACE_WALLTIME].execute = 1;
-	} else {
-		set_events_all(0);
-        	ki_actions[TRACE_PRINT].func = runq_ftrace_print_func;
-        	ki_actions[TRACE_PRINT].execute = 1;
-	}
 
-	parse_cpuinfo();
-	parse_scavuln(0);
-	if (is_alive) parse_cpumaps();
+		parse_cpuinfo();
+		parse_scavuln(0);
+		if (is_alive) parse_cpumaps();
 
-	/* clear the system call specific actions as they aren't needed with kirunq */
-	/* may need to revist for fork/clone/exec calls */
-	for (i=0; i < KI_MAXSYSCALLS; i++) {
-		ks_actions[i].execute = 0;
-	}
+		/* clear the system call specific actions as they aren't needed with kirunq */
+		/* may need to revist for fork/clone/exec calls */
+		for (i=0; i < KI_MAXSYSCALLS; i++) {
+			ks_actions[i].execute = 0;
+		}
 
-	if (timestamp) {
-		parse_mpsched();
-		parse_pself();
-		parse_edus();
-		parse_jstack();
+		if (timestamp) {
+			parse_mpsched();
+			parse_pself();
+			parse_edus();
+			parse_jstack();
 
-		runq_csvfile = open_csv_file("kirunq", 1);
+			runq_csvfile = open_csv_file("kirunq", 1);
+		}
 	}
 }
 
@@ -238,7 +355,7 @@ print_perldom_stats(uint64 *warnflagp)
 	if (gstatp->T_irq_time) BOLD ("  hardirq_sys hardirq_user hardirq idle  softirq_sys softirq_user softirq_idle");
 	if (msr_flag) BOLD ("  LLC_hit%%    CPI   Avg_MHz  SMI_cnt");
 	/* if (msr_flag) BOLD ("        MIPS"); */
-	NL; 
+	NL;
 
         for (i=0;i<MAXLDOMS;i++) {
                 if (ldominfop = FIND_LDOMP(globals->ldom_hash, i)) {
@@ -328,7 +445,7 @@ print_percpu_runq_histogram()
         sched_info_t *schedp;
         runq_info_t *rqinfop;
 
-        printf(" cpu       <5    <10    <20    <50   <100   <500  <1000  <2000 <10000 <20000 >20000 \n");
+        printf(" cpu       <5    <10    <20    <50   <100   <500  <1000  <2000 <10000 <20000 >20000 "); NL;
         for (i=0;i<MAXCPUS;i++) {
                 if ((cpuinfop = FIND_CPUP(globals->cpu_hash, i)) &&
                     (schedp = (sched_info_t *)cpuinfop->schedp) &&
@@ -338,7 +455,7 @@ print_percpu_runq_histogram()
                                 ldrq[cpuinfop->ldom].rqhist[j] += rqinfop->rqhist[j];
                                 printf(" %6d", rqinfop->rqhist[j]);
                         }
-			NL;
+                        NL;
                 }
 	}
 }
@@ -401,7 +518,7 @@ print_percpu_runq_stats()
         }
         total_avg = ((tt * 1.0)/tc);
 	NL;
-        printf("TOTAL_AVG = %-9.1f usecs runq latency per context switch",total_avg); NL;
+        printf("TOTAL_AVG = %-9.1f usecs runq latency per context switch ",total_avg); NL;
         /* fprintf (stderr, "\nTOTAL_AVG = %-9.1f usecs runq latency per context switch \n",total_avg); */
 }
 
@@ -652,7 +769,7 @@ print_percpu_stats(uint64 *warnflagp)
 			}
 			*/
 
-			NL; 
+			NL;
                 }
             }
 
@@ -679,13 +796,13 @@ print_percpu_stats(uint64 *warnflagp)
 						msrptr[REF_CLK_FREQ] ? globals->clk_mhz * (msrptr[ACT_CLK_FREQ]*1.0 / msrptr[REF_CLK_FREQ]) : 0.0,
                      				gstatp->msr_last[SMI_CNT]);
 	    }
-	    /*
-	    	if (msr_flag) {
-		    printf ("   %9.2f",  (msrptr[RET_INSTR]/1000000)/globals->total_secs);
-	    	}
-	    */
+	/*
+	    if (msr_flag) {
+		printf ("   %9.2f",  (msrptr[RET_INSTR]/1000000)/globals->total_secs);
+	    }
+	*/
 
-	    NL; NLt; 
+	    NL; NLt
 	}
 
 	BOLD(" cpu node     Total Busy          sys          usr         idle");
@@ -839,9 +956,9 @@ print_HT_report()
 			NL;
                 }
             }
-	    NL;
 	}
 
+	NLt;
         BOLD("%s     PCPU     double idle   lcpu1 busy   lcpu2 busy  double busy", tab); NL;
         for (i = 0; i < MAXCPUS; i++) {
                 pcpuinfop = FIND_PCPUP(globals->pcpu_hash, i);
@@ -896,14 +1013,14 @@ print_HT_DBDI_histogram()
                         for (j = 0; j < IDLE_TIME_NBUCKETS; j++) {
                                 printf(" %6lld", pcpuinfop->sys_DBDI_hist[j]);
                         }
-			NL;
+                        NL;
                 }
         }
 
 	NL;
-        printf("%sLocality-Wide Double-Busy Double-Idle CPU Time Histogram\n", tab); NL;
+        printf("%sLocality-Wide Double-Busy Double-Idle CPU Time Histogram", tab); NL;
         printf("%sIdle time in Usecs", tab); NL;
-        printf("%s     PCPU  NODE      <10    <20    <50    <100   <250   <500   <750  <1000  <1250  <1500  <2000  <3000  <5000 <10000 <20000 >20000\n", tab);
+        printf("%s     PCPU  NODE      <10    <20    <50    <100   <250   <500   <750  <1000  <1250  <1500  <2000  <3000  <5000 <10000 <20000 >20000", tab); NL;
         for (i = 0; i < MAXCPUS; i++) {
                 pcpuinfop = FIND_PCPUP(globals->pcpu_hash, i);
                 if (pcpuinfop) {
@@ -1020,7 +1137,7 @@ find_coop_ss_slpfuncs(void *arg1,  void *arg2)
                 }
                 else
                         pid_printf (pidfile, "%12s","unknown");
-                pid_printf (pidfile, "\n");
+                PNL;
         }
 }
 
@@ -1129,7 +1246,7 @@ find_coop_ww_args(void *arg1, void *arg2)
                 }
                 else
                         pid_printf (pidfile, "%12s","unknown");
-                pid_printf (pidfile, "\n");
+               PNL;
         }
 }
 
@@ -1350,7 +1467,7 @@ sched_print_setrq_pids(void *arg1, void *arg2)
 		if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 	        coopinfop->waker_is_ICS = 0;
         }
-        pid_printf (pidfile, "\n");
+        PNL;
 
 	foreach_hash_entry((void **)setrq_infop->coop_scall_hash, SYSCALL_HASHSZ,
 					coopinfop->which == SLEEPER ? find_coop_sw_scall : find_coop_ws_scall,
@@ -1358,7 +1475,7 @@ sched_print_setrq_pids(void *arg1, void *arg2)
 					npid, (void *)vararg);
 	
 	if (coop_detail_enabled)
-        	pid_printf (pidfile, "\n");
+        	PNL;
 	if (is_alive)
         	setrq_infop->cnt = 0;
         return 0;
@@ -1375,12 +1492,13 @@ print_scd_slp_info(void *arg1,void *arg2)
 
         pid = scdwinfop->lle.key;
 
-        pid_printf(pidfile, "%s            %6d  %6d          %11.6f %10.6f %10.6f  \n", tab,
+        pid_printf(pidfile, "%s            %6d  %6d          %11.6f %10.6f %10.6f  ", tab,
                     pid,
                     scdwinfop->count,
                     SECS(scdwinfop->sleep_time),
                     SECS((scdwinfop->sleep_time*1.0) / scdwinfop->count),
                     SECS(scdwinfop->max_time*1.0));
+	PNL;
 
         return 0;
 }
@@ -1393,13 +1511,24 @@ print_slp_info(void *arg1, void *arg2)
 	FILE *pidfile = (FILE *)vararg->arg1;
 	sched_stats_t *statsp = (sched_stats_t *)vararg->arg2;
 	sched_info_t *gschedp;
-	uint64 idx;
+	uint64 idx, symaddr;
+	pid_info_t *pidp;
+	char *sym = NULL, *symfile = NULL;
+	vtxt_preg_t *pregp = NULL;
 
 	if (slpinfop->count == 0) return 0;
 	gschedp = globals->schedp;
 
-	idx = slpinfop->lle.key;
-	if (idx > globals->nsyms-1) idx = UNKNOWN_SYMIDX;
+	if (IS_WINKI) {
+		/* We should be in kernel space here */
+                if (pregp = get_win_pregp(slpinfop->lle.key, NULL)) {
+                        sym = win_symlookup(pregp, slpinfop->lle.key, &symaddr);
+                        symfile = pregp->filename;
+                }
+        } else {
+		idx = slpinfop->lle.key;
+		if (idx > globals->nsyms-1) idx = UNKNOWN_SYMIDX;
+	}
 
 	if (gschedp && statsp == &gschedp->sched_stats) {
             pid_printf(pidfile, "%s%8d %6.2f%% %10.4f %6.2f%% %10.3f %10.3f  %s", tab, 
@@ -1409,7 +1538,7 @@ print_slp_info(void *arg1, void *arg2)
                     (slpinfop->sleep_time *100.0) / statsp->T_sleep_time,
                     MSECS(slpinfop->sleep_time / slpinfop->count),
                     MSECS(slpinfop->max_time),
-		    idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr);
+		    IS_WINKI ? (sym ? sym : (symfile ? symfile : "unknown")) : (idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr));
 	    PNL;
 	} else if (statsp != NULL) {
             pid_printf(pidfile, "%s%8d %6.2f%% %10.4f %6.2f%% %9.2f%% %10.3f %10.3f  %s", tab, 
@@ -1420,25 +1549,24 @@ print_slp_info(void *arg1, void *arg2)
 		    (slpinfop->sleep_time *100.0) / (statsp->T_sleep_time + statsp->T_runq_time + statsp->T_run_time),
                     MSECS(slpinfop->sleep_time / slpinfop->count),
                     MSECS(slpinfop->max_time),
-		    idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr);
+		    IS_WINKI ? (sym ? sym : (symfile ? symfile : "unknown")) : (idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr));
 	    PNL;
          } else {
-             pid_printf(pidfile, "%s      Sleep Func    %6d          %11.6f %10.6f %10.6f  %s", tab,
+             pid_printf(pidfile, "%s      Sleep Func                %6d          %11.6f %10.6f %10.6f  %s", tab,
                     slpinfop->count,
                     SECS(slpinfop->sleep_time),
                     SECS(slpinfop->sleep_time / slpinfop->count),
                     SECS(slpinfop->max_time),
-		    idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr);
+		    IS_WINKI ? (sym ? sym : (symfile ? symfile : "unknown")) : (idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr));
+
+                    if (IS_LIKI && slpinfop->scd_wpid_hash) {
+                        pid_printf(pidfile, "%s       Waker %s  ",tab, tlabel);
+                        foreach_hash_entry_l((void **)slpinfop->scd_wpid_hash,
+                                                WPID_HSIZE,
+                                                print_scd_slp_info,
+                                                slp_scd_sort_by_time, 0, pidfile);
+                    }
 	    PNL;
-
-            if (IS_LIKI && slpinfop->scd_wpid_hash) {
-                pid_printf(pidfile, "%s       Waker PID  ",tab); PNL;
-                foreach_hash_entry_l((void **)slpinfop->scd_wpid_hash,
-                                        WPID_HSIZE,
-                                        print_scd_slp_info,
-                                        slp_scd_sort_by_time, 0, pidfile);
-            }
-
         }
 
 	return 0;
@@ -1486,7 +1614,7 @@ print_stktrc_info(void *arg1, void *arg2)
 	vtxt_preg_t *pregp;
 	float avg, wpct;
 	int i; 
-	uint64 key, offset;
+	uint64 key, offset, symaddr;
 	char *sym;
 	int migrate_warn_cnt = 0;
 	int ixgbe_read_warn_cnt = 0;
@@ -1498,9 +1626,10 @@ print_stktrc_info(void *arg1, void *arg2)
 	if (print_stktrc_args == NULL) return 0;
 	if (stktrcp->cnt == 0) return 0;
 	schedp = print_stktrc_args->schedp;
+	pidp = print_stktrc_args->pidp;
 
 	/* make a first pass and check for warnings */
-	if (kparse_flag) {
+	if (kparse_flag && !IS_WINKI) {
         	for (i=0;i<stktrcp->stklen; i++) {
 			key = stktrcp->stklle.key[i];
 			if (key == STACK_CONTEXT_USER)  break;
@@ -1549,38 +1678,52 @@ print_stktrc_info(void *arg1, void *arg2)
         for (i=0;i<stktrcp->stklen; i++) {
 		key = stktrcp->stklle.key[i];
 		if (key == 0ll)  continue;
-
-		if (key == STACK_CONTEXT_USER) {
-			pid_printf (pidfile, "  |");
-		} else if ((globals->symtable) && (key < globals->nsyms-1)) {
-			if (globals->symtable[key].nameptr) {
-				pid_printf (pidfile, "  %s", globals->symtable[key].nameptr);
-			} else {
-				pid_printf (pidfile, "  %p", globals->symtable[key].addr);
-			}
-		} else if (key == UNKNOWN_SYMIDX) {
-			pid_printf (pidfile, "  unknown");
-	        } else if (stktrcp->pidp) {
-                        pidp = stktrcp->pidp;
-                        if (pidp->PID != pidp->tgid) {
-                                pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
-                        }
-
-                        if (pregp = find_vtext_preg(pidp, key)) {
-                                if (sym = symlookup(pregp, key, &offset)) {
-                                	pid_printf (pidfile, "  %s", dmangle(sym));
-                                } else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
-                                	pid_printf (pidfile, "  %s", dmangle(sym));
+		if (IS_WINKI) {
+			if (pregp = get_win_pregp(key, pidp)) {
+				if (sym = win_symlookup(pregp, key, &symaddr)) {
+					pid_printf (pidfile, "%s?%s ", pregp->filename, sym);
+					/* printf ("%s?%s+0x%x (0x%llx) ", pregp->filename, sym, (key - pregp->p_vaddr) - symaddr, key); */
+				} else if (pregp->filename) {
+					pid_printf (pidfile, "%s ", pregp->filename);
 				} else {
-                                	pid_printf (pidfile, "  0x%llx", sym);
+					pid_printf (pidfile, "unkn  ");
 				}
-                        } else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
-                                pid_printf (pidfile, "  %s", dmangle(sym));
-                        } else {
-                                pid_printf (pidfile, "  0x%llx", key);
-                        }
-                } else {
-                        pid_printf (pidfile, "  0x%llx", key);
+			} else {
+				pid_printf (pidfile, "unkn ");
+			}
+		} else {
+			if (key == STACK_CONTEXT_USER) {
+				pid_printf (pidfile, "  |");
+			} else if ((globals->symtable) && (key < globals->nsyms-1)) {
+				if (globals->symtable[key].nameptr) {
+					pid_printf (pidfile, "  %s", globals->symtable[key].nameptr);
+				} else {
+					pid_printf (pidfile, "  %p", globals->symtable[key].addr);
+				}
+			} else if (key == UNKNOWN_SYMIDX) {
+				pid_printf (pidfile, "  unknown");
+	        	} else if (stktrcp->pidp) {
+                        	pidp = stktrcp->pidp;
+                        	if (pidp->PID != pidp->tgid) {
+                                	pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
+                        	}
+
+	                        if (pregp = find_vtext_preg(pidp->vtxt_pregp, key)) {
+                                	if (sym = symlookup(pregp, key, &offset)) {
+                                		pid_printf (pidfile, "  %s", dmangle(sym));
+                                	} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
+                                		pid_printf (pidfile, "  %s", dmangle(sym));
+					} else {
+                                		pid_printf (pidfile, "  0x%llx", sym);
+					}
+                        	} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
+                                	pid_printf (pidfile, "  %s", dmangle(sym));
+                        	} else {
+                                	pid_printf (pidfile, "  0x%llx", key);
+                	        }
+                	} else {
+                        	pid_printf (pidfile, "  0x%llx", key);
+			}
                 }
         }
 	BLACK_FONT;
@@ -1608,11 +1751,9 @@ sleep_report(void *arg1, void *arg2, int (*sort_func)(const void *, const void *
 	PNL;
 
 	if (globals->schedp == schedp) {
-		pid_printf (pidfile, "%s   Count     Pct    SlpTime    Slp%%   Msec/Slp   MaxMsecs  Func", tab);
-		PNL;
+		pid_printf (pidfile, "%s   Count     Pct    SlpTime    Slp%%   Msec/Slp   MaxMsecs  Func", tab); PNL;
 	} else { 
-		pid_printf (pidfile, "%s   Count     Pct    SlpTime    Slp%% TotalTime%%   Msec/Slp   MaxMsecs  Func", tab); 
-		PNL;
+		pid_printf (pidfile, "%s   Count     Pct    SlpTime    Slp%% TotalTime%%   Msec/Slp   MaxMsecs  Func", tab); PNL;
 	}	
 	vararg.arg1 = pidfile;
 	vararg.arg2 = statsp;
@@ -1621,7 +1762,7 @@ sleep_report(void *arg1, void *arg2, int (*sort_func)(const void *, const void *
 }
 
 void
-stktrc_report(void *arg1, void *arg2, int (*sort_func)(const void *, const void *), FILE *pidfile)
+stktrc_report(void *arg1, void *arg2, pid_info_t *pidp, int (*sort_func)(const void *, const void *), FILE *pidfile)
 {
 	stktrc_info_t	**stktrc_hash = arg1;
         sched_info_t    *schedp = (sched_info_t *)arg2;
@@ -1629,20 +1770,22 @@ stktrc_report(void *arg1, void *arg2, int (*sort_func)(const void *, const void 
 	var_arg_t	vararg;
 
 	print_stktrc_args.schedp = schedp;
+	print_stktrc_args.pidp = pidp;
 	print_stktrc_args.warnflag = 0;
 
+	PNL;
 	if (schedp) {
-		pid_printf(pidfile, "\n%sProcess Sleep stack traces (sort by %% of total wait time)", tab);
+		pid_printf(pidfile, "%sProcess Sleep stack traces (sort by %% of total wait time)", tab);
 	} else {
-		pid_printf(pidfile, "\n%sProcess RunQ stack traces (sort by count)", tab);
+		pid_printf(pidfile, "%sProcess RunQ stack traces (sort by count)", tab);
 	}
 		
 	if (nsym && (nsym != 0x7fffffff)) pid_printf (pidfile, " - Top %d stack traces", nsym);
-	pid_printf(pidfile, "\n");
+	PNL;
 
-        pid_printf(pidfile, "%s   count%s Stack trace\n", tab, schedp ? "    wpct      avg" : " ");
-        if (schedp) pid_printf(pidfile, "%s              %%     msecs\n", tab);
-        pid_printf(pidfile, "%s===============================================================\n",tab);
+        pid_printf(pidfile, "%s   count%s  Stack trace", tab, schedp ? "    wpct      avg " : " "); PNL;
+        if (schedp) pid_printf(pidfile, "%s              %%     msecs", tab); PNL;
+        pid_printf(pidfile, "%s===============================================================",tab); PNL;
 
 	vararg.arg1 = pidfile;
 	vararg.arg2 = &print_stktrc_args;
@@ -1831,7 +1974,7 @@ runq_scall_json(void *arg1, void *arg2)
 	syscall_index = (SYSCALL_MODE(syscallp->lle.key) == ELF32) ? globals->syscall_index_32 : globals->syscall_index_64;
 
         bzero(json_detail, 8192);
-        sprintf(json_temp, "%sSystem Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\\n", tab);
+        sprintf(json_temp, "%sSystem Call Name                 Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\\n", tab);
         strcat(json_detail,json_temp);
 
         sprintf (json_temp, "%s%-18s%8d %8.1f %11.6f %10.6f %10.6f %7d", tab,
@@ -1901,7 +2044,7 @@ runsys_scall_json(void *arg1, void *arg2)
 	syscall_index = (SYSCALL_MODE(syscallp->lle.key) == ELF32) ? globals->syscall_index_32 : globals->syscall_index_64;
 
         bzero(json_detail, 8192);
-        sprintf(json_temp, "%sSystem Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\\n", tab);
+        sprintf(json_temp, "%sSystem Call Name                 Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\\n", tab);
         strcat(json_detail,json_temp);
 
 
@@ -1972,7 +2115,7 @@ wait_scall_json(void *arg1, void *arg2)
 	syscall_index = (SYSCALL_MODE(syscallp->lle.key) == ELF32) ? globals->syscall_index_32 : globals->syscall_index_64;
 
         bzero(json_detail, 8192);
-        sprintf(json_temp, "%sSystem Call Name     Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\\n", tab);
+        sprintf(json_temp, "%sSystem Call Name                 Count     Rate     ElpTime        Avg        Max    Errs    AvSz     KB/s\\n", tab);
         strcat(json_detail,json_temp);
 
 
@@ -2078,7 +2221,7 @@ runq_summary_json(sched_stats_t *statp, char *json_detail)
 	char json_temp[1024];
 
         bzero(json_detail,8192);
-        sprintf(json_temp, "\\n    ******** PID RUNQ LATENCY REPORT ********\\n");
+        sprintf(json_temp, "\\n    ******** %s RUNQ LATENCY REPORT ********\\n", tlabel);
         strcat(json_detail,json_temp);
 
         sprintf(json_temp, "%sRunQTime   : %9.6f  RunQCnt   : %9d   AvRunQTime : %9.6f\\n",  tab,
@@ -2155,7 +2298,7 @@ pid_json_print_summary(FILE *pid_jsonfile, pid_info_t *pidp, sched_stats_t *stat
         bzero(json_detail,8192);
         print_irq_stats = statp->C_softirq_cnt + statp->C_hardirq_cnt;
 
-        sprintf (json_temp, "\\nPID %d  %s", (int)pidp->PID, (char *)pidp->cmd);
+        sprintf (json_temp, "\\n%s %d  %s", tlabel, (int)pidp->PID, (char *)pidp->cmd);
         strcat(json_detail,json_temp);
 
         if (pidp->thread_cmd) {
@@ -2174,7 +2317,7 @@ pid_json_print_summary(FILE *pid_jsonfile, pid_info_t *pidp, sched_stats_t *stat
         }
         if (pidp->tgid && (pidp->tgid != pidp->PID)) {
                 tgidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
-                sprintf (json_temp, "  TGID %d  %s\\n", tgidp->PID, (char *)tgidp->cmd);
+                sprintf (json_temp, "  %4s %d  %s\\n", plabel, tgidp->PID, (char *)tgidp->cmd);
                 strcat(json_detail,json_temp);
         }
         if (pidp->nlwp > 1) {
@@ -2227,7 +2370,7 @@ pid_json_print_summary(FILE *pid_jsonfile, pid_info_t *pidp, sched_stats_t *stat
                 strcat(json_detail,json_temp);
         }
 
-        sprintf (json_pidname, "PID %d", (int)pidp->PID);
+        sprintf (json_pidname, "%s %d", tlabel, (int)pidp->PID);
 
 	START_OBJ_PRINT((char *)json_pidname, SECS(total_time), statp->C_switch_cnt, JSPARENT, json_detail, "");
         ADD_KIDS_PRINT;
@@ -2284,19 +2427,23 @@ print_runq_latency_report(sched_info_t *schedp, FILE *pidfile)
 {
 	sched_stats_t *statp = &schedp->sched_stats;
 
-        pid_printf(pidfile, "\n%s******** PID RUNQ LATENCY REPORT ********\n", tab);
-        pid_printf (pidfile, "%sRunQTime   : %9.6f  RunQCnt   : %9d   AvRunQTime : %9.6f\n",  tab,
+	PNL;
+        pid_printf(pidfile, "%s******** %s RUNQ LATENCY REPORT ********", tab, tlabel); PNL;
+        pid_printf (pidfile, "%sRunQTime   : %9.6f  RunQCnt   : %9d   AvRunQTime : %9.6f",  tab,
                 SECS(statp->T_runq_time),
 		statp->C_runq_cnt,
 		statp->C_runq_cnt ? SECS(statp->T_runq_time / statp->C_runq_cnt) : 0.0);
-	pid_printf (pidfile, "%sRunQPri    : %9.6f  RunQPriCt : %9d   AvRunQPri  : %9.6f\n", tab,
+	PNL;
+	pid_printf (pidfile, "%sRunQPri    : %9.6f  RunQPriCt : %9d   AvRunQPri  : %9.6f", tab,
 		SECS(statp->T_runq_pri_time),
 		statp->C_runq_pri_cnt,
 		statp->C_runq_pri_cnt ? SECS(statp->T_runq_pri_time / statp->C_runq_pri_cnt) : 0.0);
-	pid_printf (pidfile, "%sRunQIdle   : %9.6f  RunQIdleCt: %9d   AvRunQIdle : %9.6f\n", tab,
+	PNL;
+	pid_printf (pidfile, "%sRunQIdle   : %9.6f  RunQIdleCt: %9d   AvRunQIdle : %9.6f", tab,
 		SECS(statp->T_runq_idle_time),
 		statp->C_runq_idle_cnt,
 		statp->C_runq_idle_cnt ? SECS(statp->T_runq_idle_time / statp->C_runq_idle_cnt) : 0.0);
+	PNL;
 
 	return;
 }
@@ -2312,7 +2459,7 @@ print_runq_histogram(sched_info_t *schedp, FILE *pidfile)
                 return;
 
 	PNL;
-        pid_printf(pidfile, "    runq latency in Usecs"); PNL;
+	pid_printf(pidfile, "    runq latency in Usecs"); PNL;
         pid_printf(pidfile, "    cpu    <5     <10    <20    <50    <100   <500   <1000  <2000  <10000 <20000 >20000"); PNL;
 
         for (i=0;i<MAXCPUS;i++) {
@@ -2329,8 +2476,7 @@ print_runq_histogram(sched_info_t *schedp, FILE *pidfile)
 
         }
 	PNL;
-        pid_printf(pidfile, "    runq latency in Usecs"); PNL; 
-        pid_printf(pidfile, "    cpu   Avg.      Max       Total_time  Total_cnt  Migrations  NODE_migr_in  NODE_migr_out"); PNL;
+        pid_printf(pidfile, "    runq latency in Usecs\n    cpu   Avg.      Max       Total_time  Total_cnt  Migrations  NODE_migr_in  NODE_migr_out"); PNL;
 
         for (i=0;i<MAXCPUS;i++) {
                 rqinfop = (runq_info_t *)find_entry((lle_t **)schedp->rqh, i, CPU_HASH(i));
@@ -2368,15 +2514,17 @@ msr_report(pid_info_t *pidp, FILE *pidfile)
 
 	if (msrptr[0] == 0) return;
 
-	pid_printf (pidfile, "\n    ******** CPU MSR REPORT *******\n");
-	pid_printf (pidfile, "        LLC_ref   LLC_hits  LLC_hit%%     Instrs     Cycles      CPI   Avg_MHz  SMI_cnt\n");
-	pid_printf (pidfile, "     %9lldk %9lldk %8.2f%% %9lldm %9lldm %8.2f   %7.2f     %4lld\n",
+	PNL;
+	pid_printf (pidfile, "    ******** CPU MSR REPORT *******"); PNL;
+	pid_printf (pidfile, "        LLC_ref   LLC_hits  LLC_hit%%     Instrs     Cycles      CPI   Avg_MHz  SMI_cnt"); PNL;
+	pid_printf (pidfile, "     %9lldk %9lldk %8.2f%% %9lldm %9lldm %8.2f   %7.2f     %4lld",
 			msrptr[LLC_REF]/1000, (msrptr[LLC_REF]-msrptr[LLC_MISSES])/1000,
 			(msrptr[LLC_REF]-msrptr[LLC_MISSES])*100.0 / msrptr[LLC_REF],
 			msrptr[RET_INSTR]/1000000, msrptr[CYC_NOHALT_CORE]/1000000,
 			msrptr[CYC_NOHALT_CORE] * 1.0 / msrptr[RET_INSTR],
                		msrptr[REF_CLK_FREQ] ? globals->clk_mhz * (msrptr[ACT_CLK_FREQ]*1.0 / msrptr[REF_CLK_FREQ]) : 0.0,
 			msrptr[SMI_CNT]);
+	PNL;
 }
 
 
@@ -2417,58 +2565,66 @@ sched_report(void *arg1, FILE *pidfile, FILE *pid_jsonfile, FILE *pid_wtree_json
 
 	print_irq_stats = statp->C_softirq_cnt + statp->C_hardirq_cnt;
 
-        pid_printf (pidfile, "\n%s********* SCHEDULER ACTIVITY REPORT ********\n", tab);
+       	PNL; 
+	pid_printf (pidfile, "%s********* SCHEDULER ACTIVITY REPORT ********", tab); PNL;
 
-        pid_printf (pidfile, "%sRunTime    : %9.6f  SysTime   : %9.6f   UserTime   : %9.6f\n",  tab,
+        pid_printf (pidfile, "%sRunTime    : %9.6f  SysTime   : %9.6f   UserTime   : %9.6f",  tab,
                 SECS(statp->T_run_time),
                 SECS(statp->T_sys_time),
                 SECS(statp->T_user_time));
-	if (STEAL_ON) 
-		pid_printf (pidfile, "%sStealTime  : %9.6f\n",  tab,
+	if (STEAL_ON && !IS_WINKI) 
+		pid_printf (pidfile, "%sStealTime  : %9.6f",  tab,
                 	SECS(statp->T_stealtime));
-        pid_printf (pidfile, "%sSleepTime  : %9.6f  Sleep Cnt : %9d   Wakeup Cnt : %9d\n", tab,
+	PNL;
+        pid_printf (pidfile, "%sSleepTime  : %9.6f  Sleep Cnt : %9d   Wakeup Cnt : %9d", tab,
                 SECS(statp->T_sleep_time),
                 statp->C_sleep_cnt,
                 statp->C_wakeup_cnt);
-        pid_printf (pidfile, "%sRunQTime   : %9.6f  Switch Cnt: %9d   PreemptCnt : %9d\n",  tab,
+	PNL;
+        pid_printf (pidfile, "%sRunQTime   : %9.6f  Switch Cnt: %9d   PreemptCnt : %9d",  tab,
                 SECS(statp->T_runq_time),
                 statp->C_switch_cnt,
                 statp->C_preempt_cnt);
+	PNL;
 	if (print_irq_stats > 0) {
-	    pid_printf (pidfile, "%sHardIRQ    : %9.6f  HardIRQ-S : %9.6f    HardIRQ-U : %9.6f\n", tab,
+	    pid_printf (pidfile, "%sHardIRQ    : %9.6f  HardIRQ-S : %9.6f    HardIRQ-U : %9.6f", tab,
 		SECS(statp->T_hardirq_user_time + statp->T_hardirq_sys_time),
 		SECS(statp->T_hardirq_sys_time),
 		SECS(statp->T_hardirq_user_time));	
-	    pid_printf (pidfile, "%sSoftIRQ    : %9.6f  SoftIRQ-S : %9.6f    SoftIRQ-U : %9.6f\n", tab,
+	    PNL;
+	    pid_printf (pidfile, "%sSoftIRQ    : %9.6f  SoftIRQ-S : %9.6f    SoftIRQ-U : %9.6f", tab,
 		SECS(statp->T_softirq_user_time + statp->T_softirq_sys_time),
 		SECS(statp->T_softirq_sys_time),
 		SECS(statp->T_softirq_user_time));
+	    PNL;
 	}
-        pid_printf (pidfile, "%sLast CPU   : %9d  CPU Migrs : %9d   NODE Migrs : %9d\n", tab,
+        pid_printf (pidfile, "%sLast CPU   : %9d  CPU Migrs : %9d   NODE Migrs : %9d", tab,
                 schedp->cpu,
                 schedp->cpu_migrations,
 		schedp->ldom_migrations);
+	PNL;
         if (IS_LIKI) {
 		pid_printf (pidfile, "%sPolicy     : %-12s", tab, sched_policy_name[schedp->policy]);
 		if (IS_LIKI_V2_PLUS) {
 			pid_printf (pidfile, "     vss :  %8lld          rss :  %8lld", pidp->vss, pidp->rss);
 		}
-		pid_printf (pidfile, "\n");
+		PNL;
 	}
 
 	if (total_time) {
-		pid_printf (pidfile, "\n%sbusy    : %9.2f%%\n", tab, (statp->T_run_time*100.0) / total_time );
-		pid_printf (pidfile, "%s  sys   : %9.2f%%\n", tab, (statp->T_sys_time*100.0) / total_time );
-		pid_printf (pidfile, "%s  user  : %9.2f%%\n", tab, (statp->T_user_time*100.0) / total_time );
+		PNL; pid_printf (pidfile, "%sbusy    : %9.2f%%", tab, (statp->T_run_time*100.0) / total_time ); PNL;
+		pid_printf (pidfile, "%s  sys   : %9.2f%%", tab, (statp->T_sys_time*100.0) / total_time ); PNL;
+		pid_printf (pidfile, "%s  user  : %9.2f%%", tab, (statp->T_user_time*100.0) / total_time ); PNL;
 		if (STEAL_ON) {
-			pid_printf (pidfile, "%s  steal : %9.2f%%\n", tab, (statp->T_stealtime*100.0) / total_time );
+			pid_printf (pidfile, "%s  steal : %9.2f%%", tab, (statp->T_stealtime*100.0) / total_time ); PNL;
 		}
 		if (print_irq_stats > 0) {
-		    pid_printf (pidfile, "%s  irq   : %9.2f%%\n", tab, 
+		    pid_printf (pidfile, "%s  irq   : %9.2f%%", tab, 
 			(statp->T_irq_time * 100.0) / total_time);
+		    PNL;
 		}
-		pid_printf (pidfile, "%srunQ    : %9.2f%%\n", tab, (statp->T_runq_time*100.0) / total_time );
-		pid_printf (pidfile, "%ssleep   : %9.2f%%\n", tab, (statp->T_sleep_time*100.0) / total_time );
+		pid_printf (pidfile, "%srunQ    : %9.2f%%", tab, (statp->T_runq_time*100.0) / total_time ); PNL;
+		pid_printf (pidfile, "%ssleep   : %9.2f%%", tab, (statp->T_sleep_time*100.0) / total_time ); PNL;
 	}
 
 	csv_printf(pid_csvfile, ",%s,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%d,%d,%d,%d,%7.6f,%d,%d,%d,%d,%d,%d",
@@ -2516,7 +2672,7 @@ sched_report(void *arg1, FILE *pidfile, FILE *pid_jsonfile, FILE *pid_wtree_json
                 }
                 coopinfo.elf = pidp->elf;
 
-                pid_printf (pidfile, "%s       PID    Count   SlpPcnt     Slptime  Command ", tab);
+                pid_printf (pidfile, "%s       %s    Count   SlpPcnt     Slptime  Command ", tab, tlabel);
                 if (coop_detail_enabled) 
 			pid_printf (pidfile, "          WakerSyscall+arg0                    SleeperSyscall+arg0                Sleep function\n");
 		pid_printf (pidfile, "\n");
@@ -2538,7 +2694,7 @@ sched_report(void *arg1, FILE *pidfile, FILE *pid_jsonfile, FILE *pid_wtree_json
                         pid_printf (pidfile, "\n%sTasks that have woken up this task(Top %d)\n", tab, npid);
                 }
 
-                pid_printf (pidfile, "%s       PID    Count   SlpPcnt     Slptime  Command ", tab);
+                pid_printf (pidfile, "%s       %s    Count   SlpPcnt     Slptime  Command ", tab, tlabel);
                 if (coop_detail_enabled) 
 			pid_printf (pidfile, "          WakerSyscall+arg0                    SleeperSyscall+arg0                Sleep function\n");
                 pid_printf (pidfile, "\n");
@@ -2559,8 +2715,8 @@ sched_report(void *arg1, FILE *pidfile, FILE *pid_jsonfile, FILE *pid_wtree_json
         if (pidp->slp_hash) {
         	pid_printf (pidfile, "\n%s******** SLEEP REPORT ********\n\n", tab);
         	sleep_report(pidp->slp_hash, schedp, slp_sort_by_time, pidfile);
-        	if (pidp->stktrc_hash) stktrc_report(pidp->stktrc_hash, schedp, stktrc_sort_by_slptime, pidfile);
-        	if (pidp->runq_stktrc_hash) stktrc_report(pidp->runq_stktrc_hash, NULL, stktrc_sort_by_cnt, pidfile);
+        	if (pidp->stktrc_hash) stktrc_report(pidp->stktrc_hash, schedp, pidp, stktrc_sort_by_slptime, pidfile);
+        	if (pidp->runq_stktrc_hash) stktrc_report(pidp->runq_stktrc_hash, NULL, pidp, stktrc_sort_by_cnt, pidfile);
 	}
 }
 
@@ -2588,11 +2744,12 @@ print_cstate_stats(uint64 *warnflagp)
 	uint64		cstate_total_time=0;
 	int warn_cnt = 0;
 
+	TEXT("\n");
 	BOLD(" cpu node    Events     Busy%%");
 	for (j=0; j<=max_cstate;j++) {
 		BOLD("   Cstate%d", j);
 	}
-	BOLD ("  freq_changes    freq_hi   freq_low"); NL;
+	BOLD (" freq_changes    freq_hi   freq_low"); NL;
 
 	for (i=0;i<MAXCPUS;i++) {
 		if (cpuinfop = FIND_CPUP(globals->cpu_hash, i)) {
@@ -2609,7 +2766,7 @@ print_cstate_stats(uint64 *warnflagp)
 	
 				printf ("%-4d [%2d]  %8d", i, cpuinfop->ldom, powerp->power_start_cnt);
 				printf ("  %7.2f%%", cstate_total_time ?  (powerp->cstate_times[CSTATE_BUSY] * 100.0) / cstate_total_time : 0);
-				for (j=0; j<=max_cstate;j++) {
+				for (j=0;j<=max_cstate;j++) {
 					if ((j > 1) && powerp->cstate_times[j]) { 
 						warn_cnt++;
 						RED_FONT;
@@ -2652,9 +2809,9 @@ print_hardirq_entry(void *arg1, void *arg2)
 
 	irqname_entry = (irq_name_t *)find_entry((lle_t **)globals->irqname_hash, irq, IRQ_HASH(irq));
 	if (irqname_entry) {
-		printf ("%4d %-16s", irq, irqname_entry->name);
+		printf ("%4d %-32s", irq, irqname_entry->name);
 	} else {
-		printf ("%4d %-16s", irq, " ");
+		printf ("%4d %-32s", irq, " ");
 	}
 	printf (" %8d %12.6f %12.6f", irqentryp->count, SECS(irqentryp->total_time), 
 					(SECS(irqentryp->total_time) / irqentryp->count)*1000000.0);
@@ -2668,6 +2825,14 @@ print_softirq_entry(void *arg1, void *arg2)
 	int *warnflagp = (int *)arg2;
 	int irq = irqentryp->lle.key;
 	irq_name_t *irqname_entry;
+	char *name = NULL;
+
+	if (IS_WINKI) {
+		irqname_entry = (irq_name_t *)find_entry((lle_t **)globals->dpcname_hash, irq, IRQ_HASH(irq));
+		if (irqname_entry) name = irqname_entry->name;
+	} else {
+		name = softirq_name[irq];	
+	}	
 
 	if (warnflagp) {
 		/* if we use more than 1/2 core worth of time for BLOCK interrupts */
@@ -2683,7 +2848,7 @@ print_softirq_entry(void *arg1, void *arg2)
 		} 
 	}
 
-	printf ("%4d %-16s %8d %12.6f %12.3f", irq, softirq_name[irq], 
+	printf ("%4d %-32s %8d %12.6f %12.3f", irq, name,
 					irqentryp->count,
 					SECS(irqentryp->total_time),
 					(SECS(irqentryp->total_time) / irqentryp->count)*1000000.0);
@@ -2707,13 +2872,12 @@ print_percpu_irq_stats(int irqtype)
 			irqinfop = (irqtype == HARDIRQ) ? cpuinfop->irqp : cpuinfop->softirqp;
 			if (irqinfop) {
 				CAPTION_GREY;
-				BOLD ("CPU %4d      Events: %8d  ElpTime: %9.6f", i, irqinfop->count, SECS(irqinfop->total_time)); 
+				BOLD ("CPU %4d      Events: %8d  ElpTime: %9.6f", i, irqinfop->count, SECS(irqinfop->total_time)); NL;
 				_CAPTION;
-				BOLD (" IRQ Name                Count      ElpTime    Avg(usec)"); NL;
+				BOLD (" IRQ Name                                Count      ElpTime    Avg(usec)"); NL;
 				foreach_hash_entry((void **)irqinfop->irq_entry_hash, IRQ_HSIZE,
 							irqtype == HARDIRQ ? print_hardirq_entry : print_softirq_entry,
 				 			irq_sort_by_time, 0, NULL);
-				NLt;
 			}
 		}
 	}
@@ -2728,10 +2892,10 @@ print_global_hardirq_stats(void *arg1)
 
 	if (irqinfop == NULL) return;
 
-	BOLD (" IRQ Name                Count      ElpTime    Avg(usec)"); NL;
+	BOLD (" IRQ Name                                Count      ElpTime    Avg(usec)\n");
 	foreach_hash_entry((void **)irqinfop->irq_entry_hash, IRQ_HSIZE,
 					print_hardirq_entry, irq_sort_by_time, 0, NULL);
-	printf ("     Total:           %8d %12.6f", irqinfop->count, SECS(irqinfop->total_time)); NL;
+	printf ("     Total:                           %8d %12.6f\n", irqinfop->count, SECS(irqinfop->total_time));
 	return;
 }
 
@@ -2743,10 +2907,10 @@ print_global_softirq_stats(void *arg1)
 
 	if (irqinfop == NULL) return;
 
-	BOLD (" IRQ Name                Count      ElpTime    Avg(usec)"); NL;
+	BOLD (" IRQ Name                                Count      ElpTime    Avg(usec)\n");
 	foreach_hash_entry((void **)irqinfop->irq_entry_hash, IRQ_HSIZE,
 					print_softirq_entry, irq_sort_by_time, 0, warnflagp);
-	printf ("     Total:           %8d %12.6f", irqinfop->count, SECS(irqinfop->total_time)); NL;
+	printf ("     Total:                           %8d %12.6f\n", irqinfop->count, SECS(irqinfop->total_time));
 	return;
 }
 
@@ -2817,7 +2981,7 @@ print_pid_stealtime_summary(void *arg1, void *arg2)
 	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
         if (cluster_flag) { SPACE; SERVER_URL_FIELD_BRACKETS(globals) }
 
-        NL;
+	NL; 
 
         return 0;
 
@@ -2826,7 +2990,7 @@ print_pid_stealtime_summary(void *arg1, void *arg2)
 int 
 print_systime_pids(uint64 *warnflagp)
 {
-	BOLD ("    PID       RunTime      SysTime     UserTime     RunqTime    SleepTime  Command"); NL;
+	BOLD ("    %s       RunTime      SysTime     UserTime     RunqTime    SleepTime  Command", tlabel); NL;
 	foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_pid_runtime_summary,
                            (int (*)()) pid_sort_by_systime,
@@ -2836,7 +3000,7 @@ print_systime_pids(uint64 *warnflagp)
 int
 print_runtime_pids(uint64 *warnflagp)
 {
-	BOLD ("    PID       RunTime      SysTime     UserTime     RunqTime    SleepTime  Command"); NL;
+	BOLD ("    %s       RunTime      SysTime     UserTime     RunqTime    SleepTime  Command", tlabel); NL;
 	foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_pid_runtime_summary,
                            (int (*)()) pid_sort_by_runtime,
@@ -2846,7 +3010,7 @@ print_runtime_pids(uint64 *warnflagp)
 int 
 print_runq_pids(uint64 *warnflagp)
 {
-	BOLD ("    PID       RunTime      SysTime     UserTime     RunqTime    SleepTime  Command"); NL;
+	BOLD ("    %s       RunTime      SysTime     UserTime     RunqTime    SleepTime  Command", tlabel); NL;
 	foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_pid_runtime_summary,
                            (int (*)()) pid_sort_by_runqtime,
@@ -2856,12 +3020,11 @@ print_runq_pids(uint64 *warnflagp)
 int 
 print_stealtime_pids(uint64 *warnflagp)
 {
-	BOLD ("    PID       RunTime      SysTime     UserTime     RunqTime    StealTime Command"); NL;
+	BOLD ("    %s       RunTime      SysTime     UserTime     RunqTime    StealTime  Command", tlabel); NL;
 	foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_pid_stealtime_summary,
                            (int (*)()) pid_sort_by_stealtime,
                            npid, warnflagp);
-	NLt;
 }
 
 void
@@ -2899,7 +3062,7 @@ print_runq_itime_analysis()
 
         for (i=0;i<MAXCPUS;i++) {
 		if (cpuinfop = FIND_CPUP(globals->cpu_hash, i)) {
-                        printf ("%4d :", i);
+                        printf ("%4d  :", i);
                         for (j = 0; j < IDLE_TIME_NBUCKETS; j++) {
                                 printf(" %-6lld", cpuinfop->idle_hist[j]);
                         }
@@ -2972,7 +3135,7 @@ void print_percpu_csv(cpu_info_t *cpuinfop)
 
 		csv_printf(runq_csvfile,",%d", powerp->power_start_cnt);
 		csv_printf (runq_csvfile,",%3.2f%%", gbl_total_time ?  (powerp->cstate_times[CSTATE_BUSY] * 100.0) / gbl_total_time : 0.0);
-                for (j=0;j<=max_cstate;j++) {
+		for (j=0;j<=max_cstate;j++) {
 			csv_printf(runq_csvfile,",%3.2f", gbl_total_time ? (powerp->cstate_times[j] * 100.0) / gbl_total_time : 0.0);
 		}
 	} else {
@@ -3079,17 +3242,17 @@ runq_print_report(void *v)
 
 	print_global_runq_histogram();
 
-        printf ("\nTop PIDs Waiting on RunQ (in secs):\n");
+        printf ("\nTop %ss Waiting on RunQ (in secs):\n", tlabel);
         print_runq_pids(NULL);
 
-        printf ("\nTop PIDs using most CPU  (in secs):\n");
+        printf ("\nTop %ss using most CPU  (in secs):\n", tlabel);
         print_runtime_pids(NULL);
 
-        printf ("\nTop PIDs using most Sys CPU  (in secs):\n");
+        printf ("\nTop %ss using most Sys CPU  (in secs):\n", tlabel);
         print_systime_pids(NULL);
 
-	if (STEAL_ON) {
-		printf ("\nTop PIDs with most Steal Time (in secs):\n");
+	if (STEAL_ON && !IS_WINKI) {
+		printf ("\nTop %ss with most Steal Time (in secs):\n", tlabel);
 		print_stealtime_pids(NULL);
 	}
 

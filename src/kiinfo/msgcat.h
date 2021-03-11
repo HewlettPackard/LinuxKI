@@ -138,7 +138,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 	" Key: All times are in seconds\n ElapsedT    the total wall clock time for the system call during the trace\n Max         the longest time the call took during the trace\n Min         the shortest time the call took during the trace\n Ave         the average time the call took during the trace\n SystemtT    the total time spent in the OS for the systemcall during the trace"
 
 #define _MSG_1_4_INFO \
-	"Hardclock traces are generated at each clock tick (every 10 ms) and can\ngive us a rough profile of system activity.  Idle traces may not\nbe collected while in a power savings state.\nMissing hardclock traces will distort the percentages."
+	" traces are generated at each clock tick (every 10 ms) and can\ngive us a rough profile of system activity.\nIdle traces may not be collected while in a power savings state.  Missing\ndistort the percentages."
 
 #define _MSG_1_5_INFO \
 	" trace are generated from the kernel function setrq() which\nputs threads on the run queue.  The trace provides the name of the\ncalling function and can provide insight in kernel scheduling.\n\n"

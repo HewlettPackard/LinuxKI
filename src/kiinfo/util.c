@@ -43,6 +43,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "developers.h"
 #include "info.h"
 #include "futex.h"
+#include "winki.h"
+#include "Pdb.h"
 
 void 
 save_and_clear_server_stats(int nfiles) 
@@ -271,6 +273,24 @@ get_pid_cgroup(void *arg1, void *arg2)
         fclose(f);
         return 0;
 }
+
+int 
+inherit_command(void *arg1, void *arg2)
+{
+	pid_info_t *pidp = (pid_info_t *)arg1;
+	pid_info_t *tgidp;
+
+	if ((pidp->cmd == NULL) && pidp->tgid && (pidp->tgid != pidp->PID)) {
+		tgidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
+		if (tgidp->cmd) repl_command (&pidp->cmd, tgidp->cmd);
+	}
+
+	return 0;
+}	
+	
+
+	
+	
 
 int 
 get_command(void *arg1, void *arg2)
@@ -891,6 +911,9 @@ open_flags_str(unsigned int f)
 	char *str = util_str;
 	str[0] = 0;
 
+	if ((f & O_ACCMODE) == O_RDONLY) strcat(str, "RDONLY|");
+	if ((f & O_ACCMODE) ==  O_WRONLY) strcat (str, "WRONLY|");
+	if ((f & O_ACCMODE) == O_RDWR) strcat (str, "RDWR|");
 	if (f & O_CREAT) strcat (str, "CREAT|");
 	if (f & O_APPEND) strcat (str, "APPEND|");
 	if (f & O_TRUNC) strcat (str, "TRUNC|");
@@ -918,6 +941,7 @@ open_flags_str(unsigned int f)
 void
 set_ioflags()
 {
+
 	/* the rq_flag_bits changed all the time, so this is a bit of a pain.   So after calling
  	 * parse_uname, we need to set the io_flags and such
   	 */
@@ -926,6 +950,8 @@ set_ioflags()
 	globals->cmd_flag_mask = 0xfffffffffffffffe;
 	globals->cmd_flag_shift = 1;
 	globals->req_op = req_op_name_2;
+
+	if (IS_WINKI) return;
 	if (!IS_LIKI || (globals->os_vers[0] == '2')) {
 		/* For Ftrace, just use the version 2.6.32 flags */
 		if (strncmp(globals->os_vers, "2.6.36", 6) == 0) {
@@ -1033,7 +1059,6 @@ reqop_name(uint64 f)
 	return "ukn";
 }
 	
-
 char *
 ioflags(uint64 f) 
 {
@@ -1089,6 +1114,7 @@ flush_flag(uint64 f)
 void
 set_gfpflags()
 {
+	if (IS_WINKI) return;
 	if ((globals->os_vers[0] == '2') || (globals->os_vers[0] == '3')) {
 		globals->gfp_flags = gfp_name_3_0;
 	} else if ((strncmp(globals->os_vers, "4.0.", 4) == 0) ||
@@ -1551,14 +1577,15 @@ dmangle(char *sym)
 
 	/* Locate the first "N" after the _Z */
 	while (i < strlen(sym)) { 
-		if (sym[i] == 'N') { 
-			i++; 
-			break;
-		} else 
+		if (sym[i] == 'N') {
 			i++;
+			break;
+		} else {
+			i++;
+		}
 	}
 
-        /* if we didn't find the first "N", then reset i to 2 */
+	/* if we didn't find the first "N", then reset i to 2 */
         if (i >= strlen(sym)) i = 2;
 
 	/* we need to find the first number after _Z and the first character after 
@@ -1662,7 +1689,7 @@ print_user_sym(unsigned long ip, uint64 pid, char print_objfile)
 			pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
 		}
 
-		if (pregp = find_vtext_preg(pidp, ip)) {
+		if (pregp = find_vtext_preg(pidp->vtxt_pregp, ip)) {
 			if ((pregp->filename) && print_objfile) {
 				fptr = strrchr (pregp->filename, '/');
 				if (fptr)  {
@@ -2054,12 +2081,71 @@ print_ip_port (void *arg1, int be2le, FILE *pidfile)
 
 	port = be2le ? BE2LE(sock->sin_port) : sock->sin_port;
 	key = SOCK_KEY(sock->sin_addr.s_addr, port);
-	pid_printf (pidfile, "%d.%d.%d.%d",
+	pid_printf (pidfile, "%u.%u.%u.%u",
 		SOCK_IP1(key),
 		SOCK_IP2(key),
 		SOCK_IP3(key),
 		SOCK_IP4(key));
 	if (port) pid_printf (pidfile, ":%d", SOCK_PORT(key));
+}
+
+void
+print_ip_v6 (void *arg1, FILE *pidfile)
+{
+	unsigned char *s6addr8 = (char *)arg1;
+	uint16 *s6addr16 = (uint16 *)arg1;
+	int i;
+	char skip = TRUE;
+
+	i = 0;
+	while (i < 8) {
+		/* skip leading zeros */
+		if (s6addr16[i] == 0) skip=FALSE;
+		if (s6addr16[i]) break;
+		i++;
+	}
+
+	if (i == 8) {
+		/* if addr is empty, then just print the port num and return */
+		pid_printf (pidfile, "[::]");
+		return;
+	}
+
+	if ((i == 6) || ((i == 5) && (s6addr16[i] == 0xffff))) {
+		/* if first 5 elements are zero, and 6th is 0xffff, assume an IPv4 addr */
+		pid_printf (pidfile, "%u.%u.%u.%u", 
+			s6addr8[12],
+			s6addr8[13],
+			s6addr8[14],
+			s6addr8[15]);
+		return;
+	}
+
+	pid_printf (pidfile, "[");
+	if (skip == FALSE) pid_printf (pidfile, "::");
+	/* print the first element */
+	pid_printf (pidfile, "%x", s6addr16[i]);
+	i++;
+
+	while (i < 8) {
+	  	if (skip && s6addr16[i] == 0) {
+			while (i < 8) {
+				if (s6addr16[i] == 0) {
+					i++;
+				} else {
+					pid_printf (pidfile, ":");
+					skip = FALSE;
+					break;
+				}
+			}
+		}	
+		
+		if (i < 8) {
+			pid_printf (pidfile, ":%x", s6addr16[i]);
+			i++;
+		}
+	}
+	pid_printf (pidfile, "]");
 }
 
 void 
@@ -2088,57 +2174,9 @@ print_ip_port_v6 (void *arg1, int be2le, FILE *pidfile)
 #endif
 
 	port = be2le ? BE2LE(sock->sin6_port) : sock->sin6_port;
-	i = 0;
-	while (i < 8) {
-		/* skip leading zeros */
-		if (sock->sin6_addr.s6_addr16[i] == 0) skip=FALSE;
-		if (sock->sin6_addr.s6_addr16[i]) break;
-		i++;
-	}
-	
-	if (i == 8) {
-		/* if addr is empty, then just print the port num and return */
-		pid_printf (pidfile, "[::]");
-		if (port) pid_printf (pidfile, ":%d", port);
-		return;
-	}
 
-	if ((i == 6) || ((i == 5) && (sock->sin6_addr.s6_addr16[i] == 0xffff))) {
-		/* if first 5 elements are zero, and 6th is 0xffff, assume an IPv4 addr */
-		pid_printf (pidfile, "%d.%d.%d.%d", 
-			sock->sin6_addr.s6_addr[12],
-			sock->sin6_addr.s6_addr[13],
-			sock->sin6_addr.s6_addr[14],
-			sock->sin6_addr.s6_addr[15]);
-		if (port) pid_printf (pidfile, ":%d", port);
-		return;
-	}
+	print_ip_v6((void *)&sock->sin6_addr.s6_addr16[0], pidfile);
 
-	pid_printf (pidfile, "[");
-	if (skip == FALSE) pid_printf (pidfile, "::");
-	/* print the first element */
-	pid_printf (pidfile, "%x", BE2LE(sock->sin6_addr.s6_addr16[i]));
-	i++;
-
-	while (i < 8) {
-	  	if (skip && sock->sin6_addr.s6_addr16[i] == 0) {
-			while (i < 8) {
-				if (sock->sin6_addr.s6_addr16[i] == 0) {
-					i++;
-				} else {
-					pid_printf (pidfile, ":");
-					skip = FALSE;
-					break;
-				}
-			}
-		}	
-		
-		if (i < 8) {
-			pid_printf (pidfile, ":%x", BE2LE(sock->sin6_addr.s6_addr16[i]));
-			i++;
-		}
-	}
-	pid_printf (pidfile, "]");
 	if (port) pid_printf (pidfile, ":%d", port);
 }
 
@@ -2182,7 +2220,7 @@ printstr_ip_port_v6 (char *ipstr, void *arg1, int be2le)
 
 	if ((i == 6) || ((i == 5) && (sock->sin6_addr.s6_addr16[i] == 0xffff))) {
 		/* if first 5 elements are zero, and 6th is 0xffff, assume an IPv4 addr */
-		sprintf(tmpstr, "%d.%d.%d.%d", 
+		sprintf(tmpstr, "%u.%u.%u.%u", 
 			sock->sin6_addr.s6_addr[12],
 			sock->sin6_addr.s6_addr[13],
 			sock->sin6_addr.s6_addr[14],
@@ -2336,5 +2374,120 @@ syscallname_to_syscallno(char *name, int *syscallno32, int *syscallno64)
 			break;
 		}
 	}
+}
+
+int
+push_win_syscall(void *arg1, uint64 addr, uint64 hrtime)
+{
+	pid_info_t *pidp = (pid_info_t *)arg1;
+	win_syscall_save_t *entry, *next; 
+
+	next = pidp->win_active_syscalls;
+
+	if ((entry = (win_syscall_save_t *)malloc(sizeof(win_syscall_save_t))) == NULL) {
+		FATAL(errno, "malloc failure", NULL, -1);
+	}
+
+	entry->addr = addr;
+	entry->starttime = hrtime;
+	entry->next = next;
+
+	pidp->win_active_syscalls = entry;
+
+	return 1;
+}
+
+int 
+pop_win_syscall(void *arg1, uint64 *addr, uint64 *hrtime)
+{
+	pid_info_t *pidp = (pid_info_t *)arg1;
+	win_syscall_save_t *entry;
+
+	if ((entry = (win_syscall_save_t *)pidp->win_active_syscalls) == NULL) {
+		*addr = 0;
+		*hrtime = 0;
+		return 0;
+	}
+
+	*addr = entry->addr;
+	*hrtime = entry->starttime;
+	pidp->win_active_syscalls = entry->next;
+
+	FREE(entry);
+
+	return 1;
+}
+
+void
+winki_save_stktrc (void *arg0, void *arg1, void *arg2)
+{
+	trace_info_t *trcinfop = (trace_info_t *)arg0;
+	StackWalk_t *stk = (StackWalk_t *)arg1;
+	winki_stack_info_t *stkinfop = (winki_stack_info_t *)arg2;
+	int i=0, j=0;
+	trace_info_t trcinfop_save;
+
+	/* first, we have to save the current contents of the trcinfop so it can be 
+	   restored after grabbing the stack */
+	memcpy(&trcinfop_save, trcinfop, sizeof(trace_info_t));
+
+	while (stk && (stk != (StackWalk_t *)GETNEWBUF) && (stk->EventType == 0x1820) && (j < WINKI_MAX_DEPTH)) {
+		get_next_event_for_cpu(trcinfop);
+		i = 0;
+		while (&stk->Stack[i] < (uint64 *)((uint64)trcinfop->cur_event + get_event_len((event_t *)trcinfop->cur_event)) && (j < WINKI_MAX_DEPTH)) {
+			stkinfop->Stack[j] = stk->Stack[i];
+			j++;
+			i++;
+		}
+
+		if (trcinfop->next_event == (char *)GETNEWBUF) {
+			get_new_buffer(trcinfop, trcinfop->cpu);
+		}
+		stk = (StackWalk_t *)trcinfop->next_event;
+	}
+
+	stkinfop->depth = j;
+
+	/* now restore the contents of the trcinfop */
+	memcpy(trcinfop, &trcinfop_save, sizeof(trace_info_t));
+
+}
+
+void
+update_pid_ids(int tid, int pid)
+{
+	pid_info_t *pidp;
+	pid_info_t *tgidp;
+
+	if (pid) tgidp = GET_PIDP(&globals->pid_hash, pid);
+	if (tid) {
+		pidp = GET_PIDP(&globals->pid_hash, tid);
+	pidp->tgid = pid;
+	}
+}
+
+char *
+irqflags(uint32 f) 
+{
+	char *str = util_str;
+	str[0] = 0;
+	int i;
+	int op;
+
+	for (i = 0; i < IRQ_NRBIT; i++) {   	
+		if (f & (1 << i)) {
+			strcat(str, win_irq_flags[i]);
+			strcat(str, "|");
+		}
+	}
+
+	/* take off the last "|" character */
+	if (strlen(str)) {
+		str[strlen(str)-1] = 0;
+	} else {
+		sprintf(str, "0x%x", f);
+	}
+
+	return(str);
 }
 

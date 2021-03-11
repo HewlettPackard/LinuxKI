@@ -23,6 +23,7 @@
 # version 4.1  01/26/2016  Added -v option for Visualization files/dirs cleanup.
 # version 5.1  06/07/2017  Added Copyright notice       
 # version 5.2  06/20/2017  Moved Copyright notice after shell designation
+# version 7.0  03/12/2021  Added processing to clean Windows ETL trace directories
 #
 # DESCRIPTION:
 # 
@@ -64,9 +65,9 @@ help()
 {
     printf "Usage: %s: [-r] [-f] [-p] [-v]\n" "$0"
         printf "            -h               Help\n"
-        printf "            -r               Recursively traverse sudirs looking for KI data to archive\n"
-	printf "	    -p		     Remove PIDS and CIDS subdirectoriesy\n"
-	printf "	    -v		     Remove VIS  subdirectory & rel. sh/php/html files\n"
+        printf "            -r               Recursively traverse subdirs looking for KI data to archive\n"
+	printf "	    -p		     Remove PIDS and CIDS subdirectories\n"
+	printf "	    -v		     Remove VIS  subdirectory & related sh/php/html files\n"
         printf "            -f               Force remove misc/tmp files\n"
 }
 
@@ -103,34 +104,37 @@ clean_pwd()
 	
 #	Before archiving, we must have a compress tar file saved
 
-	if [ -f ki_all.$NODENAME.$tag.tar ] ; then
-            gzip ki_all.$NODENAME.$tag.tar
-	fi
-	if [ -f ki_all.$NODENAME.$tag.tar.gz ] ; then
+#	We will check the Windows KI zip file first
+	if [ ! -f ki_all.$NODENAME.$tag.zip ]; then
+	    if [ -f ki_all.$NODENAME.$tag.tar ] ; then
+               gzip ki_all.$NODENAME.$tag.tar
+  	    fi
+	    if [ -f ki_all.$NODENAME.$tag.tar.gz ] ; then
 		mv ki_all.$NODENAME.$tag.tar.gz ki_all.$NODENAME.$tag.tgz
-	fi
-	if [ -f ki_all.$tag.tar ] ; then 
+	    fi
+	    if [ -f ki_all.$tag.tar ] ; then 
 		gzip ki_all.$tag.tar
-	fi
-	if [ -f ki_all.$NODENAME.$tag.tar ] ; then
-            gzip ki_all.$NODENAME.$tag.tar
-        fi
-        if [ -f ki_all.$NODENAME.$tag.tar.gz ] ; then
-            mv ki_all.$NODENAME.$tag.tar.gz ki_all.$NODENAME.$tag.tgz
-        fi	
+	    fi
+	    if [ -f ki_all.$NODENAME.$tag.tar ] ; then
+                gzip ki_all.$NODENAME.$tag.tar
+            fi
+            if [ -f ki_all.$NODENAME.$tag.tar.gz ] ; then
+                mv ki_all.$NODENAME.$tag.tar.gz ki_all.$NODENAME.$tag.tgz
+            fi	
 
-	if [ ! -f ki_all.$NODENAME.$tag.tgz ] ; then
-#	    if there is no ki_all.*.tgz file, then lets archive what we have
-#    	    First, unzip regular files
-            gunzip *.gz
-	    tar -czvf ki_all.$NODENAME.$tag.tgz *.$tag	
-	fi
+	    if [ ! -f ki_all.$NODENAME.$tag.tgz ] ; then
+#	        if there is no ki_all.*.tgz file, then lets archive what we have
+#    	        First, unzip regular files
+                gunzip *.gz
+	        tar -czvf ki_all.$NODENAME.$tag.tgz *.$tag	
+	    fi
 
-	if [ ! -f ki_all.$NODENAME.$tag.tgz ] ; then
+	    if [ ! -f ki_all.$NODENAME.$tag.tgz ] ; then
 		continue;
-	fi
+	    fi
+	fi 
 
-        for file in `ls *.$tag 2>/dev/null`
+        for file in `ls *.$tag ki.$tag.etl 2>/dev/null`
         do
             if [ $file == "comment.$tag" ]
             then
@@ -144,8 +148,9 @@ clean_pwd()
 	rm -rf objdump.$tag >/dev/null 2>&1
 	rm -f *.$tag.csv
 	if [ $pflag -eq 1 ] ; then
-	    rm -rf PIDS
-	    rm -rf CIDS
+	    rm -rf PIDS >/dev/null 2>&1
+	    rm -rf CIDS >/dev/null 2>&1
+	    rm -rf TIDS >/dev/null 2>&1
 	fi
 	if [ $vflag -eq 1 ] ; then
 	    rm -Rf VIS D3 tl_temp
@@ -153,7 +158,7 @@ clean_pwd()
 	    rm -f $(ls *.html | grep -v kp)
 	fi
 
-    	for file in `ls 2>/dev/null | egrep -v '\.txt|\.gz|\.tgz|\.html|^doc|^4000|^CIDS|^PIDS|^VIS|^statsp|^MW|^misc|^comment'`
+    	for file in `ls 2>/dev/null | egrep -v '\.txt|\.gz|\.tgz|\.zip|\.html|^doc|^4000|^CIDS|^PIDS|^TIDS|^VIS|^statsp|^MW|^misc|^comment|^SymbolCache'`
     	do
             if [ $file == !p4.* ] ; then
                 continue

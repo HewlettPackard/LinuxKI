@@ -330,6 +330,7 @@ futex_print_detail(void *arg1, void *arg2)
                         SECS(gfp->total_time),
                         SECS(gfp->total_time)/gfp->cnt,
                         SECS(gfp->max_time));
+
 	NL;
 
 	if (gfp->uaddr2_hash) {

@@ -45,6 +45,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "ki_tool.h"
 #include "liki.h"
+#include "winki.h"
 #include "developers.h"
 
 #include "kd_types.h"
@@ -54,7 +55,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "info.h"
 #include "futex.h"
 
-static inline void
+void
 incr_syscall_stats(void *arg1, uint64 ret, uint64 syscalltm, int logio) 
 {
 	syscall_stats_t *statp = (syscall_stats_t *)arg1;
@@ -1629,7 +1630,7 @@ print_varargs_exit(syscall_exit_t *rec_ptr)
 			break;
 		case __NR_select :
 		case __NR_pselect6 :
-			fds_bytes = varlen / 3;
+			fds_bytes = (nfds/8) + (nfds & 07ULL ? 1 : 0);
 
 			if (fds_bytes) {
 				print_fd_set("readfds=", varptr, fds_bytes);
@@ -1682,7 +1683,9 @@ print_syscall_args(pid_info_t *pidp, int syscallno, uint64 *args)
 				case SKIP: 		break;
 				case DECIMAL:		printf ("%c%s=%i", fsep, label,  (int32)argval); break;
 				case HEX:		printf ("%c%s=0x%llx", fsep, label,  argval); break;
-				case OCTAL:		printf ("%c%s=0%llo", fsep, label, argval); break;
+				case OCTAL:		if (argval < 0xffffffff) 
+								/* check for valid Octal number.  Argument may be optional */
+								printf ("%c%s=0%llo", fsep, label, argval); break;
 				case FUTEX_VAL3:	printf ("%c%s=0x%llx", fsep, label,  argval); 
 							if ((args[1] == FUTEX_WAKE_OP) || (args[1] == FUTEX_WAKE_OP_PRIVATE)) 
 								arg_actions[format].func(argval);

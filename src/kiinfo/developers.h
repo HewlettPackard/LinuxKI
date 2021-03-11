@@ -19,7 +19,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define FATAL(err, msg, optmsg, optnum)  fatal(__func__,__LINE__,__FILE__, err, msg, optmsg, optnum)
 #define TRACE debug_trace(__func__,__LINE__,__FILE__)
 
-#define HEADER_SIZE(ptr)   (((ptr->version != 0xffffffff) && (ptr->version & 1)) ? sizeof(info_t) : sizeof(header_page_t))
+/* #define HEADER_SIZE(ptr)   (IS_LIKI ? sizeof(info_t) : (IS_WINKI ? sizeof(etw_bufhd_t) : sizeof(header_page_t))) */
+#define HEADER_SIZE(ptr)   (((ptr->version != 0xffffffff) && (ptr->version & 1)) ? sizeof(info_t) : (((ptr->version != 0xffffffff) && (ptr->version & 0xffff0000)) ? sizeof(etw_bufhd_t) : sizeof(header_page_t)))
 
 enum {
 	RINGBUF_TYPE_PADDING            = 29,
@@ -56,6 +57,7 @@ typedef struct trace_info {
 	uint64		next_time;	
 	uint64		size;
 	uint64		cur_seqno;
+	uint64		abs_time;   /* for Windows buffer header time */
 	int		cpu;
         int             fd;
         int             save_fd;
@@ -151,12 +153,14 @@ typedef struct filter_struct {
 	filter_item_t *f_subsys;
 	filter_item_t *f_events;
 	filter_item_t *f_uaddr;
+	filter_item_t *f_pdb;
 } filter_t;
 
 extern trace_info_t trace_files[];
 extern trace_info_t trace_file_merged;
 extern ki_action_t *ki_actions;
 extern ki_action_t *liki_actions;
+extern ki_action_t *winki_actions;
 extern trace_ids_t trace_ids;
 extern uint64 iov_space;
 extern filter_t trace_filter;
@@ -178,6 +182,7 @@ extern uint64 time_hwm;
 extern uint64 time_lwm;
 extern uint64 time_mb_lwm;
 extern uint64 start_time;
+extern uint64 winki_start_time;
 extern uint64 end_time;
 extern uint64 prev_vint_time;
 extern uint64 vis_hostid;
@@ -193,6 +198,7 @@ extern int64 kistep;
 extern uint64 interval_start_time;
 extern uint64 interval_end_time;
 extern uint64 last_time;
+extern uint32 winki_bufsz;
 extern char vers_str[];
 extern char *kernel_trace_name[];
 extern char liki_module_loaded;
@@ -231,6 +237,7 @@ extern int open_trace_files();
 extern int reset_trace_files(int nfiles);
 extern void read_fmt_files();
 extern void save_and_clear_server_stats(int);
+extern char *get_next_event_for_cpu(trace_info_t *);
 
 
 extern int  setup_percpu_readers();
@@ -239,6 +246,7 @@ extern int  load_liki_module();
 extern int  unload_liki_module();
 extern void init_liki_tracing();
 extern int  likidump();
+extern int  etldump();
 extern void  kitracedump();
 extern int  merge();
 extern void reset_kgdboc();
@@ -249,3 +257,4 @@ extern void clear_kgdboc();
 
 
 ki_action_t * liki_action();
+ki_action_t * winki_action();

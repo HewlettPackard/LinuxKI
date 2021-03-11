@@ -9,5 +9,3 @@ clean:
 	rm -rf kiinfo
 	rm -rf kiinfo.x86_64
 	rm -rf kiinfo.sles15
-
-

@@ -37,6 +37,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <ncurses.h>
 #include <curses.h>
 
+#include "winki.h"
+#include "SysConfig.h"
+#include "Image.h"
+#include "Pdb.h"
+#include "PerfInfo.h"
+#include "winki_util.h"
+
 extern int pc_hugetlb_fault;
 extern int pc_huge_pmd_share;
 extern int pc_queued_spin_lock_slowpath;
@@ -51,6 +58,29 @@ extern int pc_pcc_cpufreq_target;
 int prof_dummy_func(void *, void *);
 int prof_ftrace_print_func(void *, void *);
 
+static inline void
+prof_winki_trace_funcs()
+{
+	int i;
+
+        for (i = 0; i < 65536; i++) {
+                ki_actions[i].id = i;
+                ki_actions[i].func = NULL;
+                ki_actions[i].execute = 0;
+        }
+
+        strcpy(&ki_actions[0].subsys[0], "EventTrace");
+        strcpy(&ki_actions[0].event[0], "Header");
+        ki_actions[0].func = winki_header_func;
+        ki_actions[0].execute = 1;
+
+	strcpy(&ki_actions[0xf2e].subsys[0], "PerfInfo");
+	strcpy(&ki_actions[0xf2e].event[0], "SampleProfile");
+	ki_actions[0xf2e].func=perfinfo_profile_func;
+	ki_actions[0xf2e].execute = 1;
+}
+
+
 /*
  ** The initialisation function
  */
@@ -61,7 +91,7 @@ prof_init_func(void *v)
 
 	if (debug) printf ("prof_init_func()\n");
 
-	if (!IS_LIKI) { 
+	if (!IS_LIKI && !IS_WINKI) { 
 		printf ("No Hardclock Entries Captured\n\n");
 		_exit(0);
 	}
@@ -73,6 +103,11 @@ prof_init_func(void *v)
         bufmiss_func =  NULL;
 	filter_func = trace_filter_func;
 	report_func_arg = filter_func_arg;
+
+	if (IS_WINKI) {
+		prof_winki_trace_funcs();
+		return;
+	}
 
         /* go ahead and initialize the trace functions, but do not set the execute field */
         ki_actions[TRACE_HARDCLOCK].func = hardclock_func;
@@ -209,7 +244,7 @@ int prof_ftrace_print_func(void *a, void *arg)
                 PRINT_EVENT(rec_ptr->KD_ID);
                 printf (" %s", buf);
 
-                NL;
+	NL;
         }
 }
 
@@ -220,19 +255,24 @@ hc_print_pc(void *arg1, void *arg2)
 	print_pc_args_t *print_pc_args = (print_pc_args_t *)arg2;
 	FILE *pidfile = print_pc_args->pidfile;
 	hc_info_t *hcinfop = print_pc_args->hcinfop;
+	vtxt_preg_t *pregp;
 
-	uint64 key;
+	uint64 key = UNKNOWN_SYMIDX;
 	char *sym = NULL; 
 	char *symfile = NULL;
-	uint64 offset;
+	uint64 offset, symaddr;
 
 	if (pcinfop->count == 0) return 0;
 	key = pcinfop->lle.key;
+	pregp = pcinfop->pregp;
 
 	SPAN_GREY;
 
-	if (key == UNKNOWN_SYMIDX)  {
-		sym="UNKNOWN";
+	if (IS_WINKI) {
+                if (pregp) {
+                        sym = win_symlookup(pregp, key, &symaddr);
+			symfile = pregp->filename;
+                }
 	} else if (key != UNKNOWN_SYMIDX) {
 		if (key < globals->nsyms-1)  {
 			sym = globals->symtable[key].nameptr;
@@ -240,15 +280,17 @@ hc_print_pc(void *arg1, void *arg2)
 			if (objfile_preg.elfp && (key < 0x10000000)) {
 				sym = symlookup(&objfile_preg, key, &offset);
 				symfile = objfile;
-			} else if (pcinfop->pregp) {
-				if (pcinfop->pregp->p_type == MAPCLASS) {
-					sym = maplookup(pcinfop->pregp, key, &offset); 
+			} else if (pregp) {
+				if (pregp->p_type == MAPCLASS) {
+					sym = maplookup(pregp, key, &offset); 
 				} else { 
-					sym = symlookup(pcinfop->pregp, key, &offset);
+					sym = symlookup(pregp, key, &offset);
 				}
-				symfile = pcinfop->pregp->filename;
+				symfile = pregp->filename;
 			}
 		}
+	} else {
+		sym="UNKNOWN";
 	}
 
 	if (kilive) {
@@ -281,17 +323,26 @@ hc_print_pc2(void *arg1, void *arg2)
 	print_pc_args_t *print_pc_args = (print_pc_args_t *)arg2;
 	hc_info_t *hcinfop = print_pc_args->hcinfop;
 	FILE *pidfile = print_pc_args->pidfile;
+	vtxt_preg_t *pregp = pcinfop->pregp;
 	uint64 key;
 	char *sym = NULL; 
 	char *symfile = NULL;
 	uint64 offset;
+	uint64 symaddr;
 
 	if (pcinfop->count == 0) return 0;
 	key = pcinfop->lle.key;
 
 	SPAN_GREY;
 
-	if (key != UNKNOWN_SYMIDX) {
+	if (IS_WINKI) {
+                if (pregp) {
+                        sym = win_symlookup(pregp, key, &symaddr);
+			symfile = pregp->filename;
+                }
+        } else if ((pcinfop->state == HC_USER) || (key > globals->nsyms) || (key == UNKNOWN_SYMIDX))  {
+                /* fall through */
+	} else if (key != UNKNOWN_SYMIDX) {
 		if (pcinfop->state == HC_USER) {
 			if (objfile_preg.elfp && (key < 0x10000000)) {
 				sym = symlookup(&objfile_preg, key, &offset);
@@ -329,13 +380,13 @@ hc_print_pc2(void *arg1, void *arg2)
 		
 	if (sym == NULL) {
 		if (key == UNKNOWN_SYMIDX) {
-			printf ("%s%8d %6.2f%%  %-6s %s", tab, 
-				pcinfop->count, 
-				(pcinfop->count*100.0) / hcinfop->total, 
+			printf ("%s%8d %6.2f%%  %-6s %s", tab,
+				pcinfop->count,
+				(pcinfop->count*100.0) / hcinfop->total,
 				cpustate_name_index[pcinfop->state],
 				"unknown");
 		} else {
-			printf ("%s%8d %6.2f%%  %-6s 0x%llx", tab, 
+			printf ("%s%8d %6.2f%%  %-6s 0x%llx", tab,
 				pcinfop->count, 
 				(pcinfop->count*100.0) / hcinfop->total, 
 				cpustate_name_index[pcinfop->state],
@@ -372,27 +423,40 @@ hc_print_pc_sys(void *arg1, void *arg2)
 	print_pc_args_t *print_pc_args = (print_pc_args_t *)arg2;
 	FILE *pidfile = print_pc_args->pidfile;
 	hc_info_t *hcinfop = print_pc_args->hcinfop;
-	uint64 idx;
-	
+	uint64 idx, symaddr;
+	char *symptr = "UNKNOWN";
+	pid_info_t *pidp;
+	vtxt_preg_t *pregp;
 
 	idx = pcinfop->lle.key;
 
 	SPAN_GREY;
-	if ((pcinfop->state == HC_USER) || (idx > globals->nsyms))  {
-		pid_printf (pidfile, "%s%8d %6.2f%%  %-6s %s", tab, 
-					pcinfop->count, 
-					(pcinfop->count*100.0) / hcinfop->total, 
-					cpustate_name_index[pcinfop->state], 
-					"UNKNOWN");
-		PNL;
+	if (IS_WINKI) {
+		if (pregp = get_win_pregp(idx, NULL)) {
+			symptr = win_symlookup(pregp, idx, &symaddr);
+		} 
+	} else if ((pcinfop->state == HC_USER) || (idx > globals->nsyms) || (idx == UNKNOWN_SYMIDX))  {
+		/* fall through */
 	} else {
-		pid_printf (pidfile, "%s%8d %6.2f%%  %-6s %s", tab, 
-					pcinfop->count, 
-					(pcinfop->count*100.0) / hcinfop->total, 
-					cpustate_name_index[pcinfop->state], 
-					(idx == UNKNOWN_SYMIDX) ? "UNKNOWN" : globals->symtable[idx].nameptr);
-		PNL;;
+		symptr = globals->symtable[idx].nameptr;
 	}
+
+	pid_printf (pidfile, "%s%8d %6.2f%%  %-6s", tab, 
+				pcinfop->count, 
+				(pcinfop->count*100.0) / hcinfop->total, 
+				cpustate_name_index[pcinfop->state]);
+
+	if (symptr) { 
+		pid_printf (pidfile, " %s", symptr);
+	} else { 
+		pid_printf (pidfile, " 0x%0llx", idx); 
+	}
+
+	if (IS_WINKI && pregp && pregp->filename) {
+		pid_printf (pidfile, " [%s]", pregp->filename);
+	}
+
+	NL;
 }
 
 int
@@ -405,7 +469,7 @@ hc_print_stktrc(void *p1, void *p2)
 	pid_info_t *pidp;
 	vtxt_preg_t *pregp;
         float avg, wpct;
-	uint64 key;
+	uint64 key, symaddr;
 	char *sym;
 	uint64 offset;
         int i;
@@ -423,7 +487,21 @@ hc_print_stktrc(void *p1, void *p2)
         for (i=0;i<stktrcp->stklen; i++) {
                 key = stktrcp->stklle.key[i];
 
-		if (key == STACK_CONTEXT_KERNEL) {
+		if (IS_WINKI) {
+			pidp = stktrcp->pidp;
+			pregp = get_win_pregp(key, pidp);
+			if (pregp) {
+				sym = win_symlookup(pregp, key, &symaddr);
+			} 
+
+			if (sym) { 
+				pid_printf (pidfile, "  %s", sym);
+			} else if (pregp) {
+				pid_printf (pidfile, "  [%s]", pregp->filename);
+			} else {
+				pid_printf (pidfile, "  0x%llx", key);
+			}
+		} else if (key == STACK_CONTEXT_KERNEL) {
 			continue;
 		} else if (key == STACK_CONTEXT_USER) {
 			pid_printf (pidfile, "  |");
@@ -468,7 +546,7 @@ hc_print_stktrc(void *p1, void *p2)
 				pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
 			}
 
-			if (pregp = find_vtext_preg(pidp, key)) {
+			if (pregp = find_vtext_preg(pidp->vtxt_pregp, key)) {
 				if (sym = symlookup(pregp, key, &offset)) {
 					pid_printf (pidfile, "  %s", dmangle(sym));
 				} else if (sym = maplookup(pidp->mapinfop, key, &offset)) {
@@ -486,6 +564,7 @@ hc_print_stktrc(void *p1, void *p2)
 		}
         }
         PNL;
+
 }
 
 int
@@ -586,6 +665,9 @@ int print_pid_symbols(void *arg1, void *arg2)
         if (hcinfop==NULL) return 0;
         if (hcinfop->cpustate[HC_SYS] == 0)   return 0;
 
+	print_pc_args.warnflagp = NULL;
+
+	NL;
         CAPTION_GREY;
         BOLD("Pid: ");
         PID_URL_FIELD8(pidp->PID);
@@ -596,8 +678,6 @@ int print_pid_symbols(void *arg1, void *arg2)
 		printf("%s ", pidp->cmd);
 		if (strstr(pidp->cmd, "kiinfo")) {
 			print_pc_args.warnflagp = &warnflag;
-		} else {
-			print_pc_args.warnflagp = NULL;
 		}
 	}
 	if (pidp->hcmd) printf ("{%s} ", pidp->hcmd);
@@ -607,7 +687,7 @@ int print_pid_symbols(void *arg1, void *arg2)
 	
 	_CAPTION;
 
-        TEXT("-----------------------------------------------------------------\n"); 
+        TEXT("-----------------------------------------------------------------\n");
 	lineno=0;
         SPAN_GREY;
         BOLD ("%s   Count    USER     SYS    INTR", tab); NL;
@@ -633,7 +713,6 @@ int print_pid_symbols(void *arg1, void *arg2)
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_HAS_JOURNAL, _LNK_1_4_5);
 		kp_warning(globals->warnings, warn_indx, _LNK_1_4_5); NL;
 	}
-	NLt;
 
 	return 0;
 }

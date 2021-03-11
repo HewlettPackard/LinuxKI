@@ -28,6 +28,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <poll.h>
 #include "ki_tool.h"
 #include "liki.h"
+#include "winki.h"
 #include "globals.h"
 #include "developers.h"
 #include "info.h"

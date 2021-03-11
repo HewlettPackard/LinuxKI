@@ -14,6 +14,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 extern lle_t	*find_add_hash_entry (lle_t ***, int, uint64, int, int);
 extern lle_t	*find_remove_hash_entry (lle_t ***, int, uint64, int, int);
+extern strlle_t *find_add_strhash_entry (strlle_t ***, int, int, int, char *, int);
 extern stklle_t *find_add_stkhash_entry (stklle_t ***, int, int, int, uint64 *, int);
 extern lle_t	*find_add_entry (lle_t **, uint64, int, int);
 extern lle_t	*find_entry (lle_t **, uint64, int);

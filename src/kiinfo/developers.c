@@ -23,6 +23,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <sys/mman.h>
 #include "ki_tool.h"
 #include "liki.h"
+#include "winki.h"
 #include "globals.h"
 #include "developers.h"
 #include "info.h"
@@ -98,13 +99,22 @@ add_filter_item_str(void *a, char *item_str)
 
 }
 
+inline int rb_len_time_stamp()
+{
+        if (atoi(globals->os_vers) >= 5) {
+                return 8;
+        } else {
+                return 16;
+        }
+}
+
 char *
 get_rec_from_event(event_t *eventp) 
 {
 	uint32 type_len_ts, type_len;
 	uint32 event_header_length;
 
-	if (IS_LIKI) return (char *)eventp;
+	if (IS_WINKI || IS_LIKI) return (char *)eventp;
 
 	type_len_ts = eventp->type_len_ts;
 	type_len = type_len_ts & 0x1f;
@@ -118,7 +128,7 @@ get_rec_from_event(event_t *eventp)
 		event_header_length = 8;
 		break;
 	case RINGBUF_TYPE_TIME_STAMP:
-		event_header_length = 16;
+		event_header_length = rb_len_time_stamp();
 		break;
 	default: 
 		event_header_length = 4;
@@ -144,6 +154,7 @@ process_buffer(trace_info_t *trcinfop)
 
 	/* action specific function */
 	if (ki_actions[rec_ptr->id].execute && ki_actions[rec_ptr->id].func) {
+		if (IS_WINKI && (winki_start_time == 0)) winki_start_time = trcinfop->cur_time;
 		ki_actions[rec_ptr->id].func((void *)trcinfop, filter_func_arg);
 	}
 
@@ -213,11 +224,25 @@ _get_event_len(event_t *eventp)
 	uint32 type_len_ts, type_len;
 	uint32 length;
 	common_t *rec_ptr;
+	etw_common_t *etw_rec_ptr;
+	etw_common_c014_t *etw_c014_rec_ptr;
 	
 	if (IS_LIKI) {
 		rec_ptr = (common_t *)eventp;
 		return rec_ptr->reclen;
 	}
+	
+	if (IS_WINKI) {
+		/* be sure we are 64-bit aligned */
+		etw_rec_ptr = (etw_common_t *)eventp;
+		if (etw_rec_ptr->ReservedHeaderField == 0xc014) {
+			etw_c014_rec_ptr = (etw_common_c014_t *)etw_rec_ptr;
+			return ((etw_c014_rec_ptr->EventSize+7) & ~0x7);
+		} else {
+			return ((etw_rec_ptr->EventSize+7) & ~0x7);
+		}
+	}
+		
 
 	type_len_ts = eventp->type_len_ts;
 	type_len = type_len_ts & 0x1f;
@@ -231,7 +256,7 @@ _get_event_len(event_t *eventp)
 		length = 8;
 		break;
 	case RINGBUF_TYPE_TIME_STAMP:
-		length = 16;
+		length = rb_len_time_stamp();
 		break;
 	case 0:
 		length = eventp->array[0] + 4;
@@ -256,12 +281,31 @@ get_event_time(trace_info_t *trcinfop, int how)
 	uint32 type_len_ts, type_len;
 	uint64 time_delta, ts, event_time;
 	uint32 length;
-	header_page_t *headerp = trcinfop->header;
 	event_t *eventp = (event_t*)trcinfop->next_event;
 	common_t *rec_ptr = (common_t *)eventp;
+	etw_common_t *etw_rec_ptr = (etw_common_t *)eventp;
+	etw_common_c002_t *etw_rec_c002_ptr = (etw_common_c002_t *)eventp;
+	etw_common_c011_t *etw_rec_c011_ptr = (etw_common_c011_t *)eventp;
+	etw_common_c014_t *etw_rec_c014_ptr = (etw_common_c014_t *)eventp;
+
+	/* printf ("get_event_time: header 0x%llx   how: %d version %d\n", trcinfop->header, how, globals->kiversion); */
 
 	if (IS_LIKI) return rec_ptr->hrtime;
 
+	if (IS_WINKI) {
+		if (etw_rec_ptr->ReservedHeaderField == 0xc002) {
+			return etw_rec_c002_ptr->TimeStamp;
+		} else if (etw_rec_ptr->ReservedHeaderField == 0xc011) {
+			return etw_rec_c011_ptr->TimeStamp;
+		} else if (etw_rec_ptr->ReservedHeaderField == 0xc014) {
+			return etw_rec_c014_ptr->TimeStamp;
+		} else {
+			printf ("Unknown ReservedHeaderField: 0x%x\n", etw_rec_ptr->ReservedHeaderField);
+			hex_dump(etw_rec_ptr, 1);
+			return 0;
+		}
+	}
+			
 	type_len_ts = eventp->type_len_ts;
 	type_len = type_len_ts & 0x1f;
 	ts = (type_len_ts >> 5) & 0x7ffffff;
@@ -274,15 +318,15 @@ get_event_time(trace_info_t *trcinfop, int how)
 		time_delta =  ((uint64)eventp->array[0] << TS_SHIFT) + ts;
 		break;
 	case RINGBUF_TYPE_TIME_STAMP:
-		time_delta = ts;
+		if (how) trcinfop->next_time = ts;
+
+		time_delta = 0;
 		break;
 	case 0:
 		time_delta = 0;
-		length = 4096;
 		break;
 	default: 
 		time_delta =  ts;
-		length = (type_len * 4) + 4;
 		break;
 	}
 
@@ -310,6 +354,8 @@ get_new_buffer(trace_info_t *trcinfop, int cpu)
 		old_header = trcinfop->header;
 		if (IS_LIKI) {
 			trcinfop->header = (header_page_t *)((char *)trcinfop->header+CHUNK_SIZE);
+		} else if (IS_WINKI) {
+			trcinfop->header = (header_page_t *)((char *)trcinfop->header+winki_bufsz);
 		} else {
 			trcinfop->header = (header_page_t *)((char *)trcinfop->header + trcinfop->header->commit + HEADER_SIZE(trcinfop->header));
 		}
@@ -327,23 +373,57 @@ get_new_buffer(trace_info_t *trcinfop, int cpu)
 			trcinfop->next_time = get_event_time(trcinfop, 0);
 			trcinfop->buffers++;
 
-			if (debug) fprintf (stderr, "CPU[%d] start time: 0x%llx %6.6f  len: %lld 0x%llx 0x%llx 0x%llx next_time: %6.6f\n", cpu,
+			if (debug) 
+				fprintf (stderr, "CPU[%d] start time: 0x%llx %6.6f  len: %lld hdr: 0x%llx next_event: 0x%llx next_time: 0x%llx\n",
+				cpu,
 				trcinfop->header->time,
 				SECS(trcinfop->header->time),
 				trcinfop->header->commit,
 				trcinfop->header,
 				trcinfop->next_event,
-				trcinfop->next_time,
-				SECS(trcinfop->next_time)); 
+				trcinfop->next_time);
 			
 			/* check for bad timestamp and treat as a missed buffer */
 			if (trcinfop->header->time && 
 		    	    (old_header->time > trcinfop->header->time)) {
-				printf ("CPU[%d]: Old Time %9.6f (0x%llx)   New Time %9.6f\n", cpu, SECS(old_header->time), old_header->time, SECS(trcinfop->header->time));
+				printf ("CPU[%d]: Old Time %9.6f (0x%llx)   New Time %9.6f\n", 
+					cpu, SECS(old_header->time), old_header->time, SECS(trcinfop->header->time));
 			}
 		} else {
 			retry=1;
 		}
+	}
+}
+
+char *
+get_next_event_for_cpu(trace_info_t *trcinfop)
+{
+	event_t *eventp;
+	int elen;
+
+	if (trcinfop->fd == 0) return NULL;
+
+	if (trcinfop->next_event == (char *)GETNEWBUF) {
+		get_new_buffer(trcinfop, trcinfop->cpu);
+	}
+
+	if (trcinfop->next_time) {
+		trcinfop->cur_event = trcinfop->next_event;
+		trcinfop->cur_time = trcinfop->next_time;
+		eventp = (event_t *)trcinfop->cur_event;
+		elen = _get_event_len(eventp);
+		trcinfop->next_event = (char *)eventp + elen;
+
+		if (trcinfop->next_event >= ((char *)trcinfop->header + (IS_WINKI ? 0 : HEADER_SIZE(trcinfop->header)) + trcinfop->header->commit)) {
+			trcinfop->next_event = (char *)GETNEWBUF;
+		} else if (_get_event_len((event_t *)trcinfop->next_event) == 0) {
+			trcinfop->next_event = (char *)GETNEWBUF;
+		} else {
+			trcinfop->next_time = get_event_time(trcinfop, 1);
+		}	
+		return trcinfop->cur_event;
+	} else {
+		return NULL;
 	}
 }
 
@@ -360,6 +440,7 @@ get_next_event(int count)
 	char *rec_ptr;
 	int	missed_events=0;
 	common_t  *liki_rec;
+	uint32	elen;
 
     while (1) {
 	found = 0;
@@ -379,7 +460,7 @@ get_next_event(int count)
 				trcinfop->header->commit,
 				trcinfop->next_event); 
 			get_new_buffer(trcinfop, cntl_indx);
-			if (debug)  fprintf (stderr, "CPU[%d] header: 0x%llx next_event: 0x%llx \n", 
+			if (debug) fprintf (stderr, "CPU[%d] header: 0x%llx next_event: 0x%llx \n", 
 				trcinfop->cpu,
 				trcinfop->header,
 				trcinfop->next_event); 
@@ -403,40 +484,36 @@ get_next_event(int count)
 		trcinfop->cur_time = trcinfop->next_time;
 		trcinfop->cpu = low_indx;
 		eventp = (event_t *)trcinfop->cur_event;
+		elen = _get_event_len(eventp);
+		trcinfop->next_event = (char *)eventp + elen;
 		if (debug) { 
-				fprintf (stderr, "found event - CPU %d, map_addr 0x%llx, header 0x%llx (0x%llx), cur_event 0x%llx (0x%llx)\n", 
+				fprintf (stderr, "cur event - CPU %d, map_addr 0x%llx, header 0x%llx (0x%llx), cur_event 0x%llx (0x%llx) cur_time 0x%llx elen 0x%x  next_event 0x%llx (0x%llx)\n",
 					trcinfop->cpu, trcinfop->mmap_addr, 
-					trcinfop->header, (char *)trcinfop->header - trcinfop->mmap_addr, 
-					trcinfop->cur_event, (char *)trcinfop->cur_event - trcinfop->mmap_addr);
-			 	hex_dump((char *)eventp, 1);
-		}
-		trcinfop->next_event = (char *)eventp + _get_event_len(eventp);
-		if (debug) { 
-				fprintf (stderr, "next event - CPU %d, map_addr 0x%llx, header 0x%llx (0x%llx), next_event 0x%llx (0x%llx)\n", 
-					trcinfop->cpu, trcinfop->mmap_addr, 
-					trcinfop->header, (char *)trcinfop->header - trcinfop->mmap_addr, 
-					trcinfop->next_event, (char *)trcinfop->next_event - trcinfop->mmap_addr);
-			 	hex_dump((char *)trcinfop->next_event, 1);
+					trcinfop->header, 
+					(char *)trcinfop->header - trcinfop->mmap_addr, 
+					trcinfop->cur_event,
+					(char *)trcinfop->cur_event - trcinfop->mmap_addr,
+					trcinfop->cur_time, 
+					elen,
+					trcinfop->next_event, 
+					(char *)trcinfop->next_event - trcinfop->mmap_addr);
 		}
 
-		if (trcinfop->next_event >= ((char *)trcinfop->header + HEADER_SIZE(trcinfop->header) + trcinfop->header->commit)) {
+		if (trcinfop->next_event >= ((char *)trcinfop->header + (IS_WINKI ? 0 : HEADER_SIZE(trcinfop->header)) + trcinfop->header->commit)) {
 			trcinfop->next_event = (char *)GETNEWBUF;
 		} else if (_get_event_len((event_t *)trcinfop->next_event) == 0) {
 			trcinfop->next_event = (char *)GETNEWBUF;
 		} else {
 			trcinfop->next_time = get_event_time(trcinfop, 1);
 			length = _get_event_len((event_t *)trcinfop->next_event);
-			if (debug) fprintf (stderr, "CPU[%d] start time: 0x%llx %6.6f pagelen: %lld header: 0x%llx curevent: 0x%llx nextevent: 0x%llx elen: %d  next_time: 0x%llx %6.6f *\n", 
-				trcinfop->cpu,
-				trcinfop->header->time,
-				SECS(trcinfop->header->time),
-				trcinfop->header->commit,
-				trcinfop->header,
-				trcinfop->cur_event,
-				trcinfop->next_event,
-				length,
-				trcinfop->next_time,
-				SECS(trcinfop->next_time));
+			if (debug) {
+				fprintf (stderr, "next event - CPU[%d] curevent: 0x%llx nextevent: 0x%llx elen: %d  next_time: 0x%llx *\n", 
+					trcinfop->cpu,
+					trcinfop->cur_event,
+					trcinfop->next_event,
+					length,
+					trcinfop->next_time);
+			}
 		}	
 		if (start_time == 0) {
 			start_time = trcinfop->cur_time; 	/* set on first event found */
@@ -584,18 +661,12 @@ developers_call(int ncpus)
 	if (debug) fprintf (stderr, "developers_call() - ncpus = %d\n", ncpus);
 
 	if (IS_LIKI && (ncpus == 1)) find_start_event();
+	
+	winki_start_time = 0;
 
 	while (trcinfop = get_next_event(ncpus)) {
 		eventp = (event_t *)trcinfop->cur_event;
 		rec_ptr = conv_common_rec(trcinfop, &tt_rec_ptr);
-		if (debug) fprintf (stderr, "CPU[%d] %5.6f type_len_ts: 0x%x  type_len: %d  ts: %d | next event - %5.6f neventp 0x%llx\n", 
-			trcinfop->cpu,
-			SECS(trcinfop->cur_time),
-			eventp->type_len_ts,
-			eventp->type_len_ts & 0x1f,
-			(eventp->type_len_ts >> 5) & 0x7ffffff,
-			SECS(trcinfop->next_time),
-			trcinfop->next_event);
 
 		trcinfop->events++;
 		last_time = trcinfop->cur_time;
@@ -603,9 +674,16 @@ developers_call(int ncpus)
 		process_buffer(trcinfop); 
 	}
 
+	if (IS_WINKI) {
+		/* convert start and stop times to be compatible with Linux times */
+		start_time = CONVERT_WIN_TIME(winki_start_time);
+		last_time = CONVERT_WIN_TIME(last_time);
+	}
+
 	if (end_time == 0) end_time = last_time;
 	elapsed_time = end_time - start_time;
 	elapsed_time = (elapsed_time > start_filter) ? elapsed_time -= start_filter : 0;
+
 	secs = globals->total_secs = SECS(elapsed_time);
 
 	/* print(num, print_func, print_func_arg); */

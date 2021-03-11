@@ -627,7 +627,7 @@ cl_power_report()				/* Section 1.2.3 */
 	for (i=1; i < NCSTATES; i++) {
 		BOLD ("  Cstate%d", i);
 	}
-	BOLD("  freq_changes    freq_hi   freq_low\n");
+	BOLD(" freq_changes    freq_hi   freq_low\n");
 	foreach_server(cl_print_power_events, server_sort_by_power, top, &cnt);
 
 	if (cnt == 0) {
@@ -874,7 +874,7 @@ cl_th_detection()                       /* Section 1.5 */
         _TABLE;
         TEXT("\n");
 
-        BOLD("PID       Wakeups MaxWakeups    Count     TimeStamp  cmd abstime_flag: %d\n", abstime_flag);
+        BOLD("PID       Wakeups MaxWakeups    Count     TimeStamp  cmd\n");
         foreach_hash_entry((void **)clpid_hash, CLPID_HASHSZ, cl_print_wakeup_pids, clpid_sort_by_wakeups, top, NULL);
 }
 

@@ -39,8 +39,10 @@ extern int font_color;
 #define UL  if (HTML) printf ("<ul>")
 #define LI  if (HTML) printf ("<li>")
 #define NL  printf("\n")
-#define DNL if (dockfile) fprintf (dockfile, "\n"); NL;
-#define PNL if (pidfile) fprintf (pidfile, "\n"); NL;
+#define DNL dock_printf("\n");
+#define PNL pid_printf(pidfile, "\n");
+/* #define DNL if (dockfile) fprintf (dockfile, "\n"); NL; */
+/* #define PNL if (pidfile) fprintf (pidfile, "\n"); NL; */
 
 #define NLt if (!HTML) printf ("\n");
 
@@ -67,7 +69,7 @@ extern int font_color;
 #define SPAN_GREY if (HTML && ((lineno & 1) == 0)) printf("<span style=\"background-color: #EEEEEE\">") 
 #define _SPAN	if (HTML && ((lineno & 1) == 0)) printf("</span>");  
 
-#define CAPTION_GREY if (HTML)  printf("<span style=\"background-color: #DDDDDD\">") 
+#define CAPTION_GREY if (HTML)  printf("<span style=\"background-color: #DDDDDD\">")
 #define _CAPTION if (HTML) printf("</span>\n"); else printf ("\n");
 
 #define FONT_SIZE(size)
@@ -136,10 +138,10 @@ extern int font_color;
 		printf("<A Href=\"%s/VIS/%d/pid_detail.html\" TARGET=\"kipid file\">%-12s", globals->subdir, (int)pid, (char *)pidlink);	\
 	} else if (kptree && HTML) {									\
                 sprintf (pidlink, "%d</A>", (int)pid);                                                  \
-                printf("<A Href=\"PIDS/%d\" TARGET=\"kipid file\">%-12s", (int)pid, (char *)pidlink);   \
+                printf("<A Href=\"%sS/%d\" TARGET=\"kipid file\">%-12s", tlabel, (int)pid, (char *)pidlink);   \
 	} else if (cltree && HTML) {									\
                 sprintf (pidlink, "%d</A>", (int)pid);                                                  \
-                printf("<A Href=\"%s/PIDS/%d\" TARGET=\"kipid file\">%-12s", globals->subdir, (int)pid, (char *)pidlink);   \
+                printf("<A Href=\"%s/%sS/%d\" TARGET=\"kipid file\">%-12s", globals->subdir, tlabel, (int)pid, (char *)pidlink);   \
 	} else { 											\
 		printf("%-8d", (int)pid); 								\
 	}
@@ -151,7 +153,7 @@ extern int font_color;
                 printf("<A Href=\"VIS/%d/pid_detail.html\" TARGET=\"kipid vis file\">%12s", (int)pid, (char *)pidlinkr);                         \
         } else if (kptree && HTML) { 											\
 		sprintf (pidlinkr, "%d</A>", (int)pid); 							\
-		printf("<A Href=\"PIDS/%d\" TARGET=\"kipid file\">%12s", (int)pid, (char *)pidlinkr);	\
+		printf("<A Href=\"%sS/%d\" TARGET=\"kipid file\">%12s", tlabel, (int)pid, (char *)pidlinkr);	\
 	} else { 											\
 		printf("%8d", (int)pid); 								\
 	}
@@ -163,7 +165,7 @@ extern int font_color;
                 printf("<A Href=\"VIS/%d/pid_detail.html\" TARGET=\"kipid vis file\">%-12s", (int)pid, (char *)pidlink2);                         \
         } else if (kptree && HTML) {                                                                    \
                 sprintf (pidlink2, "%d</A>", (int)pid);                                                  \
-                printf("<A Href=\"PIDS/%d\" TARGET=\"kipid file\">%-12s", (int)pid, (char *)pidlink2);   \
+                printf("<A Href=\"%sS/%d\" TARGET=\"kipid file\">%-12s", tlabel, (int)pid, (char *)pidlink2);   \
         } else {                                                                                        \
                 printf("%-8d", (int)pid);                                                               \
         }
@@ -175,7 +177,7 @@ extern int font_color;
                 printf("<A Href=\"VIS/%d/pid_detail.html\" TARGET=\"kipid vis file\">%12s", (int)pid, (char *)pidlinkr2);                         \
         } else if (kptree && HTML) {                                                                                    \
                 sprintf (pidlinkr2, "%d</A>", (int)pid);                                                  \
-                printf("<A Href=\"PIDS/%d\" TARGET=\"kipid file\">%12s", (int)pid, (char *)pidlinkr2);    \
+                printf("<A Href=\"%sS/%d\" TARGET=\"kipid file\">%12s", tlabel, (int)pid, (char *)pidlinkr2);    \
         } else {                                                                                        \
                 printf("%8d", (int)pid);                                                                \
         }

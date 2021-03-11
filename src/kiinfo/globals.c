@@ -28,7 +28,8 @@ server_info_t	*globals;		/* The current server_info that KI is working on  */
 server_info_t	*prev_int_serverp;	/* Two time server_info_t's to perform 100ms	*/
 server_info_t	*curr_int_serverp;	/* interval stats delta calculations with. See	*/
 					/* kiall_interval_processing() for details.	*/
-runq_info_t	ldrq[MAXLDOMS]; 
+
+runq_info_t	ldrq[MAXLDOMS];
 runq_info_t	prev_int_ldrq[MAXLDOMS];	/* Two runq_info_t's to track delta stats */
 runq_info_t	curr_int_ldrq[MAXLDOMS];	/* for 100ms interval CPU summary.  See   */
 
@@ -56,7 +57,7 @@ int next_sid = 1;
 uint64 idle_time_buckets[IDLE_TIME_NBUCKETS-1]={
         10, 20, 50, 100, 250, 500, 750, 1000, 1250, 1500, 2000, 3000, 5000, 10000, 20000};
 char input_str[4096];
-char util_str[512];
+char util_str[4096];
 char *warnurl_dir = "http://htmlpreview.github.io/?https://github.com/HewlettPackard/LinuxKI/blob/master/documentation";
 char *tab = "\0";    /* report indentation variable; */
 char *tab0 = "\0";    /* report indentation variable; */
@@ -1936,6 +1937,8 @@ arg_action_t arg_actions[MAXARG_ACTIONS] = {
 	futex_val3_str,
 	semctl_cmd_str
 };
+
+short syscall_index_win[MAX_SYSCALL_IDX];
 	
 short syscall_index_x86_64[MAX_SYSCALL_IDX] = {
 	/* read */			0,
@@ -5175,7 +5178,7 @@ short syscall_index_ppc64le[MAX_SYSCALL_IDX] = {
        /* ftime */                     UKN,
        /* sync */                      162,
        /* kill */                      62,
-       /* rename */                    82,
+              /* rename */                    82,
        /* mkdir */                     83,
        /* rmdir */                     84,
        /* dup */                       32,
@@ -6221,8 +6224,16 @@ short syscall_index_ppc64le[MAX_SYSCALL_IDX] = {
 };
 
 
+/* global pointer to OS specific syscall_arg_list */
+syscall_arg_list_t *syscall_arg_list;
 
-syscall_arg_list_t syscall_arg_list[KI_MAXSYSCALLS] = {
+/* Windows will be allocated dynamically */
+syscall_arg_list_t win_syscall_arg_list[KI_MAXSYSCALLS] = {
+{"unknown", "ret", HEX, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP, NULL, SKIP}
+};
+
+/* Linux will be statically allocated */
+syscall_arg_list_t linux_syscall_arg_list[KI_MAXSYSCALLS] = {
 {"read", "ret", HEX, "fd", DECIMAL, "*buf", HEX, "count", DECIMAL, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"write", "ret", HEX, "fd", DECIMAL, "*buf", HEX, "count", DECIMAL, NULL, SKIP, NULL, SKIP, NULL, SKIP},
 {"open", "ret", DECIMAL, "*pathname", HEX, "flags", OFLAGS, "mode", OCTAL, NULL, SKIP, NULL, SKIP, NULL, SKIP},
@@ -6753,4 +6764,85 @@ warnmsg_t warnmsg[MAXNOTEWARN] = {
 	{ "Warning: Excessive CPU time in pcc_cpufreq driver", _HTTP_PCC_CPUFREQ},
 	{ "Warning: Side Channel Attack (Spectre/Meltdown) mitigations present", _HTTP_SSA_VULN},
 
+};
+
+
+char *win_thread_state[MaxThreadStates] = {
+	"Initialized",
+	"Ready",
+	"Running",
+	"Standby",
+	"Terminated",
+	"Waiting",
+	"Transistion",
+	"DeferredReady",
+	"Unknown-8",
+	"Unknown-9"
+
+};
+
+char *win_thread_mode[2] = {
+	"Kernel",
+	"User"
+};
+
+char *win_thread_wait_reason[MaxThreadWaitReasons] = {
+	"Executive",
+	"FreePage",
+	"PageIn",
+	"PoolAllocation",
+	"DelayAllocation",
+	"Suspended",
+	"UserRequest",
+	"WrExecutive",
+	"WrFreePage",
+	"WrPageIn",
+	"WrPoolAllocation",
+	"WrDelayExecution",
+	"WrSuspended",
+	"WrUserRequest",
+	"WrEventPair",
+	"WrQueue",
+	"WrLpcReceive",
+	"WrLpcReply",
+	"WrVirtualMemory",
+	"WrPageOut",
+	"WrRendezvious",
+	"WrKeyedEvent",
+	"WrTerminated",
+	"WrProcessInSwap",
+	"WrCpuRateControl",
+	"WrCalloutStack",
+	"WrKernel",
+	"WrResource",
+	"WrPushLock",
+	"WrMutex",
+	"WrQuantumEnd",
+	"WrDispatchInt",
+	"WrPreempted",
+	"WrYieldExecution",
+	"WrFastMutex",
+	"WrGuardedMutex",
+	"WrRundown",
+	"WrAlertThreadId",
+	"WrDeferredPreempt"
+};
+
+char *win_irq_flags[IRQ_NRBIT] = {
+	"Nocache",
+	"MountCompletion",
+	"SynchronousApi",
+	"AssociatedIrp",
+	"BufferedIo",
+	"DeallocateBuffer",
+	"SynchronousPagingIo",
+	"CreateOperation",
+	"ReadOperation",
+	"WriteOperation",
+	"CloseOperation",
+	"DeferIoCompletion",
+	"ObQueryName",
+	"HoldDeviceQueue",
+	"RetryIoCOmpletion",
+	"ClassCacheOperation"
 };

@@ -1,0 +1,1 @@
+cmd_/home/mcr/rpmbuild/SOURCES/src/liki/likit.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/mcr/rpmbuild/SOURCES/src/liki/likit.ko /home/mcr/rpmbuild/SOURCES/src/liki/likit.o /home/mcr/rpmbuild/SOURCES/src/liki/likit.mod.o

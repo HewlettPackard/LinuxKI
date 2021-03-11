@@ -6720,7 +6720,7 @@ liki_initialize(void)
 	int	i;
 #endif
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(5,8,14)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,10,0)
 	printk(KERN_INFO "LiKI: unsupported kernel version\n");
 	return(-EINVAL);
 #else

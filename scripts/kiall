@@ -1,4 +1,5 @@
 #!/bin/bash
+shopt -s extglob
 #**************************************************************************
 # Copyright 2017 Hewlett Packard Enterprise Development LP.
 # This program is free software; you can redistribute it and/or modify
@@ -45,6 +46,7 @@
 # version 5.4   05/10/2018   Added -M option to leave C++ names mangled
 # version 6.0   11/25/2019   Added -P num_threads to kiall -V for parallel processing
 # version 6.1   04/20/2020   Added -B to collect block frequency statistics for Kparse reports (this takes more time)
+# version 7.0   03/12/2021   Added processing Windows ETL trace files
 # 
 # DESCRIPTION:
 #  
@@ -154,11 +156,14 @@ extract_ki_files()
         gunzip $file
     done
 
-# Check to see if ki.bin files exist.   If so, then we can return 
+# Check to see if ki.bin or etl files exist.   If so, then we can return 
     if [ -f ki.bin.$tag ] ; then 
 	return
     fi
     if [ -f ki.bin.000.$tag ] ; then
+	return
+    fi
+    if [ -f ki.$tag.etl ] ; then
 	return
     fi
 
@@ -180,6 +185,13 @@ extract_ki_files()
 	tar xf ki_all.$NODENAME.$tag.tgz
     elif [ -f ki_all.$tag.tgz ] ; then
 	tar xf ki_all.$tag.tgz
+    fi
+
+# Check for Windows ZIP file 
+    if [ -f ki_all.$NODENAME.$tag.zip ] ; then
+	unzip ki_all.$NODENAME.$tag.zip
+    elif [ -f ki_all.$tag.zip ]; then
+	unzip ki_all.$tag.zip
     fi
 
 # add read access to the files 
@@ -246,12 +258,24 @@ process_mw()
 #	cd ..
 }
 
+process_winki()
+{
+    echo $DIR/kiinfo -kitrace -ts $tag 
+    $DIR/kiinfo -kitrace -ts $tag >ki.$tag
+	    
+    echo $DIR/kiinfo -kiall csv$oracle$mangle$blkfrq -html -ts $tag
+
+    ( $DIR/kiinfo -kiall nop$oracle$mangle$blkfrq -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
+}
+
+
 
 process_ki()
 {
     oracle=""
     echo $DIR/kiinfo -kitrace -ts $tag 
     ( $DIR/kiinfo -kitrace -ts $tag >ki.$tag & )
+
     rm -rf PIDS >/dev/null
     mkdir PIDS
     if [ `grep "ora_" ps-eLf.$tag | wc -l` -gt 0 ] ; then
@@ -345,14 +369,24 @@ process_pwd()
         done
 
         extract_ki_files
-	if [ -f ki.bin.000.$tag ] ; then
+
+# Check for Windows ETL file first 
+	if [ -f ki.$tag.etl ] ; then
+	    if [ ! -f ki.bin.000.$tag ] ; then
+		$DIR/kiinfo -etldump -ts $tag
+	    fi
+	elif [ -f ki.bin.000.$tag ] ; then
 	    likimerge
 	fi
 
 	if [ -f ki.bin.$tag ] ; then
 	    process_ki
 	elif [ -f ki.bin.000.$tag ] ; then
-	    process_ki
+	    if [ -f ki.$tag.etl ] ; then
+		process_winki	
+	    else
+		process_ki
+	    fi
 	else
 	    echo "No ki.bin files found for $tag"
 	fi
@@ -363,12 +397,12 @@ process_r()
 {
 #   Files need to be of the form ki_all.<hostname>.<timestamp>.tgz
 
-    ls ki_all.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]*.tgz >/dev/null 2>&1
+    ls ki_all.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]?(.tgz|.zip) >/dev/null 2>&1
     if [ $? -ne 0 ] ; then
 	echo "No files of the form ki_all.<hostname>.<timestamp>.tgz found in $SAVED_PWD"
 	return;
     fi
-    for tag in `ls ki_all*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9].tgz | awk '{print substr($1,match($1,"[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]"),9)}' | sort | uniq ` 
+    for tag in `ls ki_all.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]?(.tgz|.zip) | awk '{print substr($1,match($1,"[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]"),9)}' | sort | uniq ` 
     do
 	if [ ! -z "$intag" ] ; then
 	    if [ $tag = $intag ] ; then
@@ -378,7 +412,7 @@ process_r()
 	    fi
 	fi
 
-	for NODENAME in `ls ki_all.*.$tag.tgz 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
+	for NODENAME in `ls ki_all.*.$tag?(.tgz|.zip) 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
 	do
 	    if [ ! -z $NODENAME ] ; then
 	        if [ ! -d $NODENAME ] ; then
@@ -388,7 +422,11 @@ process_r()
 	 	    mkdir $NODENAME/$tag
 		fi
 
-		mv ki_all.$NODENAME.$tag.tgz $NODENAME/$tag/ki_all.$NODENAME.$tag.tgz
+		if [ -f ki_all.$NODENAME.$tag.zip ] ; then
+		    mv ki_all.$NODENAME.$tag.zip $NODENAME/$tag/ki_all.$NODENAME.$tag.zip
+		else
+		    mv ki_all.$NODENAME.$tag.tgz $NODENAME/$tag/ki_all.$NODENAME.$tag.tgz
+		fi
 		cd $NODENAME/$tag
 		process_pwd
 	    	cd $SAVED_PWD
@@ -401,7 +439,7 @@ process_c()
 {
 #   Files need to be of the form ki_all.<hostname>.<timestamp>.tgz
 
-    ls ki_all.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]*.tgz >/dev/null 2>&1
+    ls ki_all.*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]?(.tgz|.zip) >/dev/null 2>&1
     if [ $? -ne 0 ] ; then
 #	if there are no ki_all files, then simply run kiinfo in cwd if the -t option is passed
 	if [ ! -z "$intag" ] ; then
@@ -418,7 +456,7 @@ process_c()
 	return
     fi
 
-    for tag in `ls ki_all*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9].tgz 2>/dev/null | awk '{print substr($1,match($1,"[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]"),9)}' | sort | uniq ` 
+    for tag in `ls ki_all*.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]?(.tgz|.zip) 2>/dev/null | awk '{print substr($1,match($1,"[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9]"),9)}' | sort | uniq ` 
     do
 	if [ ! -z "$intag" ] ; then
 	    if [ $tag = $intag ] ; then
@@ -428,7 +466,7 @@ process_c()
 	    fi
 	fi
 
-	for NODENAME in `ls ki_all.*.$tag.tgz 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
+	for NODENAME in `ls ki_all.*.$tag?(.tgz|.zip) 2>/dev/null | sed "s/\./ /g" | awk '{print $2}' | sort`
 	do
 	    if [ ! -d $tag ] ; then
 		mkdir $tag
@@ -437,7 +475,7 @@ process_c()
 	    if [ ! -z $NODENAME ] ; then
 		rm -rf $tag/$NODENAME
 		mkdir $tag/$NODENAME
-		mv ki_all.$NODENAME.$tag.tgz $tag/$NODENAME
+		mv ki_all.$NODENAME.$tag?(.tgz|.zip) $tag/$NODENAME
 		cd $tag/$NODENAME
 		process_pwd
 	    	cd $SAVED_PWD

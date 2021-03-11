@@ -41,8 +41,23 @@ elif [ "$ARCH" == "aarch64" ]; then
 	rm /opt/linuxki/kiinfo >/dev/null 2>&1
 	ln /opt/linuxki/kiinfo.aarch64 /opt/linuxki/kiinfo
 elif [ "$ARCH" == "ppc64le" ]; then
-       rm /opt/linuxki/kiinfo >/dev/null 2>&1
-       ln /opt/linuxki/kiinfo.ppc64le /opt/linuxki/kiinfo
+	rm /opt/linuxki/kiinfo >/dev/null 2>&1
+	grep "SUSE Linux Enterprise Server 15" /etc/os-release >/dev/null 2>&1
+	if [ $? == 0 ]; then
+		ln /opt/linuxki/kiinfo-sles15.ppc64le /opt/linuxki/kiinfo
+	else
+		grep "Red Hat Enterprise Linux 8" /etc/os-release >/dev/null 2>&1
+		if [ $? == 0 ]; then
+                	ln /opt/linuxki/kiinfo-rhel8.ppc64le /opt/linuxki/kiinfo
+		else 
+			grep "CentOS Linux 8" /etc/os-release >/dev/null 2>&1
+			if [ $? == 0 ]; then
+                		ln /opt/linuxki/kiinfo-rhel8.ppc64le /opt/linuxki/kiinfo
+			else
+				ln /opt/linuxki/kiinfo-rhel7_8.ppc64le /opt/linuxki/kiinfo
+			fi
+		fi
+	fi
 else
 	echo "Unknown Architecture.  Only x86_64, aarch64, ppc64le supported"
 	exit 0
@@ -52,6 +67,7 @@ fi
 #
 # Configure/install LiKI module
 #
+rm /opt/linuxki/modules/likit.ko.`uname -r` >/dev/null 2>&1
 /opt/linuxki/module_prep
 
 # 

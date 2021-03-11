@@ -23,6 +23,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <err.h>
 #include "ki_tool.h"
 #include "liki.h"
+#include "winki.h"
 #include "developers.h"
 #include "kd_types.h"
 #include "globals.h"

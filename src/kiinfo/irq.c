@@ -21,6 +21,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <sys/types.h>
 #include "ki_tool.h"
 #include "liki.h"
+#include "winki.h"
 #include "developers.h"
 #include "kd_types.h"
 #include "globals.h"
@@ -54,10 +55,9 @@ update_softirq_times(irq_info_t *irqinfop, int irq, uint64 delta, int irqtype)
 	return 0;
 }
 
-static inline void
-irq_entry_update_stats(common_t *rec_ptr, int irq, int irqtype)
+void
+irq_entry_update_stats(uint64 hrtime, int cpu, int pid, int irq, int irqtype)
 {
-	int cpu = rec_ptr->cpu;
 	cpu_info_t *cpuinfop;
 	sched_info_t *schedp;
 	sched_stats_t *statp;
@@ -65,7 +65,6 @@ irq_entry_update_stats(common_t *rec_ptr, int irq, int irqtype)
 	pid_info_t *pidp;
 	int new_state, old_state;
 	uint64 delta;
-	int pid;
 
 	cpuinfop = GET_CPUP(&globals->cpu_hash, cpu);
 	schedp = GET_ADD_SCHEDP(&cpuinfop->schedp);
@@ -74,12 +73,12 @@ irq_entry_update_stats(common_t *rec_ptr, int irq, int irqtype)
 	old_state = statp->state;
 	new_state = old_state | irqtype;
 	statp->state = new_state;
-	delta = update_sched_time(statp, rec_ptr->hrtime);
+	delta = update_sched_time(statp, hrtime);
 	update_sched_state(statp, old_state, statp->state, delta);
 
 	if (irqtype==SOFTIRQ) {
 		cpuinfop->last_softirq_vec = irq;
-		cpuinfop->last_softirq_time = rec_ptr->hrtime; 
+		cpuinfop->last_softirq_time = hrtime; 
 	} else if (cpuinfop->last_softirq_vec) {
 		/* upate softirq time if we are entering a hardirq
 		 * while in a softirq context
@@ -96,21 +95,20 @@ irq_entry_update_stats(common_t *rec_ptr, int irq, int irqtype)
 	}
 
 	if (perpid_stats) {
-		pid = rec_ptr->pid;
 		pidp = GET_PIDP(&globals->pid_hash, pid);
 		schedp = (sched_info_t *)find_sched_info(pidp);
 		statp = &schedp->sched_stats;
 		old_state = statp->state;
 		new_state = statp->state = old_state | irqtype;
-		delta = update_sched_time(statp, rec_ptr->hrtime);
+		delta = update_sched_time(statp, hrtime);
 		update_sched_state(statp, old_state, statp->state, delta);	
 	}
 
 	return;
 }
 
-static inline uint64
-irq_exit_update_stats(common_t *rec_ptr, int irq, int irqtype)
+uint64
+irq_exit_update_stats(uint64 hrtime, int cpu, int pid, int irq, int irqtype)
 {
 	cpu_info_t *cpuinfop;
 	sched_info_t *schedp;
@@ -119,10 +117,8 @@ irq_exit_update_stats(common_t *rec_ptr, int irq, int irqtype)
 	irq_info_t **irqp;
 	irq_info_t *irqinfop;
 	irq_entry_t *irqentryp;
-	int cpu = rec_ptr->cpu;
 	int new_state, old_state;
 	uint64 delta;
-	int pid;
 
 	cpuinfop = GET_CPUP(&globals->cpu_hash, cpu);
 	schedp =  GET_ADD_SCHEDP(&cpuinfop->schedp);
@@ -140,7 +136,7 @@ irq_exit_update_stats(common_t *rec_ptr, int irq, int irqtype)
 
 	new_state = old_state & ~irqtype;
 	statp->state = new_state;
-	delta = update_sched_time(statp, rec_ptr->hrtime);
+	delta = update_sched_time(statp, hrtime);
 	update_sched_state(statp, old_state, statp->state, delta);
 	if (irqtype == HARDIRQ) {
 		statp->C_hardirq_cnt++;
@@ -161,13 +157,12 @@ irq_exit_update_stats(common_t *rec_ptr, int irq, int irqtype)
 	}
 	
 	if (perpid_stats) {
-		pid = rec_ptr->pid;
 		pidp = GET_PIDP(&globals->pid_hash, pid);
 		schedp = (sched_info_t *)find_sched_info(pidp);
 		statp = &schedp->sched_stats;
 		old_state = statp->state;
 		new_state = statp->state = old_state & ~irqtype;
-		delta = update_sched_time(statp, rec_ptr->hrtime);
+		delta = update_sched_time(statp, hrtime);
 		update_sched_state(statp, old_state, statp->state, delta);	
 		irqtype == HARDIRQ ? statp->C_hardirq_cnt++ : statp->C_softirq_cnt++;
 	}
@@ -180,12 +175,15 @@ static inline int
 print_irq_handler_entry_rec(void *a)
 {
 	irq_handler_entry_t *rec_ptr = (irq_handler_entry_t *)a;
+	char irqname[IRQ_NAME_LEN+4];
 
 	PRINT_COMMON_FIELDS(rec_ptr);
 	PRINT_EVENT(rec_ptr->id);
+	strncpy(&irqname[0], rec_ptr->name, IRQ_NAME_LEN);
+	irqname[IRQ_NAME_LEN] = 0;
 	
 	printf ("%cirq=%d", fsep, rec_ptr->irq);
-	printf ("%cname=%-16s", fsep, rec_ptr->name);
+	printf ("%cname=%-16s", fsep, irqname);
 	printf ("\n");
 
 	return 0;
@@ -246,6 +244,7 @@ irq_handler_entry_func(void *a, void *v)
 	irq_handler_entry_t tt_rec_ptr;
 	irq_handler_entry_t *rec_ptr;
 	irq_name_t *irqnamep;
+	char irqname[IRQ_NAME_LEN+4];
 	int irq;
 	
 	if (debug) printf ("irq_handler_entry_func()\n");
@@ -258,12 +257,15 @@ irq_handler_entry_func(void *a, void *v)
 
 		irqnamep = GET_IRQNAMEP(&globals->irqname_hash, irq);
         	if (irqnamep->name == NULL) {
-                	add_command(&irqnamep->name, rec_ptr->name);
+			strncpy(&irqname[0], rec_ptr->name, IRQ_NAME_LEN);
+			irqname[IRQ_NAME_LEN] = 0;
+
+                	add_command(&irqnamep->name, irqname);
         	}
 
 	}
 
-	irq_entry_update_stats((common_t *)rec_ptr, rec_ptr->irq, HARDIRQ);
+	irq_entry_update_stats(rec_ptr->hrtime, rec_ptr->cpu, rec_ptr->pid, rec_ptr->irq, HARDIRQ);
 
 	if (kitrace_flag) print_irq_handler_entry_rec(rec_ptr);
 	return 0;
@@ -281,7 +283,7 @@ irq_handler_exit_func(void *a, void *v)
 	rec_ptr = conv_irq_handler_exit(a, &tt_rec_ptr);
 
 	if (pertrc_stats) incr_trc_stats(rec_ptr, NULL);
-	delta = irq_exit_update_stats((common_t *)rec_ptr, rec_ptr->irq, HARDIRQ);
+	delta = irq_exit_update_stats(rec_ptr->hrtime, rec_ptr->cpu, rec_ptr->pid, rec_ptr->irq, HARDIRQ);
 	if (kitrace_flag) print_irq_handler_exit_rec(rec_ptr, delta);
 
 	return 0;
@@ -300,7 +302,7 @@ softirq_entry_func(void *a, void *v)
 	rec_ptr = conv_softirq_entry(a, &tt_rec_ptr);
 
 	if (pertrc_stats) incr_trc_stats(rec_ptr, NULL);
-	irq_entry_update_stats((common_t *)rec_ptr, rec_ptr->vec, SOFTIRQ);
+	irq_entry_update_stats(rec_ptr->hrtime, rec_ptr->cpu, rec_ptr->pid, rec_ptr->vec, SOFTIRQ);
 	if (kitrace_flag) print_softirq_entry_rec(rec_ptr);
 
 	return 0;
@@ -319,7 +321,7 @@ softirq_exit_func(void *a, void *v)
 	cpuinfop = GET_CPUP(&globals->cpu_hash, rec_ptr->cpu);
 
 	if (pertrc_stats) incr_trc_stats(rec_ptr, NULL);
-	delta = irq_exit_update_stats((common_t *)rec_ptr, rec_ptr->vec, SOFTIRQ);
+	delta = irq_exit_update_stats(rec_ptr->hrtime, rec_ptr->cpu, rec_ptr->pid, rec_ptr->vec, SOFTIRQ);
 	if (kitrace_flag) {
 		print_softirq_exit_rec(rec_ptr, cpuinfop->last_softirq_time ? rec_ptr->hrtime - cpuinfop->last_softirq_time : delta);
 	}

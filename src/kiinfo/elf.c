@@ -503,8 +503,7 @@ int load_elf(char *fnamep, vtxt_preg_t *pregp)
 
 void *find_vtext_preg(void *arg1, uint64 pc)
 {
-	pid_info_t *pidp = (pid_info_t *)arg1;
-	vtxt_preg_t *pregp = pidp->vtxt_pregp;
+	vtxt_preg_t *pregp = (vtxt_preg_t *)arg1;
 
 	while (pregp != NULL) {
 		if ((pc >= pregp->p_vaddr) && (pc < pregp->p_endaddr)) {

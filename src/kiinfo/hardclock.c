@@ -21,6 +21,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <sys/types.h>
 #include "ki_tool.h"
 #include "liki.h"
+#include "winki.h"
 #include "globals.h"
 #include "developers.h" 
 #include "kd_types.h"
@@ -92,7 +93,7 @@ collect_pc_info(hardclock_t *rec_ptr, hc_info_t *hcinfop, pid_info_t *pidp)
 			/* if multi-threaded, use TGID */
 			if (pidp->PID != pidp->tgid) pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
 
-			if (pregp = find_vtext_preg(pidp, pc)) {
+			if (pregp = find_vtext_preg(pidp->vtxt_pregp, pc)) {
 				if (symlookup(pregp, pc, &offset)) {
 					key = pc - offset;
 				} else if (maplookup(pidp->mapinfop, pc, &offset)) {
@@ -167,7 +168,7 @@ collect_hc_stktrc(hardclock_t *rec_ptr, hc_info_t *hcinfop, pid_info_t *pidp)
 	stktrcp->state = state;
 }
 
-static inline void 
+void 
 hc_update_sched_state(sched_info_t *schedp, int state, uint64 cur_time)
 {
 	if (schedp->sched_stats.state==UNKNOWN) {

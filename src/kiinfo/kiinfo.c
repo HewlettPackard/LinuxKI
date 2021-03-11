@@ -25,6 +25,7 @@
 #include "ki_tool.h"
 #include "option_iface.h"
 #include "liki.h"
+#include "winki.h"
 #include "globals.h"
 #include "developers.h"
 #include "info.h"
@@ -33,6 +34,7 @@
 #include "html.h"
 
 extern void (*init_func)(void *);
+extern void firstpass_init_func(void *);
 extern int open_trace_files();
 extern int close_trace_files(int);
 extern int init_trace_files(int);
@@ -56,7 +58,8 @@ init_t Init;
 char startup_found = 0;
 double realsecs = 0;
 uint64 realtime = 0;
-uint64 start_time = 0;				/* absolute times */
+uint64 start_time = 0;				/* absolute times of first event */
+uint64 winki_start_time = 0;			/* absolute times of first traced event */
 uint64 end_time= 0;
 uint64 prev_vint_time = 0;
 uint64 vis_hostid = 0;
@@ -68,12 +71,16 @@ int64 start_filter_save;
 int64 end_filter= 0xfffffffffffffffull;
 int64 end_filter_save;
 int64 kistep = 0ull;
+uint32 winki_bufsz = 0;
 char	liki_module_loaded = 0;
 char	liki_initialized = 0;
 char *cwd = NULL;
 int nfiles = 0;
 struct utsname utsname;
 char *kgdboc_str = NULL;
+char *tlabel;		/* Thread label for reporting Threads ID */
+char *plabel;		/* Process/Task Group label for reporting Process ID */
+EventTraceHdr_t *winki_hdr = NULL;
 
 trace_info_t  trace_files[MAXCPUS];
 trace_info_t  trace_file_merged;
@@ -183,6 +190,9 @@ main(int argc, char *argv[])
 	} else if (objdump_flag) {
 		objdump();
 		_exit(0);
+	} else if (etldump_flag) {
+		etldump();
+		_exit(0);
 	}
 
 	if (likimerge_flag) {
@@ -216,7 +226,6 @@ main(int argc, char *argv[])
 
 	if (csv_flag) fsep = ',';               /* change field separator for CSV output */ 
 	if (is_alive) {
-
 		if (geteuid() != 0) { 
 			fprintf (stderr, "You must run kinfo as root to perform online tracing\n");
 			_exit(-1);
@@ -239,12 +248,17 @@ main(int argc, char *argv[])
 		parse_uname(0);
 		nservers++;
 
+		syscall_arg_list = linux_syscall_arg_list;
+
 		if (arch_flag == AARCH64) {
 			globals->syscall_index_32 = syscall_index_aarch_64;
 			globals->syscall_index_64 = syscall_index_aarch_64;
 		} else if (arch_flag == PPC64LE) {
 			globals->syscall_index_32 = syscall_index_ppc64le;
 			globals->syscall_index_64 = syscall_index_ppc64le;
+		} else if (IS_WINKI) {
+			globals->syscall_index_32 = syscall_index_win;
+			globals->syscall_index_64 = syscall_index_win;
 		} else {
 			globals->syscall_index_32 = syscall_index_x86_32;
 			globals->syscall_index_64 = syscall_index_x86_64;
@@ -259,6 +273,10 @@ main(int argc, char *argv[])
 
 		/* open debugfs directory needef or LiKI */
 		init_debug_mountpoint(debug_dir);
+
+		tlabel="PID";
+		plabel="TGID";
+
 		init_func(NULL);
 		developers_init();		/* calls liki_init_tracing */ 
 
@@ -299,15 +317,29 @@ main(int argc, char *argv[])
 
 		if (nfiles == 0) FATAL(1010, "Cannot open file of the form ki.bin*.<timestamp>", timestamp, -1);
 
+		if (IS_WINKI) {
+			tlabel="TID";
+			plabel="PID";
+		} else {
+			tlabel="PID";
+			plabel="TGID";
+		}
+
 		init_trace_files(nfiles); 
 		if (!IS_LIKI) kistep = 0;
-		if (!IS_LIKI) read_fmt_files(); 
-		init_trace_ids();
+		if (IS_FTRACE) read_fmt_files(); 
+		if (!IS_WINKI) init_trace_ids(); /* skip this for now */
 
 		parse_uname(1);
 		set_ioflags();
 		set_gfpflags();
 		printf ("KI Binary Version %d\n", globals->kiversion);
+
+		if (IS_WINKI) {
+			syscall_arg_list = win_syscall_arg_list;
+		} else {
+			syscall_arg_list = linux_syscall_arg_list;
+                }
 
 		if (arch_flag == AARCH64) {
 			globals->syscall_index_32 = syscall_index_aarch_64;
@@ -315,14 +347,40 @@ main(int argc, char *argv[])
 		} else if (arch_flag == PPC64LE) {
 			globals->syscall_index_32 = syscall_index_ppc64le;
 			globals->syscall_index_64 = syscall_index_ppc64le;
+		} else if (IS_WINKI) {
+			globals->syscall_index_32 = syscall_index_win;
+			globals->syscall_index_64 = syscall_index_win;
 		} else {
 			globals->syscall_index_32 = syscall_index_x86_32;
 			globals->syscall_index_64 = syscall_index_x86_64;
 		}
 
-		end_filter_save = end_filter;
-		start_filter_save = start_filter;
-		if (kistep) end_filter = start_filter + kistep;
+		if (IS_WINKI) {
+			int reset_kitrace_flag = 0;
+			
+			firstpass_init_func(NULL);
+			developers_call(nfiles);
+			close_trace_files(nfiles);
+
+			nfiles = open_trace_files();
+			if (nfiles == 0)  FATAL(1010, "Cannot open file of the form ki.bin*.<timestamp>", timestamp, -1);
+			init_trace_files(nfiles);
+
+			start_time = 0;
+		} else {
+			end_filter_save = end_filter;
+			start_filter_save = start_filter;
+			if (kistep) end_filter = start_filter + kistep;
+		}
+
+		if (IS_WINKI) {
+			tlabel="TID";
+			plabel="PID";
+		} else {
+			tlabel="PID";
+			plabel="TGID";
+		}
+
 		init_func(NULL);
 
 		while (!done) {
@@ -344,58 +402,96 @@ main(int argc, char *argv[])
 	} else if (timestamp) {
 		cwd = get_current_dir_name();
 		for_each_file(".", "ki.bin.", timestamp, cluster_flag);
+
 		if (nservers == 0) {
 			FATAL(1009, "Cannot open file of the form ki.bin*.<timestamp>", timestamp, -1);
-		} else {
-			sprintf (ts_begin_marker, "kitrace_marker_BEGIN_%s", timestamp);
-			sprintf (ts_end_marker, "kitrace_marker_END_%s", timestamp);
-			if (cluster_flag)  
-				fprintf (stderr, "Number of Servers to analyze: %d\n", nservers);
+		}
 
-			for (i=0; i < nservers; i++) {
-				globals = server[i];
-				start_time = 0;
-				end_time= 0;
-				ret = chdir(globals->subdir);
-				if (cluster_flag) fprintf (stderr, "Processing KI files in %s\n", globals->subdir);
+		sprintf (ts_begin_marker, "kitrace_marker_BEGIN_%s", timestamp);
+		sprintf (ts_end_marker, "kitrace_marker_END_%s", timestamp);
+		if (cluster_flag)  
+			fprintf (stderr, "Number of Servers to analyze: %d\n", nservers);
 
-				nfiles = open_merged_file();
-        			if (nfiles == 0) {
-					nfiles = open_trace_files();
-				}
-
-				if (nfiles == 0)  FATAL(1010, "Cannot open file of the form ki.bin*.<timestamp>", timestamp, -1);
-
-				init_trace_files(nfiles); 
-				if (!IS_LIKI) read_fmt_files(); 
-				init_trace_ids();
-
-				parse_uname(1);
-				set_ioflags();
-				set_gfpflags();
-				printf ("KI Binary Version %d\n", globals->kiversion);
-
-				if (arch_flag == AARCH64) {
-					globals->syscall_index_32 = syscall_index_aarch_64;
-					globals->syscall_index_64 = syscall_index_aarch_64;
-				} else if (arch_flag == PPC64LE) {
-					globals->syscall_index_32 = syscall_index_ppc64le;
-					globals->syscall_index_64 = syscall_index_ppc64le;
-				} else {
-					globals->syscall_index_32 = syscall_index_x86_32;
-					globals->syscall_index_64 = syscall_index_x86_64;
-				}
-
-				init_func(NULL);
-	
-				developers_init();
-				developers_call(nfiles);
-				close_trace_files(nfiles);		
-				save_and_clear_server_stats(nfiles);
-				ret = chdir(cwd);
+		for (i=0; i < nservers; i++) {
+			globals = server[i];
+			start_time = 0;
+			end_time= 0;
+			ret = chdir(globals->subdir);
+			if (cluster_flag) fprintf (stderr, "Processing KI files in %s\n", globals->subdir);
+			nfiles = open_merged_file();
+       			if (nfiles == 0) {
+				nfiles = open_trace_files();
 			}
 
+			if (nfiles == 0)  FATAL(1010, "Cannot open file of the form ki.bin*.<timestamp>", timestamp, -1);
+			init_trace_files(nfiles); 
+
+
+			if (IS_FTRACE) read_fmt_files(); 
+			if (!IS_WINKI) init_trace_ids();  /* skip for now */
+
+			parse_uname(1);
+			set_ioflags();
+			set_gfpflags();
+			printf ("KI Binary Version %d\n", globals->kiversion);
+
+			if (IS_WINKI) {
+				syscall_arg_list = win_syscall_arg_list;
+			} else {
+				syscall_arg_list = linux_syscall_arg_list;
+               		}
+			if (arch_flag == AARCH64) {
+				globals->syscall_index_32 = syscall_index_aarch_64;
+				globals->syscall_index_64 = syscall_index_aarch_64;
+			} else if (arch_flag == PPC64LE) {
+				globals->syscall_index_32 = syscall_index_ppc64le;
+				globals->syscall_index_64 = syscall_index_ppc64le;
+			} else if (IS_WINKI) {
+				globals->syscall_index_32 = syscall_index_win;
+				globals->syscall_index_64 = syscall_index_win;;
+			} else {
+				globals->syscall_index_32 = syscall_index_x86_32;
+				globals->syscall_index_64 = syscall_index_x86_64;
+			}
+
+			if (IS_WINKI) {
+				int reset_kitrace_flag = 0;
+			
+				if (kitrace_flag) {
+					CLEAR(KITRACE_FLAG);
+					reset_kitrace_flag=1;
+				}
+				firstpass_init_func(NULL);
+				developers_call(nfiles);
+				close_trace_files(nfiles);
+
+				nfiles = open_trace_files();
+				if (nfiles == 0)  FATAL(1010, "Cannot open file of the form ki.bin*.<timestamp>", timestamp, -1);
+				init_trace_files(nfiles);
+				if (reset_kitrace_flag) {
+					SET(KITRACE_FLAG);
+				}
+			}
+
+			start_time = 0;
+
+			if (IS_WINKI) {
+				tlabel="TID";
+				plabel="PID";
+			} else {
+				tlabel="PID";
+				plabel="TGID";
+			}
+
+			init_func(NULL);
+
+			developers_init();
+			developers_call(nfiles);
+			close_trace_files(nfiles);		
+			save_and_clear_server_stats(nfiles);
+			ret = chdir(cwd);
 		}
+
 		developers_report();
 
 		if ((!cluster_flag) && (!kiall_flag) && (!kilive)) {

@@ -187,6 +187,68 @@ int	linkcnt=0;
 }
 
 /*
+**      String version of find_add_hash_entry
+*/
+strlle_t *
+find_add_strhash_entry (strlle_t ***hashaddr, int hashsz, int idx, int size, char *str, int len)
+{
+strlle_t **hashptr;
+strlle_t *prevptr, *entryptr;
+#if DEBUG
+int     linkcnt=0;
+#endif
+
+#if DEBUG
+        if (debug) printf ("find_add_strhash_entry(%s %d)\n", str, idx);
+#endif
+        hashptr = *hashaddr;
+        if (hashptr == NULL) {
+                hashptr = calloc(hashsz, sizeof(uint64 *));
+                if (hashptr == NULL) {
+			FATAL(errno, "Unable to malloc hash entry", "hashsz:", hashsz);
+                }
+		CALLOC_LOG(hashptr, hashsz, sizeof(uint64 *));
+
+                *hashaddr = hashptr;
+        }
+	if (len > MAX_STR_LEN) len = MAX_STR_LEN;
+        prevptr = (strlle_t *)&hashptr[idx];
+        entryptr = (strlle_t *)hashptr[idx];
+        while (entryptr != NULL) {
+	
+                if ( !bcmp(&entryptr->key,str,len) ) {
+/*
+			printf ("find_add_strhash_entry(%s %d)\n", str, idx);
+*/
+		        return entryptr;
+
+		}
+                prevptr = entryptr;
+                entryptr = entryptr->next;
+#if DEBUG
+                linkcnt++;
+#endif
+        }
+
+        if (entryptr == NULL) {
+        
+                entryptr = calloc(1, size);
+                if (entryptr == NULL) {
+			FATAL(errno, "Unable to malloc hash entry", "size:", size);
+                }
+		CALLOC_LOG(entryptr, 1, size);
+                bcopy(str, entryptr->key, len); 
+                entryptr->next = NULL;
+                prevptr->next = entryptr;
+        }
+ 
+/*      if (debug) printf ("Exiting find_add_strhash_entry() - new entry created\n"); */
+        return entryptr;
+}
+ 
+
+
+/*
 **      Stack trace version of find_add_hash_entry
 */
 stklle_t *

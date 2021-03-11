@@ -42,6 +42,109 @@ int kparse_dummy_func(uint64, int, void *);
 int kparse_generic_func(void *, void *);
 int kparse_ftrace_print_func(void *, void *);
 
+#include "Thread.h"
+#include "PerfInfo.h"
+#include "DiskIo.h"
+#include "winki_util.h"
+
+static inline void
+kparse_winki_trace_funcs()
+{
+	int i;
+
+        for (i = 0; i < 65536; i++) {
+                ki_actions[i].id = i;
+                ki_actions[i].func = NULL;
+                ki_actions[i].execute = 0;
+        }
+
+        strcpy(&ki_actions[0].subsys[0], "EventTrace");
+        strcpy(&ki_actions[0].event[0], "Header");
+        ki_actions[0].func = winki_header_func;
+        ki_actions[0].execute = 1;
+
+        strcpy(&ki_actions[0x524].subsys[0], "Thread");
+        strcpy(&ki_actions[0x524].event[0], "Cswitch");
+        ki_actions[0x524].func=thread_cswitch_func;
+        ki_actions[0x524].execute = 1;
+
+        strcpy(&ki_actions[0x532].subsys[0], "Thread");
+        strcpy(&ki_actions[0x532].event[0], "ReadyThread");
+        ki_actions[0x532].func=thread_readythread_func;
+        ki_actions[0x532].execute = 1;
+
+        strcpy(&ki_actions[0x548].subsys[0], "Thread");
+        strcpy(&ki_actions[0x548].event[0], "SetName");
+        ki_actions[0x548].func=thread_setname_func;
+        ki_actions[0x548].execute = 1;
+
+        strcpy(&ki_actions[0xf33].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf33].event[0], "SysClEnter");
+        ki_actions[0xf33].func=perfinfo_sysclenter_func;
+        ki_actions[0xf33].execute = 1;
+
+        strcpy(&ki_actions[0xf34].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf34].event[0], "SysClExit");
+        ki_actions[0xf34].func=perfinfo_sysclexit_func;
+        ki_actions[0xf34].execute = 1;
+
+        strcpy(&ki_actions[0x10a].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10a].event[0], "Read");
+        ki_actions[0x10a].func=diskio_readwrite_func;
+        ki_actions[0x10a].execute = 1;
+
+        strcpy(&ki_actions[0x10b].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10b].event[0], "Write");
+        ki_actions[0x10b].func=diskio_readwrite_func;
+        ki_actions[0x10b].execute = 1;
+
+        strcpy(&ki_actions[0x10c].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10c].event[0], "ReadInit");
+        ki_actions[0x10c].func=diskio_init_func;
+        ki_actions[0x10c].execute = 1;
+
+        strcpy(&ki_actions[0x10d].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10d].event[0], "WriteInit");
+        ki_actions[0x10d].func=diskio_init_func;
+        ki_actions[0x10d].execute = 1;
+
+        strcpy(&ki_actions[0x10e].subsys[0], "DiskIo");
+        strcpy(&ki_actions[0x10e].event[0], "FlushBuffers");
+        ki_actions[0x10e].func=diskio_flush_func;
+        ki_actions[0x10e].execute = 1;
+
+        strcpy(&ki_actions[0xf2e].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf2e].event[0], "SampleProfile");
+        ki_actions[0xf2e].func=perfinfo_profile_func;
+        ki_actions[0xf2e].execute = 1;
+
+        strcpy(&ki_actions[0xf32].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf32].event[0], "ISR-MSI");
+        ki_actions[0xf32].func=perfinfo_isr_func;
+        ki_actions[0xf32].execute = 1;
+
+        strcpy(&ki_actions[0xf42].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf42].event[0], "ThreadedDPC");
+        ki_actions[0xf42].func=perfinfo_dpc_func;
+        ki_actions[0xf42].execute = 1;
+
+        strcpy(&ki_actions[0xf43].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf43].event[0], "ISR");
+        ki_actions[0xf43].func=perfinfo_isr_func;
+        ki_actions[0xf43].execute = 1;
+
+        strcpy(&ki_actions[0xf44].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf44].event[0], "DPC");
+        ki_actions[0xf44].func=perfinfo_dpc_func;
+        ki_actions[0xf44].execute = 1;
+
+
+        strcpy(&ki_actions[0xf45].subsys[0], "PerfInfo");
+        strcpy(&ki_actions[0xf45].event[0], "TimeDPC");
+        ki_actions[0xf45].func=perfinfo_dpc_func;
+        ki_actions[0xf45].execute = 1;
+}
+
 /*
  ** The initialisation function
  */
@@ -60,6 +163,15 @@ kparse_init_func(void *v)
         /* We will disregard the trace records until the Marker is found */
         for (i = 0; i < KI_MAXTRACECALLS; i++) {
                 ki_actions[i].execute = 0;
+        }
+
+        if (IS_WINKI) {
+                kparse_winki_trace_funcs();
+
+		parse_systeminfo();
+                parse_cpulist();
+                parse_corelist();
+                return;
         }
 
         /* go ahead and initialize the trace functions, but do not set the execute field */
@@ -388,9 +500,11 @@ kparse_print_report(void *v)
         kp_wait_for_cpu();  	 			/* Section 2.2 */
         kp_runq_statistics();				/* Section 2.2.2 */
         kp_top_runq_pids();				/* Section 2.2.3 */
-	kp_futex();					/* Section 2.3 */
-	kp_futex_summary_by_cnt();			/* Section 2.3.1 */
-	kp_futex_summary_by_time();			/* Section 2.3.2 */
+	if (!IS_WINKI) {
+		kp_futex();					/* Section 2.3 */
+		kp_futex_summary_by_cnt();			/* Section 2.3.1 */
+		kp_futex_summary_by_time();			/* Section 2.3.2 */
+	}
 
 	kp_file_activity();				/* Section 3.0 */
 	kp_file_ops();					/* Section 3.1 */
@@ -407,16 +521,18 @@ kparse_print_report(void *v)
         kp_highwait_disks();				/* Section 4.2.4 */
         kp_requeue_disks();				/* Section 4.2.5 */
         kp_dsk_histogram();				/* Section 4.2.6 */
-	kp_mapper_report();				/* Section 4.3 */
-	kp_active_mapper_devs();			/* Section 4.3.1 */
-	kp_hiserv_mapper_devs();			/* Section 4.3.2 */
-	kp_fc_totals();					/* Section 4.4 */
-	kp_wwn_totals();				/* Section 4.5 */
-	kp_perpid_mdev_totals();			/* Section 4.6 */
+	if (!IS_WINKI) {
+		kp_mapper_report();				/* Section 4.3 */
+		kp_active_mapper_devs();			/* Section 4.3.1 */
+		kp_hiserv_mapper_devs();			/* Section 4.3.2 */
+		kp_fc_totals();					/* Section 4.4 */
+		kp_wwn_totals();				/* Section 4.5 */
+		kp_perpid_mdev_totals();			/* Section 4.6 */
+	}
 	kp_perpid_dev_totals();				/* Section 4.7 */
 	if (dskblk_stats) {
-        	kp_dskblk_read();  		        /* Section 4.8 */
-        	kp_dskblk_write();			/* Section 4.9 */
+        	kp_dskblk_read();          		        /* Section 4.8 */
+        	kp_dskblk_write();      		        /* Section 4.9 */
 	}
 
 	kp_network();					/* Section 5.0 */

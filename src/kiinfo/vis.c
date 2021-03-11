@@ -1116,7 +1116,7 @@ print_task_tlinedata(void *arg1, void *arg2)
 
 	if (add_hdr) {
 		sprintf(pid_timeline_buffer, "hostname,timestamp,subdir,server_id,interval,start,end,pid,syscalls,runtime,systime,usertime,runqtime,sleeptime,irqtime,totaltime,stealtime,switch_cnt,sleep_cnt,preempt_cnt,wakeup_cnt,run_per_csw,migr,nodemigr,totalio,readio,writeio\n");
-		write (pid_timeline_csv_fd, pid_timeline_buffer, strlen(pid_timeline_buffer));
+		ret = write (pid_timeline_csv_fd, pid_timeline_buffer, strlen(pid_timeline_buffer));
 	}
 
 	sprintf(pid_timeline_buffer, "%s,%s,%s,%d,%d,%.06f,%.06f,%d,%d,",
@@ -1129,7 +1129,7 @@ print_task_tlinedata(void *arg1, void *arg2)
                 SECS(interval_end - start_time),	
 		(int)pidp->PID,
 		pidp->syscall_cnt);
-	write (pid_timeline_csv_fd, pid_timeline_buffer, strlen(pid_timeline_buffer));
+	ret = write (pid_timeline_csv_fd, pid_timeline_buffer, strlen(pid_timeline_buffer));
 
         sprintf(pid_timeline_buffer, "%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%7.6f,%d,%d,%d,%d,%7.6f,%d,%d,%d,%d,%d\n",
                 SECS(statp->T_run_time),
@@ -1150,7 +1150,7 @@ print_task_tlinedata(void *arg1, void *arg2)
 		rstatp->compl_cnt + wstatp->compl_cnt,
 		rstatp->compl_cnt,
 		wstatp->compl_cnt);
-	write (pid_timeline_csv_fd, pid_timeline_buffer, strlen(pid_timeline_buffer));
+	ret = write (pid_timeline_csv_fd, pid_timeline_buffer, strlen(pid_timeline_buffer));
 	
 	close(pid_timeline_csv_fd);
 }

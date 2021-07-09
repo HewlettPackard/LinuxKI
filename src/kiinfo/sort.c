@@ -1449,9 +1449,66 @@ fdata_sort_by_syscalls(const void *v1, const void *v2)
 	const uint64 *p2=v2;
 	fdata_info_t *a1 = (fdata_info_t *)*p1;
 	fdata_info_t *a2 = (fdata_info_t *)*p2;
-	int64 diff;
 
 	return (int)(a2->stats.syscall_cnt - a1->stats.syscall_cnt);
+}
+
+int
+fobj_sort_by_logio(const void *v1, const void *v2)
+{
+	const uint64 *p1=v1;
+	const uint64 *p2=v2;
+	fileobj_t *a1 = (fileobj_t *)*p1;
+	fileobj_t *a2 = (fileobj_t *)*p2;
+	int64 diff;
+
+	diff = a1->liostats[IOTOT].bytes - a2->liostats[IOTOT].bytes;
+        if (diff < 0) {
+                return 1;
+        } else if (diff > 0) {
+                return -1;
+        } else {
+                return 0;
+        }
+}
+
+int
+fobj_sort_by_physio(const void *v1, const void *v2)
+{
+	const uint64 *p1=v1;
+	const uint64 *p2=v2;
+	fileobj_t *a1 = (fileobj_t *)*p1;
+	fileobj_t *a2 = (fileobj_t *)*p2;
+	int64 diff;
+
+	diff = a1->piostats[IOTOT].sect_xfrd - a2->piostats[IOTOT].sect_xfrd;
+        if (diff < 0) {
+                return 1;
+        } else if (diff > 0) {
+                return -1;
+        } else {
+                return 0;
+        }
+}
+
+int
+fdev_sort_by_physio(const void *v1, const void *v2)
+{
+	const uint64 *p1=v1;
+	const uint64 *p2=v2;
+	filedev_t *a1 = (filedev_t *)*p1;
+	filedev_t *a2 = (filedev_t *)*p2;
+	int64 diff;
+
+	diff = a1->stats[IOTOT].sect_xfrd - a2->stats[IOTOT].sect_xfrd;
+
+        if (diff < 0) {
+                return 1;
+        } else if (diff > 0) {
+                return -1;
+        } else {
+                return 0;
+        }
 }
 
 /*

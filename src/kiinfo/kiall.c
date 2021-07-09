@@ -29,8 +29,11 @@
 #include "kprint.h"
 
 #include "Thread.h"
+#include "Process.h"
 #include "PerfInfo.h"
 #include "DiskIo.h"
+#include "NetIp.h"
+#include "FileIo.h"
 #include "winki_util.h"
 
 int kiall_dummy_func(uint64, int, void *);
@@ -44,99 +47,40 @@ int itimes_fd = -1;
 static inline void
 kiall_winki_trace_funcs()
 {
-        int i;
-
-        for (i = 0; i < 65536; i++) {
-                ki_actions[i].id = i;
-                ki_actions[i].func = NULL;
-                ki_actions[i].execute = 0;
-        }
-
-        strcpy(&ki_actions[0].subsys[0], "EventTrace");
-        strcpy(&ki_actions[0].event[0], "Header");
-        ki_actions[0].func = winki_header_func;
-        ki_actions[0].execute = 1;
-
-        strcpy(&ki_actions[0x524].subsys[0], "Thread");
-        strcpy(&ki_actions[0x524].event[0], "Cswitch");
-        ki_actions[0x524].func=thread_cswitch_func;
-        ki_actions[0x524].execute = 1;
-
-        strcpy(&ki_actions[0x532].subsys[0], "Thread");
-        strcpy(&ki_actions[0x532].event[0], "ReadyThread");
-        ki_actions[0x532].func=thread_readythread_func;
-	        ki_actions[0x532].execute = 1;
-
-        strcpy(&ki_actions[0x548].subsys[0], "Thread");
-        strcpy(&ki_actions[0x548].event[0], "SetName");
-        ki_actions[0x548].func=thread_setname_func;
-        ki_actions[0x548].execute = 1;
-
-        strcpy(&ki_actions[0xf33].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf33].event[0], "SysClEnter");
-        ki_actions[0xf33].func=perfinfo_sysclenter_func;
-        ki_actions[0xf33].execute = 1;
-
-        strcpy(&ki_actions[0xf34].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf34].event[0], "SysClExit");
-        ki_actions[0xf34].func=perfinfo_sysclexit_func;
-        ki_actions[0xf34].execute = 1;
-
-        strcpy(&ki_actions[0x10a].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10a].event[0], "Read");
-        ki_actions[0x10a].func=diskio_readwrite_func;
-        ki_actions[0x10a].execute = 1;
-
-        strcpy(&ki_actions[0x10b].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10b].event[0], "Write");
-        ki_actions[0x10b].func=diskio_readwrite_func;
-        ki_actions[0x10b].execute = 1;
-
-        strcpy(&ki_actions[0x10c].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10c].event[0], "ReadInit");
-        ki_actions[0x10c].func=diskio_init_func;
-        ki_actions[0x10c].execute = 1;
-
-	        strcpy(&ki_actions[0x10d].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10d].event[0], "WriteInit");
-        ki_actions[0x10d].func=diskio_init_func;
-        ki_actions[0x10d].execute = 1;
-
-        strcpy(&ki_actions[0x10e].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10e].event[0], "FlushBuffers");
-        ki_actions[0x10e].func=diskio_flush_func;
-        ki_actions[0x10e].execute = 1;
-
-        strcpy(&ki_actions[0xf2e].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf2e].event[0], "SampleProfile");
-        ki_actions[0xf2e].func=perfinfo_profile_func;
-        ki_actions[0xf2e].execute = 1;
-
-        strcpy(&ki_actions[0xf32].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf32].event[0], "ISR-MSI");
-        ki_actions[0xf32].func=perfinfo_isr_func;
-        ki_actions[0xf32].execute = 1;
-
-        strcpy(&ki_actions[0xf42].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf42].event[0], "ThreadedDPC");
-        ki_actions[0xf42].func=perfinfo_dpc_func;
-        ki_actions[0xf42].execute = 1;
-
-        strcpy(&ki_actions[0xf43].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf43].event[0], "ISR");
-        ki_actions[0xf43].func=perfinfo_isr_func;
-        ki_actions[0xf43].execute = 1;
-
-        strcpy(&ki_actions[0xf44].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf44].event[0], "DPC");
-        ki_actions[0xf44].func=perfinfo_dpc_func;
-        ki_actions[0xf44].execute = 1;
-
-
-        strcpy(&ki_actions[0xf45].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf45].event[0], "TimeDPC");
-        ki_actions[0xf45].func=perfinfo_dpc_func;
-        ki_actions[0xf45].execute = 1;
+	winki_init_actions(NULL);
+        winki_enable_event(0x10a, diskio_readwrite_func);
+        winki_enable_event(0x10b, diskio_readwrite_func);
+        winki_enable_event(0x10c, diskio_init_func);
+        winki_enable_event(0x10d, diskio_init_func);
+        winki_enable_event(0x10e, diskio_flush_func);
+	winki_enable_event(0x30a, process_load_func);
+	winki_enable_event(0x400, fileio_name_func);
+	winki_enable_event(0x420, fileio_name_func);
+	winki_enable_event(0x423, fileio_name_func);
+	winki_enable_event(0x440, fileio_create_func);
+	winki_enable_event(0x443, fileio_readwrite_func);
+	winki_enable_event(0x444, fileio_readwrite_func);
+	winki_enable_event(0x524, thread_cswitch_func);
+	winki_enable_event(0x532, thread_readythread_func);
+	winki_enable_event(0x548, thread_setname_func);
+	winki_enable_event(0x60a, tcpip_sendipv4_func);
+	winki_enable_event(0x60b, tcpip_recvipv4_func);
+	winki_enable_event(0x60e, tcpip_retransmitipv4_func);
+	winki_enable_event(0x61a, tcpip_sendipv6_func);
+	winki_enable_event(0x61b, tcpip_recvipv6_func);
+	winki_enable_event(0x61e, tcpip_retransmitipv6_func);
+	winki_enable_event(0x80a, udpip_sendipv4_func);
+	winki_enable_event(0x80b, udpip_recvipv4_func);
+	winki_enable_event(0x81a, udpip_sendipv6_func);
+	winki_enable_event(0x81b, udpip_recvipv6_func);
+        winki_enable_event(0xf33, perfinfo_sysclenter_func);
+        winki_enable_event(0xf34, perfinfo_sysclexit_func);
+        winki_enable_event(0xf2e, perfinfo_profile_func);
+        winki_enable_event(0xf32, perfinfo_isr_func);
+        winki_enable_event(0xf42, perfinfo_dpc_func);
+        winki_enable_event(0xf43, perfinfo_isr_func);
+        winki_enable_event(0xf44, perfinfo_dpc_func);
+        winki_enable_event(0xf45, perfinfo_dpc_func);
 }
 
 /*
@@ -190,7 +134,7 @@ kiall_init_func(void *v)
                 parse_systeminfo();
                 parse_cpulist();
                 parse_corelist();
-
+		parse_SQLThreadList();
                 return;
         }
 
@@ -302,6 +246,7 @@ kiall_init_func(void *v)
         dsk_io_sizes[8]= 1000;
 
 	parse_cpuinfo();
+	parse_mem_info();
 	if (is_alive) parse_cpumaps();
 	parse_kallsyms();
 	parse_devices();
@@ -338,7 +283,7 @@ kiall_preprocess_func(void *a, void *v)
         common_t        *rec_ptr;
 
 	rec_ptr = conv_common_rec(trcinfop, &tt_rec_ptr);
-	kiall_interval_processing(rec_ptr->hrtime);
+	if (vis) kiall_interval_processing(rec_ptr->hrtime);
 }
 
 void
@@ -668,6 +613,7 @@ kiall_print_report(void *v)
 	printf ("\nTotal time captured (secs): %3.2f\n", globals->total_secs);
 	print_cpu_buf_info();
 	close_csv_file(dsk_csvfile);
+	dsk_csvfile = NULL;
 	SET_STAT(PERCPU_STATS);
 
 	if (globals->hcinfop) {
@@ -717,8 +663,20 @@ kiall_print_report(void *v)
 	print_cpu_buf_info();
 	close_csv_file(wait_csvfile);
 
-	/* The rest of the reports are not ready yet */
-	if (IS_WINKI) return 0;
+	sprintf(fname, "kisock.%s.txt", timestamp);
+	if (freopen(fname, "w", stdout) == NULL) {
+		fprintf (stderr, "Unable to rename stdout to %s (errno: %d)\n", fname, errno);
+		return 0;
+	}
+        printf("Command line: %s -kisock nsock=30, -ts %s\n\n", cmdstr, timestamp);
+        printf ("%s (%s)\n\n", tool_name, tool_version);
+	parse_uname(1);
+	nfile=30;
+	socket_csvfile = open_csv_file("kisock", 1);
+	socket_print_report(v);
+	printf ("\nTotal time captured (secs): %3.2f\n", globals->total_secs);
+	print_cpu_buf_info();
+	close_csv_file(socket_csvfile);
 
 	sprintf(fname, "kifile.%s.txt", timestamp);
 	if (freopen(fname, "w", stdout) == NULL) {
@@ -734,21 +692,10 @@ kiall_print_report(void *v)
 	printf ("\nTotal time captured (secs): %3.2f\n", globals->total_secs);
 	print_cpu_buf_info();
 	close_csv_file(file_csvfile);
+	file_csvfile = NULL;
 
-	sprintf(fname, "kisock.%s.txt", timestamp);
-	if (freopen(fname, "w", stdout) == NULL) {
-		fprintf (stderr, "Unable to rename stdout to %s (errno: %d)\n", fname, errno);
-		return 0;
-	}
-        printf("Command line: %s -kisock nsock=30, -ts %s\n\n", cmdstr, timestamp);
-        printf ("%s (%s)\n\n", tool_name, tool_version);
-	parse_uname(1);
-	nfile=30;
-	socket_csvfile = open_csv_file("kisock", 1);
-	socket_print_report(v);
-	printf ("\nTotal time captured (secs): %3.2f\n", globals->total_secs);
-	print_cpu_buf_info();
-	close_csv_file(socket_csvfile);
+	/* The rest of the reports are not ready yet */
+	if (IS_WINKI) return 0;
 
 	sprintf(fname, "kifutex.%s.txt", timestamp);
 	if (freopen(fname, "w", stdout) == NULL) {

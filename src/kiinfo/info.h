@@ -224,14 +224,16 @@ extern int    pid_report_func(void *);
 extern int    pid_print_report(void *);
 extern int    pid_bufmiss_func(void *, void *);
 extern void   parse_dmidecode();
-extern void    parse_systeminfo();   /* WinKI */
+extern void   parse_systeminfo();   /* WinKI */
 extern int    parse_cpulist();   /* WinKI */
-extern int   parse_corelist();	 /* WinKI */
+extern int    parse_corelist();	 /* WinKI */
+extern int    parse_SQLThreadList(); /* WinKI */
 extern void   parse_cpuinfo();
 extern void   parse_cpumaps();
 extern void   parse_mpsched();
 extern void   parse_mpscheds();
 extern void   parse_mem_info();
+extern void   parse_dmidecode();
 extern void   parse_lsof();
 extern void   parse_ll_R();
 extern void   parse_maps();
@@ -247,6 +249,7 @@ extern void   parse_pself();
 extern void   parse_jstack();
 extern void   parse_scavuln(char);
 extern void   parse_devices();
+extern void   io_controllers(uint64 *, char);
 extern void   print_docker_ps();
 extern uint64 get_container_id (char *);
 extern int    pid_alarm_func(void *);
@@ -308,6 +311,7 @@ extern int    dsk_alarm_func(void *);
 extern int    dsk_bucket_adjust();
 extern int    dsk_print_dev_iostats(void *, void *);
 extern int    dsk_print_dev_iostats_total(void *, void *);
+extern int    print_dev_iostats(void *, char *, char*, char *, char *, uint64, FILE *);
 extern int    incr_io_histogram(uint32 *, int, uint64);
 extern int    sum_iostat(void *, void *);
 extern int    sum_iostats(void *, void *);
@@ -435,6 +439,7 @@ extern int    socket_print_rip(void *, void *);
 extern int    socket_print_lsock(void *, void *);
 extern int    socket_print_rsock(void *, void *);
 extern int    socket_print_sdata(void *, void *);
+extern int    socket_print_perpid_sdata(void *, void *);
 
 
 

@@ -101,8 +101,10 @@ bsearch_pdb_symtab(uint64 ip, pdb_symidx_t *symtab, int nsyms  )
 static	char		*ntkrnlmp_pdb = "ntkrnlmp.pdb";
 static	char 		*kernelbase_pdb = "kernelbase.pdb";
 static	char 		*sqldk_pdb = "SqlDK.pdb";
+static  char		*sqltses_pdb = "SqlTsEs.pdb";
 static	char 		*ntfs_pdb = "ntfs.pdb";
 static	char 		*fltmgr_pdb = "fltMgr.pdb";
+static  char		*msvcr120_pdb = "msvcr120.amd64.pdb";
 
 char *
 win_symlookup(vtxt_preg_t *pregp, uint64 ip, uint64 *symaddr)
@@ -134,12 +136,17 @@ win_symlookup(vtxt_preg_t *pregp, uint64 ip, uint64 *symaddr)
 			pdbname = kernelbase_pdb;
 		} else if (strncmp(pregp->filename, "sqldk.dll", strlen("sqldk.dll")) == 0) {
 			pdbname = sqldk_pdb;
+		} else if (strncmp(pregp->filename, "sqltses.dll", strlen("sqltses.dll")) == 0) {
+			pdbname = sqltses_pdb;
 		} else if (strncmp(pregp->filename, "NTFS.sys", strlen("Ntfs.sys")) == 0) {
 			pdbname = ntfs_pdb;
 		} else if (strncmp(pregp->filename, "Ntfs.sys", strlen("Ntfs.sys")) == 0) {
 			pdbname = ntfs_pdb;
 		} else if (strncmp(pregp->filename, "FLTMGR.SYS", strlen("FLTMGR.SYS")) == 0) {
 			pdbname = fltmgr_pdb;
+                } else if (strncmp(pregp->filename, "msvcr120.dll", strlen("msvcr120.dll")) == 0) {
+                        pdbname = msvcr120_pdb;
+
 		} else {
 			sprintf (util_str, pregp->filename);
 			pdbname = &util_str[0];
@@ -641,6 +648,16 @@ int filter_pdb(char *name)
 	else if (strcasestr(name, "wow64cpu.pdb") == name) return 1;
 	else if (strcasestr(name, "qds.pdb") == name) return 1;
 	else if (strcasestr(name, "afd.pdb") == name) return 1;
+	else if (strcasestr(name, "msvcr120.amd64.pdb") == name) return 1;
+	else if (strcasestr(name, "kernel32.pdb") == name) return 1;
+        else if (strcasestr(name, "user32.pdb") == name) return 1;
+        else if (strcasestr(name, "win32u.pdb") == name) return 1;
+        else if (strcasestr(name, "win32k.pdb") == name) return 1;
+	else if (strcasestr(name, "win32kfull.pdb") == name) return 1;
+        else if (strcasestr(name, "rdsdwmdr.pdb") == name) return 1;
+        else if (strcasestr(name, "dwmredir.pdb") == name) return 1;
+        else if (strcasestr(name, "dwmcore.pdb") == name) return 1;
+	else if (strcasestr(name, "intelppm.pdb") == name) return 1;
 
 	if (pdbfiles == NULL) return 0;
 	
@@ -696,7 +713,8 @@ build_symbol_table_from_txt(char *pdbname, char *txtname)
 
 	rtnptr = fgets((char *)&util_str, 4095, txtfile);
 	while (rtnptr != NULL) {
-		if (strstr(util_str, "SymTag"))  i++;
+		sscanf (util_str, "%llx %d %s %s\n", &addr, &tmp, tag, symbol);
+		if (strstr(tag, "SymTag") && (addr > 0x400000)) i++;
 		rtnptr = fgets((char *)&util_str, 4095, txtfile);
 	}
 		
@@ -722,7 +740,7 @@ build_symbol_table_from_txt(char *pdbname, char *txtname)
 		sscanf (util_str, "%llx %d %s %s\n", &addr, &tmp, tag, symbol);
 		/*  if (i > (nsyms-10))  printf ("addr: 0x%llx tag: %s symbol: %s\n", addr, tag, symbol); */
 
-		if (strstr(tag, "SymTag")) {
+		if (strstr(tag, "SymTag") && (addr > 0x400000)) {
 			pdbinfop->symtab[i].symaddr = addr - 0x400000;
 			add_string(&pdbinfop->symtab[i].symptr, symbol);
 			i++;
@@ -869,6 +887,12 @@ int get_pdb(PdbImage_t *p)
         if (ptr = strrchr(name, '\\')) {
                 name = ++ptr;
         }
+
+	if (strncmp(&name[0], "sqldk.pdb", strlen("sqldk.pdb")) == 0) {
+		name = sqldk_pdb;
+	} else if (strncmp(&name[0], "sqltses.pdb", strlen("sqltses.pdb")) == 0) {
+		name = sqltses_pdb;
+	}
 
 	/* Currently native PDB files are not supported,
 	 * so we will have to use the *.txt files created by pdbdump

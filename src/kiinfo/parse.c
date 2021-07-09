@@ -63,6 +63,7 @@ int pc_rwsem_down_write_failed = -1;
 int pc_mutex_lock_slowpath = -1;
 int pc_kstat_irqs_usr = -1;
 int pc_pcc_cpufreq_target = -1;
+int pc_kvm_mmu_page_fault = -1;
 
 
 void
@@ -116,7 +117,11 @@ parse_mem_info()
 	char fname[30];
 	char *rtnptr;
 	char varname[30];
-	int tot_memory;
+	int node;
+	ldom_info_t *ldominfop;
+	uint64 node_mem, node_free, node_used, node_shmem, node_thp, node_hp, node_hp_free;
+	char kb1[16], kb2[16], kb3[16], kb4[16], kb5[16], kb6[16];
+
 
 	if (is_alive) {
 		sprintf(fname, "/proc/meminfo");
@@ -132,10 +137,25 @@ parse_mem_info()
 
 	rtnptr = fgets((char *)&input_str, 127, f);
 	while (rtnptr != NULL) {
+		node = -1;
 		if ((strncmp(input_str, "Mem:", 4) == 0) || (strncmp(input_str, "MemTotal:", 9) == 0)) {
 			sscanf (input_str,"%s %lld", varname, &globals->memkb);
-			break;
 		}
+
+		if (strncmp(input_str, "Node_", 5) == 0) {
+			sscanf(input_str+5, "%d %lld%s %lld%s %11d%s", 
+				&node, &node_mem, kb1, 
+				&node_free, kb2, 
+				&node_used, kb3);
+
+			if (node >= 0) {
+				ldominfop = GET_LDOMP(&globals->ldom_hash, node);
+				ldominfop->memkb = node_mem;
+				ldominfop->freekb = node_free;
+				ldominfop->usedkb = node_used;
+			}
+		}
+
 		rtnptr = fgets((char *)&input_str, 127, f);
 	}
 }
@@ -1549,6 +1569,7 @@ parse_kallsyms()
 		else if (strcmp(globals->symtable[i].nameptr, "kstat_irqs_usr") == 0)  pc_kstat_irqs_usr = i; 
 		else if (strcmp(globals->symtable[i].nameptr, "__mutex_lock_slowpath") == 0)  pc_mutex_lock_slowpath = i; 
 		else if (strcmp(globals->symtable[i].nameptr, "pcc_cpufreq_target") == 0)  pc_pcc_cpufreq_target = i; 
+		else if (strcmp(globals->symtable[i].nameptr, "kvm_mmu_page_fault") == 0) pc_kvm_mmu_page_fault = i;
 	}
 
 	globals->nsyms = nsyms;
@@ -2197,6 +2218,84 @@ parse_corelist()
 	return 0;
 }
 
+int
+parse_SQLThreadList() 
+{
+	int fd, ret, i = 0;
+	struct stat statbuf;
+	uint64 offset = 0, addr, size, len=0;
+	char *mapptr, *chr, *pos;
+	char fname[32];
+	int pid, tid;
+	pid_info_t *pidp, *tgidp;
+	char instance[32], thrname[64];
+
+        sprintf(fname, "SQLThreadList.%s", timestamp);
+
+	if ((fd = open(fname, O_RDONLY)) < 0)  {
+		if (debug) {
+			fprintf(stderr, "Unable to open file %s for processing, continuing without SQL Thread List\n", fname);
+			perror("open error");
+		}
+		return -1;
+	}
+
+	if ((ret = fstat(fd, &statbuf)) < 0) {
+		if (debug) {
+			fprintf(stderr, "Unable to stat file %s for processing, continuing\n", fname);
+			perror("fstat error");
+		}
+		close(fd);
+		return 0;
+	}
+
+	if ((size = statbuf.st_size) == 0) {
+		if (debug) {
+			fprintf(stderr, "SQL Thread List file %s is empty, continuing\n", fname);
+		}
+		close(fd);
+		return 0;
+	}
+
+	size = statbuf.st_size;
+	mapptr = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
+        if (mapptr == MAP_FAILED) {
+                fprintf(stderr, "Unable to mmap file %s for processing\n", fname);
+                close(fd);
+                return 0;
+        }
+
+        close (fd);
+
+        if ((mapptr[0] != (char)0xff) || (mapptr[1] != (char)0xfe)) {
+                fprintf (stderr, "Invalid SQL Thread List file %s, skipping\n", fname);
+                return 0;
+        }
+
+        chr = mapptr+2;
+        while (chr < mapptr + (size-4)) {
+                GET_WIN_LINE(util_str, chr);
+
+		if (strncmp(util_str, "PID,INSTANCE", 12) == 0) continue;
+
+		sscanf(util_str, "%d,%[^,],%d,%[^\r]", &pid, instance, &tid, thrname); 
+		/* printf ("%d <%s> %d <%s>\n", pid, instance, tid, thrname); */
+
+		if (tid) {
+			pidp = GET_PIDP(&globals->pid_hash, tid);
+			add_command(&pidp->thread_cmd, thrname);
+			if (pid) {
+				tgidp = GET_PIDP(&globals->pid_hash, pid);
+				pidp->tgid = pid;
+				add_command (&tgidp->hcmd, instance);
+			}
+		}
+	}
+
+	munmap(mapptr, size);
+}
+
+
 long
 get_memkb(char *str) 
 {
@@ -2271,3 +2370,189 @@ parse_systeminfo()
 	
 	fclose(f);
 }
+
+int get_max_sectors_kb()
+{
+	FILE *f = NULL; 
+	char fname[32];
+	char *rtnptr, *pos, *end;
+	int max_max_sectors_kb = 0, max_sectors_kb;
+
+	sprintf (fname, "block_params.%s", timestamp);
+
+	if ( (f = fopen(fname,"r")) == NULL) {
+                return 0;
+        }
+
+	while (1) {
+		rtnptr = fgets((char *)&input_str, 511, f);
+		if (rtnptr == NULL) {
+			/* stop if at the end of the file */
+			break;
+		}
+		if ((strncmp(input_str, "/sys/block/sd", 13) == 0) && 
+		     strstr(input_str, "max_sectors_kb")) {
+			/* get the max_sector_kb */
+			pos = strchr(input_str, ':');
+			pos++;
+			sscanf (pos, "%d", &max_sectors_kb);
+			max_max_sectors_kb = MAX(max_max_sectors_kb, max_sectors_kb);
+		}
+	}
+
+	fclose(f);
+	return max_max_sectors_kb;
+}
+
+int show_fc_linkspeeds()
+{
+	FILE *f = NULL; 
+	char fname[30];
+	char *rtnptr;
+
+	sprintf (fname, "fc_linkspeed.%s", timestamp);
+
+	if ( (f = fopen(fname,"r")) == NULL) {
+                return 0;
+        }
+
+	BOLD ("\n** Fibre Channel Link Speeds **\n");
+	while (1) {
+		rtnptr = fgets((char *)&input_str, 511, f);
+		if (rtnptr == NULL) {
+			/* stop if at the end of the file */
+			break;
+		}
+
+		printf("%s", input_str);
+	}
+	fclose(f);
+}
+
+void 
+io_controllers(uint64 *warnflagp, char print_flag)
+{
+	FILE *f = NULL;
+	char fname[32];
+	char *rtnptr;
+	int max_sectors_kb;
+
+	if (IS_WINKI) return;
+
+	max_sectors_kb = get_max_sectors_kb();
+
+	sprintf (fname, "lspci-v.%s", timestamp);
+
+        if ( (f = fopen(fname,"r")) == NULL) {
+                fprintf (stderr, "Unable to open file %s, errno %d\n", fname, errno);
+                fprintf (stderr, "Continuing without checking RAID controllers\n");
+                return;
+        }
+
+	while (1) {
+		rtnptr = fgets((char *)&input_str, 511, f);
+		if (rtnptr == NULL) {
+			/* stop if at the end of the file */
+			break;
+		}
+		if (strstr(input_str, " Fibre Channel: ") ||
+		    strstr(input_str, " RAID bus controller: ") || 
+		    strstr(input_str, " Attached SCSI controller: ")) {
+			if (print_flag)  printf("%s", input_str);
+
+			/* Read next line to get subsystem */  
+			rtnptr = fgets((char *)&input_str, 511, f);
+			if (rtnptr == NULL) {
+				/* stop if at the end of the file */
+				break;
+			}
+
+			if ((max_sectors_kb > 1024) && 
+			    (strstr(input_str, " P4") || strstr(input_str, " P8"))) {
+				(*warnflagp) |= WARNF_CACHE_BYPASS;
+				RED_FONT;
+			}
+
+			if (print_flag)  printf("%s", input_str);
+			BLACK_FONT;
+		}
+	}
+
+	fclose(f);
+
+	show_fc_linkspeeds();
+}
+
+void
+parse_dmidecode() 
+{
+	FILE *f = NULL;
+	char fname[30];
+	char *rtnptr;
+	int size, speed, cfg_speed, hdr = 1;
+	char type[8];
+	char locator[25];
+	char mfg[16];
+	char unit[16];
+
+	if (IS_WINKI) return;
+
+	sprintf (fname, "dmidecode.%s", timestamp);
+
+        if ( (f = fopen(fname,"r")) == NULL) {
+                fprintf (stderr, "Unable to open file %s, errno %d\n", fname, errno);
+                fprintf (stderr, "Continuing without getting memory details\n");
+                return;
+        }
+
+	while (1) {
+		rtnptr = fgets((char *)&input_str, 511, f);
+		if (rtnptr == NULL) {
+			/* stop if at the end of the file */
+			break;
+		}
+
+		if (strstr(input_str, "Memory Device")) {
+			if (hdr) BOLD ("Location              Type    Size    Speed CfgSpeed  Mfg\n");
+			hdr = speed = size = cfg_speed = 0;
+			while (1) {
+				rtnptr = fgets((char *)&input_str, 511, f);
+				if (rtnptr == NULL) {
+					/* stop if at the end of the file */
+					if (size) {
+						printf ("%24s  %6s %4d GB  %4d MT/s  %4d MT/s\n",
+							locator, type, size, speed, cfg_speed);
+					}
+					break;
+				}
+
+				if (strncmp(input_str, "Handle", 6) == 0) {
+					if (size) {
+						printf ("%-20s %5s %4d GB   %6d   %6d  %s\n",
+							locator, type, size, speed, cfg_speed, mfg);
+					}
+					break;
+				}
+
+				if (strncmp(input_str+1, "Size:", 5) == 0) {
+					sscanf (input_str+7, "%d %2s", &size, unit);
+					if (unit[0] == 'M') size = size / 1024;
+				} else if (strncmp(input_str+1, "Speed:", 6) == 0) {
+					sscanf (input_str+8, "%d", &speed);
+				} else if (strncmp(input_str+1, "Configured Memory Speed:", 24) == 0) {
+					sscanf (input_str+26, "%d", &cfg_speed);
+				} else if (strncmp(input_str+1, "Type:", 5) == 0) {
+					sscanf (input_str+7, "%16s", type);
+				} else if (strncmp(input_str+1, "Manufacturer:", 13) == 0) {
+					sscanf (input_str+15, "%s", mfg);
+				} else if (strncmp(input_str+1, "Locator:", 8) == 0) {
+					strncpy (locator, input_str+10, 24);
+					locator[strlen(locator)-1] = 0;
+				}
+				
+			}
+		}
+
+	}
+}
+

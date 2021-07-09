@@ -33,6 +33,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "msgcat.h"
 #include "hash.h"
 #include "oracle.h"
+#include "FileIo.h"
 
 typedef struct kp_trc_type_args {
         uint64          warnflag;
@@ -123,6 +124,7 @@ print_mem_info()
 	i = 0;
         rtnptr = fgets((char *)&input_str, 127, f);
         while (rtnptr != NULL) {
+		/* print 1st 4 lines */
 		if (i < 4) printf ("%s", input_str); 
 	
 		if (strncmp(input_str, "AnonHugePages", 13) == 0) {
@@ -267,10 +269,15 @@ void kp_toc()
 
 	  LI; ARF(_LNK_3_0, _MSG_3_0); NLt;
 	  UL;
-            LI; ARF(_LNK_3_1, _MSG_3_1); NLt;
-            LI; ARF(_LNK_3_2, _MSG_3_2); NLt;
-            LI; ARF(_LNK_3_3, _MSG_3_3); NLt;
-            if (kparse_full) LI; ARF(_LNK_3_4, _MSG_3_4); NLt;
+	    if (IS_WINKI) {
+              LI; ARF(_LNK_3_1, _MSG_3_1_WIN); NLt;
+              LI; ARF(_LNK_3_2, _MSG_3_2_WIN); NLt;
+	    } else {
+              LI; ARF(_LNK_3_1, _MSG_3_1); NLt;
+              LI; ARF(_LNK_3_2, _MSG_3_2); NLt;
+              LI; ARF(_LNK_3_3, _MSG_3_3); NLt;
+              if (kparse_full) LI; ARF(_LNK_3_4, _MSG_3_4); NLt;
+	    }
 	  _UL;
 	  
 	  LI; ARF(_LNK_4_0, _MSG_4_0); NLt;
@@ -296,9 +303,12 @@ void kp_toc()
 	    	LI; ARF(_LNK_4_6, _MSG_4_6); NLt;
 	    }
 	    LI; ARF(_LNK_4_7, _MSG_4_7); NLt;
-	    if (dskblk_stats) {
-		LI; ARF(_LNK_4_8, _MSG_4_8); NLt;
-		LI; ARF(_LNK_4_9, _MSG_4_9); NLt;
+	    if (!IS_WINKI) {
+	    	if (dskblk_stats) {
+			LI; ARF(_LNK_4_8, _MSG_4_8); NLt;
+			LI; ARF(_LNK_4_9, _MSG_4_9); NLt;
+		}
+		LI; ARF(_LNK_4_10, _MSG_4_10); NLt;
 	    }
 	  _UL;
 
@@ -310,36 +320,40 @@ void kp_toc()
 	    LI; ARF(_LNK_5_4, _MSG_5_4); NLt;
 	    LI; ARF(_LNK_5_5, _MSG_5_5); NLt;
 	    LI; ARF(_LNK_5_6, _MSG_5_6); NLt;
+	    if (IS_WINKI) LI; ARF(_LNK_5_7, _MSG_5_7); NLt;
 	  _UL;
 
-	  if (IS_LIKI_V2_PLUS) {
+	  if (!IS_WINKI) {
 	    LI; ARF(_LNK_6_0, _MSG_6_0); NLt;
 	    UL;
 	      LI; ARF(_LNK_6_1, _MSG_6_1); NLt;
-	      LI; ARF(_LNK_6_2, _MSG_6_2); NLt;
+	      if (IS_LIKI_V2_PLUS) {
+	        LI; ARF(_LNK_6_2, _MSG_6_2); NLt;
+	        LI; ARF(_LNK_6_3, _MSG_6_3); NLt;
+	      }
 	    _UL;
-	  }
 
-	  if (next_sid > 1) {
-            LI; ARF(_LNK_7_0, _MSG_7_0); NLt;
-	    UL;	
-              LI; ARF(_LNK_7_1, _MSG_7_1); NLt;
-              LI; ARF(_LNK_7_2, _MSG_7_2); NLt;
-              LI; ARF(_LNK_7_3, _MSG_7_3); NLt;
-              LI; ARF(_LNK_7_4, _MSG_7_4); NLt;
-              LI; ARF(_LNK_7_5, _MSG_7_5); NLt;
-              LI; ARF(_LNK_7_6, _MSG_7_6); NLt;
-              LI; ARF(_LNK_7_7, _MSG_7_7); NLt;
-	    _UL;
-	  }
+	    if (next_sid > 1) {
+              LI; ARF(_LNK_7_0, _MSG_7_0); NLt;
+	      UL;	
+                LI; ARF(_LNK_7_1, _MSG_7_1); NLt;
+                LI; ARF(_LNK_7_2, _MSG_7_2); NLt;
+                LI; ARF(_LNK_7_3, _MSG_7_3); NLt;
+                LI; ARF(_LNK_7_4, _MSG_7_4); NLt;
+                LI; ARF(_LNK_7_5, _MSG_7_5); NLt;
+                LI; ARF(_LNK_7_6, _MSG_7_6); NLt;
+                LI; ARF(_LNK_7_7, _MSG_7_7); NLt;
+	      _UL;
+	    }
 
-	  if (globals->docker_hash) {
-  	    LI; ARF(_LNK_8_0, _MSG_8_0); NLt;
-	    UL;	
-              LI; ARF(_LNK_8_1, _MSG_8_1); NLt;
-              LI; ARF(_LNK_8_2, _MSG_8_2); NLt;
-              LI; ARF(_LNK_8_3, _MSG_8_3); NLt;
-	    _UL;
+	    if (globals->docker_hash) {
+  	      LI; ARF(_LNK_8_0, _MSG_8_0); NLt;
+	      UL;	
+                LI; ARF(_LNK_8_1, _MSG_8_1); NLt;
+                LI; ARF(_LNK_8_2, _MSG_8_2); NLt;
+                LI; ARF(_LNK_8_3, _MSG_8_3); NLt;
+	      _UL;
+	    }
 	  }
 
   	  LI; ARF(_LNK_9_0, _MSG_9_0); NLt;
@@ -1050,6 +1064,11 @@ kp_hc_stktraces()			/* Section 1.4.4 */
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_PCC_CPUFREQ, _LNK_1_4_4);
 		kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); NL;
 	}
+
+	if ((*print_pc_args.warnflagp) & WARNF_KVM_PAGEFAULT) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_KVM_PAGEFAULT, _LNK_1_4_4);
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); NL;
+	}
 }
 
 void
@@ -1527,7 +1546,6 @@ kp_file_ops()				/* Section 3.1 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-
         lineno = 1;
         tab=tab0;
 
@@ -1539,6 +1557,30 @@ kp_file_ops()				/* Section 3.1 */
 	CSV_FIELD("kifile", "[CSV]");
 }
 
+void
+kp_file_logio()
+{
+        GREEN_TABLE;
+        ANM(_LNK_3_1);
+        HEAD3(_MSG_3_1);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_3_2,"[Next Subsection]");
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_4_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        lineno = 1;
+        tab=tab0;
+
+	BOLD ("                    -------  Total  ------- -------  Write  -------- --------  Read  --------"); NL;
+	BOLD ("Object                 IO/s    KB/s  AvIOsz     IO/s    KB/s  AvIOsz     IO/s    KB/s  AvIOsz  filename"); NL;
+
+	foreach_hash_entry((void **)globals->fobj_hash, FOBJ_HSIZE, file_print_fobj_logio,
+			   (int (*)())fobj_sort_by_logio, 20, NULL);
+
+}
 
 void
 kp_file_time()				/* Section 3.2 */
@@ -1566,6 +1608,28 @@ kp_file_time()				/* Section 3.2 */
                             (int (*)())fdata_sort_by_elptime,
                             20, NULL);
 	CSV_FIELD("kifile", "[CSV]");
+}
+
+void
+kp_file_physio()
+{
+        GREEN_TABLE;
+        ANM(_LNK_3_2);
+        HEAD3(_MSG_3_2);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_3_1,"[Prev Subsection]");
+        ARFx(_LNK_2_0,"---[Prev Section]");
+        ARFx(_LNK_4_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+        lineno = 1;
+        tab=tab0;
+
+	foreach_hash_entry((void **)globals->fobj_hash, FOBJ_HSIZE, file_print_fobj_physio,
+			   (int (*)())fobj_sort_by_physio, 10, NULL);
+
 }
 
 void
@@ -1659,6 +1723,7 @@ kp_device_report()			/* Section 4.0 */
         ARFx(_LNK_3_0,"[Prev Section]");
         ARFx(_LNK_5_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
+
         _TABLE;
 }
 
@@ -2199,7 +2264,7 @@ kp_perpid_dev_totals()			/* Section 4.7 */
 	} else {
         	ARFx(_LNK_4_6,"[Prev Subsection]");
 	}
-        ARFx(_LNK_4_8,"[Next Subsection]");
+	if (!IS_WINKI) ARFx(_LNK_4_8,"[Next Subsection]");
         ARFx(_LNK_4_0,"---[Prev Section]");
         ARFx(_LNK_5_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
@@ -2302,7 +2367,7 @@ kp_blk_write_entry(void *arg1, void *arg2)
 }
 
 void
-kp_dskblk_write()			/* Section 4.8 */
+kp_dskblk_write()			/* Section 4.9 */
 {
         GREEN_TABLE;
         ANM(_LNK_4_9);
@@ -2310,6 +2375,7 @@ kp_dskblk_write()			/* Section 4.8 */
 
         FONT_SIZE(-1);
         ARFx(_LNK_4_8,"[Prev Subsection]");
+        ARFx(_LNK_4_10,"[Next Subsection]");
         ARFx(_LNK_4_0,"---[Prev Section]");
         ARFx(_LNK_5_0,"[Next Section]");
         ARFx(_LNK_TOC,"[Table of Contents]");
@@ -2318,6 +2384,32 @@ kp_dskblk_write()			/* Section 4.8 */
         BOLD("Freq    Dev             Block"); NL;
         foreach_hash_entry((void **)globals->dskblk_hash, DSKBLK_HSIZE, kp_blk_write_entry, dskblk_sort_by_wrcnt, 10, NULL);
 
+}
+
+void
+kp_io_controllers()			/* Section 4.10 */
+{
+	uint64 warnflag = 0ull;
+	int warn_indx;
+
+        GREEN_TABLE;
+        ANM(_LNK_4_10);
+        HEAD3(_MSG_4_10);
+
+        FONT_SIZE(-1);
+        ARFx(_LNK_4_9,"[Prev Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+        ARFx(_LNK_5_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	NL;
+
+	io_controllers(&warnflag, 1);
+        if (warnflag & WARNF_CACHE_BYPASS) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_CACHE_BYPASS, _LNK_4_10);
+                kp_warning(globals->warnings, warn_indx, _LNK_4_10);  NL;
+	}
 }
 
 void 
@@ -2329,12 +2421,10 @@ kp_network()
         HEAD2(_MSG_5_0);
         FONT_SIZE(-1);
         ARFx(_LNK_4_0,"[Prev Section]"); 
-	if (IS_LIKI_V2_PLUS)  {
+	if (!IS_WINKI) {
                 ARFx(_LNK_6_0,"[Next Section]");
-        } else if (next_sid > 1)  {
-                ARFx(_LNK_7_0,"[Next Section]");
 	} else {
-                ARFx(_LNK_8_0,"[Next Section]"); 
+                ARFx(_LNK_9_0,"[Next Section]"); 
 	}
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
@@ -2343,23 +2433,24 @@ kp_network()
 void
 kp_ipip()
 {
+	char *hdr1="Syscalls";
+
         GREEN_TABLE;
         ANM(_LNK_5_1);
         HEAD2(_MSG_5_1);
         FONT_SIZE(-1);
         ARFx(_LNK_5_2,"[Next Subsection]"); 
         ARFx(_LNK_4_0,"---[Prev Section]");
-	if (IS_LIKI_V2_PLUS)  {
+	if (!IS_WINKI) {
                 ARFx(_LNK_6_0,"[Next Section]");
-        } else if (next_sid > 1)  {
-                ARFx(_LNK_7_0,"[Next Section]");
 	} else {
-                ARFx(_LNK_8_0,"[Next Section]"); 
+                ARFx(_LNK_9_0,"[Next Section]"); 
 	}
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD ("Syscalls      Rd/s      RdKB/s      Wr/s      WrKB/s  Connection"); NL;
+	if (IS_WINKI) hdr1="Requests";
+	BOLD ("%s      Rd/s      RdKB/s      Wr/s      WrKB/s  Connection", hdr1); NL;
 	foreach_hash_entry2((void **)globals->ipip_hash, IPIP_HASHSZ, socket_print_ipip,
 			    (int (*)())ipip_sort_by_syscalls, 10, NULL);
 	CSV_FIELD("kisock", "[CSV]");
@@ -2368,7 +2459,8 @@ kp_ipip()
 void
 kp_remoteip()
 {
-	int scallflag=1;
+	uint64 scallflag=1;
+       	int nentries=5;
 
         GREEN_TABLE;
         ANM(_LNK_5_2);
@@ -2377,25 +2469,30 @@ kp_remoteip()
         ARFx(_LNK_5_1,"[Prev Subsection]"); 
         ARFx(_LNK_5_3,"[Next Subsection]"); 
         ARFx(_LNK_4_0,"---[Prev Section]");
-	if (IS_LIKI_V2_PLUS)  {
+	if (!IS_WINKI) {
                 ARFx(_LNK_6_0,"[Next Section]");
-        } else if (next_sid > 1)  {
-                ARFx(_LNK_7_0,"[Next Section]");
 	} else {
-                ARFx(_LNK_8_0,"[Next Section]"); 
+                ARFx(_LNK_9_0,"[Next Section]"); 
 	}
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-        foreach_hash_entry((void **)globals->rip_hash, IP_HASHSZ, socket_print_rip,
-			   (int (*)())ip_sort_by_syscalls, 10, &scallflag);
+	if (IS_WINKI) {
+		scallflag=0;
+		nentries=10;
+		BOLD("Requests      Rd/s      RdKB/s      Wr/s      WrKB/s  Connection"); NL;
+	}
+        
+	foreach_hash_entry((void **)globals->rip_hash, IP_HASHSZ, socket_print_rip,
+			   (int (*)())ip_sort_by_syscalls, nentries, &scallflag);
 	CSV_FIELD("kisock", "[CSV]");
 }
 
 void
 kp_remoteport()
 {
-	int scallflag=1;
+	uint64 scallflag=1;
+	int nentries=5;
 
         GREEN_TABLE;
         ANM(_LNK_5_3);
@@ -2404,25 +2501,29 @@ kp_remoteport()
         ARFx(_LNK_5_2,"[Prev Subsection]"); 
         ARFx(_LNK_5_4,"[Next Subsection]"); 
         ARFx(_LNK_4_0,"---[Prev Section]"); 
-	if (IS_LIKI_V2_PLUS)  {
+	if (!IS_WINKI)  {
                 ARFx(_LNK_6_0,"[Next Section]");
-        } else if (next_sid > 1)  {
-                ARFx(_LNK_7_0,"[Next Section]");
-	} else {
-                ARFx(_LNK_8_0,"[Next Section]"); 
+                ARFx(_LNK_9_0,"[Next Section]"); 
 	}
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
+	if (IS_WINKI) {
+		scallflag=0;
+		nentries=10;
+		BOLD("Requests      Rd/s      RdKB/s      Wr/s      WrKB/s  Connection"); NL;
+	}
+
         foreach_hash_entry((void **)globals->rsock_hash, SOCK_HASHSZ, socket_print_rsock,
-			   (int (*)())sock_sort_by_syscalls, 5, &scallflag);
+			   (int (*)())sock_sort_by_syscalls, nentries, &scallflag);
 	CSV_FIELD("kisock", "[CSV]");
 }
 
 void
 kp_localip()
 {
-	int scallflag=1;
+	uint64	scallflag=1;
+	int	nentries=5;
 
         GREEN_TABLE;
         ANM(_LNK_5_4);
@@ -2431,25 +2532,31 @@ kp_localip()
         ARFx(_LNK_5_3,"[Prev Subsection]");
         ARFx(_LNK_5_5,"[Next Subsection]");
         ARFx(_LNK_4_0,"---[Prev Section]");
-	if (IS_LIKI_V2_PLUS)  {
+	if (!IS_WINKI) {
                 ARFx(_LNK_6_0,"[Next Section]");
-        } else if (next_sid > 1)  {
-                ARFx(_LNK_7_0,"[Next Section]");
 	} else {
-                ARFx(_LNK_8_0,"[Next Section]"); 
+                ARFx(_LNK_9_0,"[Next Section]"); 
 	}
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
+	if (IS_WINKI) {
+		scallflag=0;
+		nentries=10;
+		BOLD("Requests      Rd/s      RdKB/s      Wr/s      WrKB/s  Connection"); NL;
+	} 
+	
 	foreach_hash_entry((void **)globals->lip_hash, IP_HASHSZ, socket_print_lip,
-			   (int (*)())ip_sort_by_syscalls, 10, &scallflag);
+			   (int (*)())ip_sort_by_syscalls, nentries, &scallflag);
+
 	CSV_FIELD("kisock", "[CSV]");
 }
 
 void
 kp_localport()
 {
-	int scallflag=1;
+	uint64 scallflag=1;
+	int nentries=5;
 
         GREEN_TABLE;
         ANM(_LNK_5_5);
@@ -2458,18 +2565,22 @@ kp_localport()
         ARFx(_LNK_5_4,"[Prev Subsection]");
         ARFx(_LNK_5_6,"[Next Subsection]");
         ARFx(_LNK_4_0,"---[Prev Section]");
-	if (IS_LIKI_V2_PLUS)  {
+	if (!IS_WINKI)  {
                 ARFx(_LNK_6_0,"[Next Section]");
-        } else if (next_sid > 1)  {
-                ARFx(_LNK_7_0,"[Next Section]");
 	} else {
-                ARFx(_LNK_8_0,"[Next Section]"); 
+                ARFx(_LNK_9_0,"[Next Section]"); 
 	}
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
-
+	
+	if (IS_WINKI) {
+		scallflag=0;
+		nentries=10;
+		BOLD("Requests      Rd/s      RdKB/s      Wr/s      WrKB/s  Connection"); NL;
+	}
+		
 	foreach_hash_entry((void **)globals->lsock_hash, SOCK_HASHSZ, socket_print_lsock,
-			   (int (*)())sock_sort_by_syscalls, 5, &scallflag);
+			   (int (*)())sock_sort_by_syscalls, nentries, &scallflag);
 
 	CSV_FIELD("kisock", "[CSV]");
 }
@@ -2477,27 +2588,64 @@ kp_localport()
 void
 kp_socket()
 {
+	char *hdr1="Syscalls";
+
         GREEN_TABLE;
         ANM(_LNK_5_6);
         HEAD2(_MSG_5_6);
         FONT_SIZE(-1);
         ARFx(_LNK_5_5,"[Prev Subsection]");
+	if (IS_WINKI) ARFx(_LNK_5_5,"[Next Subsection]");
         ARFx(_LNK_4_0,"---[Prev Section]");
-	if (IS_LIKI_V2_PLUS)  {
+	if (!IS_WINKI)  {
                 ARFx(_LNK_6_0,"[Next Section]");
-        } else if (next_sid > 1)  {
-                ARFx(_LNK_7_0,"[Next Section]");
 	} else {
-                ARFx(_LNK_8_0,"[Next Section]"); 
+                ARFx(_LNK_9_0,"[Next Section]"); 
 	}
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD("Syscalls      Rd/s      RdKB/s      Wr/s      WrKB/s  Connection"); NL;
+	if (IS_WINKI) hdr1="Requests";
+
+	BOLD("%s      Rd/s      RdKB/s      Wr/s      WrKB/s   LastPid  Connection", hdr1); NL;
         foreach_hash_entry2((void **)globals->sdata_hash, SDATA_HASHSZ, socket_print_sdata,
                            (int (*)())sdata_sort_by_syscalls, 10, NULL);
 	CSV_FIELD("kisock", "[CSV]");
 }
+
+void
+kp_timeo_retrans()
+{
+	int warn_indx;
+
+        GREEN_TABLE;
+        ANM(_LNK_5_7);
+        HEAD2(_MSG_5_7);
+        FONT_SIZE(-1);
+        ARFx(_LNK_5_6,"[Prev Subsection]");
+        ARFx(_LNK_4_0,"---[Prev Section]");
+	if (!IS_WINKI) {
+                ARFx(_LNK_6_0,"[Next Section]");
+	} else {
+                ARFx(_LNK_9_0,"[Next Section]"); 
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	if (globals->num_tcp_timeouts) { 
+		RED_FONT;
+		printf ("%d TCP Timeouts Detected - Avg delay (secs) = %7.6f\n", 
+				globals->num_tcp_timeouts, 
+				SECS((globals->tcp_timeout_time * 1.0) / globals->num_tcp_timeouts));
+		BLACK_FONT;
+
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_TCP_TIMEOUTS, _LNK_5_7);
+                kp_warning(globals->warnings, warn_indx, _LNK_5_7); NL;
+	} else {
+		BOLD ("No TCP Timeouts Detected\n");
+	}
+}
+
 
 void
 kp_memory()				/* Section 6.0 */
@@ -2518,6 +2666,80 @@ kp_memory()				/* Section 6.0 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 }
+
+void
+kp_dimm(void *arg1, void *arg2)		/* Section 6.1 */
+{
+        uint64 warnflag = 0ull;
+        int i, warn_indx=0, nldom;
+	ldom_info_t *ldominfop;
+	uint64 maxmem = 0, minmem = 0;
+
+        GREEN_TABLE;
+        ANM(_LNK_6_1);
+        HEAD3(_MSG_6_1);
+        FONT_SIZE(-1);
+        ARFx(_LNK_6_2,"[Next Subsection]"); 
+        ARFx(_LNK_6_0,"---[Prev Section]"); 
+        if (next_sid > 1)  {
+                ARFx(_LNK_7_0,"[Next Section]");
+        } else if (globals->docker_hash) { 
+                ARFx(_LNK_8_0,"[Next Section]"); 
+	} else {
+		ARFx(_LNK_9_0,"[Next Section]");
+	}
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+
+	if (arch_flag == PPC64LE) {
+		TEXT("DIMM information not available for PowerPC servers\n");
+		return;
+	}
+
+	parse_dmidecode();
+
+	BOLD("\n-- NUMA Node Memory--\n");
+	BOLD("\nNode   TotalMB   UsedMB   FreeMB\n");
+
+	nldom = MAX(globals->nldom, 1);
+	for (i = 0; i < globals->nldom; i++) {
+		if (ldominfop = FIND_LDOMP(globals->ldom_hash, i)) {
+			if (minmem == 0) 
+				minmem = ldominfop->memkb;
+			else  
+				minmem = MIN(ldominfop->memkb, minmem);
+			maxmem = MAX(ldominfop->memkb, maxmem);
+
+			if ((ldominfop->memkb * 100.0 / maxmem) < 95.0) {
+				warnflag |= WARNF_MEM_IMBALANCE;
+				RED_FONT; 
+			}
+
+			if (ldominfop->freekb < 100 * 1024) {
+				warnflag |= WARNF_NODE_LOWMEM;
+				RED_FONT; 
+			}
+
+			printf ("%4d  %8lld %8lld %8lld\n", i,
+				ldominfop->memkb/1024,
+				ldominfop->usedkb/1024,
+				ldominfop->freekb/1024);
+
+			BLACK_FONT;
+		}
+	}
+
+	if (warnflag & WARNF_MEM_IMBALANCE) {
+        	warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_MEM_IMBALANCE, _LNK_6_1);
+               	kp_warning(globals->warnings, warn_indx, _LNK_6_1); NL;
+	}
+
+	if (warnflag & WARNF_NODE_LOWMEM) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_NODE_LOWMEM, _LNK_6_1);
+               	kp_warning(globals->warnings, warn_indx, _LNK_6_1); NL;
+	}
+}
+
 
 int
 kp_pid_memory(void *arg1, void *arg2)
@@ -2540,16 +2762,17 @@ kp_pid_memory(void *arg1, void *arg2)
 }
 
 void
-kp_rss()				/* Section 6.1 */
+kp_rss()				/* Section 6.2 */
 {
         uint64 warnflag = 0ull;
         int warn_indx=0;
 
         GREEN_TABLE;
-        ANM(_LNK_6_1);
-        HEAD3(_MSG_6_1);
+        ANM(_LNK_6_2);
+        HEAD3(_MSG_6_2);
         FONT_SIZE(-1);
-        ARFx(_LNK_6_2,"[Next Subsection]"); 
+        ARFx(_LNK_6_1,"[Prev Subsection]"); 
+        ARFx(_LNK_6_3,"[Next Subsection]"); 
         ARFx(_LNK_6_0,"---[Prev Section]"); 
         if (next_sid > 1)  {
                 ARFx(_LNK_7_0,"[Next Section]");
@@ -2567,16 +2790,16 @@ kp_rss()				/* Section 6.1 */
 }
 
 void
-kp_vss()				/* Section 6.2 */
+kp_vss()				/* Section 6.3 */
 {
         uint64 warnflag = 0ull;
         int warn_indx=0;
 
         GREEN_TABLE;
-        ANM(_LNK_6_2);
-        HEAD3(_MSG_6_2);
+        ANM(_LNK_6_3);
+        HEAD3(_MSG_6_3);
         FONT_SIZE(-1);
-        ARFx(_LNK_6_1,"[Prev Subsection]"); 
+        ARFx(_LNK_6_2,"[Prev Subsection]"); 
         ARFx(_LNK_6_0,"---[Prev Section]");
         if (next_sid > 1)  {
                 ARFx(_LNK_7_0,"[Next Section]");
@@ -2602,11 +2825,7 @@ kp_oracle()				/* Section 7.0 */
         ANM(_LNK_7_0);
         HEAD2(_MSG_7_0);
         FONT_SIZE(-1);
-	if (IS_LIKI_V2_PLUS)  {
-        	ARFx(_LNK_6_0,"[Prev Section]");
-	} else { 
-        	ARFx(_LNK_5_0,"[Prev Section]");
-	}
+        ARFx(_LNK_6_0,"[Prev Section]");
 	if (globals->docker_hash) {
         	ARFx(_LNK_8_0,"[Next Section]");
 	} else {
@@ -2962,7 +3181,7 @@ kp_file_links()			/* Section 9.0 */
         	ARFx(_LNK_8_0,"[Prev Section]"); 
 	} else if (next_sid > 1)  {
         	ARFx(_LNK_7_0,"[Prev Section]"); 
-	} else if (IS_LIKI_V2_PLUS)  { 
+	} else if (!IS_WINKI)  { 
         	ARFx(_LNK_6_0,"[Prev Section]");
 	} else { 
         	ARFx(_LNK_5_0,"[Prev Section]");
@@ -2985,7 +3204,7 @@ kp_txt_links()				/* Section 9.1 */
         	ARFx(_LNK_8_0,"---[Prev Section]"); 
 	} else if (next_sid > 1)  {
         	ARFx(_LNK_7_0,"---[Prev Section]"); 
-	} else if (IS_LIKI_V2_PLUS)  { 
+	} else if (!IS_WINKI)  { 
         	ARFx(_LNK_6_0,"---[Prev Section]");
 	} else { 
         	ARFx(_LNK_5_0,"---[Prev Section]");
@@ -3016,7 +3235,7 @@ kp_csv_links()				/* Section 9.2 */
         	ARFx(_LNK_8_0,"---[Prev Section]"); 
 	} else if (next_sid > 1)  {
         	ARFx(_LNK_7_0,"---[Prev Section]"); 
-	} else if (IS_LIKI_V2_PLUS)  { 
+	} else if (!IS_WINKI)  { 
         	ARFx(_LNK_6_0,"---[Prev Section]");
 	} else { 
         	ARFx(_LNK_5_0,"---[Prev Section]");
@@ -3045,7 +3264,7 @@ kp_misc_links()				/* Section 9.3 */
         	ARFx(_LNK_8_0,"---[Prev Section]"); 
 	} else if (next_sid > 1)  {
         	ARFx(_LNK_7_0,"---[Prev Section]"); 
-	} else if (IS_LIKI_V2_PLUS)  { 
+	} else if (!IS_WINKI)  { 
         	ARFx(_LNK_6_0,"---[Prev Section]");
 	} else { 
         	ARFx(_LNK_5_0,"---[Prev Section]");
@@ -3054,46 +3273,55 @@ kp_misc_links()				/* Section 9.3 */
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
 	BOLD("General"); NL;
-	FILE_FIELD("uname-a", "uname -a");
-	FILE_FIELD("release", "/etc/*release");
-	FILE_FIELD("uptime", "uptime");
-	FILE_FIELD("cmdline", "/proc/cmdline");
-	FILE_FIELD("grub.conf", "/boot/grub/grub.conf");
-	BOLD("Configuration"); NL;
-	FILE_FIELD("cpuinfo", "/proc/cpuinfo");
-	FILE_FIELD("mem_info", "free; /proc/meminfo");
-	FILE_FIELD("lspci", "lspci");
-	FILE_FIELD("dmidecode", "dmidecode");
-	FILE_FIELD("getconf-a", "getconf -a");
-	FILE_FIELD("sysctl-a", "sysctl -a");
-	FILE_FIELD("sysctl.conf", "/etc/sysctl.conf");
-	FILE_FIELD("sched_features", "<debugfs>/sched_features");
-	FILE_FIELD("ipcs-m", "ipcs -m");
-	BOLD("NUMA Information"); NL;
-	FILE_FIELD("numa_info", "numactl --hardware / numastat");
-	FILE_FIELD("mpsched", "mpsched");
-	BOLD("Processes"); NL;
-	FILE_FIELD("ps-eLf", "ps -eLf");
-	FILE_FIELD("ps-aux", "ps aus");
-	FILE_FIELD("pstree", "pstree");
-	FILE_FIELD("stacks", "/proc/*/stacks/*");
-	BOLD("File Systems and I/O"); NL;
-	FILE_FIELD("mount-v", "mount -v");
-	FILE_FIELD("fstab", "/etc/fstab");
-	FILE_FIELD("extfs", "extfs inforamation");
-	FILE_FIELD("lvm", "LVM info");
-	FILE_FIELD("dmsetup_ls", "dmsetup ls --tree");
-	FILE_FIELD("multipath-l", "multipath -ll");
-	FILE_FIELD("multipath.conf", "/etc/multipath.conf");
-	FILE_FIELD("block_params", "Block Device parameters");
-	FILE_FIELD("interrupts", "/proc/interrupts");
-	BOLD("Network"); NL;
-	FILE_FIELD("ifconfig", "ifconfig");
-	FILE_FIELD("ethtool", "ethtool");
-	FILE_FIELD("route-n", "route -n");
-	FILE_FIELD("bonds", "/proc/net/bonding/bond*");
-	FILE_FIELD("netstat-s", "netstat -s");
-	FILE_FIELD("netstat-neopa", "netstat -neopa");
+	if (IS_WINKI) {
+		FILE_FIELD("systeminfo", "systeminfo");
+		FILE_FIELD("cpulist", "wmic cpu list brief");
+		FILE_FIELD("corelist", "wmic cpu get SocketDesignation, NumberOfCores, NumberOfLogicalProcessors");
+		FILE_FIELD("tasklist", "tasklist");
+
+	} else {
+		FILE_FIELD("uname-a", "uname -a");
+		FILE_FIELD("release", "/etc/*release");
+		FILE_FIELD("uptime", "uptime");
+		FILE_FIELD("cmdline", "/proc/cmdline");
+		FILE_FIELD("grub.conf", "/boot/grub/grub.conf");
+		BOLD("Configuration"); NL;
+		FILE_FIELD("cpuinfo", "/proc/cpuinfo");
+		FILE_FIELD("mem_info", "free; /proc/meminfo");
+		FILE_FIELD("lspci", "lspci");
+		FILE_FIELD("dmidecode", "dmidecode");
+		FILE_FIELD("getconf-a", "getconf -a");
+		FILE_FIELD("sysctl-a", "sysctl -a");
+		FILE_FIELD("sysctl.conf", "/etc/sysctl.conf");
+		FILE_FIELD("sched_features", "<debugfs>/sched_features");
+		FILE_FIELD("ipcs-m", "ipcs -m");
+		BOLD("NUMA Information"); NL;
+		FILE_FIELD("numa_info", "numactl --hardware / numastat");
+		FILE_FIELD("mpsched", "mpsched");
+		BOLD("Processes"); NL;
+		FILE_FIELD("ps-eLf", "ps -eLf");
+		FILE_FIELD("ps-aux", "ps aus");
+		FILE_FIELD("pstree", "pstree");
+		FILE_FIELD("stacks", "/proc/*/stacks/*");
+		BOLD("File Systems and I/O"); NL;
+		FILE_FIELD("mount-v", "mount -v");
+		FILE_FIELD("fstab", "/etc/fstab");
+		FILE_FIELD("extfs", "extfs inforamation");
+		FILE_FIELD("lvm", "LVM info");
+		FILE_FIELD("dmsetup_ls", "dmsetup ls --tree");
+		FILE_FIELD("multipath-l", "multipath -ll");
+		FILE_FIELD("multipath.conf", "/etc/multipath.conf");
+		FILE_FIELD("block_params", "Block Device parameters");
+		FILE_FIELD("interrupts", "/proc/interrupts");
+		FILE_FIELD("fc_linkspeed", "/sys/devices/pci*/*/*/host*/fc_host/host*/speed");
+		BOLD("Network"); NL;
+		FILE_FIELD("ifconfig", "ifconfig");
+		FILE_FIELD("ethtool", "ethtool");
+		FILE_FIELD("route-n", "route -n");
+		FILE_FIELD("bonds", "/proc/net/bonding/bond*");
+		FILE_FIELD("netstat-s", "netstat -s");
+		FILE_FIELD("netstat-neopa", "netstat -neopa");
+	}
 }
 
 void

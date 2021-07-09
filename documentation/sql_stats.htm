@@ -1,0 +1,417 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:Consolas;
+	panose-1:2 11 6 9 2 2 4 3 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+a:link, span.MsoHyperlink
+	{color:#0563C1;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:#954F72;
+	text-decoration:underline;}
+p
+	{margin-right:0in;
+	margin-left:0in;
+	font-size:12.0pt;
+	font-family:"Times New Roman",serif;}
+pre
+	{mso-style-link:"HTML Preformatted Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	font-size:10.0pt;
+	font-family:Consolas;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+span.HTMLPreformattedChar
+	{mso-style-name:"HTML Preformatted Char";
+	mso-style-link:"HTML Preformatted";
+	font-family:Consolas;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:107%;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:.5in .5in .5in .5in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-GB link="#0563C1" vlink="#954F72">
+
+<div class=WordSection1>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;vertical-align:
+top'><b><i><span lang=EN-US style='font-size:12.0pt;font-family:"Arial",sans-serif;
+color:black'>LinuxKI Warning</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>MS SQL Server scaling issues
+causing by SQL auto statistics</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Date: 05/13/21</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Problem</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>In
+a recent customer PoC, the customer was testing the scalability of their
+application and SQL Server data bases using a series of fast SQL Statements.   The
+customer was benchmarking Synergy 480 Gen10 servers with Intel Gold 6242R
+processes along with Windows Server 2019.  With a single user executing the
+series of SQL, they processes 2000 txn/s with a response time under 500
+microseconds.    When they increased the load to 4 users, they processed 4600
+txn/sec with an average response time of 900 microseconds, and with 16 users,
+they processed 12000 txn/sec with a response time around 1200 microseconds.  
+The expectation was that the scaling could be more linear and the impact on the
+transaction time would be less.  </span></p>
+
+<p class=MsoNormal><b><span lang=EN-US style='font-size:10.0pt;line-height:
+107%;font-family:"Arial",sans-serif'>Investigation</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Windows KI
+data (XPERF) was collected on both the application server and the DB server and
+analyzed with the <span class=MsoHyperlink><a
+href="https://github.com/HewlettPackard/LinuxKI/wiki">LinuxKI Toolset</a></span>.  
+Analysis on the SQL Server threads shows a high amount of CPU time in SQL user
+code:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>TID 4516  sqlservr.exe</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>  PID 18316  sqlservr.exe</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    ********* SCHEDULER ACTIVITY REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    RunTime    : 12.047432  SysTime   :  0.308011   UserTime   :
+11.737751</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    SleepTime  :  2.977374  Sleep Cnt :      9141   Wakeup Cnt
+:       167</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    RunQTime   :  1.165617  Switch Cnt:      9143   PreemptCnt
+:         2</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    HardIRQ    :  0.000066  HardIRQ-S :  0.000002    HardIRQ-U
+:  0.000064</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    SoftIRQ    :  0.001604  SoftIRQ-S :  0.000047    SoftIRQ-U
+:  0.001557</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    Last CPU   :        25  CPU Migrs :       101   NODE Migrs
+:         0 </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-indent:
+.5in;line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:
+10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>The CPU
+profile data showed that most of the CPU time was spent in LatchBase code:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    ******** CPU ACTIVITY REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    The percentages below reflect the percentage</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    of the Thread's total RunTime spent in either</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    User code or System code</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    RunTime:  12.0474</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>      Count    USER     SYS    INTR</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>      12110   11689     421       0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>              96.52%   3.48%   0.00%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    HARDCLOCK entries</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>       Count     Pct  State  Function</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>        4040  33.36%  USER   <span style='background:yellow'>LatchBase::AcquireInternal</span>
+[sqlmin.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>        2563  21.16%  USER   <span style='background:yellow'>LatchBase::ReleaseInternal</span>
+[sqlmin.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>        1332  11.00%  USER  
+HoBtFactory::DirtyLockResourceLookup [sqlmin.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>        1142   9.43%  USER  
+HoBtFactory::GetColumnModCountsForQp [sqlmin.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>         360   2.97%  USER   LatchBase::RecordRelease
+[sqlmin.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>         356   2.94%  USER   LatchBase::RecordAcquire
+[sqlmin.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>         319   2.63%  USER   HoBtFactory::GetHoBtAccess
+[sqlmin.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>         223   1.84%  USER  
+HoBtColumnAttributeCacheShareable::GetHoBtColumnAttributeByRowsetColumnId
+[sqlmin.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+lang=EN-US style='font-size:10.0pt;line-height:107%;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:10.0pt;line-height:107%;
+font-family:"Arial",sans-serif'>The stack traces provide more details as it appears
+the latch code is acquiring/releasing resources as part of some statistics
+processing (CStatsUtil::GetModCtr):</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New"'>      
+Count     Pct  HARDCLOCK Stack trace</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New"'>      
+============================================================</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New"'>       
+3051  25.19%  <span style='background:yellow'>LatchBase::AcquireInternal</span> 
+HoBtFactory::DirtyLockResourceLookup  DatasetUsageDescriptor::Construct 
+HoBtFactory::GetColumnModCountsForQp  GetColumnModCountsForQp  <span
+style='background:yellow'>CStatsUtil::GetModCtr</span> 
+CStatsUtil::GetNetModCtr  CStatsUtil::ModCtrExceedsThrsld  IGetMetadata::PiMedObject 
+ContextAccessor::GetStatManFactory  CEnvCollection::XretSchemaChanged 
+CXStmtQuery::XretSchemaChanged  CXStmtSelect::XretExecute 
+CMsqlExecContext::ExecuteStmts&lt;1,1&gt;  CMsqlExecContext::FExecute 
+CSQLSource::Execute</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New"'>       
+1691  13.96%  <span style='background:yellow'>LatchBase::ReleaseInternal</span> 
+HoBtFactory::DirtyLockResourceLookup  DatasetUsageDescriptor::Construct 
+HoBtFactory::GetColumnModCountsForQp  GetColumnModCountsForQp  <span
+style='background:yellow'>CStatsUtil::GetModCtr</span> 
+CStatsUtil::GetNetModCtr  CStatsUtil::ModCtrExceedsThrsld  IGetMetadata::PiMedObject 
+ContextAccessor::GetStatManFactory  CEnvCollection::XretSchemaChanged 
+CXStmtQuery::XretSchemaChanged  CXStmtSelect::XretExecute 
+CMsqlExecContext::ExecuteStmts&lt;1,1&gt;  CMsqlExecContext::FExecute 
+CSQLSource::Execute</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New"'>       
+1330  10.98%  HoBtFactory::DirtyLockResourceLookup 
+DatasetUsageDescriptor::Construct  HoBtFactory::GetColumnModCountsForQp  GetColumnModCountsForQp 
+<span style='background:yellow'>CStatsUtil::GetModCtr</span> 
+CStatsUtil::GetNetModCtr  CStatsUtil::ModCtrExceedsThrsld 
+IGetMetadata::PiMedObject  ContextAccessor::GetStatManFactory 
+CEnvCollection::XretSchemaChanged  CXStmtQuery::XretSchemaChanged 
+CXStmtSelect::XretExecute  CMsqlExecContext::ExecuteStmts&lt;1,1&gt; 
+CMsqlExecContext::FExecute  CSQLSource::Execute  process_request</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New"'>       
+1139   9.41%  HoBtFactory::GetColumnModCountsForQp  GetColumnModCountsForQp  <span
+style='background:yellow'>CStatsUtil::GetModCtr</span> 
+CStatsUtil::GetNetModCtr  CStatsUtil::ModCtrExceedsThrsld 
+IGetMetadata::PiMedObject  ContextAccessor::GetStatManFactory 
+CEnvCollection::XretSchemaChanged  CXStmtQuery::XretSchemaChanged 
+CXStmtSelect::XretExecute  CMsqlExecContext::ExecuteStmts&lt;1,1&gt; 
+CMsqlExecContext::FExecute  CSQLSource::Execute  process_request 
+process_commands_internal  process_messages</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New"'>        
+987   8.15%  <span style='background:yellow'>LatchBase::AcquireInternal</span> 
+HoBtFactory::GetHoBtAccess  HoBtAccess::Init 
+HoBtFactory::GetColumnModCountsForQp  GetColumnModCountsForQp  <span
+style='background:yellow'>CStatsUtil::GetModCtr</span> 
+CStatsUtil::GetNetModCtr  CStatsUtil::ModCtrExceedsThrsld 
+IGetMetadata::PiMedObject  ContextAccessor::GetStatManFactory 
+CEnvCollection::XretSchemaChanged  CXStmtQuery::XretSchemaChanged 
+CXStmtSelect::XretExecute  CMsqlExecContext::ExecuteStmts&lt;1,1&gt; 
+CMsqlExecContext::FExecute  CSQLSource::Execute</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New"'>        
+868   7.17%  <span style='background:yellow'>LatchBase::ReleaseInternal</span> 
+HoBtFactory::GetHoBtAccess  HoBtFactory::GetColumnModCountsForQp  GetColumnModCountsForQp 
+<span style='background:yellow'>CStatsUtil::GetModCtr</span> 
+CStatsUtil::GetNetModCtr  CStatsUtil::ModCtrExceedsThrsld 
+IGetMetadata::PiMedObject  ContextAccessor::GetStatManFactory 
+CEnvCollection::XretSchemaChanged  CXStmtQuery::XretSchemaChanged 
+CXStmtSelect::XretExecute  CMsqlExecContext::ExecuteStmts&lt;1,1&gt; 
+CMsqlExecContext::FExecute  CSQLSource::Execute  process_request</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Solution </span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>After
+disabling AUTO_CREATE_STATISTICS and AUTO_UPDATE_STATISTICS, performance for
+the 16-user test, the throughput increased to 12000 txn/s to 50000 txn/s and
+the average transaction time decreased from 1200 microseconds to 157
+microseconds.    </span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Please note
+that the auto statistics can provide benefits in some cases.   Please consult
+with Microsoft if you encounter a similar issue.</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>For
+more information on processing Windows KI data (XPERF) using the LinuxKI
+toolset, refer to Section 12 of the </span><span class=MsoHyperlink><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'><a
+href="https://github.com/HewlettPackard/LinuxKI/raw/master/documentation/LinuxKI_MasterClass.pdf">LinuxKI
+MasterClass</a></span></span><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>.   </span></p>
+
+</div>
+
+</body>
+
+</html>

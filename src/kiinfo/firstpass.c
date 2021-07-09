@@ -33,6 +33,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "Image.h"
 #include "Provider.h"
 #include "SysConfig.h"
+#include "winki_util.h"
 
 int firstpass_image_func(void *, void *);
 int firstpass_header_func(void *, void *);
@@ -44,57 +45,20 @@ win_set_firstpass_funcs()
 {
 	int i;
 
+	winki_init_actions(NULL);
+
+	winki_enable_event(0, winki_header_func);
 	for (i = 1; i < 10; i++) {
-		ki_actions[i].id = i;
-		ki_actions[i].func = firstpass_generic_func;
-		ki_actions[i].execute = 1;
+		winki_enable_event(i, firstpass_generic_func);
 	}
 
-	for (i = 10; i < 65536; i++) {
-		ki_actions[i].id = i;
-		ki_actions[i].func = NULL;
-	}
-
-	strcpy(&ki_actions[0].subsys[0], "EventTrace");
-	strcpy(&ki_actions[0].event[0], "Header");
-	ki_actions[0].func = firstpass_header_func;
-	ki_actions[0].execute = 1;
-
-	strcpy(&ki_actions[0x24].subsys[0], "EventTrace");
-	strcpy(&ki_actions[0x24].event[0], "Provider");
-	ki_actions[0x24].func = firstpass_header_func;
-	ki_actions[0x24].execute = 1;
-
-	strcpy(&ki_actions[0x1402].subsys[0], "Image");
-	strcpy(&ki_actions[0x1402].event[0], "UnLoad");
-	ki_actions[0x1402].func=firstpass_image_func;
-	ki_actions[0x1402].execute = 1;
-
-	strcpy(&ki_actions[0x1403].subsys[0], "Image");
-	strcpy(&ki_actions[0x1403].event[0], "DCStart");
-	ki_actions[0x1403].func=firstpass_image_func;
-	ki_actions[0x1403].execute = 1;
-
-	strcpy(&ki_actions[0x1404].subsys[0], "Image");
-	strcpy(&ki_actions[0x1404].event[0], "DCEnd");
-	ki_actions[0x1404].func=firstpass_image_func;
-	ki_actions[0x1404].execute = 1;
-
-	strcpy(&ki_actions[0x140a].subsys[0], "Image");
-	strcpy(&ki_actions[0x140a].event[0], "Load");
-	ki_actions[0x140a].func=firstpass_image_func;
-	ki_actions[0x140a].execute = 1;
-
-	strcpy(&ki_actions[0x1421].subsys[0], "Image");
-	strcpy(&ki_actions[0x1421].event[0], "KernelBase");
-	ki_actions[0x1421].func=firstpass_image_func;
-	ki_actions[0x1421].execute = 1;
-
-	strcpy(&ki_actions[0xb0f].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb0f].event[0], "Services");
-	ki_actions[0xb0f].func=sysconfig_services_func;
-	ki_actions[0xb0f].execute = 1;
-
+	winki_enable_event(0x24, firstpass_header_func);
+	winki_enable_event(0x1402, firstpass_image_func);
+	winki_enable_event(0x1403, firstpass_image_func);
+	winki_enable_event(0x1404, firstpass_image_func);
+	winki_enable_event(0x140a, firstpass_image_func);
+	winki_enable_event(0x1421, firstpass_image_func);
+	winki_enable_event(0xb0f, sysconfig_services_func);
 }
 
 /*
@@ -104,6 +68,7 @@ void
 firstpass_init_func(void *v)
 {
 	int i;
+	pid_info_t *pidp;
 
 	if (debug) printf ("firstpass_init_func()\n");
         process_func = NULL;
@@ -115,6 +80,10 @@ firstpass_init_func(void *v)
 
 	if (IS_WINKI) { 
 		win_set_firstpass_funcs();
+
+		/* Init the System process - PID 4 */
+		pidp = GET_PIDP(&globals->pid_hash, 4);
+		add_command(&pidp->cmd, "System");
 	} else {
 		/* only for Windows for now */
 	}

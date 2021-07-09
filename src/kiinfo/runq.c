@@ -66,103 +66,18 @@ int runq_ftrace_print_func(void *, void *);
 static inline void
 runq_winki_trace_funcs()
 {
-	int i;
-
-        for (i = 0; i < 65536; i++) {
-                ki_actions[i].id = i;
-                ki_actions[i].func = NULL;
-                ki_actions[i].execute = 0;
-        }
-
-        strcpy(&ki_actions[0].subsys[0], "EventTrace");
-        strcpy(&ki_actions[0].event[0], "Header");
-        ki_actions[0].func = winki_header_func;
-        ki_actions[0].execute = 1;
-
-        strcpy(&ki_actions[0x501].subsys[0], "Thread");
-        strcpy(&ki_actions[0x501].event[0], "Start");
-        ki_actions[0x501].func=print_thread_group1_func;
-        ki_actions[0x501].execute = 0;
-
-        strcpy(&ki_actions[0x502].subsys[0], "Thread");
-        strcpy(&ki_actions[0x502].event[0], "End");
-        ki_actions[0x502].func=print_thread_group1_func;
-        ki_actions[0x502].execute = 0;
-
-        strcpy(&ki_actions[0x503].subsys[0], "Thread");
-        strcpy(&ki_actions[0x503].event[0], "DCStart");
-        ki_actions[0x503].func=print_thread_group1_func;
-        ki_actions[0x503].execute = 0;
-
-        strcpy(&ki_actions[0x504].subsys[0], "Thread");
-        strcpy(&ki_actions[0x504].event[0], "DCEnd");
-        ki_actions[0x504].func=print_thread_group1_func;
-        ki_actions[0x504].execute = 0;
-
-        strcpy(&ki_actions[0x524].subsys[0], "Thread");
-        strcpy(&ki_actions[0x524].event[0], "Cswitch");
-        ki_actions[0x524].func=thread_cswitch_func;
-        ki_actions[0x524].execute = 1;
-
-        strcpy(&ki_actions[0x532].subsys[0], "Thread");
-        strcpy(&ki_actions[0x532].event[0], "ReadyThread");
-        ki_actions[0x532].func=thread_readythread_func;
-        ki_actions[0x532].execute = 1;
-
-        strcpy(&ki_actions[0x542].subsys[0], "Thread");
-        strcpy(&ki_actions[0x542].event[0], "AutoBoostSetFloor");
-        ki_actions[0x542].func=print_thread_autoboost_func;
-        ki_actions[0x542].execute = 0;
-
-        strcpy(&ki_actions[0x543].subsys[0], "Thread");
-        strcpy(&ki_actions[0x543].event[0], "AutoBoostClearFloor");
-        ki_actions[0x543].func=print_thread_autoboost_func;
-        ki_actions[0x543].execute = 0;
-
-        strcpy(&ki_actions[0x544].subsys[0], "Thread");
-        strcpy(&ki_actions[0x544].event[0], "AutoBoostEntryExhaustion");
-        ki_actions[0x544].func=print_thread_autoboost_func;
-        ki_actions[0x544].execute = 0;
-
-        strcpy(&ki_actions[0x548].subsys[0], "Thread");
-        strcpy(&ki_actions[0x548].event[0], "SetName");
-        ki_actions[0x548].func=thread_setname_func;
-        ki_actions[0x548].execute = 1;
-
-        strcpy(&ki_actions[0xf33].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf33].event[0], "SysClEnter");
-        ki_actions[0xf33].func=perfinfo_sysclenter_func;
-        ki_actions[0xf33].execute = 1;
-
-        strcpy(&ki_actions[0xf34].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf34].event[0], "SysClExit");
-        ki_actions[0xf34].func=perfinfo_sysclexit_func;
-        ki_actions[0xf34].execute = 1;
-
-        strcpy(&ki_actions[0xf32].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf32].event[0], "ISR-MSI");
-        ki_actions[0xf32].func=perfinfo_isr_func;
-        ki_actions[0xf32].execute = 1;
-
-        strcpy(&ki_actions[0xf42].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf42].event[0], "ThreadedDPC");
-        ki_actions[0xf42].func=perfinfo_dpc_func;
-        ki_actions[0xf42].execute = 1;
-
-        strcpy(&ki_actions[0xf43].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf43].event[0], "ISR");
-        ki_actions[0xf43].func=perfinfo_isr_func;
-        ki_actions[0xf43].execute = 1;
-
-        strcpy(&ki_actions[0xf44].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf44].event[0], "DPC");
-        ki_actions[0xf44].func=perfinfo_dpc_func;
-        ki_actions[0xf44].execute = 1;
-
-        strcpy(&ki_actions[0xf45].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf45].event[0], "TimeDPC");
-        ki_actions[0xf45].func=perfinfo_dpc_func;
-        ki_actions[0xf45].execute = 1;
+	winki_init_actions(NULL);
+        winki_enable_event(0x524, thread_cswitch_func);
+        winki_enable_event(0x532, thread_readythread_func);
+        winki_enable_event(0x548, thread_setname_func);
+        winki_enable_event(0xf33, perfinfo_sysclenter_func);
+        winki_enable_event(0xf34, perfinfo_sysclexit_func);
+        winki_enable_event(0xf2e, perfinfo_profile_func);
+        winki_enable_event(0xf32, perfinfo_isr_func);
+        winki_enable_event(0xf42, perfinfo_dpc_func);
+        winki_enable_event(0xf43, perfinfo_isr_func);
+        winki_enable_event(0xf44, perfinfo_dpc_func);
+        winki_enable_event(0xf45, perfinfo_dpc_func);
 }
 
 /*
@@ -188,6 +103,7 @@ runq_init_func(void *v)
 		parse_systeminfo();
 		parse_cpulist();
 		parse_corelist();
+		runq_csvfile = open_csv_file("kirunq", 1);
 	} else {
 		ki_actions[TRACE_SYS_EXIT].func = sys_exit_func;
 		ki_actions[TRACE_SYS_ENTER].func = sys_enter_func;
@@ -1579,18 +1495,31 @@ print_slp_info_csv(void *arg1, void *arg2)
 	pid_info_t *pidp = (pid_info_t *)arg2;
 	sched_info_t *schedp = pidp->schedp;
 	sched_stats_t *statsp = &schedp->sched_stats;
-	uint64 idx;
+	uint64 idx, symaddr;
+	char *sym = NULL, *symfile = NULL;
+	vtxt_preg_t *pregp = NULL;
 
 	if (slpinfop->count == 0) return 0;
 
-	idx = slpinfop->lle.key;
-	if (idx > globals->nsyms-1) idx = UNKNOWN_SYMIDX;
-	csv_printf (wait_csvfile,"%lld,%s,%d,%7.6f,%s,%d,%3.2f,%7.6f,%3.2f,%3.2f,%7.6f,%7.6f\n", 
+	if (IS_WINKI) {
+                /* We should be in kernel space here */
+                if (pregp = get_win_pregp(slpinfop->lle.key, NULL)) {
+                        sym = win_symlookup(pregp, slpinfop->lle.key, &symaddr);
+                        symfile = pregp->filename;
+                }
+        } else {
+                idx = slpinfop->lle.key;
+                if (idx > globals->nsyms-1) idx = UNKNOWN_SYMIDX;
+        }
+
+	csv_printf (wait_csvfile,"%lld,%s,%d,%7.6f,%s", 
 		pidp->PID,
 		pidp->cmd,
 		statsp->C_sleep_cnt,
 		SECS(statsp->T_sleep_time),
-		idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr,
+		IS_WINKI ? (sym ? sym : (symfile ? symfile : "unknown")) : (idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr));
+
+	csv_printf (wait_csvfile,",%d,%3.2f,%7.6f,%3.2f,%3.2f,%7.6f,%7.6f\n", 
 		slpinfop->count,
                 (slpinfop->count * 100.0) / statsp->C_sleep_cnt,
 		SECS(slpinfop->sleep_time),
@@ -1634,18 +1563,12 @@ print_stktrc_info(void *arg1, void *arg2)
 			key = stktrcp->stklle.key[i];
 			if (key == STACK_CONTEXT_USER)  break;
 			if ((globals->symtable) && (key < globals->nsyms-1)) {
-				if (stktrcp->cnt > 10000) {
-					if ((key == pc_md_flush_request)  || (key == pc_blkdev_issue_flush)) md_flush_warn_cnt++;
-				} else if (stktrcp->cnt > 1000) {
-					if ((key == pc_sleep_on_page)  || (key == pc_migration_entry_wait)) migrate_warn_cnt++; 
-				} else if (stktrcp->cnt > 500) {
-					if ((key == pc_mutex_lock) || ((key == pc_xfs_file_aio_read) || (key == pc_xfs_file_read_iter)))
-						xfs_dioread_warn_cnt++;
-				} else if (stktrcp->cnt > 100) {
-					if ((key == pc_inode_dio_wait) || (key == pc_xfs_file_dio_aio_write)) xfs_dio_align_warn_cnt++;
-				} else if (stktrcp->cnt > 50) {
-					if ((key == pc_msleep) || (key == pc_ixgbe_read_i2c_byte_generic)) ixgbe_read_warn_cnt++;
-				}
+				if (((key == pc_md_flush_request)  || (key == pc_blkdev_issue_flush)) && (stktrcp->cnt > 1000))  md_flush_warn_cnt++;
+				else if (((key == pc_sleep_on_page)  || (key == pc_migration_entry_wait)) && (stktrcp->cnt > 500))  migrate_warn_cnt++; 
+				else if (((key == pc_mutex_lock) || ((key == pc_xfs_file_aio_read)) || (key == pc_xfs_file_read_iter)) &&
+						(stktrcp->cnt > 500)) xfs_dioread_warn_cnt++;
+				else if (((key == pc_inode_dio_wait) || (key == pc_xfs_file_dio_aio_write)) && (stktrcp->cnt > 500)) xfs_dio_align_warn_cnt++;
+				else if (((key == pc_msleep) || (key == pc_ixgbe_read_i2c_byte_generic)) && (stktrcp->cnt > 50)) ixgbe_read_warn_cnt++;
 			}
 		}
 
@@ -3116,46 +3039,46 @@ void print_percpu_csv(cpu_info_t *cpuinfop)
 		(statsp->T_softirq_sys_time*100.0)/total_time,
 		(statsp->T_softirq_idle_time*100.0)/total_time);
 
-	csv_printf(runq_csvfile,",%3.2f,%3.2f", (statsp->T_stealtime * 100.0) / total_time, 
+	if (!IS_WINKI) {
+		csv_printf(runq_csvfile,",%3.2f,%3.2f", (statsp->T_stealtime * 100.0) / total_time, 
 						(statsp->T_stealtime_idle * 100.0) / total_time);
 
-	if (powerp) {
-		csv_printf(runq_csvfile,",%d,%d,%d", powerp->power_freq_cnt, powerp->freq_hi, powerp->freq_low);
+		if (powerp) {
+			csv_printf(runq_csvfile,",%d,%d,%d", powerp->power_freq_cnt, powerp->freq_hi, powerp->freq_low);
 
-		gbl_total_time = 0;
-		if (powerp->power_start_cnt) {
-                	powerp->cstate_times[powerp->cur_cstate] += (end_time - powerp->last_cstate_time);
+			gbl_total_time = 0;
+			if (powerp->power_start_cnt) {
+                		powerp->cstate_times[powerp->cur_cstate] += (end_time - powerp->last_cstate_time);
+			}
+
+                	for (j=0;j<NCSTATES;j++) {
+                        	gbl_total_time += powerp->cstate_times[j];
+                	}
+
+			if (gbl_total_time == 0) gbl_total_time = globals->total_secs;
+
+			csv_printf(runq_csvfile,",%d", powerp->power_start_cnt);
+			csv_printf (runq_csvfile,",%3.2f%%", gbl_total_time ?  (powerp->cstate_times[CSTATE_BUSY] * 100.0) / gbl_total_time : 0.0);
+			for (j=0;j<=max_cstate;j++) {
+				csv_printf(runq_csvfile,",%3.2f", gbl_total_time ? (powerp->cstate_times[j] * 100.0) / gbl_total_time : 0.0);
+			}
+		} else {
+			csv_printf(runq_csvfile,",0,0,0,0,0,0.00");
+                	for (j=0;j<=max_cstate;j++) {
+				csv_printf(runq_csvfile,",0.00");
+			}
 		}
 
-                for (j=0;j<NCSTATES;j++) {
-                        gbl_total_time += powerp->cstate_times[j];
-                }
-
-		if (gbl_total_time == 0) gbl_total_time = globals->total_secs;
-
-		csv_printf(runq_csvfile,",%d", powerp->power_start_cnt);
-		csv_printf (runq_csvfile,",%3.2f%%", gbl_total_time ?  (powerp->cstate_times[CSTATE_BUSY] * 100.0) / gbl_total_time : 0.0);
-		for (j=0;j<=max_cstate;j++) {
-			csv_printf(runq_csvfile,",%3.2f", gbl_total_time ? (powerp->cstate_times[j] * 100.0) / gbl_total_time : 0.0);
-		}
-	} else {
-		csv_printf(runq_csvfile,",0,0,0,0");
-		csv_printf(runq_csvfile,",0");   
-		csv_printf(runq_csvfile,",0.00");
-                for (j=0;j<=max_cstate;j++) {
-			csv_printf(runq_csvfile,",0.00");
-		}
-	}	
-
-	if (msr_flag)  {
-		msrptr = &statsp->msr_total[0];
-		csv_printf (runq_csvfile, ",%lld,%lld,%3.2f%%,%lld,%lld,%3.2f,%3.2f,%lld",
+		if (msr_flag )  {
+			msrptr = &statsp->msr_total[0];
+			csv_printf (runq_csvfile, ",%lld,%lld,%3.2f%%,%lld,%lld,%3.2f,%3.2f,%lld",
 				msrptr[LLC_REF], msrptr[LLC_REF]-msrptr[LLC_MISSES],
 				(msrptr[LLC_REF]-msrptr[LLC_MISSES])*100.0 / msrptr[LLC_REF],
 				msrptr[RET_INSTR], msrptr[CYC_NOHALT_CORE],
 				msrptr[CYC_NOHALT_CORE] * 1.0 / msrptr[RET_INSTR],
                			msrptr[REF_CLK_FREQ] ? globals->clk_mhz * (msrptr[ACT_CLK_FREQ]*1.0 / msrptr[REF_CLK_FREQ]) : 0.0,
 				statsp->msr_last[SMI_CNT]);
+		}
 	}
 
 	csv_printf(runq_csvfile,"\n");
@@ -3170,14 +3093,16 @@ void print_cpu_csv()
 
 	csv_printf(runq_csvfile, "CPU,node,sibling,TotTime,User,Sys,Idle,HirqUser,HirqSys,HirqIdle,SirqUser,SirqSys,SirqIdle");
 	csv_printf(runq_csvfile, ",%%User,%%Sys,%%Idle,%%HirqUser,%%HirqSys,%%HirqIdle,%%SirqUser,%%SirqSys,%%SirqIdle");
-	csv_printf(runq_csvfile, ",%%StlTm,%%StlTmIdle");
-	csv_printf(runq_csvfile,",FreqEvents,FreqHi,FreqLo");
-	csv_printf(runq_csvfile,",CstateEvents");
-	csv_printf(runq_csvfile,",Busy%%");
-	for (i=0; i<=max_cstate; i++) {
-		csv_printf(runq_csvfile,",Cstate%d", i);
+	if (!IS_WINKI) {
+		csv_printf(runq_csvfile, ",%%StlTm,%%StlTmIdle");
+		csv_printf(runq_csvfile,",FreqEvents,FreqHi,FreqLo");
+		csv_printf(runq_csvfile,",CstateEvents");
+		csv_printf(runq_csvfile,",Busy%%");
+		for (i=0; i<=max_cstate; i++) {
+			csv_printf(runq_csvfile,",Cstate%d", i);
+		}
+		if (msr_flag)  csv_printf(runq_csvfile,",LLC ref,LLC hit,LLC hit%%,Instrs,Cycles,CPI,Avg MHz,SMI Count");
 	}
-	if (msr_flag)  csv_printf(runq_csvfile,",LLC ref,LLC hit,LLC hit%%,Instrs,Cycles,CPI,Avg MHz,SMI Count");
 	csv_printf(runq_csvfile, "\n");
 
         for (i=0;i<MAXCPUS;i++) {

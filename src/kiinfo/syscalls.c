@@ -84,6 +84,7 @@ incr_socket_stats(void *arg1, void *arg2, uint64 syscalltm, int elf, int logio)
 	syscall_exit_t *rec_ptr = (syscall_exit_t *)arg2;
 	short *syscall_index;
 	uint64 bytes;
+	int syscallno = rec_ptr->syscallno;
 
 	syscall_index = ((elf == ELF32) ? globals->syscall_index_32 : globals->syscall_index_64);
 
@@ -98,23 +99,23 @@ incr_socket_stats(void *arg1, void *arg2, uint64 syscalltm, int elf, int logio)
 
 	bytes = rec_ptr->ret;
 
-	switch (rec_ptr->syscallno) {
-                case __NR_recvfrom:
-                case __NR_recvmsg:
-                case __NR_read:
-                case __NR_readv:
+	switch (syscall_index[syscallno]) {
+                case __NUM_recvfrom:
+                case __NUM_recvmsg:
+                case __NUM_read:
+                case __NUM_readv:
 			statp->rd_bytes += bytes;
 			statp->rd_cnt++;
 			break;
-		case __NR_vmsplice:
-                case __NR_sendto:
-                case __NR_sendmsg:
-                case __NR_write :
-                case __NR_writev :	
+		case __NUM_vmsplice:
+                case __NUM_sendto:
+                case __NUM_sendmsg:
+                case __NUM_write :
+                case __NUM_writev :	
 			statp->wr_bytes += bytes;
 			statp->wr_cnt++;
 			break;
-                case __NR_splice:
+                case __NUM_splice:
 			if (logio == 1) {
 				statp->rd_bytes += bytes;
 				statp->rd_cnt++;
@@ -129,10 +130,8 @@ incr_socket_stats(void *arg1, void *arg2, uint64 syscalltm, int elf, int logio)
 }
 
 static inline void
-pid_update_fdinfo(void *arg1, void *arg2)
+pid_update_fdinfo(syscall_exit_t *rec_ptr, pid_info_t *pidp, fd_info_t *fdinfop)
 {
-	syscall_exit_t *rec_ptr = (syscall_exit_t *)arg1;
-	fd_info_t *fdinfop = (fd_info_t *)arg2;
 	char *		varptr;
 	struct sockaddr_in *laddr, *raddr;
 	struct sockaddr_in6 *ldest, *rdest;
@@ -140,52 +139,26 @@ pid_update_fdinfo(void *arg1, void *arg2)
 	struct sockaddr_in6 *rsock_src6;
 	fileaddr_t	*faddr;
 	unsigned int	dev;
-
-	/* if the file was previously closed, let's cleanup the fdinfop.  We will keep the syscall stats 
-	if (fdinfop->closed) {
-		fdinfop->dev=0;
-		fdinfop->node=0;
-		fdinfop->ftype=0;
-		if (fdinfop->lsock) {
-			FREE(fdinfop->lsock);
-			fdinfop->lsock = NULL;
-		}
-		if (fdinfop->rsock) {
-			FREE(fdinfop->rsock);
-			fdinfop->rsock = NULL;
-		}
-		 if (fdinfop->fnamep) {
-			FREE(fdinfop->fnamep);
-			fdinfop->fnamep = NULL;
-		}
-		fdinfop->multiple_fnames++;
-		fdinfop->closed=0;
-	}
-	*/
-		
+	int		syscallno = rec_ptr->syscallno;
 
 	/* printf ("pid_update_fdinfo() rec_ptr: 0x%llx  reclen: %d %d\n", rec_ptr, rec_ptr->reclen, sizeof(syscall_exit_t));  */
 	if (rec_ptr->reclen <= sizeof(syscall_exit_t)) return;
 
 	varptr = (char *)rec_ptr + sizeof(syscall_exit_t);
-	switch (rec_ptr->syscallno) {
-#ifndef __NR_sendmmsg
-#define __NR_sendmmsg 307
-#define __NR_recvmmsg 299
-#endif
-		case __NR_recvmmsg :
-		case __NR_sendmmsg :
+	switch (pidp->syscall_index[syscallno]) {
+		case __NUM_recvmmsg :
+		case __NUM_sendmmsg :
 			varptr += sizeof(unsigned long);
-		case __NR_recvfrom:
-                case __NR_sendto:
-                case __NR_recvmsg:
-                case __NR_sendmsg:
-                case __NR_vmsplice:
-                case __NR_splice:
-                case __NR_read:
-                case __NR_readv:
-                case __NR_write :
-                case __NR_writev :
+		case __NUM_recvfrom:
+                case __NUM_sendto:
+                case __NUM_recvmsg:
+                case __NUM_sendmsg:
+                case __NUM_vmsplice:
+                case __NUM_splice:
+                case __NUM_read:
+                case __NUM_readv:
+                case __NUM_write :
+                case __NUM_writev :
 			laddr = (struct sockaddr_in *)varptr;
 			if (laddr->sin_family == AF_INET) {
 				raddr = (struct sockaddr_in *)(varptr+sizeof(struct sockaddr_in));
@@ -376,7 +349,7 @@ update_file_stats(void *a, pid_info_t *pidp, int fd, uint64 syscallbegtm, int ol
 			tfdinfop = (fd_info_t *)find_entry((lle_t **)tgidp->fdhash, fdinfop->FD, FD_HASH(fdinfop->FD));
 			if (tfdinfop) fdinfop = tfdinfop;
 		}
-		pid_update_fdinfo(rec_ptr, fdinfop);
+		pid_update_fdinfo(rec_ptr, pidp, fdinfop);
 		device = fdinfop->dev;
 		node = fdinfop->node;
 		ftype = fdinfop->ftype;
@@ -1494,21 +1467,22 @@ print_varargs_enter(syscall_enter_t *rec_ptr)
 	struct timeval *t;
 	struct sockaddr_in *lsock;
 	struct sockaddr_in *rsock;
+	int syscallno = rec_ptr->syscallno;
 
-	switch (rec_ptr->syscallno) {
-		case __NR_open :
-		case __NR_openat :
-		case __NR_stat :
-		case __NR_creat : 
-		case __NR_access : 
-		case __NR_lstat :
-		case __NR_unlink :
-		case __NR_unlinkat :
-		case __NR_execve : 
+	switch (globals->syscall_index_64[syscallno]) {
+		case __NUM_open :
+		case __NUM_openat :
+		case __NUM_stat :
+		case __NUM_creat : 
+		case __NUM_access : 
+		case __NUM_lstat :
+		case __NUM_unlink :
+		case __NUM_unlinkat :
+		case __NUM_execve : 
 			printf ("%cfilename: %s", fsep, varptr);
 			break;
-		case __NR_select :
-		case __NR_pselect6 :
+		case __NUM_select :
+		case __NUM_pselect6 :
 			nfds = rec_ptr->args[0];
 			fds_bytes = (nfds/8) + (nfds & 07ULL ? 1 : 0);
 			t = (struct timeval *)varptr;
@@ -1523,17 +1497,17 @@ print_varargs_enter(syscall_enter_t *rec_ptr)
 				print_fd_set("exceptfds=", varptr, fds_bytes);
 			}
 			break;
-		case __NR_ppoll :
+		case __NUM_ppoll :
 			t = (struct timeval *)varptr;
 			printf ("%ctimeout=%d.%06d", fsep, t->tv_sec, t->tv_usec);
 			varptr+= sizeof(struct timeval);
-		case __NR_poll :
+		case __NUM_poll :
 			nfds = rec_ptr->args[1];
 			if (nfds) {
 				print_pollfds(varptr, nfds);
 			}
 			break;
-		case __NR_io_submit :
+		case __NUM_io_submit :
 			print_iocbs(rec_ptr, varptr);
 			break;
 		default:
@@ -1556,27 +1530,24 @@ print_varargs_exit(syscall_exit_t *rec_ptr)
 	int i;
 	short *st_addr;
 	short sock_type = 0;
+	int syscallno = rec_ptr->syscallno;
 
-	switch (rec_ptr->syscallno) {
-#ifndef __NR_sendmmsg
-#define __NR_sendmmsg 307
-#define __NR_recvmmsg 299
-#endif
-		case __NR_recvmmsg :
-		case __NR_sendmmsg :	
+	switch (globals->syscall_index_64[syscallno]) {
+		case __NUM_recvmmsg :
+		case __NUM_sendmmsg :	
 			printf ("%cbytes=%lld", fsep, *(unsigned long *)varptr);
 			varptr += sizeof(unsigned long);
 			/* fall through to print socket addresses */
-		case __NR_recvfrom:
-		case __NR_sendto:
-		case __NR_recvmsg:
-		case __NR_sendmsg:
-		case __NR_read:
-		case __NR_readv:
-		case __NR_pread64:
-		case __NR_write :
-		case __NR_writev :
-		case __NR_pwrite64:
+		case __NUM_recvfrom:
+		case __NUM_sendto:
+		case __NUM_recvmsg:
+		case __NUM_sendmsg:
+		case __NUM_read:
+		case __NUM_readv:
+		case __NUM_pread64:
+		case __NUM_write :
+		case __NUM_writev :
+		case __NUM_pwrite64:
 #if 0
 			for (ptr=varptr, i=0; i < varlen; i++) {
 				printf ("%02hhx", ptr[i]);
@@ -1618,18 +1589,18 @@ print_varargs_exit(syscall_exit_t *rec_ptr)
 			}
 
 			break;
-		case __NR_io_getevents :
+		case __NUM_io_getevents :
 			print_io_events(rec_ptr, varptr);
 			break;
-		case __NR_poll : 
-		case __NR_ppoll :
+		case __NUM_poll : 
+		case __NUM_ppoll :
 			nfds = varlen / sizeof(struct pollfd);
 			if (nfds) {
 				print_pollfds(varptr, nfds);
 			}
 			break;
-		case __NR_select :
-		case __NR_pselect6 :
+		case __NUM_select :
+		case __NUM_pselect6 :
 			fds_bytes = (nfds/8) + (nfds & 07ULL ? 1 : 0);
 
 			if (fds_bytes) {
@@ -1873,109 +1844,6 @@ sys_enter_func2(void *a)
 	if (kitrace_flag) print_sys_enter_rec(rec_ptr, pidp);
 	return 0;
 }
-
-/* this is replaced by pid_update_fdinfo */
-#if 0
-static inline void 
-socket_update_fdinfo(void *arg1, void *arg2)
-{
-	syscall_exit_t *rec_ptr =  (syscall_exit_t *)arg1;
-	fd_info_t *fdinfop = (fd_info_t *)arg2;
-	struct sockaddr_in *addr, *lsock_src, *rsock_src;
-	struct sockaddr_in6 *lsock_dest, *rsock_dest;
-	struct sockaddr_in6 *lsock_src6, *rsock_src6;
-	unsigned long bytes;
-	char *varptr;
-
-	printf ("socket_update_fdinfo BEGIN\n");
-	/* printf ("socket_update_fdinfo() rec_ptr: 0x%llx  reclen: %d %d\n", rec_ptr, rec_ptr->reclen, sizeof(syscall_exit_t));  */
-	if (rec_ptr->reclen <= sizeof(syscall_exit_t)) return;
-
-	varptr = (char *)rec_ptr + sizeof(syscall_exit_t);
-	switch (rec_ptr->syscallno) {
-#ifdef __NR_sendmmsg
-                case __NR_recvmmsg :
-                case __NR_sendmmsg :
-                        bytes = *(unsigned long *)varptr;
-                        varptr += sizeof(unsigned long);
-                        /* fall through to print socket addresses */
-#endif
-                case __NR_recvfrom:
-                case __NR_sendto:
-                case __NR_recvmsg:
-                case __NR_sendmsg:
-                case __NR_read:
-                case __NR_readv:
-                case __NR_write :
-                case __NR_writev :	
-			printf ("socket_update_fdinfo\n");
-			if (fdinfop->lsock || fdinfop->rsock) {
-				break;
-			}
-	                addr = (struct sockaddr_in *)varptr;
-			
-			printf ("socket_update_fdinfo sin_family %d\n", addr->sin_family == AF_INET);
-			if (addr->sin_family == AF_INET) {
-				lsock_src = addr;
-                        	rsock_src = (struct sockaddr_in *)(varptr+sizeof(struct sockaddr_in));
-
-				if (fdinfop->lsock && fdinfop->rsock) {
-					lsock_dest = fdinfop->lsock;
-					rsock_dest = fdinfop->rsock;
-				} else {
-					if (lsock_dest = calloc(1, sizeof(struct sockaddr_in6))) {
-						CALLOC_LOG(lsock_dest, 1, sizeof(struct sockaddr_in6));
-						if (rsock_dest = calloc(1, sizeof(struct sockaddr_in6))) {
-							CALLOC_LOG(rsock_dest, 1, sizeof(struct sockaddr_in6));
-							fdinfop->lsock = lsock_dest;
-							fdinfop->rsock = rsock_dest;
-							fdinfop->ftype = F_IPv4;
-							fdinfop->node = TCP_NODE;
-						}
-					}
-				}
-
-				/* Munge the IPv4 addr to the IPv6 addr */
-				/* update the socket information in the fd_info_t structure */
-				memcpy(&lsock_dest->sin6_addr.s6_addr[12], &lsock_src->sin_addr.s_addr, 4);
-				memcpy(&rsock_dest->sin6_addr.s6_addr[12], &rsock_src->sin_addr.s_addr, 4);
-				lsock_dest->sin6_port = BE2LE(lsock_src->sin_port);
-				rsock_dest->sin6_port = BE2LE(rsock_src->sin_port);
-
-			} else if (addr->sin_family == AF_INET6) {
-				lsock_src6 = (struct sockaddr_in6 *)addr;
-                        	rsock_src6 = (struct sockaddr_in6 *)(varptr+sizeof(struct sockaddr_in6));
-
-				if (fdinfop->lsock && fdinfop->rsock) {
-					lsock_dest = fdinfop->lsock;
-					rsock_dest = fdinfop->rsock;
-				} else {
-					if (lsock_dest = calloc(1, sizeof(struct sockaddr_in6))) {
-						CALLOC_LOG(lsock_dest, 1, sizeof(struct sockaddr_in6));
-						if (rsock_dest = calloc(1, sizeof(struct sockaddr_in6))) {
-							CALLOC_LOG(rsock_dest, 1, sizeof(struct sockaddr_in6));
-							fdinfop->lsock = lsock_dest;
-							fdinfop->rsock = rsock_dest;
-							fdinfop->ftype = F_IPv6;
-							fdinfop->node = TCP_NODE;
-						}
-					}
-				}
-				/* update the socket information in the fd_info_t structure */
-				memcpy(&lsock_dest->sin6_addr.s6_addr[0], &lsock_src6->sin6_addr.s6_addr[0], 16);
-				memcpy(&rsock_dest->sin6_addr.s6_addr[0], &rsock_src6->sin6_addr.s6_addr[0], 16);
-				lsock_dest->sin6_port = BE2LE(lsock_src6->sin6_port);
-				rsock_dest->sin6_port = BE2LE(rsock_src6->sin6_port);
-				lsock_dest->sin6_family = lsock_src6->sin6_family;
-				rsock_dest->sin6_family = rsock_src6->sin6_family;
-			}
-
-			break;
-		default:
-		;
-	}
-}
-#endif
 
 static inline int
 sys_exit_func2(void *a)

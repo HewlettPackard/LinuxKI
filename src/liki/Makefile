@@ -116,7 +116,49 @@ else ifeq ($(hostdistro),centos) #  Centos
 else ifeq ($(hostdistro),ol) # Oracle Linux (OL)
    ifeq (,$(findstring uek,$(hostkernel)))
       #OL Red Hat compatible kernel
-      EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=7 -DOTHER_STACK_SKIP=2
+      ifneq (,$(findstring 6.,$(hostversion)))
+         #RHEL6 (2.6)
+         EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 7.,$(hostversion)))
+         #RHEL 7 (3.10)
+         EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=9 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 8.0,$(hostversion)))
+         #RHEL 8.0 (4.18)
+         EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 8.1,$(hostversion)))
+        #RHEL 8.1(4.18)
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 8.,$(hostversion)))
+        #RHEL 8.2 and later (4.18)
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifeq ($(hostdistro),ol) # Oracle Linux (OL)
+   ifeq (,$(findstring uek,$(hostkernel)))
+      #OL Red Hat compatible kernel
+      ifneq (,$(findstring 6.,$(hostversion)))
+         #RHEL6 (2.6)
+         EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 7.,$(hostversion)))
+         #RHEL 7 (3.10)
+         EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=9 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 8.0,$(hostversion)))
+         #RHEL 8.0 (4.18)
+         EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 8.1,$(hostversion)))
+        #RHEL 8.1(4.18)
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 8.,$(hostversion)))
+        #RHEL 8.2 and later (4.18)
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else
+        EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      endif
+   else ifneq (,$(findstring uek,$(hostkernel)))
+      #OL Unbreakable Enterprise Kernel (UEK)
+      EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
+   endif
+else
+        EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      endif
    else ifneq (,$(findstring uek,$(hostkernel)))
       #OL Unbreakable Enterprise Kernel (UEK)
       EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2

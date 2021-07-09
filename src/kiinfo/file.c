@@ -50,117 +50,30 @@ int file_ftrace_print_func(void *, void *);
 static inline void
 file_win_trace_funcs()
 {
-	int i;
-	
-	for (i = 0; i < 65536; i++) {
-		ki_actions[i].id = i;
-		ki_actions[i].func = NULL;
-		ki_actions[i].execute = 0;
-	}
-
-        strcpy(&ki_actions[0].subsys[0], "EventTrace");
-        strcpy(&ki_actions[0].event[0], "Header");
-        ki_actions[0].func = winki_header_func;
-        ki_actions[0].execute = 1;
-
-        strcpy(&ki_actions[0x400].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x400].event[0], "FileName");
-        ki_actions[0x400].func=print_fileio_name_func; 
-        strcpy(&ki_actions[0x420].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x420].event[0], "FileCreate");
-        ki_actions[0x420].func=print_fileio_name_func;
-
-        strcpy(&ki_actions[0x423].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x423].event[0], "FileDelete");
-        ki_actions[0x423].func=print_fileio_name_func;
-
-        strcpy(&ki_actions[0x424].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x424].event[0], "FileRundown");
-        ki_actions[0x424].func=print_fileio_name_func;
-
-        strcpy(&ki_actions[0x440].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x440].event[0], "Create");
-        ki_actions[0x440].func=print_fileio_create_func;
-
-        strcpy(&ki_actions[0x441].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x441].event[0], "Cleanup");
-        ki_actions[0x441].func=print_fileio_simpleop_func;
-
-        strcpy(&ki_actions[0x442].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x442].event[0], "Close");
-        ki_actions[0x442].func=print_fileio_simpleop_func;
-
-        strcpy(&ki_actions[0x443].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x443].event[0], "Read");
-        ki_actions[0x443].func=print_fileio_readwrite_func;
-
-        strcpy(&ki_actions[0x444].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x444].event[0], "Write");
-        ki_actions[0x444].func=print_fileio_readwrite_func;
-
-        strcpy(&ki_actions[0x445].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x445].event[0], "SetInfo");
-        ki_actions[0x445].func=print_fileio_info_func;
-
-        strcpy(&ki_actions[0x446].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x446].event[0], "Delete");
-        ki_actions[0x446].func=print_fileio_info_func;
-
-        strcpy(&ki_actions[0x447].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x447].event[0], "Rename");
-        ki_actions[0x447].func=print_fileio_info_func;
-
-        strcpy(&ki_actions[0x448].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x448].event[0], "DirEnum");
-        ki_actions[0x448].func=print_fileio_direnum_func;
-
-        strcpy(&ki_actions[0x449].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x449].event[0], "Flush");
-        ki_actions[0x449].func=print_fileio_simpleop_func;
-
-        strcpy(&ki_actions[0x44a].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x44a].event[0], "QueryInfo");
-        ki_actions[0x44a].func=print_fileio_info_func;
-
-        strcpy(&ki_actions[0x44b].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x44b].event[0], "FSControl");
-        ki_actions[0x44b].func=print_fileio_info_func;
-
-        strcpy(&ki_actions[0x44c].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x44c].event[0], "OperationEnd");
-        ki_actions[0x44c].func=print_fileio_opend_func;
-
-        strcpy(&ki_actions[0x44d].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x44d].event[0], "DirNotify");
-        ki_actions[0x44d].func=print_fileio_direnum_func;
-
-        strcpy(&ki_actions[0x44f].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x44f].event[0], "DeletePath");
-        ki_actions[0x44f].func=print_fileio_name_func;
-
-        strcpy(&ki_actions[0x450].subsys[0], "FileIo");
-        strcpy(&ki_actions[0x450].event[0], "RenamePath");
-        ki_actions[0x450].func=print_fileio_name_func;
-
-        strcpy(&ki_actions[0xb0f].subsys[0], "SysConfig");
-        strcpy(&ki_actions[0xb0f].event[0], "Services");
-        ki_actions[0xb0f].func=sysconfig_services_func;
-        ki_actions[0xb0f].execute = 1;
-
-        strcpy(&ki_actions[0x30a].subsys[0], "Process");
-        strcpy(&ki_actions[0x30a].event[0], "Load");
-        ki_actions[0x30a].func=process_load_func;
-        ki_actions[0x30a].execute = 1;
-
-        strcpy(&ki_actions[0x1403].subsys[0], "Image");
-        strcpy(&ki_actions[0x1403].event[0], "DCStart");
-        ki_actions[0x1403].func=image_dcstart_func;
-        ki_actions[0x1403].execute = 1;
-
-        strcpy(&ki_actions[0x1404].subsys[0], "Image");
-        strcpy(&ki_actions[0x1404].event[0], "DCEnd");
-        ki_actions[0x1404].func=image_dcstart_func;
-        ki_actions[0x1404].execute = 1;
+	winki_init_actions(NULL);
+	winki_enable_event(0x10a, diskio_readwrite_func);
+        winki_enable_event(0x10b, diskio_readwrite_func);
+        winki_enable_event(0x400, fileio_name_func);
+        winki_enable_event(0x420, fileio_name_func);
+        winki_enable_event(0x423, fileio_name_func);
+        winki_enable_event(0x440, fileio_create_func);
+        winki_enable_event(0x443, fileio_readwrite_func);
+        winki_enable_event(0x444, fileio_readwrite_func);
+	/*
+        winki_enable_event(0x441, fileio_simpleop_func);
+        winki_enable_event(0x442, fileio_simpleop_func);
+        winki_enable_event(0x445, fileio_info_func);
+        winki_enable_event(0x446, fileio_info_func);
+        winki_enable_event(0x447, fileio_info_func);
+        winki_enable_event(0x448, fileio_direnum_func);
+        winki_enable_event(0x449, fileio_simpleop_func);
+        winki_enable_event(0x44a, fileio_info_func);
+        winki_enable_event(0x44b, fileio_info_func);
+        winki_enable_event(0x44c, fileio_opend_func);
+        winki_enable_event(0x44d, fileio_direnum_func);
+        winki_enable_event(0x44f, fileio_name_func);
+        winki_enable_event(0x450, fileio_name_func);
+	*/
 }
 
 
@@ -175,6 +88,7 @@ file_init_func(void *v)
         bufmiss_func = pid_bufmiss_func;
 
 	if (IS_WINKI) {
+		parse_SQLThreadList();
 		file_win_trace_funcs();
 	} else {
 	        /* go ahead and initialize the trace functions, but do not set the execute field */
@@ -227,8 +141,9 @@ file_init_func(void *v)
 			parse_jstack();
 		}
 	}
+
 	if (timestamp) {
-			file_csvfile = open_csv_file("kifile", 1);
+		file_csvfile = open_csv_file("kifile", 1);
 	}
 }
 
@@ -290,6 +205,77 @@ int file_print_pgcache(void *arg1, void *arg2)
 			fdatap->node,
                         ftype_name_index[fdatap->ftype],
         		fdatap->fnameptr ? fdatap->fnameptr : "???");
+}
+
+int
+file_print_fobj_logio(void *arg1, void *arg2)
+{
+        fileobj_t *fobjinfop = (fileobj_t *)arg1;
+        fileobj_t *gfobjinfop;
+	fstats_t *fstatsp;
+	char *filename;
+	int rw;
+
+	printf ("%s0x%llx", tab, fobjinfop->FOBJ);
+	for (rw = IOTOT; rw >= IORD; rw--) {
+		fstatsp = &fobjinfop->liostats[rw];
+		printf ("  %7.0f %7.0f %7d", 
+			fstatsp->cnt / globals->total_secs*1.0,
+			(fstatsp->bytes/1024)/globals->total_secs*1.0,
+			fstatsp->bytes / MAX(fstatsp->cnt, 1));
+	}
+
+	/* get the fobj filename from the global fobj */
+	if (fobjinfop->filename == NULL) {
+		gfobjinfop = FIND_FOBJP(globals->fobj_hash, fobjinfop->FOBJ);
+		if (gfobjinfop && gfobjinfop->filename) {
+			printf ("  %s", gfobjinfop->filename);
+		}
+	} else {
+		printf ("  %s", fobjinfop->filename);
+	}
+	printf ("\n");
+}
+
+int
+file_print_fdev(void *arg1, void *arg2)
+{
+        filedev_t *fdevinfop = (filedev_t *)arg1;
+	fileobj_t *fobjinfop = (fileobj_t *)arg2;
+	char devstr[16]; 
+	iostats_t *statp;
+
+	statp = &fdevinfop->stats[0];
+	sprintf(devstr, "0x%08x", fdevinfop->FDEV);
+
+	print_dev_iostats(statp, devstr, fobjinfop->filename,  NULL, NULL, 0, NULL);
+}
+
+int
+file_print_fobj_physio(void *arg1, void *arg2)
+{
+        fileobj_t *fobjinfop = (fileobj_t *)arg1;
+
+	if (fobjinfop->piostats[IOTOT].compl_cnt == 0) return 0;
+	NLt;
+        CAPTION_GREY;
+	printf ("obj: 0x%llx", fobjinfop->FOBJ);
+	printf ("  filename: %s", fobjinfop->filename);
+	NLt;
+	_CAPTION;
+
+	BOLD ("      device rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv" ); NL;
+#if 0 
+	/* Skip the totals unless we see mulitple devices for a file */
+	printf ("Totals:     ");
+	print_iostats_totals(globals, &fobjinfop->piostats[0], NULL);
+	printf ("\n");
+#endif
+
+	if (fobjinfop->fdev_hash) {
+        	foreach_hash_entry((void **)fobjinfop->fdev_hash, FDEV_HSIZE, file_print_fdev,
+                           (int (*)())fdev_sort_by_physio, 0, fobjinfop);
+	}
 }
 
 int file_print_fdata(void *arg1, void *arg2)
@@ -480,40 +466,60 @@ file_print_report(void *v)
 
 	printf ("\n%s******** GLOBAL FILE ACTIVITY REPORT ********\n", tab);
 
-        printf ("\n%s---  Top Files sorted by System Call Count  ---\n", tab);
-        printf("%sSyscalls    ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
-        foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata,
+	if (globals->fdata_hash) {
+        	printf ("\n%s---  Top Files sorted by System Call Count  ---\n", tab);
+        	printf("%sSyscalls    ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
+        	foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata,
                            (int (*)())fdata_sort_by_syscalls,
                            nfile, NULL);
 
-        printf ("\n%s---  Top Files sorted by System Call Count (Detailed)  ---\n", tab);
-        foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata,
+        	printf ("\n%s---  Top Files sorted by System Call Count (Detailed)  ---\n", tab);
+        	foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata,
                            (int (*)())fdata_sort_by_syscalls,
                            nfile, &scallflag);
 
-        printf ("\n%s---  Top Files sorted by Errors  ---\n", tab);
-        printf("%sSyscalls    ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
-        foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata_errs,
+        	printf ("\n%s---  Top Files sorted by Errors  ---\n", tab);
+        	printf("%sSyscalls    ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
+        	foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata_errs,
                            (int (*)())fdata_sort_by_errs,
                            nfile, NULL);
 
-        printf ("\n%s---  Top Files sorted by Elapsed Time  ---\n", tab);
-        printf("%sSyscalls    ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
-        foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata,
+        	printf ("\n%s---  Top Files sorted by Elapsed Time  ---\n", tab);
+        	printf("%sSyscalls    ElpTime  Lseeks   Reads  Writes    Errs         dev/fdatap       node     type  Filename\n", tab);
+        	foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_fdata,
                             (int (*)())fdata_sort_by_elptime,
                             nfile, NULL);
 
-	if (globals->cache_insert_cnt + globals->cache_evict_cnt) {
-		printf ("\n%s--- Top Files sorted by Page Cache Activity ---\n", tab);
-        	printf("%s Inserts   Evicts         dev       node     type  Filename\n", tab);
-        	foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_pgcache,
-                            (int (*)())fdata_sort_by_pgcache,
-                            nfile, NULL);
+		if (globals->cache_insert_cnt + globals->cache_evict_cnt) {
+			printf ("\n%s--- Top Files sorted by Page Cache Activity ---\n", tab);
+        		printf("%s Inserts   Evicts         dev       node     type  Filename\n", tab);
+        		foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, file_print_pgcache,
+                            	(int (*)())fdata_sort_by_pgcache,
+                            	nfile, NULL);
+		}
+	
+		if (file_csvfile) {
+			csv_printf(file_csvfile, "PID,Command,ThreadName,FD,Filename,type,System Call,syscallno,Count,Rate,ElpTime,AvTime,MaxTime,errors,AvSz,KB/s\n");
+			file_print_csv();
+		}
 	}
 
-	if (file_csvfile) {
-		csv_printf(file_csvfile, "PID,Command,ThreadName,FD,Filename,type,System Call,syscallno,Count,Rate,ElpTime,AvTime,MaxTime,errors,AvSz,KB/s\n");
-		file_print_csv();
+	if (globals->fobj_hash) {
+		foreach_hash_entry(globals->fobj_hash, FOBJ_HSIZE, calc_fobj_totals, NULL, 0, 0);
+
+        	printf ("\n%s---  Top Files sorted by Logical I/O  ---\n", tab);
+	        printf ("                    -------  Total  ------- -------  Write  -------- --------  Read  --------\n");
+ 		printf ("Object                 IO/s    KB/s  AvIOsz     IO/s    KB/s  AvIOsz     IO/s    KB/s  AvIOsz  filename\n");
+
+        	foreach_hash_entry((void **)globals->fobj_hash, FOBJ_HSIZE, file_print_fobj_logio,
+                           (int (*)())fobj_sort_by_logio, nfile, NULL);
+
+        	printf ("\n%s---  Top Files sorted by Physical I/O  ---\n", tab);
+		csv_printf(file_csvfile,"filname   ,device    ,h/w path        ,Mapper Device                    ,Target Path       ,  rwt,  avque,avinflt,  io/s,  KB/s, avsz,   avwait,   avserv,   tot,   seq,   rnd, reque, abort, flush, maxwait, maxserv\n");
+
+        	foreach_hash_entry((void **)globals->fobj_hash, FOBJ_HSIZE, file_print_fobj_physio,
+                           (int (*)())fobj_sort_by_physio, nfile, NULL);
+
 	}
 
 	foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, clear_fdata_stats, NULL, 0, NULL);

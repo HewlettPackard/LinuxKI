@@ -396,6 +396,8 @@ Kipid(init_t *init, arg_t *arg)
 			CLEAR_STAT(FUTEX_STATS);
                 } else if (strcmp("mangle", prop->p_name) == 0) {
                         SET(MANGLE_FLAG);
+		} else if (strcmp("vis", prop->p_name) == 0) {
+			SET(VIS_FLAG);
 		} else if (strcmp("vpct", prop->p_name) == 0) {
                         vpct = (uint32)prop->p_value.i;
                 } else if (strcmp("vdepth", prop->p_name) == 0) {

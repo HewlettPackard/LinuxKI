@@ -31,6 +31,87 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "Pdb.h"
 
 int
+calc_fdev_totals(void *arg1, void *arg2) 
+{
+        filedev_t *fdevinfop = (filedev_t *)arg1;
+
+        calc_io_totals(&fdevinfop->stats[0], NULL);
+
+        return 0;
+}
+
+int
+calc_fobj_totals(void *arg1, void *arg2) 
+{
+        fileobj_t *fobjinfop = (fileobj_t *)arg1;
+	fstats_t *fstats;
+
+        if (fobjinfop == NULL) return 0;
+
+	fstats = &fobjinfop->liostats[0];
+	fstats[IOTOT].bytes = fstats[IORD].bytes + fstats[IOWR].bytes;
+	fstats[IOTOT].cnt = fstats[IORD].cnt + fstats[IOWR].cnt;
+	fstats[IOTOT].seqios = fstats[IORD].seqios + fstats[IOWR].seqios;
+	fstats[IOTOT].rndios = fstats[IORD].rndios + fstats[IOWR].rndios;
+
+        calc_io_totals(&fobjinfop->piostats[0], NULL);
+
+	if (fobjinfop->fdev_hash) {
+		foreach_hash_entry((void **)fobjinfop->fdev_hash, FDEV_HSIZE, calc_fdev_totals, NULL, 0, 0);
+	}
+
+        return 0;
+}
+
+static inline int
+fileio_incr_fileobj_stats(FileIo_ReadWrite_t *p, fstats_t *statp)
+{
+
+	if (p->Offset == statp->next_offset) {
+		statp->seqios++;
+	} else {
+		statp->rndios++;
+	}
+
+	statp->cnt++;
+	statp->bytes += p->IoSize;
+	statp->next_offset += p->Offset + p->IoSize;
+}
+
+static inline void
+fileio_perfile_stats(FileIo_ReadWrite_t *p) 
+{
+	fileobj_t *fobjinfop;
+	uint32 rw;
+	uint64 obj = p->FileObject;
+
+	rw = filereq_type(p->EventType);
+
+	fobjinfop = GET_FOBJP(&globals->fobj_hash, obj);
+
+	fileio_incr_fileobj_stats(p, &fobjinfop->liostats[rw]);
+	fobjinfop->last_tid = p->tid;
+}
+
+static inline void
+fileio_perpid_file_stats(FileIo_ReadWrite_t *p) 
+{
+	fileobj_t *fobjinfop;
+	uint32 rw;
+	uint64 obj = p->FileObject;
+	pid_info_t *pidp;
+
+	pidp = GET_PIDP(&globals->pid_hash, p->tid);
+
+	rw = filereq_type(p->EventType);
+
+	fobjinfop = GET_FOBJP(&pidp->fobj_hash, obj);
+	
+	fileio_incr_fileobj_stats(p, &fobjinfop->liostats[rw]);
+	fobjinfop->last_tid = p->tid;
+}
+
+int
 print_fileio_create_func (void *a, void *v)
 {
 	trace_info_t *trcinfop = (trace_info_t *)a;
@@ -65,11 +146,32 @@ print_fileio_create_func (void *a, void *v)
 	PRINT_WIN_FILENAME(&p->OpenPath[0]);
 	printf ("\"");
 
+	/*
+	printf (" Stacktrace: ");
 	PRINT_WIN_STKTRC2(pidp, stkinfop);
+	*/
 
 	printf ("\n");
 
 	if (debug) hex_dump(p, 6);
+}
+
+int
+fileio_create_func (void *a, void *v)
+{
+	trace_info_t *trcinfop = (trace_info_t *)a;
+	FileIo_Create_t *p = (FileIo_Create_t *)trcinfop->cur_event;
+	fileobj_t *fobjinfop;
+	uint16 *chr;
+
+	chr = &p->OpenPath[0];
+	PRINT_WIN_NAME2_STR(util_str, chr)
+
+	fobjinfop = GET_FOBJP(&globals->fobj_hash, p->FileObject);
+	add_command(&fobjinfop->filename, util_str);
+
+	if (kitrace_flag) 
+		print_fileio_create_func(a, v);
 }
 
 int
@@ -103,12 +205,30 @@ print_fileio_readwrite_func (void *a, void *v)
 		p->IoSize,
 		p->IoFlags);
 
+	/* 
+	printf (" Stacktrace: ");
 	PRINT_WIN_STKTRC2(pidp, stkinfop);
+	*/
 
 	printf ("\n");
 
 	if (debug) hex_dump(p, 6);
 }
+
+
+int 
+fileio_readwrite_func (void *a, void *v)
+{
+	trace_info_t *trcinfop = (trace_info_t *)a;
+	FileIo_ReadWrite_t *p = (FileIo_ReadWrite_t *)trcinfop->cur_event;
+
+	if (global_stats && perfd_stats) fileio_perfile_stats(p);
+	if (perpid_stats && perfd_stats) fileio_perpid_file_stats(p);
+
+	if (kitrace_flag)
+		print_fileio_readwrite_func(a, v);
+}
+
 
 int
 print_fileio_opend_func (void *a, void *v)
@@ -146,6 +266,24 @@ print_fileio_name_func (void *a, void *v)
 	printf ("\n");
 
 	if (debug) hex_dump(p, 3);
+}
+
+
+int fileio_name_func (void *a, void *v)
+{
+	trace_info_t *trcinfop = (trace_info_t *)a;
+	FileIo_FileName_t *p = (FileIo_FileName_t *)trcinfop->cur_event;
+	fileobj_t *fobjinfop;
+	uint16 *chr;
+
+	chr = &p->FileName[0];
+	PRINT_WIN_NAME2_STR(util_str, chr)
+
+	fobjinfop = GET_FOBJP(&globals->fobj_hash, p->FileObject);
+	add_command(&fobjinfop->filename, util_str);
+
+	if (kitrace_flag) 
+		print_fileio_name_func(a, v);
 }
 
 int
@@ -198,7 +336,9 @@ print_fileio_direnum_func (void *a, void *v)
 	PRINT_WIN_FILENAME(&p->FileName[0]);
 	printf ("\"");
 
+       	/* printf (" Stacktrace: ");	
 	PRINT_WIN_STKTRC2(pidp, stkinfop);
+	*/
 
 	printf ("\n");
 
@@ -234,7 +374,9 @@ print_fileio_simpleop_func (void *a, void *v)
 		p->TTID,
 		p->FileObject);
 
+	/* printf (" Stacktrace: ");
 	PRINT_WIN_STKTRC2(pidp, stkinfop);
+	*/
 
 	printf ("\n");
 

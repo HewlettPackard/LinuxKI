@@ -53,8 +53,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "winki.h"
 #include "Pdb.h"
 #include "Thread.h"
+#include "Process.h"
 #include "PerfInfo.h"
 #include "DiskIo.h"
+#include "NetIp.h"
+#include "FileIo.h"
 #include "winki_util.h"
 
 extern struct utsname  utsname;
@@ -136,6 +139,7 @@ int print_docker_window();
 int print_select_docker_window();
 int print_wwn_window();
 int print_select_wwn_window();
+int print_select_file_window();
 void *live_termio_thread();
 
 win_action_t win_actions[MAX_WIN] = {
@@ -173,7 +177,8 @@ win_action_t win_actions[MAX_WIN] = {
 	{ print_docker_window, WINMAIN_FLAGS, WINMAIN_STATS, WINMAIN_TRACEMASK },
 	{ print_select_docker_window, WINMAIN_FLAGS, WINMAIN_STATS, WINMAIN_TRACEMASK },
 	{ print_wwn_window, WINWWN_FLAGS, WINWWN_STATS, WINWWN_TRACEMASK},
-	{ print_select_wwn_window, WINWWN_FLAGS, WINWWN_STATS, WINWWN_TRACEMASK}
+	{ print_select_wwn_window, WINWWN_FLAGS, WINWWN_STATS, WINWWN_TRACEMASK},
+	{ print_select_file_window, WINFILE_SEL_FLAGS, WINFILE_SEL_STATS, WINFILE_SEL_TRACEMASK },
 };
 
 static char * iolabels[3] = {
@@ -258,100 +263,40 @@ print_global_header()
 static inline void
 live_winki_trace_funcs()
 {
-	int i;
-
-        for (i = 0; i < 65536; i++) {
-                ki_actions[i].id = i;
-                ki_actions[i].func = NULL;
-                ki_actions[i].execute = 0;
-        }
-
-        strcpy(&ki_actions[0].subsys[0], "EventTrace");
-        strcpy(&ki_actions[0].event[0], "Header");
-        ki_actions[0].func = winki_header_func;
-        ki_actions[0].execute = 1;
-
-        strcpy(&ki_actions[0x524].subsys[0], "Thread");
-        strcpy(&ki_actions[0x524].event[0], "Cswitch");
-        ki_actions[0x524].func=thread_cswitch_func;
-        ki_actions[0x524].execute = 1;
-
-        strcpy(&ki_actions[0x532].subsys[0], "Thread");
-        strcpy(&ki_actions[0x532].event[0], "ReadyThread");
-        ki_actions[0x532].func=thread_readythread_func;
-                ki_actions[0x532].execute = 1;
-
-        strcpy(&ki_actions[0x548].subsys[0], "Thread");
-        strcpy(&ki_actions[0x548].event[0], "SetName");
-        ki_actions[0x548].func=thread_setname_func;
-        ki_actions[0x548].execute = 1;
-
-        strcpy(&ki_actions[0xf33].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf33].event[0], "SysClEnter");
-        ki_actions[0xf33].func=perfinfo_sysclenter_func;
-        ki_actions[0xf33].execute = 1;
-
-        strcpy(&ki_actions[0xf34].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf34].event[0], "SysClExit");
-        ki_actions[0xf34].func=perfinfo_sysclexit_func;
-        ki_actions[0xf34].execute = 1;
-
-        strcpy(&ki_actions[0x10a].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10a].event[0], "Read");
-        ki_actions[0x10a].func=diskio_readwrite_func;
-        ki_actions[0x10a].execute = 1;
-
-        strcpy(&ki_actions[0x10b].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10b].event[0], "Write");
-        ki_actions[0x10b].func=diskio_readwrite_func;
-        ki_actions[0x10b].execute = 1;
-
-        strcpy(&ki_actions[0x10c].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10c].event[0], "ReadInit");
-        ki_actions[0x10c].func=diskio_init_func;
-        ki_actions[0x10c].execute = 1;
-
-                strcpy(&ki_actions[0x10d].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10d].event[0], "WriteInit");
-        ki_actions[0x10d].func=diskio_init_func;
-        ki_actions[0x10d].execute = 1;
-
-        strcpy(&ki_actions[0x10e].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10e].event[0], "FlushBuffers");
-        ki_actions[0x10e].func=diskio_flush_func;
-        ki_actions[0x10e].execute = 1;
-
-        strcpy(&ki_actions[0xf2e].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf2e].event[0], "SampleProfile");
-        ki_actions[0xf2e].func=perfinfo_profile_func;
-        ki_actions[0xf2e].execute = 1;
-
-        strcpy(&ki_actions[0xf32].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf32].event[0], "ISR-MSI");
-        ki_actions[0xf32].func=perfinfo_isr_func;
-        ki_actions[0xf32].execute = 1;
-
-        strcpy(&ki_actions[0xf42].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf42].event[0], "ThreadedDPC");
-        ki_actions[0xf42].func=perfinfo_dpc_func;
-        ki_actions[0xf42].execute = 1;
-
-        strcpy(&ki_actions[0xf43].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf43].event[0], "ISR");
-        ki_actions[0xf43].func=perfinfo_isr_func;
-        ki_actions[0xf43].execute = 1;
-
-        strcpy(&ki_actions[0xf44].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf44].event[0], "DPC");
-        ki_actions[0xf44].func=perfinfo_dpc_func;
-        ki_actions[0xf44].execute = 1;
-
-
-        strcpy(&ki_actions[0xf45].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf45].event[0], "TimeDPC");
-        ki_actions[0xf45].func=perfinfo_dpc_func;
-        ki_actions[0xf45].execute = 1;
-
+	winki_init_actions(NULL);
+	winki_enable_event(0x10a, diskio_readwrite_func);
+	winki_enable_event(0x10b, diskio_readwrite_func);
+	winki_enable_event(0x10c, diskio_init_func);
+	winki_enable_event(0x10d, diskio_init_func);
+	winki_enable_event(0x10e, diskio_flush_func);
+	winki_enable_event(0x30a, process_load_func);
+	winki_enable_event(0x400, fileio_name_func);
+	winki_enable_event(0x420, fileio_name_func);
+	winki_enable_event(0x423, fileio_name_func);
+	winki_enable_event(0x440, fileio_create_func);
+	winki_enable_event(0x443, fileio_readwrite_func);
+	winki_enable_event(0x444, fileio_readwrite_func);
+	winki_enable_event(0x524, thread_cswitch_func);
+	winki_enable_event(0x532, thread_readythread_func);
+	winki_enable_event(0x548, thread_setname_func);
+	winki_enable_event(0x60a, tcpip_sendipv4_func);
+	winki_enable_event(0x60b, tcpip_recvipv4_func);
+	winki_enable_event(0x60e, tcpip_retransmitipv4_func);
+	winki_enable_event(0x61a, tcpip_sendipv6_func);
+	winki_enable_event(0x61b, tcpip_recvipv6_func);
+	winki_enable_event(0x61e, tcpip_retransmitipv6_func);
+	winki_enable_event(0x80a, udpip_sendipv4_func);
+	winki_enable_event(0x80b, udpip_recvipv4_func);
+	winki_enable_event(0x81a, udpip_sendipv6_func);
+	winki_enable_event(0x81b, udpip_recvipv6_func);
+	winki_enable_event(0xf33, perfinfo_sysclenter_func);
+	winki_enable_event(0xf34, perfinfo_sysclexit_func);
+	winki_enable_event(0xf2e, perfinfo_profile_func);
+	winki_enable_event(0xf32, perfinfo_isr_func);
+	winki_enable_event(0xf42, perfinfo_dpc_func);
+	winki_enable_event(0xf43, perfinfo_isr_func);
+	winki_enable_event(0xf44, perfinfo_dpc_func);
+	winki_enable_event(0xf45, perfinfo_dpc_func);
 }
 
 /*
@@ -453,7 +398,7 @@ live_init_func(void *v)
 		parse_systeminfo();
 		parse_cpulist();
 		parse_corelist();
-
+		parse_SQLThreadList();
 	} else {
 		parse_cpuinfo();
 		parse_mem_info();
@@ -605,6 +550,7 @@ live_report_func(void *v)
 			} else {
 				foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, calc_pid_iototals, NULL, 0, NULL);
 			}
+			if (globals->fobj_hash) foreach_hash_entry(globals->fobj_hash, FOBJ_HSIZE, calc_fobj_totals, NULL, 0, 0);
 		}
 		live_print_window();
 		if (is_alive) { 
@@ -919,6 +865,38 @@ print_iostats_summary_live (void *arg1, void *arg2)
         }
 }
 
+
+int
+live_print_fobj_logio(void *arg1, void *arg2)
+{
+	fileobj_t *fobjinfop = (fileobj_t *)arg1;
+	fileobj_t *gfobjinfop;
+	fstats_t *fstatsp;
+	int rw;
+
+	col=0;
+	mvprintw (lineno, col, "0x%016llx", fobjinfop->FOBJ);
+	col = 20;
+	for (rw = IOTOT; rw >= IORD; rw--) {
+		fstatsp = &fobjinfop->liostats[rw];
+		mvprintw (lineno, col, "%7.0f %7.0f %7d",
+			fstatsp->cnt / globals->total_secs*1.0,
+			(fstatsp->bytes/1024)/globals->total_secs*1.0,
+			fstatsp->bytes / MAX(fstatsp->cnt, 1));
+		col+=25;
+		if ((COLS - col) < 75) break;
+	}
+
+	/* get the fobj filename from the global fobj */
+	if (fobjinfop->filename == NULL) {
+		gfobjinfop = FIND_FOBJP(globals->fobj_hash, fobjinfop->FOBJ);
+		if (gfobjinfop && gfobjinfop->filename) {
+			mvprintw (lineno++, col, "%s", gfobjinfop->filename);
+		}
+        } else {
+                mvprintw (lineno++, col, "%s", fobjinfop->filename);
+        }
+}
 
 /* this is used to print an I/O summary on one line.  It does not include a nl character */
 int
@@ -1311,7 +1289,7 @@ print_fdata_live(void *arg1, void *arg2)
 }
 
 int
-print_socket_detail_live(sd_stats_t *statsp, struct sockaddr_in6 *lsock, struct sockaddr_in6 *rsock, void **syscallp)
+print_socket_detail_live(sd_stats_t *statsp, struct sockaddr_in6 *lsock, struct sockaddr_in6 *rsock, int type, void **syscallp)
 {
 	char ipstr[64];
 
@@ -1329,17 +1307,23 @@ print_socket_detail_live(sd_stats_t *statsp, struct sockaddr_in6 *lsock, struct 
                 printw ("R=%s", ipstr);
         }
 
+	if (type > 0 && type < 11) {
+		printw (" (%s)", socktype_name_index[type]);
+	}
+
 	if (statsp->last_pid > 0) {
 		printw (" Last PID: %d\n", statsp->last_pid);
 	}
-	
-	mvprintw (lineno++, 0, "System Call Name                 Count     Rate     ElpTime        Avg");
-        if (COLS > 107) printw ("        Max    Errs    AvSz     KB/s");
-	foreach_hash_entry((void **)syscallp, SYSCALL_HASHSZ, print_syscall_info_live, syscall_sort_by_time, LINES_AVAIL, NULL);
+
+	if (syscallp) {	
+		mvprintw (lineno++, 0, "System Call Name                 Count     Rate     ElpTime        Avg");
+        	if (COLS > 107) printw ("        Max    Errs    AvSz     KB/s");
+		foreach_hash_entry((void **)syscallp, SYSCALL_HASHSZ, print_syscall_info_live, syscall_sort_by_time, LINES_AVAIL, NULL);
+	}
 }
 
 int
-print_socket_info_live(sd_stats_t *statsp, struct sockaddr_in6 *lsock, struct sockaddr_in6 *rsock)
+print_socket_info_live(sd_stats_t *statsp, struct sockaddr_in6 *lsock, struct sockaddr_in6 *rsock, int type,  int print_lpid) 
 {
 	uint64 total_time;
 	sched_info_t *gschedp;
@@ -1357,6 +1341,8 @@ print_socket_info_live(sd_stats_t *statsp, struct sockaddr_in6 *lsock, struct so
                 (statsp->wr_cnt*1.0) / secs, 
                 (statsp->wr_bytes / 1024.0) / secs);
 
+	if (print_lpid) printw ("%10d  ", statsp->last_pid);
+
 	printstr_ip_port_v6(ipstr, lsock, 0);
         if (lsock) {
                 printw ("L=%s", ipstr);
@@ -1367,6 +1353,11 @@ print_socket_info_live(sd_stats_t *statsp, struct sockaddr_in6 *lsock, struct so
         if (rsock) {
                 printw ("R=%s", ipstr);
         }
+
+	if (type > 0 && type < 11) {
+		printw (" (%s)", socktype_name_index[type]);
+	}
+
 }
 
 int
@@ -1380,9 +1371,7 @@ print_ipip_live(void *arg1, void *arg2)
 
         if (statsp->syscall_cnt == 0) return 0;
 
-        key1 = ipipp->lle.key1;
-        key2 = ipipp->lle.key2;
-	print_socket_info_live(statsp, ipipp->laddr, ipipp->raddr);
+	print_socket_info_live(statsp, ipipp->laddr, ipipp->raddr, 0, 0);
 }
 
 int
@@ -1395,10 +1384,12 @@ print_sdata_live(void *arg1, void *arg2)
 	statsp = &sdatap->stats;
 	if (statsp->syscall_cnt == 0) return 0;
 
-        key1 = sdatap->lle.key1;
-        key2 = sdatap->lle.key2;
-	print_socket_detail_live(statsp, sdatap->laddr, sdatap->raddr, sdatap->syscallp);
-	lineno++;
+	if (IS_WINKI) { 
+		print_socket_info_live(statsp, sdatap->laddr, sdatap->raddr, sdatap->type, 1);
+	} else {
+		print_socket_detail_live(statsp, sdatap->laddr, sdatap->raddr, sdatap->type, sdatap->syscallp);
+		lineno++;
+	}
 }
 
 int 
@@ -1406,15 +1397,28 @@ print_pid_header(pid_info_t *pidp)
 {
 	sched_info_t *schedp;
 	sched_stats_t *statp;
+	pid_info_t *tgidp, *ppidp;
+	docker_info_t *dockerp;
 
 	print_top_line();
 	lineno++;
-	mvprintw (lineno++,0, "PID:  %6d", pidp->PID);
+	mvprintw (lineno++,0, "%s %d", tlabel, pidp->PID);
 
 	if (pidp->cmd) printw (" %s", pidp->cmd);
 	if (pidp->hcmd) printw ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printw ("  (%s)", pidp->thread_cmd);
 	if (pidp->dockerp) printw (" <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
+
+	if (pidp->tgid && (pidp->tgid != pidp->PID)) {
+	        tgidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
+ 		dockerp = tgidp->dockerp;
+		mvprintw (lineno++,2, "%s %d  %s", plabel, tgidp->PID, (char *)tgidp->cmd);
+        }
+
+	if (pidp->ppid) {
+		ppidp = GET_PIDP(&globals->pid_hash, pidp->ppid);
+		mvprintw (lineno++,2, "PPID %d  %s", ppidp->PID, (char *)ppidp->cmd);
+	}
 
 	schedp = pidp->schedp;
 	if (schedp) {
@@ -1540,19 +1544,33 @@ print_pidfile_window()
 	print_pid_header(pidp);
 	lineno++;
 
-	if (pidp->fdhash == NULL) {
+	if ((pidp->fdhash == NULL) && (pidp->fobj_hash == NULL)) {
 		mvprintw(lineno++, 0, "*** No File Activity Found ***");
 		return 0;
 	}
 
-	mvprintw (lineno++, 0, "System Call Name                 Count     Rate     ElpTime        Avg");
-        if (COLS > 107) printw ("        Max    Errs    AvSz     KB/s");
 
-	if (is_alive) foreach_hash_entry(pidp->fdhash, FD_HSIZE, get_filename, NULL, 0, pidp);
-	foreach_hash_entry((void **)pidp->fdhash, FD_HSIZE, print_fd_info_live,
-		fd_sort_by_time, 0, pidp);
+	if (pidp->fobj_hash) {
+		mvprintw (lineno++, 0, "                    -------  Total  ------- -------  Write  -------- --------  Read  --------");
+		mvprintw (lineno++, 0, "Object                 IO/s    KB/s  AvIOsz     IO/s    KB/s  AvIOsz     IO/s    KB/s  AvIOsz  filename");
 
-	return 0;
+		foreach_hash_entry(pidp->fobj_hash, FOBJ_HSIZE, calc_fobj_totals, NULL, 0, 0);
+		foreach_hash_entry((void **)pidp->fobj_hash, FOBJ_HSIZE, live_print_fobj_logio,
+				fobj_sort_by_logio,
+				0, NULL);
+	}
+
+	else if (pidp->fdhash) {
+		mvprintw (lineno++, 0, "System Call Name                 Count     Rate     ElpTime        Avg");
+        	if (COLS > 107) printw ("        Max    Errs    AvSz     KB/s");
+	
+		if (is_alive) foreach_hash_entry(pidp->fdhash, FD_HSIZE, get_filename, NULL, 0, pidp);
+	
+		foreach_hash_entry((void **)pidp->fdhash, FD_HSIZE, print_fd_info_live,
+			fd_sort_by_time, 0, pidp);
+	
+		return 0;
+	}
 }
 
 int
@@ -1806,7 +1824,7 @@ print_pid_window()
 		calc_io_totals(&pidp->iostats[0], NULL);
                 foreach_hash_entry((void **)pidp->devhash, DEV_HSIZE, get_devname, NULL, 0, NULL);
                 foreach_hash_entry((void **)pidp->mdevhash, DEV_HSIZE, get_devname, NULL, 0, NULL);
-		get_command(pidp, NULL);
+		get_command(pidp, NULL); 
 		if (globals->docker_hash) get_pid_cgroup(pidp, NULL);
 	}
 
@@ -2134,6 +2152,7 @@ print_pid_iosum_live(void *arg1, void *arg2)
 
 	if (is_alive) {
 		get_command(pidp, NULL);
+		if (debug) fprintf (stderr, "pidp: 0x%llx  PID: %d  %s\n", pidp, pidp->PID, pidp->cmd);
 		if (globals->docker_hash) get_pid_cgroup(pidp, NULL);
 	}
 
@@ -2916,8 +2935,33 @@ print_ht_window()
 }
 
 int
+live_print_fobj_physio(void *arg1, void *arg2)
+{
+	fileobj_t *fobjinfop = (fileobj_t *)arg1;
+	iostats_t *iostatsp;
+	int rw, col = 0;
+
+	mvprintw (lineno, col, "0x%016llx", fobjinfop->FOBJ);
+	col = 20;
+	for (rw = IOTOT; rw >= IORD; rw--) {
+		iostatsp = &fobjinfop->piostats[rw];
+		mvprintw (lineno, col, "%7.0f %7.0f %7d",
+			iostatsp->compl_cnt / globals->total_secs*1.0,
+			(iostatsp->sect_xfrd/2)/globals->total_secs*1.0,
+		iostatsp->sect_xfrd*512 / MAX(iostatsp->compl_cnt, 1));
+		col+=25;
+		if ((COLS - col) < 75) break;
+	}
+
+	mvprintw (lineno++, col, "%s", fobjinfop->filename);
+}
+
+
+int
 print_file_window()
 {
+	int cnt;
+
 	if (is_alive) {
 		update_cpu_times(end_time);
 		calc_global_cpu_stats(globals, NULL);
@@ -2925,14 +2969,135 @@ print_file_window()
 	
 	print_global_header();	
 	lineno++;
-	
-	mvprintw(lineno++, 0,"-------------------------- Global File Activity ------------------------------");
-	mvprintw (lineno++, 0,"System Call Name                 Count     Rate     ElpTime        Avg        Max    Errs");
-        if (COLS > 95) printw ("    AvSz     KB/s");
-	foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, print_fdata_live,
-                   (int (*)())fdata_sort_by_syscalls,
-                   LINES_AVAIL+globals->nlcpu+10, NULL);
-	return 0;
+
+	if (globals->fobj_hash) {
+		cnt = (LINES_AVAIL - 8)/2;
+
+		col = 0;
+		mvprintw (lineno++, col, "***  Top Files sorted by Logical I/O  ***");
+		lineno++;
+                mvprintw (lineno, col, "                    -------  Total  -------");
+		col+=45;
+                if ((COLS - col) > 75) {
+			mvprintw (lineno, col, "-------  Write  --------");
+			col+=25;
+		}
+                if ((COLS - col) > 75) {
+			mvprintw (lineno, col, "--------  Read  --------");
+		}
+		lineno++;
+
+		col = 0;
+                mvprintw (lineno, col, "Object                 IO/s    KB/s  AvIOsz ");
+		col+=45;
+	        if ((COLS - col) > 75) {
+			mvprintw(lineno, col, "   IO/s    KB/s  AvIOsz");
+			col += 25;
+		}
+	        if ((COLS - col) > 75) {
+			mvprintw(lineno, col ,"   IO/s    KB/s  AvIOsz");
+		}
+		lineno++;
+                foreach_hash_entry((void **)globals->fobj_hash, FOBJ_HSIZE, live_print_fobj_logio,
+                           (int (*)())fobj_sort_by_logio, cnt, NULL);
+		lineno++;
+
+		col = 0;
+		mvprintw (lineno++, col, "***  Top Files sorted by Physical I/O  ***");
+		lineno++;
+                mvprintw (lineno, col, "                    -------  Total  -------");
+		col+=45;
+                if ((COLS - col) > 75) {
+			mvprintw (lineno, col, "-------  Write  --------");
+			col+=25;
+		}
+                if ((COLS - col) > 75) {
+			mvprintw (lineno, col, "--------  Read  --------");
+		}
+		lineno++;
+
+		col = 0;
+                mvprintw (lineno, col, "Object                 IO/s    KB/s  AvIOsz ");
+		col+=45;
+	        if ((COLS - col) > 75) {
+			mvprintw(lineno, col, "   IO/s    KB/s  AvIOsz");
+			col += 25;
+		}
+	        if ((COLS - col) > 75) {
+			mvprintw(lineno, col ,"   IO/s    KB/s  AvIOsz");
+		}
+		lineno++;
+                foreach_hash_entry((void **)globals->fobj_hash, FOBJ_HSIZE, live_print_fobj_physio,
+                           (int (*)())fobj_sort_by_physio, cnt, NULL);
+
+        } else {
+		mvprintw(lineno++, 0,"-------------------------- Global File Activity ------------------------------");
+		mvprintw (lineno++, 0,"System Call Name                 Count     Rate     ElpTime        Avg        Max    Errs");
+        	if (COLS > 95) printw ("    AvSz     KB/s");
+		foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, print_fdata_live,
+                   	(int (*)())fdata_sort_by_syscalls,
+                   	LINES_AVAIL+globals->nlcpu+10, NULL);
+		return 0;
+	}
+}
+
+int
+live_file_print_fdev(void *arg1, void *arg2)
+{
+        filedev_t *fdevinfop = (filedev_t *)arg1;
+        char devstr[16];
+        iostats_t *statp;
+
+	col=0;
+        statp = &fdevinfop->stats[0];
+
+	sprintf(devstr, "0x%08x", fdevinfop->FDEV);
+	mvprintw(lineno, col, "%s", devstr);
+	col+=13;
+	print_iostats_totals_live(statp);
+	lineno++;
+}
+
+
+int
+print_select_file_window()
+{
+
+	fileobj_t *fobjinfop; 
+	fstats_t *fstatsp;
+	int rw, ndev;
+
+	print_global_header();
+	lineno++;
+
+	fobjinfop = FIND_FOBJP(globals->fobj_hash, curfaddr);
+	if (fobjinfop == NULL) return 0;
+
+	mvprintw (lineno++, 0, "Fileobj: 0x%016llx  Filename: %s", fobjinfop->FOBJ, fobjinfop->filename);
+	lineno++;
+	mvprintw (lineno++, 0, "*** Logical I/O ***");
+	lineno++;
+        mvprintw (lineno++, 0, "-------  Total  ------- -------  Write  -------- --------  Read  --------");
+        mvprintw (lineno++, 0, "   IO/s    KB/s  AvIOsz     IO/s    KB/s  AvIOsz     IO/s    KB/s  AvIOsz");
+
+	col = 0;
+	for (rw = IOTOT; rw >= IORD; rw--) {
+		fstatsp = &fobjinfop->liostats[rw];
+		mvprintw (lineno, col, "%7.0f %7.0f %7d",
+			fstatsp->cnt / globals->total_secs*1.0,
+			(fstatsp->bytes/1024)/globals->total_secs*1.0,
+			fstatsp->bytes / MAX(fstatsp->cnt, 1));
+		col+=25;
+	}
+	lineno++; lineno++;
+	mvprintw (lineno++, 0, "*** Physical I/O ***");
+	lineno++;
+	PRINT_IODETAIL_HDR("disknum   ");
+	ndev = LINES_AVAIL-1;
+	if (fobjinfop->fdev_hash) {
+		foreach_hash_entry((void **)fobjinfop->fdev_hash, FDEV_HSIZE, live_file_print_fdev,
+				(int (*)())fdev_sort_by_physio, ndev, NULL);
+	}
 }
 
 int
@@ -3171,23 +3336,29 @@ int
 print_net_window()
 {
 	int nlines;
+	char *hcol1 = "Syscalls";
 
 	if (is_alive) {
 		update_cpu_times(end_time);
 		calc_global_cpu_stats(globals, NULL);
 	}
+
+	if (IS_WINKI) hcol1 = "Requests";
 	
 	print_global_header();	
 	lineno++;
 
 	mvprintw(lineno++, 0,"--------------------------- Top IP->IP dataflows -----------------------------");
-        mvprintw(lineno++, 0,"Syscalls      Rd/s      RdKB/s      Wr/s      WrKB/s  Connection");
+        mvprintw(lineno++, 0,"%s      Rd/s      RdKB/s      Wr/s      WrKB/s  Connection", hcol1);
 	nlines = LINES_AVAIL / 2;
         foreach_hash_entry2((void **)globals->ipip_hash, IPIP_HASHSZ, print_ipip_live,
                            ipip_sort_by_syscalls, nlines, NULL);
 	lineno++;
 	
 	mvprintw(lineno++, 0,"---------------------------- Top Sockets in Use ------------------------------");
+	if (IS_WINKI) {
+        	mvprintw(lineno++, 0,"%s      Rd/s      RdKB/s      Wr/s      WrKB/s     LastPid  Connection", hcol1);
+	}
         foreach_hash_entry((void **)globals->sdata_hash, FDATA_HASHSZ, print_sdata_live,
                             (int (*)())sdata_sort_by_syscalls,
                             LINES_AVAIL, NULL);
@@ -4041,6 +4212,48 @@ select_futex_window(int win, int prompt)
 }
 
 int
+select_file_window(int win, int prompt)
+{
+	int valid = FALSE;
+	int ret;
+	char str[80];
+	uint64 fileobj;
+
+	if ((prompt==0) && (curfaddr > 0x0)) {
+		fileobj=curfaddr;
+		valid = TRUE;
+	} else {
+		/* We need to get a valid LDOM */
+		move(LINES-1, 0); clrtoeol();
+		mvprintw(LINES-1, 0, "Fileobj: ");
+		echo();
+		ret = mvgetnstr(LINES-1, 10, str, 24);
+		noecho();
+
+		/* need to convert from to a dev_t */
+		if ((ret >= 0) && (strlen(str) > 1)) {
+			fileobj = strtoull(str, NULL, 16);
+			if (fileobj > 0x0) { 
+				valid = TRUE;
+			}
+		}
+	}
+
+	if (valid) {
+		input_pending = FALSE;
+		change_window(win, 0, -1, -1, 0x0, fileobj, -1, NO_HBA, NO_WWN, -1, -1, NO_DOCKID);
+		live_print_window();
+		input_pending = TRUE;
+	} else {
+		move(LINES-1, 0); clrtoeol();
+		mvprintw(LINES-1, 0, "Command: ");
+		refresh();
+		input_pending = FALSE;
+	}
+
+	return 0;
+}
+int
 select_next_step()
 {
 	/* ignore if past the end of the filter */
@@ -4207,6 +4420,9 @@ select_window(int prompt)
 		case WINIRQ_SEL:
 			select_cpu_window(WINCPU_SEL, 1); break;
 		case WINDSK:
+		case WINHBA_SEL:
+		case WINWWN_SEL:
+		case WINFILE_SEL:
 			select_dsk_window(WINDSK_SEL, 1); break;
 		case WINFUT:
 		case WINPID_FUTEX:
@@ -4215,16 +4431,21 @@ select_window(int prompt)
 			select_scall_excl(WINSCALL_EXCL, 1); break;
 		case WINHBA:
 			select_hba_window(WINHBA_SEL, 1); break;
-		case WINHBA_SEL:
-			select_dsk_window(WINDSK_SEL, 1); break;
 		case WINWWN:
 			select_wwn_window(WINWWN_SEL, 1); break;
-		case WINWWN_SEL:
-			select_dsk_window(WINDSK_SEL, 1); break;
 		case WINIRQ:
 			select_irq_window(WINIRQ_SEL, 1); break;
 		case WINDOCK:
 			select_docker_window(WINDOCK_SEL, 1); break;
+		case WINFILE:
+		case WINPID_FILE:
+			if (IS_WINKI) {
+				select_file_window(WINFILE_SEL, 1); 
+			} else { 
+				select_task_window(WINPID, 1); 
+
+			}
+			break;
 		default: 
 			select_task_window(WINPID, 1); break;
 	}

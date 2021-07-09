@@ -153,12 +153,13 @@ clean_pwd()
 	    rm -rf TIDS >/dev/null 2>&1
 	fi
 	if [ $vflag -eq 1 ] ; then
-	    rm -Rf VIS D3 tl_temp
+	    rm -rf VIS D3 >/dev/null 2>&1
+	    rm -rf tl_temp >/dev/null 2>&1
 	    rm -f *.csv *.sh *.php  >/dev/null 2>&1
 	    rm -f $(ls *.html | grep -v kp)
 	fi
 
-    	for file in `ls 2>/dev/null | egrep -v '\.txt|\.gz|\.tgz|\.zip|\.html|^doc|^4000|^CIDS|^PIDS|^TIDS|^VIS|^statsp|^MW|^misc|^comment|^SymbolCache'`
+    	for file in `ls 2>/dev/null | egrep -v '\.txt|\.gz|\.tgz|\.zip|\.html|^doc|^4000|^CIDS|^PIDS|^TIDS|^VIS|^statsp|^MW|^misc|^comment|^SymbolCache|^tl_temp'`
     	do
             if [ $file == !p4.* ] ; then
                 continue
@@ -176,7 +177,7 @@ clean_pwd()
 
 recursive_clean()
 {
-	for SUBDIR in `find . -type d | grep -v CIDS | grep -v PIDS | grep -v MW | grep -v VIS | grep -v "objdump"`
+	for SUBDIR in `find . -type d | grep -v CIDS | grep -v PIDS | grep -v MW | grep -v VIS | grep -v "tl_temp" | grep -v "objdump"`
 	do
 		cd $SUBDIR
     		ls ki.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9] >/dev/null 2>&1

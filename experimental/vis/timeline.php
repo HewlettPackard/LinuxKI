@@ -70,12 +70,16 @@
 			shell_exec ( "cd " . $tl_datadir . "; mv ../../PIDS PIDS; mv ../../VIS VIS; mv ../../PIDS.full ../../PIDS; mv ../../VIS.full ../../VIS"); 
 			shell_exec ( "cd " . $tl_datadir . "; ln -s /opt/linuxki/experimental/vis/pid_detail.html pid_detail.html");
 			shell_exec ( "cd " . $tl_datadir . "; ln -s /opt/linuxki/experimental/vis/pid_wtree.html pid_wtree.html");
+			shell_exec ( "cd " . $tl_datadir . "; ln -s /opt/linuxki/experimental/vis/pid_timeline.html pid_timeline.html");
 	}
 
 	if ( $_GET['kipid']  && !$_GET['kparse'] ) {
 		shell_exec ( "mv PIDS PIDS.full; mv VIS VIS.full");
 		shell_exec ( "/opt/linuxki/kiinfo -kipid scdetail,npid=10,pidtree,vis,vpct=1.0,vdepth=3,rqhist -ts " . $tag . " -starttime " . $start . " -endtime " . $end . " > " . $tl_datadir  . "/kipid." . $tag . ".txt 2>&1");
 		shell_exec ( "cd " . $tl_datadir . "; mv ../../PIDS PIDS; mv ../../VIS VIS; mv ../../PIDS.full ../../PIDS; mv ../../VIS.full ../../VIS");
+		shell_exec ( "cd " . $tl_datadir . "; ln -s /opt/linuxki/experimental/vis/pid_detail.html pid_detail.html");
+		shell_exec ( "cd " . $tl_datadir . "; ln -s /opt/linuxki/experimental/vis/pid_wtree.html pid_wtree.html");
+		shell_exec ( "cd " . $tl_datadir . "; ln -s /opt/linuxki/experimental/vis/pid_timeline.html pid_timeline.html");
 	}
 
 	if ( $_GET['kidsk'] ) {

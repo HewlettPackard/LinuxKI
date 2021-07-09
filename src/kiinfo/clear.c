@@ -357,6 +357,11 @@ clear_pid_info(void *arg1, void *arg2)
 	FREE(pidp->thread_cmd);
 	FREE(pidp->hcmd);
 	pidp->dockerp == NULL;
+	pidp->cmd = NULL;
+	pidp->thread_cmd = NULL;
+	pidp->hcmd = NULL;
+	pidp->last_open_fname = NULL;
+	pidp->last_exec_fname = NULL;
 	return 0;
 }
 
@@ -432,6 +437,7 @@ clear_all_stats()
 #if MALLOC_DEBUG
 	fprintf (stderr, "clear_all_stats\n");
 #endif 
+
         free_hash_table((lle_t ***)&globals->slp_hash, SLP_HSIZE);
         free_hash_table((lle_t ***)&globals->stktrc_hash, STKTRC_HSIZE);
         clear_hc_info((void **)&globals->hcinfop);

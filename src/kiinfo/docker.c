@@ -61,6 +61,11 @@ docker_init_func(void *v)
 	int ret;
 	if (debug) printf ("docker_init_func()\n");
 
+	if (IS_WINKI) {
+		fprintf (stderr, "Docker Activity Report is not availble for Windows traces\n");
+		return;
+	}	
+
 	process_func =  NULL;
         report_func = docker_report_func;
 

@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 export tag=$2
 echo "start,end,cpu,pid,tgid,type,waker,scall_tgt,state,next_tgtcpu,func_ok,id,timestamp" > VIS/$1/pid_switch.csv
 
@@ -45,7 +44,7 @@ fi
 
 # rm -f VIS/$1/pid_switch_sh.tmp*
 
-ln -s /opt/linuxki/experimental/vis/pid_switch.html VIS/$1/pid_switch.html
+ln -s /opt/linuxki/experimental/vis/pid_switch.html VIS/$1/pid_switch.html 2>/dev/null
 
 
 

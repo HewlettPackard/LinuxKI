@@ -38,11 +38,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "SysConfig.h"
 #include "DiskIo.h"
 #include "Process.h"
+#include "Thread.h"
 #include "winki_util.h"
 
 int dsk_ftrace_print_func(void *, void *);
-
-char print_csv_header = TRUE;
 
 uint64
 devstr_to_dev(char *str)
@@ -282,16 +281,21 @@ print_dev_iostats(void *arg1, char *devstr, char *devname, char *devpath, char *
 	int rw;
 	char *p;
 	char target[20];
+	FILE *csvfile;
+
+	if (dsk_csvfile) csvfile = dsk_csvfile;
+	else if (file_csvfile) csvfile = file_csvfile;
+	else csvfile = NULL;
 	
 	for (rw = IO_READ; rw <= IO_TOTAL; rw++) {
 		pid_printf (pidfile, "%s  %10s", tab, devstr);
-		csv_printf(dsk_csvfile,"%-10s,%10s", devname, devstr ? devstr : " ");
-		csv_printf(dsk_csvfile,",%-16s", devpath ? devpath : " ");
-		csv_printf(dsk_csvfile,",%-33s", mapname ? mapname : " ");
+		csv_printf(csvfile,"%-10s,%10s", devname, devstr ? devstr : " ");
+		csv_printf(csvfile,",%-16s", devpath ? devpath : " ");
+		csv_printf(csvfile,",%-33s", mapname ? mapname : " ");
 		if (wwn) {
-			csv_printf(dsk_csvfile,",0x%016llx", wwn);
+			csv_printf(csvfile,",0x%016llx", wwn);
 		} else {
-			csv_printf(dsk_csvfile,",%-18s", " ");
+			csv_printf(csvfile,",%-18s", " ");
 		}
 	
 		aviosz = 0;
@@ -311,9 +315,9 @@ print_dev_iostats(void *arg1, char *devstr, char *devname, char *devpath, char *
 		}
 
 		switch(rw) {
-		case IO_READ: pid_printf (pidfile, "%3s", "r"); csv_printf(dsk_csvfile,",Read "); break;
-		case IO_WRITE: pid_printf (pidfile, "%3s", "w"); csv_printf(dsk_csvfile,",Write"); break;
-		case IO_TOTAL: pid_printf (pidfile, "%3s", "t"); csv_printf(dsk_csvfile,",Total"); break;
+		case IO_READ: pid_printf (pidfile, "%3s", "r"); csv_printf(csvfile,",Read "); break;
+		case IO_WRITE: pid_printf (pidfile, "%3s", "w"); csv_printf(csvfile,",Write"); break;
+		case IO_TOTAL: pid_printf (pidfile, "%3s", "t"); csv_printf(csvfile,",Total"); break;
 		}			
 
 		pid_printf (pidfile, " %6.2f %7.2f %6.0f %6.0f %5ld %8.2f %8.2f %6d %6d %6d %6d %6d %7.1f %7.1f",
@@ -335,7 +339,7 @@ print_dev_iostats(void *arg1, char *devstr, char *devname, char *devpath, char *
 			pid_printf (pidfile, "  Aborted: %5d",statp[rw].abort_cnt);
 		pid_printf (pidfile, "\n");
 
-		csv_printf (dsk_csvfile, ",%7.2f,%7.2f,%6.0f,%6.0f,%5ld,%9.3f,%9.3f,%6d,%6d,%6d,%6d,%6d,%6d,%8.2f,%8.2f\n",
+		csv_printf (csvfile, ",%7.2f,%7.2f,%6.0f,%6.0f,%5ld,%9.3f,%9.3f,%6d,%6d,%6d,%6d,%6d,%6d,%8.2f,%8.2f\n",
 			avqlen,
 			avinflt,
 			statp[rw].compl_cnt / secs,
@@ -682,6 +686,7 @@ dsk_print_dev_iostats(void *arg1, void *arg2)
 	sprintf(devstr, "0x%08x", dev);
 	if (IS_WINKI) {
 	    /* if (wsysconfigp = (SysConfig_PhysDisk_t *)devinfop->wsysconfigp) { */
+		sprintf(devname_str, "disknum=%d", dev);
 		print_dev_iostats(statp, devstr, &devname_str[0], NULL, NULL, 0, pidfile);
 	} else {
 		print_dev_iostats(statp, devstr, devname, &devpath_str[0], mdevinfop ? mdevinfop->mapname : NULL, gdevinfop->wwn, pidfile);
@@ -744,80 +749,6 @@ dsk_print_wwn_iostats(void *arg1, void *arg2)
 
 	return 0;
 }
-
-#if 0
-int
-print_dev_iostats_total(void *arg1, void *arg2)
-{
-	iostats_t *statp =  (iostats_t *)arg1;
-	dev_info_t *devinfop = (dev_info_t *)arg2;
-	uint64 dev;
-        uint32  aviosz = 0;
-        double  avwait, avserv, avqlen, avinflt;
-	
-	if (statp[IOTOT].compl_cnt == 0)  {
-		return 0;
-	}
-
-	dev = devinfop->lle.key;
-        if (devinfop->devname) {
-		pid_printf (pidfile, "%s%10s", tab, devinfop->devname);
-	} else {
-		pid_printf (pidfile, "%s0x%08x", tab, dev);
-	}
-
-	avwait = avserv = avqlen = 0.0;
-	aviosz =  ((statp[IOTOT].sect_xfrd+1)/2) / statp[IOTOT].compl_cnt;
-        avwait =  MSECS(statp[IOTOT].cum_iowait / statp[IOTOT].compl_cnt);
-        avserv = MSECS(statp[IOTOT].cum_ioserv / statp[IOTOT].compl_cnt);
-        avqlen = (statp[IOTOT].cum_qlen/2.0) / (statp[IOTOT].qops * 1.0);
-	if (statp[IOTOT].issue_cnt) {
-		avinflt = (statp[IOTOT].cum_async_inflight + statp[IOTOT].cum_sync_inflight) / (statp[IOTOT].issue_cnt * 1.0);
-	} else {
-		avinflt = 0.0;
-	}
-        printf (" %6.2f %7.2f %6.0f %6.0f %8.0f %5ld %7.2f",
-                        avqlen,
-			avinflt,
-                        statp[IORD].compl_cnt / secs,
-                        statp[IOWR].compl_cnt / secs,
-                        (statp[IOTOT].sect_xfrd/2) / secs,
-                        aviosz,
-                        avwait);
-
-        if (avserv > 30.0) {
-                RED_FONT;
-                pid_printf (pidfile, " %7.2f", avserv);
-                BLACK_FONT;
-        } else {
-                pid_printf (pidfile, " %7.2f", avserv);
-        }
-
-        if (statp[IOTOT].requeue_cnt) {
-                pid_printf (pidfile, " requeue: ");
-                RED_FONT;
-                pid_printf (pidfile, "%d", statp[IOTOT].requeue_cnt);
-                BLACK_FONT;
-        }
-
-	if (statp[IOTOT].barrier_cnt) {
-		pid_printf (pidfile, " barriers: ");
-		RED_FONT;
-		pid_printf (pidfile, "%d", statp[IOTOT].barrier_cnt);
-		BLACK_FONT;
-	}
-
-	if (statp[IOTOT].abort_cnt) {
-		pid_printf (pidfile, " Aborted: ");
-		RED_FONT;
-		pid_printf (pidfile, "%d", statp[IOTOT].abort_cnt);
-		BLACK_FONT;
-	}
-
-        pid_printf (pidfile, "\n");
-        return 0;
-}
-#endif
 
 int 
 print_io_histogram(void *arg1, void *arg2)
@@ -916,54 +847,15 @@ dsk_bucket_adjust()
 static inline void
 dsk_win_trace_funcs()
 {
-	int i;
-
-	for (i = 0; i < 65536; i++) {
-		ki_actions[i].id = i;
-		ki_actions[i].func = NULL;
-		ki_actions[i].execute = 0;
-	}
-
-	strcpy(&ki_actions[0].subsys[0], "EventTrace");
-	strcpy(&ki_actions[0].event[0], "Header");
-	ki_actions[0].func = winki_header_func;
-	ki_actions[0].execute = 1;
-
-	/* Init events aren't needed at this time */
-	strcpy(&ki_actions[0x10a].subsys[0], "DiskIo");
-	strcpy(&ki_actions[0x10a].event[0], "Read");
-	ki_actions[0x10a].func=diskio_readwrite_func;
-	ki_actions[0x10a].execute = 1;
-
-	strcpy(&ki_actions[0x10b].subsys[0], "DiskIo");
-	strcpy(&ki_actions[0x10b].event[0], "Write");
-	ki_actions[0x10b].func=diskio_readwrite_func;
-	ki_actions[0x10b].execute = 1;
-
-	strcpy(&ki_actions[0x10c].subsys[0], "DiskIo");
-	strcpy(&ki_actions[0x10c].event[0], "ReadInit");
-	ki_actions[0x10c].func=diskio_init_func;
-	ki_actions[0x10c].execute = 1;
-
-	strcpy(&ki_actions[0x10d].subsys[0], "DiskIo");
-	strcpy(&ki_actions[0x10d].event[0], "WriteInit");
-	ki_actions[0x10d].func=diskio_init_func;
-	ki_actions[0x10d].execute = 1;
-
-        strcpy(&ki_actions[0x10e].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10e].event[0], "FlushBuffers");
-        ki_actions[0x10e].func=diskio_flush_func;
-	ki_actions[0x10e].execute = 1;
-
-        strcpy(&ki_actions[0x10e].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10e].event[0], "FlushInit");
-        ki_actions[0x10e].func=diskio_init_func;
-	ki_actions[0x10e].execute = 0;
-
-	strcpy(&ki_actions[0xb0b].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb0b].event[0], "PhysDisk");
-	ki_actions[0xb0b].func=sysconfig_physdisk_func;
-	ki_actions[0xb0b].execute = 1;
+	winki_init_actions(NULL);
+	winki_enable_event(0x10a, diskio_readwrite_func);
+	winki_enable_event(0x10b, diskio_readwrite_func);
+	winki_enable_event(0x10c, diskio_init_func);
+	winki_enable_event(0x10d, diskio_init_func);
+	winki_enable_event(0x10e, diskio_flush_func);
+	winki_enable_event(0x30a, process_load_func);
+	winki_enable_event(0x548, thread_setname_func);
+	winki_enable_event(0xb0b, sysconfig_physdisk_func);
 }
 	
 
@@ -985,6 +877,8 @@ dsk_init_func(void *v)
 
 	if (IS_WINKI) {
 		dsk_win_trace_funcs();
+		dsk_csvfile = open_csv_file("kidsk", 1);
+		parse_SQLThreadList();
 		CLEAR(NOMAPPER_FLAG);
 	} else {
         	/* We will disgard the trace records until the Marker is found */

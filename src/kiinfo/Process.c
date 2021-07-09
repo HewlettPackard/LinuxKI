@@ -68,5 +68,6 @@ process_load_func (void *a, void *v)
 	PRINT_WIN_NAME2_STR(util_str, chr);
 	if (strstr(util_str, ".exe")) {
 		add_command (&tgidp->cmd, strrchr(util_str, '\\')+1);
+		add_command (&pidp->cmd, strrchr(util_str, '\\')+1);
 	}
 }

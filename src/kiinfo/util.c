@@ -298,7 +298,6 @@ get_command(void *arg1, void *arg2)
 	pid_info_t *pidp = (pid_info_t *)arg1;
 	int	fd;
 	char	fname[80];
-	char	cmdstr[1024];
 	char 	*start = NULL, *end = NULL;
 
 	if (pidp->tgid == 0) pidp->tgid = get_status_int(pidp->PID, "Tgid:");
@@ -307,9 +306,8 @@ get_command(void *arg1, void *arg2)
         if ((fd = open(fname, O_RDONLY)) <= 0) {
 		return 0;
         }	
-
-	if (get_fd_str(fd, cmdstr, 1) > 0 ) {
-		add_command (&pidp->cmd, cmdstr);
+	if (get_fd_str(fd, input_str, 1) > 0 ) {
+		add_command (&pidp->cmd, input_str);
 	} else {
 		/* process is likely a daemon, so read the stat file */
 		close(fd);
@@ -318,9 +316,9 @@ get_command(void *arg1, void *arg2)
 			return 0;
         	}	
 		
-		if (get_fd_str(fd, cmdstr, 1) > 0 ) {
-			start = strchr(cmdstr, '(');
-			end = strchr(cmdstr, ')');
+		if (get_fd_str(fd, input_str, 1) > 0 ) {
+			start = strchr(input_str, '(');
+			end = strchr(input_str, ')');
 	
 			if (start && (start < end)) {	
 				*start = '[';
@@ -330,6 +328,7 @@ get_command(void *arg1, void *arg2)
 			}
 		}
 	}	
+
 	close(fd);
 }
 
@@ -412,7 +411,6 @@ get_devname(void *arg1, void *arg2)
 	dev_info_t *devinfop = (dev_info_t *)arg1;
 	int	fd;
 	char	fname[80];
-	char	cmdstr[1024];
 	char 	*start = NULL, *end = NULL;
 	uint64	dev;
 
@@ -424,8 +422,8 @@ get_devname(void *arg1, void *arg2)
 		return 0;
         }	
 		
-	if (get_fd_str(fd, cmdstr, 1) > 0 ) {
-		start = strstr(cmdstr, "DEVNAME=");
+	if (get_fd_str(fd, input_str, 1) > 0 ) {
+		start = strstr(input_str, "DEVNAME=");
 		if (start) { 
 			start = start + 8;
 			end = strstr(start, "\n");
@@ -442,9 +440,9 @@ get_devname(void *arg1, void *arg2)
 					return 0;
         			}	
 
-				if (get_fd_str(fd, cmdstr, 1) > 0 ) {
-					if (end = strstr(cmdstr, "\n")) *end = 0;
-					add_command(&devinfop->mapname, cmdstr);
+				if (get_fd_str(fd, input_str, 1) > 0 ) {
+					if (end = strstr(input_str, "\n")) *end = 0;
+					add_command(&devinfop->mapname, input_str);
 				}
 			}
 		}
@@ -2342,6 +2340,7 @@ void
 syscallname_to_syscallno(char *name, int *syscallno32, int *syscallno64)
 {
 	int i, j;
+
 	*syscallno32 = -2;
 	*syscallno64 = -2;
 

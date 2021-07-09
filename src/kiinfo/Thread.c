@@ -357,10 +357,17 @@ print_thread_cswitch_func (trace_info_t *trcinfop, pid_info_t *pidp, pid_info_t 
 
         printf (" target_tid=%d target_pid=%d", p->NewThreadId, tpidp->tgid);
         printf (" oldpri=%d newpri=%d", p->NewThreadPriority, p->OldThreadPriority);
-        printf (" prev_cstate=%d wait_reason=%s wait_mode=%s state=%s ideal_cpu=%d new_thread_waittime=%d",
+        printf (" prev_cstate=%d wait_reason=%s",
                 p->PreviousCstate,
-                win_thread_wait_reason[p->OldThreadWaitReason],
-                win_thread_mode[p->OldThreadWaitMode],
+                win_thread_wait_reason[p->OldThreadWaitReason]);
+
+	if (p->OldThreadWaitMode < MaxThreadWaitMode) {
+		printf (" wait_mode=%s", win_thread_mode[p->OldThreadWaitMode]);
+	} else {
+		printf (" wait_mode=%d", p->OldThreadWaitMode);
+	}
+
+        printf (" state=%s ideal_cpu=%d new_thread_waittime=%d",
                 win_thread_state[p->OldThreadState],
                 p->OldThreadWaitIdealProcessor,
                 p->NewThreadWaitTime);
@@ -473,6 +480,22 @@ print_thread_readythread_func (void *a, ReadyThread_t *p, pid_info_t *pidp, pid_
 }
 
 int
+check_for_tcp_timeouts(pid_info_t *pidp, winki_stack_info_t *stkinfop)
+{
+	int i, cnt=0;
+	char *symptr=NULL;
+
+	for (i=0; i < stkinfop->depth; i++) {
+		if (symptr = get_win_sym(stkinfop->Stack[i], pidp)) {
+			if (strncmp(symptr, "TcpPeriodicTimeoutHandler", 25) == 0) cnt++;
+			if (strncmp(symptr, "TcpCompleteClientReceiveRequest", 31) == 0) cnt++;
+		}
+	}
+
+	return ((cnt > 1) ? 1 : 0);
+}	
+
+int
 thread_readythread_func (void *a, void *v)
 {
         trace_info_t *trcinfop = (trace_info_t *)a;
@@ -567,7 +590,15 @@ thread_readythread_func (void *a, void *v)
 			/* update_coop_stats(schedp, tschedp, pidp, tpidp, coop_delta, coop_old_state, SLEEPER); */
 		}
 	}
-	
+
+	if (kparse_flag && stkinfo.depth) {
+	       	if (check_for_tcp_timeouts(pidp, &stkinfo)) {
+			if (debug) printf ("TCP Timeout Detected - delay= %12.6f\n ", SECS(delta));
+			globals->num_tcp_timeouts++;
+			globals->tcp_timeout_time += delta;
+		}
+        }
+
 	if (kitrace_flag) print_thread_readythread_func(trcinfop, p, pidp, tpidp, &stkinfo);
 }
 
@@ -600,7 +631,7 @@ thread_setname_func (void *a, void *v)
 
 	chr = &p->ThreadName[0];
 	PRINT_WIN_NAME2_STR(util_str, chr);
-	/* add_command (&pidp->cmd, util_str); */
+	add_command (&pidp->thread_cmd, util_str);
 
 	if (kitrace_flag) print_thread_setname_func(a, v);
 }

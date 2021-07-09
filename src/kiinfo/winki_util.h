@@ -12,6 +12,8 @@ with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 ***************************************************************************/
 
+extern int winki_init_actions(int (*func1)(void *, void*));
+extern void winki_enable_event(int id, int (*func1)(void *, void*));
 extern int winki_header_func(void *, void *);
 extern void winki_update_sched_state(void *, int, int, uint64);
 extern short syscall_addr_to_id(uint64);

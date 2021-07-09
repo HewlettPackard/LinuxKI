@@ -43,106 +43,50 @@ int kparse_generic_func(void *, void *);
 int kparse_ftrace_print_func(void *, void *);
 
 #include "Thread.h"
+#include "Process.h"
 #include "PerfInfo.h"
 #include "DiskIo.h"
+#include "NetIp.h"
+#include "FileIo.h"
 #include "winki_util.h"
 
 static inline void
 kparse_winki_trace_funcs()
 {
-	int i;
-
-        for (i = 0; i < 65536; i++) {
-                ki_actions[i].id = i;
-                ki_actions[i].func = NULL;
-                ki_actions[i].execute = 0;
-        }
-
-        strcpy(&ki_actions[0].subsys[0], "EventTrace");
-        strcpy(&ki_actions[0].event[0], "Header");
-        ki_actions[0].func = winki_header_func;
-        ki_actions[0].execute = 1;
-
-        strcpy(&ki_actions[0x524].subsys[0], "Thread");
-        strcpy(&ki_actions[0x524].event[0], "Cswitch");
-        ki_actions[0x524].func=thread_cswitch_func;
-        ki_actions[0x524].execute = 1;
-
-        strcpy(&ki_actions[0x532].subsys[0], "Thread");
-        strcpy(&ki_actions[0x532].event[0], "ReadyThread");
-        ki_actions[0x532].func=thread_readythread_func;
-        ki_actions[0x532].execute = 1;
-
-        strcpy(&ki_actions[0x548].subsys[0], "Thread");
-        strcpy(&ki_actions[0x548].event[0], "SetName");
-        ki_actions[0x548].func=thread_setname_func;
-        ki_actions[0x548].execute = 1;
-
-        strcpy(&ki_actions[0xf33].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf33].event[0], "SysClEnter");
-        ki_actions[0xf33].func=perfinfo_sysclenter_func;
-        ki_actions[0xf33].execute = 1;
-
-        strcpy(&ki_actions[0xf34].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf34].event[0], "SysClExit");
-        ki_actions[0xf34].func=perfinfo_sysclexit_func;
-        ki_actions[0xf34].execute = 1;
-
-        strcpy(&ki_actions[0x10a].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10a].event[0], "Read");
-        ki_actions[0x10a].func=diskio_readwrite_func;
-        ki_actions[0x10a].execute = 1;
-
-        strcpy(&ki_actions[0x10b].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10b].event[0], "Write");
-        ki_actions[0x10b].func=diskio_readwrite_func;
-        ki_actions[0x10b].execute = 1;
-
-        strcpy(&ki_actions[0x10c].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10c].event[0], "ReadInit");
-        ki_actions[0x10c].func=diskio_init_func;
-        ki_actions[0x10c].execute = 1;
-
-        strcpy(&ki_actions[0x10d].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10d].event[0], "WriteInit");
-        ki_actions[0x10d].func=diskio_init_func;
-        ki_actions[0x10d].execute = 1;
-
-        strcpy(&ki_actions[0x10e].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10e].event[0], "FlushBuffers");
-        ki_actions[0x10e].func=diskio_flush_func;
-        ki_actions[0x10e].execute = 1;
-
-        strcpy(&ki_actions[0xf2e].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf2e].event[0], "SampleProfile");
-        ki_actions[0xf2e].func=perfinfo_profile_func;
-        ki_actions[0xf2e].execute = 1;
-
-        strcpy(&ki_actions[0xf32].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf32].event[0], "ISR-MSI");
-        ki_actions[0xf32].func=perfinfo_isr_func;
-        ki_actions[0xf32].execute = 1;
-
-        strcpy(&ki_actions[0xf42].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf42].event[0], "ThreadedDPC");
-        ki_actions[0xf42].func=perfinfo_dpc_func;
-        ki_actions[0xf42].execute = 1;
-
-        strcpy(&ki_actions[0xf43].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf43].event[0], "ISR");
-        ki_actions[0xf43].func=perfinfo_isr_func;
-        ki_actions[0xf43].execute = 1;
-
-        strcpy(&ki_actions[0xf44].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf44].event[0], "DPC");
-        ki_actions[0xf44].func=perfinfo_dpc_func;
-        ki_actions[0xf44].execute = 1;
-
-
-        strcpy(&ki_actions[0xf45].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf45].event[0], "TimeDPC");
-        ki_actions[0xf45].func=perfinfo_dpc_func;
-        ki_actions[0xf45].execute = 1;
+	winki_init_actions(NULL);
+	winki_enable_event(0x10a, diskio_readwrite_func);
+	winki_enable_event(0x10b, diskio_readwrite_func);
+	winki_enable_event(0x10c, diskio_init_func);
+	winki_enable_event(0x10d, diskio_init_func);
+	winki_enable_event(0x10e, diskio_flush_func);
+	winki_enable_event(0x30a, process_load_func);
+	winki_enable_event(0x400, fileio_name_func);
+	winki_enable_event(0x420, fileio_name_func);
+	winki_enable_event(0x423, fileio_name_func);
+	winki_enable_event(0x440, fileio_create_func);
+	winki_enable_event(0x443, fileio_readwrite_func);
+	winki_enable_event(0x444, fileio_readwrite_func);
+	winki_enable_event(0x524, thread_cswitch_func);
+	winki_enable_event(0x532, thread_readythread_func);
+	winki_enable_event(0x548, thread_setname_func);
+	winki_enable_event(0x60a, tcpip_sendipv4_func);
+	winki_enable_event(0x60b, tcpip_recvipv4_func);
+	winki_enable_event(0x60e, tcpip_retransmitipv4_func);
+	winki_enable_event(0x61a, tcpip_sendipv6_func);
+	winki_enable_event(0x61b, tcpip_recvipv6_func);
+	winki_enable_event(0x61e, tcpip_retransmitipv6_func);
+	winki_enable_event(0x80a, udpip_sendipv4_func);
+	winki_enable_event(0x80b, udpip_recvipv4_func);
+	winki_enable_event(0x81a, udpip_sendipv6_func);
+	winki_enable_event(0x81b, udpip_recvipv6_func);
+	winki_enable_event(0xf33, perfinfo_sysclenter_func);
+	winki_enable_event(0xf34, perfinfo_sysclexit_func);
+	winki_enable_event(0xf2e, perfinfo_profile_func);
+	winki_enable_event(0xf32, perfinfo_isr_func);
+	winki_enable_event(0xf42, perfinfo_dpc_func);
+	winki_enable_event(0xf43, perfinfo_isr_func);
+	winki_enable_event(0xf44, perfinfo_dpc_func);
+	winki_enable_event(0xf45, perfinfo_dpc_func);
 }
 
 /*
@@ -171,6 +115,7 @@ kparse_init_func(void *v)
 		parse_systeminfo();
                 parse_cpulist();
                 parse_corelist();
+		parse_SQLThreadList();
                 return;
         }
 
@@ -242,6 +187,7 @@ kparse_init_func(void *v)
         dsk_io_sizes[8]= 1000;
 
 	parse_cpuinfo();
+	parse_mem_info();
 	parse_kallsyms();
 	parse_devices();
 	parse_docker_ps();
@@ -437,10 +383,12 @@ kparse_print_report(void *v)
 	foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, calc_dev_totals, NULL, 0, NULL);
 	foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, calc_fc_totals, NULL, 0, NULL);
         foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, calc_pid_iototals, NULL, 0, NULL);
+	foreach_hash_entry((void **)globals->fobj_hash, FOBJ_HSIZE, calc_fobj_totals, NULL, 0, 0);
 
 	update_perpid_sched_stats();
 	calc_global_cpu_stats(globals, NULL);
 	calc_io_totals(&globals->iostats[0], NULL);
+
 	if (globals->docker_hash) {
 		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, calc_docker_pid_totals, NULL, 0, NULL);
         	dockerp = GET_DOCKERP(&globals->docker_hash, 0);
@@ -507,10 +455,15 @@ kparse_print_report(void *v)
 	}
 
 	kp_file_activity();				/* Section 3.0 */
-	kp_file_ops();					/* Section 3.1 */
-	kp_file_time();					/* Section 3.2 */
-	kp_file_errs();					/* Section 3.3 */
-	if (kparse_full) kp_top_files();		/* Section 3.4 */
+	if (IS_WINKI) {
+		kp_file_logio();			/* Section 3.1 */
+		kp_file_physio();			/* Section 3.2 */
+	} else {
+		kp_file_ops();				/* Section 3.1 */
+		kp_file_time();				/* Section 3.2 */
+		kp_file_errs();				/* Section 3.3 */
+		if (kparse_full) kp_top_files();	/* Section 3.4 */
+	}
 
         kp_device_report();            			/* Section 4.0 */
         kp_device_globals();     			/* Section 4.1 */
@@ -530,9 +483,12 @@ kparse_print_report(void *v)
 		kp_perpid_mdev_totals();			/* Section 4.6 */
 	}
 	kp_perpid_dev_totals();				/* Section 4.7 */
-	if (dskblk_stats) {
-        	kp_dskblk_read();          		        /* Section 4.8 */
-        	kp_dskblk_write();      		        /* Section 4.9 */
+	if (!IS_WINKI) {
+		if (dskblk_stats) {
+        		kp_dskblk_read(); 	        /* Section 4.8 */
+        		kp_dskblk_write();	        /* Section 4.9 */
+		}
+		kp_io_controllers();	
 	}
 
 	kp_network();					/* Section 5.0 */
@@ -542,11 +498,16 @@ kparse_print_report(void *v)
 	kp_localip();					/* Section 5.4 */
 	kp_localport();					/* Section 5.5 */
 	kp_socket();					/* Section 5.6 */
+	if (IS_WINKI) kp_timeo_retrans();		/* Section 5.7 */
 
-	if (IS_LIKI_V2_PLUS) {
-		kp_memory();				/* Section 6.0 */
-		kp_rss();				/* Section 6.1 */
-		kp_vss();				/* Section 6.2 */
+
+	if (!IS_WINKI) {
+		kp_memory();					/* Section 6.0 */
+		kp_dimm();					/* Section 6.1 */
+		if (IS_LIKI_V2_PLUS) {
+			kp_rss();				/* Section 6.2 */
+			kp_vss();				/* Section 6.3 */
+		}
 	}
 
 	if (next_sid > 1) {

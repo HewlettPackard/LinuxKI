@@ -76,7 +76,12 @@ sysconfig_services_func (void *a, void *v)
 
 	chr = &p->Name[0];
 	PRINT_WIN_NAME2_STR(util_str, chr);
+#if 0 
+	/* The Service Name not directly associated with a Thread ID 
+	   So we will skip this for now  */
 	add_command (&pidp->hcmd, util_str);
+#endif
+
 	PRINT_WIN_NAME2_STR(NULL, chr);
 	PRINT_WIN_NAME2_STR(util_str, chr);
 	add_command (&pidp->cmd, util_str);

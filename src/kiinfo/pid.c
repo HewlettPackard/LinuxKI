@@ -47,8 +47,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "futex.h"
 
 #include "Thread.h"
+#include "Process.h"
 #include "PerfInfo.h"
 #include "DiskIo.h"
+#include "NetIp.h"
+#include "FileIo.h"
 #include "winki_util.h"
 
 
@@ -60,98 +63,40 @@ int pid_ftrace_print_func(void *, void *);
 static inline void
 pid_winki_trace_funcs()
 {
-        int i;
-
-        for (i = 0; i < 65536; i++) {
-                ki_actions[i].id = i;
-                ki_actions[i].func = NULL;
-                ki_actions[i].execute = 0;
-        }
-
-        strcpy(&ki_actions[0].subsys[0], "EventTrace");
-        strcpy(&ki_actions[0].event[0], "Header");
-        ki_actions[0].func = winki_header_func;
-        ki_actions[0].execute = 1;
-
-        strcpy(&ki_actions[0x524].subsys[0], "Thread");
-        strcpy(&ki_actions[0x524].event[0], "Cswitch");
-        ki_actions[0x524].func=thread_cswitch_func;
-        ki_actions[0x524].execute = 1;
-
-        strcpy(&ki_actions[0x532].subsys[0], "Thread");
-        strcpy(&ki_actions[0x532].event[0], "ReadyThread");
-        ki_actions[0x532].func=thread_readythread_func;
-        ki_actions[0x532].execute = 1;
-
-        strcpy(&ki_actions[0x548].subsys[0], "Thread");
-        strcpy(&ki_actions[0x548].event[0], "SetName");
-        ki_actions[0x548].func=thread_setname_func;
-        ki_actions[0x548].execute = 1;
-
-        strcpy(&ki_actions[0xf33].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf33].event[0], "SysClEnter");
-        ki_actions[0xf33].func=perfinfo_sysclenter_func;
-        ki_actions[0xf33].execute = 1;
-
-        strcpy(&ki_actions[0xf34].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf34].event[0], "SysClExit");
-        ki_actions[0xf34].func=perfinfo_sysclexit_func;
-        ki_actions[0xf34].execute = 1;
-
-        strcpy(&ki_actions[0x10a].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10a].event[0], "Read");
-        ki_actions[0x10a].func=diskio_readwrite_func;
-        ki_actions[0x10a].execute = 1;
-
-        strcpy(&ki_actions[0x10b].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10b].event[0], "Write");
-        ki_actions[0x10b].func=diskio_readwrite_func;
-        ki_actions[0x10b].execute = 1;
-
-        strcpy(&ki_actions[0x10c].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10c].event[0], "ReadInit");
-        ki_actions[0x10c].func=diskio_init_func;
-        ki_actions[0x10c].execute = 1;
-
-        strcpy(&ki_actions[0x10d].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10d].event[0], "WriteInit");
-        ki_actions[0x10d].func=diskio_init_func;
-        ki_actions[0x10d].execute = 1;
-
-        strcpy(&ki_actions[0x10e].subsys[0], "DiskIo");
-        strcpy(&ki_actions[0x10e].event[0], "FlushBuffers");
-        ki_actions[0x10e].func=diskio_flush_func;
-        ki_actions[0x10e].execute = 1;
-
-	strcpy(&ki_actions[0xf2e].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf2e].event[0], "SampleProfile");
-	ki_actions[0xf2e].func=perfinfo_profile_func;
-	ki_actions[0xf2e].execute = 1;
-
-	strcpy(&ki_actions[0xf32].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf32].event[0], "ISR-MSI");
-	ki_actions[0xf32].func=perfinfo_isr_func;
-	ki_actions[0xf32].execute = 1;
-
-	strcpy(&ki_actions[0xf42].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf42].event[0], "ThreadedDPC");
-	ki_actions[0xf42].func=perfinfo_dpc_func;
-	ki_actions[0xf42].execute = 1;
-
-	strcpy(&ki_actions[0xf43].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf43].event[0], "ISR");
-	ki_actions[0xf43].func=perfinfo_isr_func;
-	ki_actions[0xf43].execute = 1;
-
-	strcpy(&ki_actions[0xf44].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf44].event[0], "DPC");
-	ki_actions[0xf44].func=perfinfo_dpc_func;
-	ki_actions[0xf44].execute = 1;
-
-	strcpy(&ki_actions[0xf45].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf45].event[0], "TimeDPC");
-	ki_actions[0xf45].func=perfinfo_dpc_func;
-	ki_actions[0xf45].execute = 1;
+	winki_init_actions(NULL);
+	winki_enable_event(0x10a, diskio_readwrite_func);
+	winki_enable_event(0x10b, diskio_readwrite_func);
+	winki_enable_event(0x10c, diskio_init_func);
+	winki_enable_event(0x10d, diskio_init_func);
+	winki_enable_event(0x10e, diskio_flush_func);
+	winki_enable_event(0x30a, process_load_func);
+	winki_enable_event(0x400, fileio_name_func);
+        winki_enable_event(0x420, fileio_name_func);
+        winki_enable_event(0x423, fileio_name_func);
+        winki_enable_event(0x440, fileio_create_func);
+        winki_enable_event(0x443, fileio_readwrite_func);
+        winki_enable_event(0x444, fileio_readwrite_func);
+	winki_enable_event(0x524, thread_cswitch_func);
+	winki_enable_event(0x532, thread_readythread_func);
+	winki_enable_event(0x548, thread_setname_func);
+	winki_enable_event(0x60a, tcpip_sendipv4_func);
+	winki_enable_event(0x60b, tcpip_recvipv4_func);
+	winki_enable_event(0x60e, tcpip_retransmitipv4_func);
+	winki_enable_event(0x61a, tcpip_sendipv6_func);
+	winki_enable_event(0x61b, tcpip_recvipv6_func);
+	winki_enable_event(0x61e, tcpip_retransmitipv6_func);
+	winki_enable_event(0x80a, udpip_sendipv4_func);
+        winki_enable_event(0x80b, udpip_recvipv4_func);
+        winki_enable_event(0x81a, udpip_sendipv6_func);
+        winki_enable_event(0x81b, udpip_recvipv6_func);
+	winki_enable_event(0xf33, perfinfo_sysclenter_func);
+	winki_enable_event(0xf34, perfinfo_sysclexit_func);
+	winki_enable_event(0xf2e, perfinfo_profile_func);
+	winki_enable_event(0xf32, perfinfo_isr_func);
+	winki_enable_event(0xf42, perfinfo_dpc_func);
+	winki_enable_event(0xf43, perfinfo_isr_func);
+	winki_enable_event(0xf44, perfinfo_dpc_func);
+	winki_enable_event(0xf45, perfinfo_dpc_func);
 }
 
 /*
@@ -167,6 +112,8 @@ pid_init_func(void *v)
 	if (debug) printf ("pid_init_func()\n");
 
 	process_func =  NULL;
+	preprocess_func = NULL;
+	if (vis) preprocess_func = kiall_preprocess_func;
         report_func = pid_report_func;
 
         bufmiss_func = pid_bufmiss_func;
@@ -185,12 +132,15 @@ pid_init_func(void *v)
                 }
         }
 
+	pid_csvfile = open_csv_file("kipid", 1);
+
 	if (IS_WINKI) {
 		pid_winki_trace_funcs();
 
 		parse_systeminfo();
 		parse_cpulist();
 		parse_corelist();
+		parse_SQLThreadList();
 		return;
 	} 
 
@@ -270,8 +220,6 @@ pid_init_func(void *v)
 		ki_actions[TRACE_PRINT].func = pid_ftrace_print_func;
 		ki_actions[TRACE_PRINT].execute = 1;
 	}
-
-	pid_csvfile = open_csv_file("kipid", 1);
 
 	parse_cpuinfo();
 	parse_kallsyms();
@@ -762,7 +710,7 @@ void
 pid_fd_report(pid_info_t *pidp, FILE *pidfile) { 
 
 	var_arg_t vararg;
-	if (pidp->fdhash == NULL)  {
+	if ((pidp->fdhash == NULL) && (pidp->fobj_hash == NULL))  {
 		return;
 	}
 
@@ -772,9 +720,47 @@ pid_fd_report(pid_info_t *pidp, FILE *pidfile) {
 
 	vararg.arg1 = pidfile;
 	vararg.arg2 = pidp;
-	foreach_hash_entry((void **)pidp->fdhash, FD_HSIZE, print_fd_info,
+
+	if (pidp->fobj_hash) {
+	        printf ("%s                    -------  Total  ------- -------  Write  -------- --------  Read  --------\n", tab);
+		                printf ("%sObject                 IO/s    KB/s  AvIOsz     IO/s    KB/s  AvIOsz     IO/s    KB/s  AvIOsz  filename\n", tab);
+		foreach_hash_entry(pidp->fobj_hash, FOBJ_HSIZE, calc_fobj_totals, NULL, 0, 0);
+		foreach_hash_entry((void **)pidp->fobj_hash, FOBJ_HSIZE, file_print_fobj_logio,
+				fobj_sort_by_logio,
+				0, &vararg);
+	}
+
+	if (pidp->fdhash) {
+		foreach_hash_entry((void **)pidp->fdhash, FD_HSIZE, print_fd_info,
 				fd_sort_by_time,
 				0, &vararg);
+	}
+
+
+	return;
+}
+
+void 
+pid_socket_report(pid_info_t *pidp, FILE *pidfile) { 
+
+	var_arg_t vararg;
+	if (pidp->sdata_hash == NULL) {
+		return;
+	}
+
+	pid_printf (pidfile, "\n%s******** SOCKET ACTIVITY REPORT ********\n", tab);
+
+	vararg.arg1 = pidfile;
+	vararg.arg2 = pidp;
+
+	if (pidp->sdata_hash) {
+		pid_printf (pidfile, "%sRequests      Rd/s      RdKB/s      Wr/s      WrKB/s  Connection\n", tab);
+		pid_printf (pidfile, "%s================================================================================\n", tab);
+		foreach_hash_entry2((void **)pidp->sdata_hash, SDATA_HASHSZ, 
+			   socket_print_perpid_sdata,
+                           (int (*)())sdata_sort_by_syscalls,
+                           0, pidfile);
+	}
 
 	return;
 }
@@ -925,8 +911,6 @@ pid_report(void *arg1, void *v)
 
 	load_perpid_objfile_and_shlibs(pidp); 
 
-	/* fprintf (stderr, "pid_report() PID=%d\n", pidp->PID); */
-
         if (pidtree) {
                 sprintf (pid_fname, "%sS/%d", tlabel, (int)pidp->PID);
                 if ((pidfile = fopen(pid_fname, "w")) == NULL) {
@@ -940,9 +924,7 @@ pid_report(void *arg1, void *v)
         /* Set up the VIS/pid dir data files if visualizations are requested */
 
         if (vis) {
-
-/*
-**		if (wtree_build(pidp)) {
+/**		if (wtree_build(pidp)) {
 **			 fprintf (stderr, "Unable to create the wait tree.\n");
 */
 
@@ -1013,12 +995,18 @@ pid_report(void *arg1, void *v)
 	
 	if (pidp->ppid) {
 		ppidp = GET_PIDP(&globals->pid_hash, pidp->ppid);
-		pid_printf (pidfile, "  PPID %d  %s\n", ppidp->PID, (char *)ppidp->cmd);
+		pid_printf (pidfile, "  PPID %d  %s", ppidp->PID, (char *)ppidp->cmd);
+		if (ppidp->hcmd) pid_printf (pidfile, "  {%s}", ppidp->hcmd);
+		if (ppidp->thread_cmd) pid_printf (pidfile, "  (%s)", ppidp->thread_cmd);
+		pid_printf (pidfile, "\n");
 	}
 	if (pidp->tgid && (pidp->tgid != pidp->PID)) {
 		tgidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
 		dockerp = tgidp->dockerp;
-		pid_printf (pidfile, "  %s %d  %s\n", plabel, tgidp->PID, (char *)tgidp->cmd);
+		pid_printf (pidfile, "  %s %d  %s", plabel, tgidp->PID, (char *)tgidp->cmd);
+		if (tgidp->hcmd) pid_printf (pidfile, "  {%s}", tgidp->hcmd);
+		if (tgidp->thread_cmd) pid_printf (pidfile, "  (%s)", tgidp->thread_cmd);
+		pid_printf (pidfile, "\n");
 	}
 	if (pidp->nlwp > 1) {
 		pid_printf (pidfile, "    NLWP: %d\n", pidp->nlwp);
@@ -1044,6 +1032,7 @@ pid_report(void *arg1, void *v)
 	if (hc_flag) cpu_report(pidp, pidfile);
 	if (scall_flag) pid_syscall_report(pidp, pidfile);
 	if (file_flag) pid_fd_report(pidp, pidfile);
+	if (file_flag) pid_socket_report(pidp, pidfile);
 	if (pgcache_flag) pid_cache_report(pidp, pidfile);
 	if (futex_flag) pid_futex_report(pidp, pidfile);
 	if (sock_flag) pid_sock_report(pidp, pidfile);
@@ -1160,7 +1149,7 @@ pid_print_report(void *v)
 	if (oracle) {
 		sid_report(v);
 	} else {
-		csv_printf(pid_csvfile,"PID,Command,Thread,Hadoop Proc,ppid,tgid,nlwp,Container Name,Container ID,elf64,syscalls");
+		csv_printf(pid_csvfile,"%s,Command,Thread,Hadoop Proc,ppid,%s,nlwp,Container Name,Container ID,elf64,syscalls", tlabel, plabel);
 		if (sched_flag) csv_printf (pid_csvfile,",policy,runtime,systime,usertime,runqtime,sleeptime,irqtime,stealtime,switch,sleep,preempt,wakeup,runtime/swtch,lastcpu,lastldom,migr,nodemigr,vss,rss");
 		if (hc_flag) csv_printf (pid_csvfile,",TotHC,UserHC,SysHC,IntHC");
 		if (sock_flag) csv_printf(pid_csvfile,",Net Rd/s,Net Rd KB/s,Net Wr/s,Net KB Wr/s");

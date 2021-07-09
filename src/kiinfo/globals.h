@@ -484,6 +484,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define DeferredReady		7
 #define MaxThreadStates		10
 
+#define MaxThreadWaitMode	2
+
 #define dev_major(num)  ((num & MAJOR_MASK) >> MAJOR_SHIFT)
 #define lun(num)        (num & LUN_MASK)
 #define mkdev(major,minor)  ((major << MAJOR_SHIFT) | minor)
@@ -513,6 +515,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define GET_WWNINFOP(hashp, key)  (wwn_info_t *)find_add_hash_entry((lle_t ***)hashp, WWN_HSIZE, key, WWN_HASH(key), sizeof(wwn_info_t))
 #define GET_WWNDEVP(hashp, key)  (wwn_dev_t *)find_add_hash_entry((lle_t ***)hashp, DEV_HSIZE, key, DEV_HASH(key), sizeof(wwn_dev_t))
 #define GET_FDINFOP(hashp, key)  (fd_info_t *)find_add_hash_entry((lle_t ***)hashp, FD_HSIZE, key, FD_HASH(key), sizeof(fd_info_t))
+#define GET_FDEVP(hashp, key)  (filedev_t *)find_add_hash_entry((lle_t ***)hashp, FDEV_HSIZE, key, FDEV_HASH(key), sizeof(filedev_t))
+#define GET_FOBJP(hashp, key)  (fileobj_t *)find_add_hash_entry((lle_t ***)hashp, FOBJ_HSIZE, key, FOBJ_HASH(key), sizeof(fileobj_t))
 #define GET_SYSCALLP(hashp, key)  (syscall_info_t *)find_add_hash_entry((lle_t ***)hashp, SYSCALL_HASHSZ, key, SYSCALL_HASH(key), sizeof(syscall_info_t))
 #define GET_ADDR_TO_IDX_HASH_ENTRYP(hashp, key)  (addr_to_idx_hash_entry_t *)find_add_hash_entry((lle_t ***)hashp, ADDR_TO_IDX_HASHSZ, key, ADDR_TO_IDX_HASH(key), sizeof(addr_to_idx_hash_entry_t))
 #define GET_SCDWINFOP(hashp, key)  (scd_waker_info_t *)find_add_hash_entry((lle_t ***)hashp, WPID_HSIZE, key, WPID_HASH(key), sizeof(scd_waker_info_t))
@@ -586,6 +590,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define FIND_ELFMAPP(hash, key) (elfmap_info_t *)find_entry((lle_t **)hash, key, ELFMAP_HASH(key))
 #define FIND_CLIPP(hashp, ip) (clip_info_t *)find_entry((lle_t **)hashp, ip, IP_HASH(ip))
 #define FIND_GFUTEXP(hashp, key)  (gbl_futex_info_t *)find_entry((lle_t **)hashp, key, GFUTEX_HASH(key))
+#define FIND_FOBJP(hashp, key)  (fileobj_t *)find_entry((lle_t **)hashp, key, FOBJ_HASH(key))
 
 #define FIND_AND_REMOVE_IOREQP(hashp, key)  (io_req_t *)find_remove_hash_entry((lle_t ***)hashp, IOQ_HSIZE, key, IOQ_HASH(key), sizeof(io_req_t))
 #define FIND_AND_REMOVE_IOCB(hashp, key)  (iocb_info_t *)find_remove_hash_entry((lle_t ***)hashp, IOCB_HSIZE, key, IOCB_HASH(key), sizeof(iocb_info_t))
@@ -671,6 +676,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define FD lle.key
 #define FD_HSIZE 0x80
 #define FD_HASH(fd) (fd & (FD_HSIZE-1))
+
+#define FOBJ lle.key
+#define FOBJ_HSIZE 0x80
+#define FOBJ_HASH(fobj) ((fobj << 10) & (FOBJ_HSIZE-1))
+
+#define FDEV lle.key
+#define FDEV_HSIZE 0x20
+#define FDEV_HASH(fdev) ((fdev << 10) & (FDEV_HSIZE-1))
 
 #define REG_HSIZE 0x20
 #define REG_HMASK (REG_HSIZE - 1)
@@ -921,7 +934,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 /* macros for managing the Notes and Warnings messages and links.  */
 /* update with warnmsg[] definitions in globals.c */
-#define MAXWARNMSG		26	
+#define MAXWARNMSG		33	
 #define MAXNOTEMSG		0
 #define MAXNOTEWARN		MAXWARNMSG+MAXNOTEMSG
 #define WARN_CPU_BOTTLENECK		0		
@@ -950,6 +963,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARN_ORACLE_POLL		23
 #define WARN_PCC_CPUFREQ		24
 #define WARN_SCA_VULN			25
+#define WARN_TCP_TIMEOUTS		26
+#define WARN_KVM_PAGEFAULT		27
+#define WARN_SQL_STATS			28
+#define WARN_ORACLE_COLSTATS		29
+#define WARN_CACHE_BYPASS		30
+#define WARN_MEM_IMBALANCE		31
+#define WARN_NODE_LOWMEM		32
 #define NOTE_NUM1		MAXWARNMSG+0
 
 /* warn flags passed to "foreach" functions for detection */
@@ -973,17 +993,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARNF_ADD_RANDOM		0x20000ull
 #define WARNF_MD_FLUSH			0x40000ull
 #define WARNF_ORACLE_POLL		0x80000ull
-
-/* warn flags specific to Oracle warnflag
-#define WARNF_ORASCHED			0x01ull
-#define WARNF_LGWR			0x02ull
-#define WARNF_DBW			0x04ull
-#define WARNF_ILOCK			0x08ull
-#define WARNF_LGWR_ASYNC		0x10ull
-#define WARNF_DBW_ASYNC			0x20ull
-#define WARNF_SSERVER_ASYNC		0x40ull
-#define WARNF_IOSLAVE			0x04ull 
-*/
+#define WARNF_CACHE_BYPASS		0x100000ull
+#define WARNF_MEM_IMBALANCE		0x200000ull
+#define WARNF_NODE_LOWMEM		0x400000ull
 
 /* warn flags specific to hardclocks warnflag */ 
 #define WARNF_SEMLOCK			0x1ull
@@ -991,6 +1003,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARNF_HUGETLB_FAULT		0x4ull
 #define WARNF_KSTAT_IRQS		0x8ull
 #define WARNF_PCC_CPUFREQ		0x10ull
+#define WARNF_KVM_PAGEFAULT		0x20ull
+#define WARNF_ORACLE_COLSTATS		0x40ull
+
+/* warn flags specific to Windows */
+#define WARNF_TCPTIMEOUTS		0x01ull 
+#define WARNF_SQL_STATS			0x02ull 
+
 
 typedef struct var_arg_struct {
         void *arg1;
@@ -1329,11 +1348,11 @@ struct fd_stats {
 	uint32		syscall_cnt;		
 	uint32		rd_cnt;
 	uint32		wr_cnt;
+	uint32		last_pid;
 	uint32		lseek_cnt;
 	uint32 		open_cnt;
 	uint32		seqios;
 	uint32		rndios;
-	uint32		last_pid;
 };
 
 struct sd_stats {
@@ -1342,7 +1361,7 @@ struct sd_stats {
 	uint64		rd_bytes;
 	uint64		wr_bytes;	
 	uint32		errors;
-	uint32		syscall_cnt;		
+	uint32		syscall_cnt;		/* packets on Windows */
 	uint32		rd_cnt;
 	uint32		wr_cnt;
 	uint32		last_pid;
@@ -1358,7 +1377,7 @@ typedef struct pid_info {
 	lle_t		lle;
 	char		*cmd;
 	char 		*thread_cmd;
-	char		*hcmd;		/* Hadoop proc name */
+	char		*hcmd;		/* Hadoop proc name or SQL Instance name*/
 	void		*dockerp;	/* docker pointer */
 	void *schedp;			/* struct sched_info */
 	hc_info_t *hcinfop;		/* struct hc_info */
@@ -1366,6 +1385,8 @@ typedef struct pid_info {
 	void **mdevhash;		/* struct dev_info */
 	void **scallhash;		/* struct syscallinfo */
 	void **fdhash;			/* struct fdinfo */
+	void **fobj_hash;		/* struct fileobj_info WINDOWS ONLY */
+	void **sdata_hash;		/* struct sdata_info WINDOWS ONLY */
 	void **trc_hash;		/* struct trc_info */
 	void **slp_hash;		/* struct slp_info */
 	void **user_slp_hash;		/* struct slp_info */
@@ -1806,6 +1827,9 @@ typedef struct cpu_info {
 typedef struct ldom_info {
 	lle_t		lle;
 	struct sched_stats sched_stats;
+	uint64 memkb;
+	uint64 freekb;
+	uint64 usedkb;
 	int ncpus;
 	int bind_cnt;
 	int oracle_bind_cnt;
@@ -1867,6 +1891,30 @@ typedef struct fd_info {
 	int 		closed;
 	struct fd_stats	stats;
 } fd_info_t;
+
+
+typedef struct filedev_info {
+	lle_t		lle;			/* key = devnum */
+	struct iostats	stats[3];
+	uint64		last_offset;
+} filedev_t;
+
+typedef struct fstats {
+	uint64		next_offset;
+	uint64          bytes;
+	uint32		cnt;		
+	uint32		seqios;
+	uint32		rndios;
+} fstats_t;
+
+typedef struct fileobj_info {			/* Windows File Object */
+	lle_t		lle;			/* key = object ptr */
+	char 		*filename;
+	void		**fdev_hash;
+	struct fstats	liostats[3];
+	struct iostats	piostats[3];
+	uint32		last_tid;
+} fileobj_t;
 
 typedef struct io_req {
 	lle_t		lle;
@@ -2141,6 +2189,7 @@ typedef struct server_info {
 	void **stktrc_hash;		/* struct stktrc_info */
 	void **syscall_hash;		/* struct syscall_info */
 	void **fdata_hash;		/* struct fdata_info_t */
+	void **fobj_hash;		/* struct fileobj_t   WINDOWS only */
 	void **sdata_hash;		/* struct sdata_info_t */
 	void **ipip_hash;		/* struct ipip_info_t */
 	void **rip_hash;		/* struct ip_info_t */
@@ -2219,6 +2268,10 @@ typedef struct server_info {
 
 	/* Kernel Side Channel Attacks (Spectre/Meltdown) fixes */
 	int scavuln;
+
+	/* network info */
+	int num_tcp_timeouts;
+	uint64 tcp_timeout_time;
 } server_info_t;
 
 /* hash of pids belonging to same docker container */
@@ -2428,3 +2481,33 @@ extern int incr_trc_stats(void *, void *);
 
 extern char input_str[];
 extern char util_str[];
+
+#define __NUM_access 21
+#define __NUM_creat 85
+#define __NUM_execve 59
+#define __NUM_io_getevents 208
+#define __NUM_io_submit 209
+#define __NUM_lstat 6
+#define __NUM_open 2
+#define __NUM_openat 257
+#define __NUM_poll 7
+#define __NUM_ppoll 271
+#define __NUM_pread64 17
+#define __NUM_pselect6 270
+#define __NUM_pwrite64 18
+#define __NUM_read 0
+#define __NUM_readv 19
+#define __NUM_recvfrom 45
+#define __NUM_recvmmsg 299
+#define __NUM_recvmsg 47
+#define __NUM_select 23
+#define __NUM_sendmmsg 307
+#define __NUM_sendmsg 46
+#define __NUM_sendto 44
+#define __NUM_splice 275
+#define __NUM_stat 4
+#define __NUM_unlink 87
+#define __NUM_unlinkat 263
+#define __NUM_vmsplice 278
+#define __NUM_write 1
+#define __NUM_writev 20

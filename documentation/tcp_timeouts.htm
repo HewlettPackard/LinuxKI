@@ -1,0 +1,459 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:Consolas;
+	panose-1:2 11 6 9 2 2 4 3 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+a:link, span.MsoHyperlink
+	{color:#0563C1;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:#954F72;
+	text-decoration:underline;}
+p
+	{margin-right:0in;
+	margin-left:0in;
+	font-size:12.0pt;
+	font-family:"Times New Roman",serif;}
+pre
+	{mso-style-link:"HTML Preformatted Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	font-size:10.0pt;
+	font-family:Consolas;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+span.HTMLPreformattedChar
+	{mso-style-name:"HTML Preformatted Char";
+	mso-style-link:"HTML Preformatted";
+	font-family:Consolas;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:107%;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:.5in .5in .5in .5in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-GB link="#0563C1" vlink="#954F72">
+
+<div class=WordSection1>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;vertical-align:
+top'><b><i><span lang=EN-US style='font-size:12.0pt;font-family:"Arial",sans-serif;
+color:black'>LinuxKI Warning</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Performance degradation due to TCP
+interrupt timeouts </span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Date: 05/12/21</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Problem</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Customer
+migrated their OLTP workload from IBM Power using AIX to a modern virtualized
+environment using Synergy SY480 servers.   The customer used Microsoft Hyper-V
+to create VMs to host multiple Application VMs and SQL Server VMs running MS
+Windows Server 2019 and MS SQL Server 2017.    However, one of the customer’s
+primary jobs that took 3 hours on the IBM AIX server was taking 9 hours on the
+new HPE Synergy solution.</span></p>
+
+<p class=MsoNormal><b><span lang=EN-US style='font-size:10.0pt;line-height:
+107%;font-family:"Arial",sans-serif'>Investigation</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>To
+troubleshoot the issue, Windows XPERF data (also known as WinKI data) was
+collected from each of the application and database VMs using the runki.cmd
+script provided by the LinuxKI Toolset.     The WinKI data showed an
+interesting behavior in the application threads.   First off, note that most of
+the application time during the 20 second trace was spent sleeping, which
+indicates its waiting for a response from the database server, as seen in the
+following application thread:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>TID 4508  CASSI.exe</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>  PID 14532  CASSI.exe</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    ********* SCHEDULER ACTIVITY REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    RunTime    :  2.398512  SysTime   :  0.565999   UserTime  
+:  1.818851</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    SleepTime  : 17.974354  Sleep Cnt :     24275   Wakeup Cnt
+:       795</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    RunQTime   :  0.426383  Switch Cnt:     24275   PreemptCnt
+:         0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    HardIRQ    :  0.001506  HardIRQ-S :  0.000382    HardIRQ-U
+:  0.001124</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    SoftIRQ    :  0.012156  SoftIRQ-S :  0.003321    SoftIRQ-U
+:  0.008835</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    Last CPU   :         3  CPU Migrs :      4372   NODE Migrs
+:         0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    busy    :     11.53%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>      sys   :      2.72%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>      user  :      8.74%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>      irq   :      0.07%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    runQ    :      2.05%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    sleep   :     86.42%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>However,
+looking closely at the system calls, we can see that most of the time is spent
+in NtWaitForSingleObject().   The average wait time was only 752 microseconds,
+but the maximum time was over 500 milliseconds.    While it’s certainly
+possible that a DB transaction could take over 500 milliseconds, which seems
+high compared to the average wait time:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    ******** SYSTEM CALL REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    System Call Name                 Count     Rate    
+ElpTime        Avg        Max    Errs    AvSz     KB/s</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    NtWaitForSingleObject            24478   1164.1  
+18.410537   <span style='background:yellow'>0.000752</span>   <span
+style='background:yellow'>0.515920</span>       0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>       SLEEP                         24238   1152.7  
+17.678341   0.000729</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>          Sleep Func                 23914           
+17.521185   0.000733   0.006618  KeWaitForSingleObject</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>       RUNQ                                            0.425832</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>       CPU                                             0.082841</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    NtDeviceIoControlFile            54825   2607.3   
+0.444028   0.000008   0.004110       0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    NtReadFile                         121      5.8   
+0.028911   0.000239   0.023906       0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>       SLEEP                             9      0.4   
+0.026479   0.002942</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>          Sleep Func                     9            
+0.026479   0.002942   0.000018  KeWaitForSingleObject</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>       RUNQ                                            0.000127</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>       CPU                                             0.002070</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>...</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:10.0pt;line-height:107%;
+font-family:"Arial",sans-serif'>The raw trace data provides additional details
+on one of these 500+ millisecond waits from the database.   Note the trace data
+below are the trace events for just 1 of the 500+ millisecond system calls from
+TID 4508.    </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    0.375431 cpu=3 tid=4508 pid=14532 PerfInfo <span
+style='color:#0033CC'>SysClEnter addr=ntoskrnl.exe?NtWaitForSingleObject+0x0</span> 
+Stacktrace: ntoskrnl.exe?KiSystemServiceExitPico+0x297
+wow64cpu.dll?CpupSyscallStub+0xc wow64cpu.dll?Thunk0ArgReloadState+0x5
+wow64cpu.dll?BTCpuSimulate+0x9 wow64.dll?0x7ffb3789cfda
+wow64.dll?0x7ffb3789cea0 ntdll.dll?LdrpInitializeProcess+0x1789
+ntdll.dll?_control87$filt$0+0x1a9ed ntdll.dll?LdrpInitialize+0x3b
+ntdll.dll?LdrInitializeThunk+0xe ntdll.dll?RtlStringVPrintfWorkerW+0x58
+KernelBase.dll?c_PmapEntries_api_ms_win_rtcore_ntuser_window_l1_1_0+0x149
+KernelBase.dll?c_PmapEntries_api_ms_win_rtcore_ntuser_window_l1_1_0+0xa2
+msodbcsql17.dll?0x623d4a43 msodbcsql17.dll?0x623ab3b9
+msodbcsql17.dll?0x623aa141 msodbcsql17.dll?0x623a4633</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    0.375435 cpu=3 tid=4508 pid=14532 Thread <span
+style='color:#0033CC'>Cswitch</span> target_tid=0 target_pid=0 oldpri=0
+newpri=10 prev_cstate=0 wait_reason=UserRequest wait_mode=User state=Waiting
+ideal_cpu=3 new_thread_waittime=30715 StackTrace:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    0.881776 cpu=6 tid=0 pid=0 Thread <span style='color:#0033CC'>ReadyThread
+target_tid=4508</span> target_pid=14532 adjreason=1 adjincr=2 flag=1
+StackTrace: ntoskrnl.exe?KiExitDispatcher+0x12b
+ntoskrnl.exe?IopfCompleteRequest+0x18b4 ntoskrnl.exe?IopPerfCompleteRequest+0x19f
+ntoskrnl.exe?_ctrlfp$filt$0+0x5fa22
+afd.sys?AfdTLCompleteBufferUserReceive+0x11a <span style='background:yellow'>tcpip.sys?TcpCompleteClientReceiveRequest+0x25</span>
+tcpip.sys?TcpPushRequestReceive+0x106 tcpip.sys?memset+0x20043 <span
+style='background:yellow'>tcpip.sys?TcpPeriodicTimeoutHandler</span>+0x3d9 ntoskrnl.exe?KiProcessExpiredTimerList+0x159
+ntoskrnl.exe?KiRetireDpcList+0x4a7 ntoskrnl.exe?KiIdleLoop+0x5a</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    0.881788 cpu=5 tid=0 pid=0 Thread <span style='color:#0033CC'>Cswitch
+target_tid=4508 </span>target_pid=14532 oldpri=10 newpri=0 prev_cstate=1
+wait_reason=WrCalloutStack wait_mode=Kernel state=Running ideal_cpu=5
+new_thread_waittime=32 StackTrace: ntoskrnl.exe?SwapContext+0x4d0
+ntoskrnl.exe?KiSwapContext+0x76 ntoskrnl.exe?KiSwapThread+0x297
+ntoskrnl.exe?KiCommitThreadWait+0x549 ntoskrnl.exe?KeWaitForSingleObject+0x520
+ntoskrnl.exe?NtWaitForSingleObject+0xfc
+ntoskrnl.exe?KiSystemServiceExitPico+0x2b9 wow64cpu.dll?CpupSyscallStub+0xc
+wow64cpu.dll?Thunk0ArgReloadState+0x5 wow64cpu.dll?BTCpuSimulate+0x9
+wow64.dll?0x7ffb3789cfda wow64.dll?0x7ffb3789cea0 ntdll.dll?LdrpInitializeProcess+0x1789
+ntdll.dll?_control87$filt$0+0x1a9ed ntdll.dll?LdrpInitialize+0x3b
+ntdll.dll?LdrInitializeThunk+0xe ntdll.dll?RtlStringVPrintfWorkerW+0x58
+KernelBase.dll?c_PmapEntries_api_ms_win_rtcore_ntuser_window_l1_1_0+0x149
+KernelBase.dll?c_PmapEntries_api_ms_win_rtcore_ntuser_window_l1_1_0+0xa2
+msodbcsql17.dll?0x623d4a43 msodbcsql17.dll?0x623ab3b9
+msodbcsql17.dll?0x623aa141 msodbcsql17.dll?0x623a4633</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    0.881801 cpu=5 tid=4508 pid=14532 PerfInfo <span
+style='color:#0033CC'>SysClExit ret=0x0
+addr=ntoskrnl.exe?NtWaitForSingleObject+0x0  elptime=    0.506371</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>The key
+functions in the trace above are TcpPeriodicTimeoutHandler() and
+TcpCompleteClientReceiveRequest().    Typically, when data is received on a
+network port, an interrupt will occur and signal the operating system to wakeup
+the threads waiting on the network data.   In this case, the thread was woken
+up as a result of a timeout, meaning the network data was received, but the
+interrupt never occurred to process the data.    Eventually, the
+TcpPeriodicTimeoutHandler() notices that the request had not completed in 500
+milliseconds, but when it checks the receive queue, it notices the data has
+indeed been received and proceeds to wakeup the sleeping thread (TID 4508).   </span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>The primary
+root cause is a missed interrupt.   Remember this environment is virtualized
+using Hyper-V, so the virtualization layer adds some additional complexity in
+the interrupt processing from a virtual LAN.    Complicating things even more
+is that the data being received is large (&gt; than the MTU size of 1500 bytes),
+so there is also some packet reassembly that needs to be done.</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>The LinuxKI
+Toolset version 7.1 and later will detect TCP timeouts automatically and
+display a warning in the Kparse report:</span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#8CFF8C'>
+ <tr>
+  <td style='padding:1.5pt 2.25pt 1.5pt 2.25pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span style='font-size:12.0pt;
+  font-family:"Times New Roman",serif'>5.7 Network Timeouts and Retransmits</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><u><span style='font-size:9.0pt;font-family:"Times New Roman",serif;
+  color:blue'>[Prev Subsection]---[Prev Section][Next Section][Table of
+  Contents]</span></u></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:#CC0000'>265
+TCP Timeouts Detected - Avg delay (secs) = 0.499948</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><a name=warncheck0></a><span style='font-size:9.0pt;font-family:"Courier New";
+color:#CC0000'>Warning: TCP Timeouts Detected </span><u><span style='font-size:
+9.0pt;font-family:"Courier New";color:blue'>[Next][INFO]</span></u></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Solution </span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>To resolve
+the issue, the customer enabled Jumbo Frames (MTU size of 9000 bytes) and they
+also enabled SR-IOV for more efficient network processing using virtualization
+technology such as Hyper-V.    After implementing SR-IOV and Jumbo Frames, the
+critical job completed in under 3 hours.   </span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>For more
+information</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>For more
+information on analyzing Windows XPERF data using the LinuxKI Toolset (or WinKI
+for short), refer to Section 12 of the <span class=MsoHyperlink><a
+href="https://github.com/HewlettPackard/LinuxKI/raw/master/documentation/LinuxKI_MasterClass.pdf">LinuxKI
+Masterclass</a></span>.</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+</div>
+
+</body>
+
+</html>

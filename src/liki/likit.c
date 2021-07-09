@@ -18,7 +18,7 @@
  *
  * likit.c	LInux Kernel Instrumentation
  *
- *		v6.0
+ *		v7.1
  *		colin.honess@gmail.com
  *		mark.ray@hpe.com
  *		pokilfoyle@gmail.com
@@ -392,12 +392,6 @@ struct tp_struct tp_table[];
 
 #endif
 
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,0)
-#define GETNAME(sock, addr, len, peer) (sock->ops->getname(sock, addr, peer))
-#else
-#define GETNAME(sock, addr, len, peer) (sock->ops->getname(sock, addr, len, peer))
-#endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,1,0)
 #define SYSCALL_GET_ARGUMENTS(a1, a2, a3, a4, a5) syscall_get_arguments(a1, a2, a5)
@@ -3010,7 +3004,7 @@ mm_filemap_fault_trace(RXUNUSED struct mm_struct *vm_mm, unsigned long virtual_a
 	if (!(vm_mm && virtual_address)) {
 #ifdef LIKI_DEBUG
 		printk(KERN_WARNING "filemap_fault entered with vm_mm==%p and address==%p\n",
-			(void *)vm_mm, (void *)virtual_address_;
+			(void *)vm_mm, (void *)virtual_address);
 #endif
 		return;
 	}
@@ -3914,6 +3908,10 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 	long			args_tmp[N_SYSCALL_ARGS];
 	void 			*vldtmp;
 	int			sz;
+	struct sockaddr_storage	remote;
+	struct sockaddr_storage	local;
+	struct socket		*sock;
+	int			loclen = 0, remlen = 0;
 	TRACE_COMMON_DECLS;
 
 	if (unlikely(tracing_state == TRACING_DISABLED))
@@ -4181,10 +4179,6 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 	case __NR_sendto:
 
 		{
-		struct sockaddr_storage	remote;
-		struct sockaddr_storage	local;
-		struct socket		*sock;
-		int			loclen = 0, remlen = 0;
 		int			fd;
 		int			err;
 		int			fput_needed;
@@ -4214,7 +4208,11 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 
 		sock_type = sock->type;
 
-		if (GETNAME(sock, (struct sockaddr *)&local, &loclen, 0)) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,0)
+		if ((loclen = sock->ops->getname(sock, (struct sockaddr *)&local, 0)) <= 0) {
+#else
+		if (sock->ops->getname(sock, (struct sockaddr *)&local, &loclen, 0)) {
+#endif
 			fput_light(sock->file, fput_needed);
 			goto scexit_skip_vldata;
 		}
@@ -4226,7 +4224,11 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		if (args_tmp[4] == 0 || args_tmp[5] == 0) {
 
 			/* Get remote socket addresses */
-			if (GETNAME(sock, (struct sockaddr *)&remote, &remlen, 1)) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,0)
+			if ((remlen = sock->ops->getname(sock, (struct sockaddr *)&remote, 1)) <= 0) {
+#else
+			if (sock->ops->getname(sock, (struct sockaddr *)&remote, &remlen, 1)) {
+#endif
 				fput_light(sock->file, fput_needed);
 				goto scexit_skip_vldata;
 			}
@@ -4248,7 +4250,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 
 		fput_light(sock->file, fput_needed);
 
-		if (remlen == 0 || loclen == 0)
+		if (remlen <= 0 || loclen <= 0)
 			goto scexit_skip_vldata;
 
 		sz = TRACE_ROUNDUP((sizeof(syscall_exit_t) + loclen + remlen + sizeof(short)));
@@ -4288,12 +4290,8 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 
 		{
 
-		struct sockaddr_storage	remote;
-		struct sockaddr_storage	local;
-		struct socket		*sock;
  		struct kstat		stat_struct;
  		fileaddr_t		*fileaddr;
-		int			loclen = 0, remlen = 0;
 		int			fd;
 		int			err;
 		int			fput_needed;
@@ -4325,20 +4323,29 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 			memset(&local, 0, sizeof(struct sockaddr_storage));
 			sock_type = sock->type;
 
-			if (GETNAME(sock, (struct sockaddr *)&remote, &remlen, 1)) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,0)
+			if ((remlen = sock->ops->getname(sock, (struct sockaddr *)&remote, 1)) <= 0) {
+#else
+			if (sock->ops->getname(sock, (struct sockaddr *)&remote, &remlen, 1)) {
+#endif
 				fput_light(sock->file, fput_needed);
 				goto scexit_skip_vldata;
 			}
 
-			if (GETNAME(sock, (struct sockaddr *)&local, &loclen, 0)) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,0)
+			if ((loclen = sock->ops->getname(sock, (struct sockaddr *)&local, 0)) <= 0) {
+#else
+			if (sock->ops->getname(sock, (struct sockaddr *)&local, &loclen, 0)) {
+#endif
 				fput_light(sock->file, fput_needed);
 				goto scexit_skip_vldata;
 			}
 
 			fput_light(sock->file, fput_needed);
 	
-			if (loclen == 0 || remlen == 0)
+			if (loclen <= 0 || remlen <= 0) {
 				goto scexit_skip_vldata;
+			}
 
 		} else {
 
@@ -4368,8 +4375,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		}
 
 		memcpy((void *)t + sizeof(syscall_exit_t), &local, loclen);
-		memcpy((void *)t + sizeof(syscall_exit_t) + loclen,
-			&remote, remlen);
+		memcpy((void *)t + sizeof(syscall_exit_t) + loclen, &remote, remlen);
 		memcpy((void *)t + sizeof(syscall_exit_t) + loclen + remlen, &sock_type, sizeof(short));
 
 		break;
@@ -4388,10 +4394,6 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 		 * msg_len fields.
 		 */
 
-		struct sockaddr_storage	remote;
-		struct sockaddr_storage	local;
-		struct socket		*sock;
-		int			loclen, remlen;
 		int			fd;
 		int			err;
 		int			fput_needed;
@@ -4456,20 +4458,27 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 #endif
 			goto mmsgexit_skip_addresses;
 
-		if (GETNAME(sock, (struct sockaddr *)&remote, &remlen, 1)) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,0)
+		if ((remlen = sock->ops->getname(sock, (struct sockaddr *)&remote, 1)) <= 0) {
+#else
+		if (sock->ops->getname(sock, (struct sockaddr *)&remote, &remlen, 1)) {
+#endif
 			fput_light(sock->file, fput_needed);
 			goto scexit_skip_vldata;
 		}
 
-		if (GETNAME(sock, (struct sockaddr *)&local, &loclen, 0)) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,0)
+			if ((loclen = sock->ops->getname(sock, (struct sockaddr *)&local, 0)) <= 0) {
+#else
+			if (sock->ops->getname(sock, (struct sockaddr *)&local, &loclen, 0)) {
+#endif
 			fput_light(sock->file, fput_needed);
 			goto scexit_skip_vldata;
 		}
 
 		fput_light(sock->file, fput_needed);
 
-		/* If I didn't get both addresses then skip both */
-		if (loclen == 0 || remlen == 0)
+		if (loclen <= 0 || remlen <= 0)
 			loclen = remlen = 0;
 
 mmsgexit_skip_addresses:
@@ -4502,10 +4511,6 @@ mmsgexit_skip_addresses:
 #endif
 		{
 
-		struct sockaddr_storage	remote;
-		struct sockaddr_storage	local;
-		struct socket		*sock;
-		int			loclen = 0, remlen = 0;
 		int			out_fd;
 		int			err;
 		int			fput_needed;
@@ -4531,19 +4536,27 @@ mmsgexit_skip_addresses:
 #endif
 			goto scexit_skip_vldata;
 
-		if (GETNAME(sock, (struct sockaddr *)&remote, &remlen, 1)) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,0)
+		if ((remlen = sock->ops->getname(sock, (struct sockaddr *)&remote, 1)) <= 0) {
+#else
+		if (sock->ops->getname(sock, (struct sockaddr *)&remote, &remlen, 1)) {
+#endif
 			fput_light(sock->file, fput_needed);
 			goto scexit_skip_vldata;
 		}
 
-		if (GETNAME(sock, (struct sockaddr *)&local, &loclen, 0)) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,17,0)
+		if ((loclen = sock->ops->getname(sock, (struct sockaddr *)&local, 0)) <= 0) {
+#else
+		if (sock->ops->getname(sock, (struct sockaddr *)&local, &loclen, 0)) {
+#endif
 			fput_light(sock->file, fput_needed);
 			goto scexit_skip_vldata;
 		}
 
 		fput_light(sock->file, fput_needed);
 
-		if (loclen == 0 || remlen == 0)
+		if (loclen <= 0 || remlen <= 0)
 			goto scexit_skip_vldata;
 
 		sz = TRACE_ROUNDUP((sizeof(syscall_exit_t) + loclen + remlen));
@@ -4555,12 +4568,8 @@ mmsgexit_skip_addresses:
 			return;
 		}
 
-		if (remlen == 0 || loclen == 0)
-			goto scexit_skip_vldata;
-
 		memcpy((void *)t + sizeof(syscall_exit_t), &local, loclen);
-		memcpy((void *)t + sizeof(syscall_exit_t) + loclen,
-			&remote, remlen);
+		memcpy((void *)t + sizeof(syscall_exit_t) + loclen, &remote, remlen);
 
 		break;
 

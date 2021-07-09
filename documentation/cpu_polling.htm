@@ -1,0 +1,492 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Courier;
+	panose-1:2 7 4 9 2 2 5 2 4 4;}
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:#954F72;
+	text-decoration:underline;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:107%;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:.5in .5in .5in .5in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-GB link=blue vlink="#954F72">
+
+<div class=WordSection1>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal;background:white'><b><span lang=EN-US
+style='font-family:"Arial",sans-serif;color:black'>​</span></b><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>How
+CPU polling with HT enabled impacts performance</span></b></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:normal;background:white'><b><span lang=EN-US
+style='font-size:10.0pt;font-family:"Arial",sans-serif;background:white'>Date:</span></b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;background:
+white'> 06/08/2020</span></p>
+
+<p class=MsoNormal style='margin-bottom:7.5pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;&nbsp;&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:7.5pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>There have been many articles on Linux which discusses topics like
+P-states, C-states, and Hyperthreading.     This article will discuss the
+performance impact of disabling C-states and CPU “polling” with Hyperthreading
+enabled.</span></p>
+
+<p class=MsoNormal style='margin-bottom:7.5pt;line-height:normal;background:
+white'><b><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>CPU Idle latencies (C-states)</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:7.5pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>C-states are hardware sleep states that power down different
+portions of the CPU peripheral circuitry while the CPU core is idle.   Each CPU
+core has multiple idle C-state levels - each corresponding to greater power
+savings but also incurring longer latencies to transition to a running state.
+&nbsp;&nbsp;&nbsp;A processor enters a C-state (cstate &gt; 0) when it is idle
+through the MWAIT instruction.&nbsp; How do these C-states affect system
+performance if the processor is idle anyway?&nbsp;&nbsp; The key is the
+latency, or the amount of time, for the processor to wakeup after it calls
+MWAIT.&nbsp;&nbsp;&nbsp; The latency for each C-state can be seen by examining
+the /sys/devices/system/cpu/cpu*/cpuidle/state*/latency file.&nbsp;&nbsp;&nbsp;
+It should be the same for each processor on a specific system.&nbsp;
+&nbsp;Below is an example that displays the logical cstate, the Intel HW
+cstate, and the cstate latency time in usecs or microseconds:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span lang=EN-US style='font-size:9.0pt;font-family:Courier;color:black;
+background:white'>$ cd /sys/devices/system/cpu/cpu0/cpuidle</span><span
+lang=EN-US style='font-size:9.0pt;font-family:Courier;color:black'><br>
+<span style='background:white'>$ for state in `ls -d state*` ; do echo c-$state
+`cat $state/name` `cat $state/latency` ; done</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span lang=EN-US style='font-size:10.0pt;font-family:"Courier New";
+color:black'>c-state0 POLL 0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span lang=EN-US style='font-size:10.0pt;font-family:"Courier New";
+color:black'>c-state1 C1-SKX 2</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span lang=EN-US style='font-size:10.0pt;font-family:"Courier New";
+color:black'>c-state2 C1E-SKX 10</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span lang=EN-US style='font-size:10.0pt;font-family:"Courier New";
+color:black'>c-state3 C6-SKX 133</span><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'><br>
+<br>
+</span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><b><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>CPU Polling</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Rather than call the MWAIT instruction and incur idle CPU core
+latencies, an idle CPU core can enter an “idle poll” state, or C-state0.   A
+CPU core that is “polling” is actively executing instructions in the idle code
+looking for work to do.  There is no power savings for a CPU core in the
+“polling” state as the core is executing the idle code, but it incurs no
+latency delays when coming out of the idle state.   </span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>There are several ways for a CPU core to enter the polling state
+(C-state0):</span></p>
+
+<p class=MsoListParagraphCxSpFirst style='margin-bottom:12.0pt;text-indent:
+-.25in;line-height:normal;background:white'><span lang=EN-US style='font-size:
+10.0pt;font-family:Symbol;color:black'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>C-states can be disabled on the boot command line
+(intel_idle.max_cstate=0 processor.max_cstate=0).</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:12.0pt;text-indent:
+-.25in;line-height:normal;background:white'><span lang=EN-US style='font-size:
+10.0pt;font-family:Symbol;color:black'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Through the BIOS (provide the Linux idle driver does not override
+the BIOS setting).  Note C-states can be disabled in the BIOS using various
+Workload Profiles for the Proliant/Synergy Gen10 servers, such as the Low
+Latency or High Performance Compute profiles.  </span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:12.0pt;text-indent:
+-.25in;line-height:normal;background:white'><span lang=EN-US style='font-size:
+10.0pt;font-family:Symbol;color:black'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Using the cpupower command.   For example, the following commands
+will disable all Cstates for all CPU cores:</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:12.0pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-top:0in;margin-right:0in;
+margin-bottom:12.0pt;margin-left:1.0in;line-height:normal;background:white'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>$
+cpupower idle-set -d 3</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-top:0in;margin-right:0in;
+margin-bottom:12.0pt;margin-left:1.0in;line-height:normal;background:white'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>$
+cpupower idle-set -d 2</span></p>
+
+<p class=MsoListParagraphCxSpLast style='margin-top:0in;margin-right:0in;
+margin-bottom:12.0pt;margin-left:1.0in;line-height:normal;background:white'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>$
+cpupower idle-set -d 1</span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>            or</span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>                        $ cpupower idle-set -D 1</span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><b><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Hyperthreading</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Hyperthreading, also known as hardware threads, is the ability of
+a physical processor core to have 2 separate register contexts, yet share a
+single central processing unit.   This allows two threads (logical cores) to
+run on a single physical core by quickly switching control of the processing
+unit from one register context to the next.   Hyperthreading allows for more
+efficient use of CPU as one hardware thread may execute while another hardware
+thread is stalled on a memory transaction.   </span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><b><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>CPU Polling and Hyperthreading</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>For some workloads, disabling C-states can provide low latencies,
+although the increased power usage may limit the individual core Turbo Boost
+speeds.   For other workloads, enabling Hyperthreading can provide more
+efficient use of CPU cycles by making use of memory and cache stalls to execute
+instructions from the HT sibling core.  </span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>However, disabling C-states AND enabling Hyperthreading together
+may have some negative performance implications.</span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Remember, when C-states are disabled and the CPU is in a “polling”
+state (C-state0), it is actively using CPU cycles.   These are CPU cycles that
+the HT sibling core cannot use.  </span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>To demonstrate a worst case scenario, a CPU-intensive process
+which performed arithmetic and matrix operations was executed on a specific CPU
+core (CPU 15).   During the test, the C-states were limited to C-state1 using
+the latency-performance tuned profile.    The program executed 1791 loop
+iterations per second during the 15 second test:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span lang=EN-US style='font-size:10.0pt;font-family:"Courier New";
+color:black'>$ nice -n -20 taskset -c 15 ./cpucalc -r 15 -v  | grep Iterations</span></p>
+
+<p class=MsoNormal style='line-height:normal'><span lang=EN-US
+style='font-size:10.0pt;font-family:"Courier New";color:black'>2020-06-08
+15:38:01.573083 Runtime= 15.00 sec; Iterations= 26862; <span style='background:
+yellow'>Avg Iterations= 1791</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Next, C-State1 was disabled on the HT Sibling core (CPU 71), which
+places the HT Sibling core into an idle polling state:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New";color:black'>$ cpupower -c 71 idle-set -d 1</span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:9.0pt;font-family:"Courier New";
+color:black'>Idlestate 1 disabled on CPU 71</span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>When the test program was re-run, the performance dropped by 18.8%
+to 1453 loop iterations per second.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Courier New";color:black'>$ nice -n -20 taskset -c 15 ./cpucalc -r 15 -v  |
+grep Iterations</span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Courier New";
+color:black'>2020-06-08 15:40:24.923376 Runtime= 15.00 sec; Iterations= 21798; <span
+style='background:yellow'>Avg Iterations= 1453</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Note the polling behavior of the HT sibling is stealing CPU cycles
+from the other HT sibling.</span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><b><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Determining if your CPU cores are Polling</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>The turbostat tool is the most effective tool to show if the CPU
+cores are polling.   Note that if C-states are disabled on the boot command
+line, then ALL CPU cores should be in a polling state while idle.    But even
+with C-states enabled, you may occasionally see some CPU cores periodically in
+the Idle Polling state.   For example:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:8.0pt;font-family:
+"Courier New";color:black'>$ watch -n 1 &quot;taskset -c 78 turbostat
+--interval 5 --num_iterations 1 | sort -r -n -k <span style='background:yellow'>14,14</span>
+| head -20&quot;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:8.0pt;font-family:
+"Courier New";color:black'>1       1       <span style='background:yellow'>71</span>  
+   3301    100.00  3300    2601    24      0       5       0       0      
+0       <span style='background:yellow'>100.00</span>  0.00    0.00    0.00   
+0.00</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:8.0pt;font-family:
+"Courier New";color:black'>1       5       19      2419    73.28   3300   
+2601    28      0       2       21      0       0       73.28   26.73   0.00   
+0.00    26.72   0.00    35</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:8.0pt;font-family:
+"Courier New";color:black'>0       14      13      508     15.39   3300   
+2601    31      0       1       30      0       0       15.38   84.62   0.00   
+0.00    84.61   0.00    37</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:8.0pt;font-family:
+"Courier New";color:black'>0       8       7       205     6.22    3300   
+2601    86      0       3       79      0       0       6.20    93.80   0.00   
+0.00    93.78   0.00    34</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:8.0pt;font-family:
+"Courier New";color:black'>2       3       31      203     6.15    3300   
+2600    25      0       1       36      0       0       6.14    93.86   0.00   
+0.00    93.85   0.00    34</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:8.0pt;font-family:
+"Courier New";color:black'>0       0       0       140     4.25    3300   
+2601    44      0       2       37      0       0       4.21    95.77   0.00   
+0.00    95.75   0.00    36      37      37.69   0.00      0.00</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:8.0pt;font-family:
+"Courier New";color:black'>-       -       -       61      1.85    3300   
+2600    3127    0       84      3019    0       0       1.84    98.16   0.00   
+0.00    98.15   0.00    37      37      181.52  0.00      0.00</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:8.0pt;font-family:
+"Courier New";color:black'>1       6       20      10      0.31    3300   
+2601    155     0       53      99      0       0       0.28    99.71   0.00   
+0.00    99.69   0.00    31</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:8.0pt;font-family:
+"Courier New";color:black'>1       4       18      10      0.29    3300   
+2601    65      0       13      50      0       0       0.28    99.72   0.00   
+0.00    99.71   0.00    30</span></p>
+
+<p class=MsoNormal style='line-height:normal;background:white'><span
+lang=EN-US style='font-size:8.0pt;font-family:"Courier New";color:black'>Package
+Core    CPU     Avg_MHz Busy%   Bzy_MHz TSC_MHz IRQ     SMI     POLL    C1     
+C1E     C6      <span style='background:yellow'>POLL%</span>   C1%     C1E%   
+C6%     CPU%c1  CPU%c6  CoreTmp PkgTmp  RAMWatt PK</span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Note that CPU 71 is polling at 100% since all other C-states were
+disabled.   But CPU 19 is also polling 73.28% of the time as well.   </span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Note that the columns in the sort above (sort -r -n -k 14,14)
+depends on the version turbostat used, so you may need to check the output of
+turbostat to identify the proper columns.</span></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><b><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Summary</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:12.0pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Be careful when using Hyperthreading that C-states are not
+disabled, as it may negatively impact the overall performance of the system as
+the idle HT siblings may use valuable CPU cycles.  </span></p>
+
+<p class=MsoNormal style='margin-bottom:7.5pt;line-height:normal;background:
+white'><b><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>For more information</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:7.5pt;line-height:normal;background:
+white'><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>For more information, please refer to the following:&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><i><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>RHEL 7 - Power Management Guide</span></i></p>
+
+<p class=MsoNormal style='line-height:normal;background:white'><u><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:#0070C0'><a
+href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Power_Management_Guide/"
+target="_blank"><span style='color:#0070C0'>https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Power_Management_Guide/</span></a></span></u></p>
+
+<p class=MsoNormal style='margin-top:12.0pt;margin-right:0in;margin-bottom:
+0in;margin-left:0in;margin-bottom:.0001pt;line-height:normal;background:white'><i><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>SLES
+- Powersaving</span></i></p>
+
+<p class=MsoNormal style='line-height:normal;background:white'><u><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:#0070C0'><a
+href="https://en.opensuse.org/Powersaving" target="_blank"><span
+style='color:#0070C0'>https://en.opensuse.org/Powersaving</span></a></span></u></p>
+
+<p class=MsoNormal style='margin-top:12.0pt;margin-right:0in;margin-bottom:
+0in;margin-left:0in;margin-bottom:.0001pt;line-height:normal;background:white'><i><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Configuring
+and tuning HPE Proliant Servers for low-latency applications</span></i></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><u><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:#0070C0'><a
+href="http://h20564.www2.hpe.com/hpsc/doc/public/display?docId=emr_na-c01804533&amp;lang=en-us&amp;cc=us"
+target="_blank"><span style='color:#0070C0'>http://h20564.www2.hpe.com/hpsc/doc/public/display?docId=emr_na-c01804533&amp;lang=en-us&amp;cc=us</span></a></span></u></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><i><u><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:#0070C0'><span style='text-decoration:
+ none'>&nbsp;</span></span></u></i></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><i><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif'>Power Savings vs. Performance on Linux</span></i></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span class=MsoHyperlink><span lang=EN-US
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:#0070C0'><a
+href="http://htmlpreview.github.io/?https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/power_vs_perf.htm"><span
+style='color:#0070C0'>http://htmlpreview.github.io/?https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/power_vs_perf.htm</span></a></span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><i><u><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:#0070C0'><span style='text-decoration:
+ none'>&nbsp;</span></span></u></i></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><i><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;background:white'>UEFI Workload-based
+Performance and TuningGuide for HPE ProLiant Gen10, ProLiant Gen10Plus Servers,
+and HPE Synergy</span></i></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span class=MsoHyperlink><span lang=EN-US
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:#0070C0'><a
+href="https://support.hpe.com/hpesc/public/docDisplay?docId=a00016408en_us"><span
+style='color:#0070C0'>https://support.hpe.com/hpesc/public/docDisplay?docId=a00016408en_us</span></a></span></span></p>
+
+</div>
+
+</body>
+
+</html>

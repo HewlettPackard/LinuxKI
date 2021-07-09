@@ -55,6 +55,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "Image.h"
 #include "FileIo.h"
 #include "Provider.h"
+#include "NetIp.h"
+#include "winki_util.h"
 
 int trace_generic_func(void *, void *);
 int trace_ftrace_print_func(void *, void *);
@@ -80,15 +82,6 @@ int trace_winki_mjfncall_func(void *, void *);
 int trace_winki_complrout_func(void *, void *);
 int trace_winki_complreq_func(void *, void *);
 int trace_winki_complreqret_func(void *, void *);
-int trace_winki_tcpsendipv4_func(void *, void *);
-int trace_winki_tcpsendipv6_func(void *, void *);
-int trace_winki_tcpgroup1_func(void *, void *);
-int trace_winki_tcpgroup2_func(void *, void *);
-int trace_winki_tcpgroup3_func(void *, void *);
-int trace_winki_tcpgroup4_func(void *, void *);
-int trace_winki_udpgroup1_func(void *, void *);
-int trace_winki_udpgroup2_func(void *, void *);
-int trace_winki_udpfail_func(void *, void *);
 int trace_winki_sysconfig_cpu_func(void *, void *);
 int trace_winki_sysconfig_nic_func(void *, void *);
 int trace_winki_sysconfig_logdisk_func(void *, void *);
@@ -134,457 +127,109 @@ check_for_missed_buffer(void *arg1, void *arg2, int next_pid)
 static inline void
 win_set_trace_funcs()
 {
-	int i;
-
-	for (i = 0; i < 65536; i++) {
-		ki_actions[i].id = i;
-		ki_actions[i].func = trace_winki_generic_func;
-	}
-
-	strcpy(&ki_actions[0].subsys[0], "EventTrace");
-	strcpy(&ki_actions[0].event[0], "Header");
-	ki_actions[0].func = trace_winki_header_func;
-
-	strcpy(&ki_actions[0x5].subsys[0], "EventTrace");
-	strcpy(&ki_actions[0x5].event[0], "Extension");
-	ki_actions[0x5].func=trace_winki_common_func;
-
-	strcpy(&ki_actions[0x8].subsys[0], "EventTrace");
-	strcpy(&ki_actions[0x8].event[0], "RDComplete");
-	ki_actions[0x8].func=trace_winki_common_func;
-
-	strcpy(&ki_actions[0x20].subsys[0], "EventTrace");
-	strcpy(&ki_actions[0x20].event[0], "EndExtension");
-	ki_actions[0x20].func=trace_winki_common_func;
-
-	strcpy(&ki_actions[0x50].subsys[0], "EventTrace");
-	strcpy(&ki_actions[0x50].event[0], "PartitionInfoExtension");
-	ki_actions[0x50].func=trace_winki_common_func;
-
-	strcpy(&ki_actions[0x10a].subsys[0], "DiskIo");
-	strcpy(&ki_actions[0x10a].event[0], "Read");
-	ki_actions[0x10a].func=print_diskio_readwrite_func;
-
-	strcpy(&ki_actions[0x10b].subsys[0], "DiskIo");
-	strcpy(&ki_actions[0x10b].event[0], "Write");
-	ki_actions[0x10b].func=print_diskio_readwrite_func;
-
-	strcpy(&ki_actions[0x10c].subsys[0], "DiskIo");
-	strcpy(&ki_actions[0x10c].event[0], "ReadInit");
-	ki_actions[0x10c].func=diskio_init_func;
-
-	strcpy(&ki_actions[0x10d].subsys[0], "DiskIo");
-	strcpy(&ki_actions[0x10d].event[0], "WriteInit");
-	ki_actions[0x10d].func=diskio_init_func;
-
-	strcpy(&ki_actions[0x10e].subsys[0], "DiskIo");
-	strcpy(&ki_actions[0x10e].event[0], "FlushBuffers");
-	ki_actions[0x10e].func=print_diskio_flush_func;
-
-	strcpy(&ki_actions[0x10f].subsys[0], "DiskIo");
-	strcpy(&ki_actions[0x10f].event[0], "FlushInit");
-	ki_actions[0x10f].func=diskio_init_func;
-
-	strcpy(&ki_actions[0x122].subsys[0], "DiskIo");
-	strcpy(&ki_actions[0x122].event[0], "DrvMjFnCall");
-	ki_actions[0x122].func=trace_winki_mjfncall_func; 
-
-	strcpy(&ki_actions[0x123].subsys[0], "DiskIo");
-	strcpy(&ki_actions[0x123].event[0], "DrvMjFnRet");
-	ki_actions[0x123].func=trace_winki_mjfnret_func;
-
-	strcpy(&ki_actions[0x125].subsys[0], "DiskIo");
-	strcpy(&ki_actions[0x125].event[0], "DrvComplRout");
-	ki_actions[0x125].func=trace_winki_complrout_func;
-
-	strcpy(&ki_actions[0x134].subsys[0], "DiskIo");
-	strcpy(&ki_actions[0x134].event[0], "DiskComplReq");
-	ki_actions[0x134].func=trace_winki_complreq_func;
-
-	strcpy(&ki_actions[0x135].subsys[0], "DiskIo");
-	strcpy(&ki_actions[0x135].event[0], "DrvComplReqRet");
-	ki_actions[0x135].func=trace_winki_complreqret_func;
-
-	strcpy(&ki_actions[0x220].subsys[0], "PageFault");
-	strcpy(&ki_actions[0x220].event[0], "HardFault");
-	ki_actions[0x220].func=trace_winki_hardfault_func;
-
-	strcpy(&ki_actions[0x301].subsys[0], "Process");
-	strcpy(&ki_actions[0x301].event[0], "Start");
-	ki_actions[0x301].func=trace_winki_process_func;
-
-	strcpy(&ki_actions[0x302].subsys[0], "Process");
-	strcpy(&ki_actions[0x302].event[0], "End");
-	ki_actions[0x302].func=trace_winki_process_func;
-
-	strcpy(&ki_actions[0x303].subsys[0], "Process");
-	strcpy(&ki_actions[0x303].event[0], "DCStart");
-	ki_actions[0x303].func=trace_winki_process_func;
-
-	strcpy(&ki_actions[0x304].subsys[0], "Process");
-	strcpy(&ki_actions[0x304].event[0], "DCEnd");
-	ki_actions[0x304].func=trace_winki_process_func;
-
-	strcpy(&ki_actions[0x30a].subsys[0], "Process");
-	strcpy(&ki_actions[0x30a].event[0], "Load");
-	ki_actions[0x30a].func=print_process_load_func;
-
-	strcpy(&ki_actions[0x30b].subsys[0], "Process");
-	strcpy(&ki_actions[0x30b].event[0], "Terminate");
-	ki_actions[0x30b].func=trace_winki_process_terminate_func;
-
-	strcpy(&ki_actions[0x327].subsys[0], "Process");
-	strcpy(&ki_actions[0x327].event[0], "Defunct");
-	ki_actions[0x327].func=trace_winki_process_func;
-
-	strcpy(&ki_actions[0x400].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x400].event[0], "FileName");
-	ki_actions[0x400].func=print_fileio_name_func;
-
-	strcpy(&ki_actions[0x420].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x420].event[0], "FileCreate");
-	ki_actions[0x420].func=print_fileio_name_func;
-
-	strcpy(&ki_actions[0x423].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x423].event[0], "FileDelete");
-	ki_actions[0x423].func=print_fileio_name_func;
-
-	strcpy(&ki_actions[0x424].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x424].event[0], "FileRundown");
-	ki_actions[0x424].func=print_fileio_name_func;
-
-	strcpy(&ki_actions[0x440].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x440].event[0], "Create");
-	ki_actions[0x440].func=print_fileio_create_func;
-
-	strcpy(&ki_actions[0x441].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x441].event[0], "Cleanup");
-	ki_actions[0x441].func=print_fileio_simpleop_func;
-
-	strcpy(&ki_actions[0x442].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x442].event[0], "Close");
-	ki_actions[0x442].func=print_fileio_simpleop_func;
-
-	strcpy(&ki_actions[0x443].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x443].event[0], "Read");
-	ki_actions[0x443].func=print_fileio_readwrite_func;
-
-	strcpy(&ki_actions[0x444].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x444].event[0], "Write");
-	ki_actions[0x444].func=print_fileio_readwrite_func;
-
-	strcpy(&ki_actions[0x445].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x445].event[0], "SetInfo");
-	ki_actions[0x445].func=print_fileio_info_func;
-
-	strcpy(&ki_actions[0x446].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x446].event[0], "Delete");
-	ki_actions[0x446].func=print_fileio_info_func;
-
-	strcpy(&ki_actions[0x447].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x447].event[0], "Rename");
-	ki_actions[0x447].func=print_fileio_info_func;
-
-	strcpy(&ki_actions[0x448].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x448].event[0], "DirEnum");
-	ki_actions[0x448].func=print_fileio_direnum_func;
-
-	strcpy(&ki_actions[0x449].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x449].event[0], "Flush");
-	ki_actions[0x449].func=print_fileio_simpleop_func;
-
-	strcpy(&ki_actions[0x44a].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x44a].event[0], "QueryInfo");
-	ki_actions[0x44a].func=print_fileio_info_func;
-
-	strcpy(&ki_actions[0x44b].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x44b].event[0], "FSControl");
-	ki_actions[0x44b].func=print_fileio_info_func;
-
-	strcpy(&ki_actions[0x44c].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x44c].event[0], "OperationEnd");
-	ki_actions[0x44c].func=print_fileio_opend_func;
-
-	strcpy(&ki_actions[0x44d].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x44d].event[0], "DirNotify");
-	ki_actions[0x44d].func=print_fileio_direnum_func;
-
-	strcpy(&ki_actions[0x44f].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x44f].event[0], "DeletePath");
-	ki_actions[0x44f].func=print_fileio_name_func;
-
-	strcpy(&ki_actions[0x450].subsys[0], "FileIo");
-	strcpy(&ki_actions[0x450].event[0], "RenamePath");
-	ki_actions[0x450].func=print_fileio_name_func;
-
-	strcpy(&ki_actions[0x501].subsys[0], "Thread");
-	strcpy(&ki_actions[0x501].event[0], "Start");
-	ki_actions[0x501].func=print_thread_group1_func;
-
-	strcpy(&ki_actions[0x502].subsys[0], "Thread");
-	strcpy(&ki_actions[0x502].event[0], "End");
-	ki_actions[0x502].func=print_thread_group1_func;
-
-	strcpy(&ki_actions[0x503].subsys[0], "Thread");
-	strcpy(&ki_actions[0x503].event[0], "DCStart");
-	ki_actions[0x503].func=print_thread_group1_func;
-
-	strcpy(&ki_actions[0x504].subsys[0], "Thread");
-	strcpy(&ki_actions[0x504].event[0], "DCEnd");
-	ki_actions[0x504].func=print_thread_group1_func;
-
-	strcpy(&ki_actions[0x524].subsys[0], "Thread");
-	strcpy(&ki_actions[0x524].event[0], "Cswitch");
-	ki_actions[0x524].func=thread_cswitch_func;
-
-	strcpy(&ki_actions[0x532].subsys[0], "Thread");
-	strcpy(&ki_actions[0x532].event[0], "ReadyThread");
-	ki_actions[0x532].func=thread_readythread_func;
-
-	strcpy(&ki_actions[0x542].subsys[0], "Thread");
-	strcpy(&ki_actions[0x542].event[0], "AutoBoostSetFloor");
-	ki_actions[0x542].func=print_thread_autoboost_func;
-
-	strcpy(&ki_actions[0x543].subsys[0], "Thread");
-	strcpy(&ki_actions[0x543].event[0], "AutoBoostClearFloor");
-	ki_actions[0x543].func=print_thread_autoboost_func;
-
-	strcpy(&ki_actions[0x544].subsys[0], "Thread");
-	strcpy(&ki_actions[0x544].event[0], "AutoBoostEntryExhaustion");
-	ki_actions[0x544].func=print_thread_autoboost_func;
-
-	strcpy(&ki_actions[0x548].subsys[0], "Thread");
-	strcpy(&ki_actions[0x548].event[0], "SetName");
-	ki_actions[0x548].func=thread_setname_func;
-
-	strcpy(&ki_actions[0x60a].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x60a].event[0], "SendIPV4");
-	ki_actions[0x60a].func=trace_winki_tcpsendipv4_func;
-
-	strcpy(&ki_actions[0x60b].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x60b].event[0], "RecvIPV4");
-	ki_actions[0x60b].func=trace_winki_tcpgroup1_func;
-
-	strcpy(&ki_actions[0x60c].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x60c].event[0], "ConnectIPV4");
-	ki_actions[0x60c].func=trace_winki_tcpgroup2_func;
-
-	strcpy(&ki_actions[0x60d].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x60d].event[0], "DisconnectIPV4");
-	ki_actions[0x60d].func=trace_winki_tcpgroup1_func;
-
-	strcpy(&ki_actions[0x60e].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x60e].event[0], "RetransmitIPV4");
-	ki_actions[0x60e].func=trace_winki_tcpgroup1_func;
-
-	strcpy(&ki_actions[0x60e].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x60e].event[0], "AcceptIPV4");
-	ki_actions[0x60e].func=trace_winki_tcpgroup2_func;
-
-	strcpy(&ki_actions[0x610].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x610].event[0], "ReconnectIPV4");
-	ki_actions[0x610].func=trace_winki_tcpgroup1_func;
-
-	strcpy(&ki_actions[0x611].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x611].event[0], "Fail");
-
-	strcpy(&ki_actions[0x612].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x612].event[0], "ReconnectIPV4");
-	ki_actions[0x612].func=trace_winki_tcpgroup1_func;
-
-	strcpy(&ki_actions[0x61a].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x61a].event[0], "SendIPV6");
-	ki_actions[0x61a].func=trace_winki_tcpsendipv6_func;
-
-	strcpy(&ki_actions[0x61b].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x61b].event[0], "RecvIPV6");
-	ki_actions[0x61b].func=trace_winki_tcpgroup3_func;
-
-	strcpy(&ki_actions[0x61c].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x61c].event[0], "ConnectIPV6");
-	ki_actions[0x61c].func=trace_winki_tcpgroup4_func;
-
-	strcpy(&ki_actions[0x61d].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x61d].event[0], "DisconnectIPV6");
-	ki_actions[0x61d].func=trace_winki_tcpgroup3_func;
-
-	strcpy(&ki_actions[0x61e].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x61e].event[0], "RetransmitIPV6");
-	ki_actions[0x61e].func=trace_winki_tcpgroup3_func;
-
-	strcpy(&ki_actions[0x61f].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x61f].event[0], "AcceptIPV6");
-	ki_actions[0x61f].func=trace_winki_tcpgroup4_func;
-
-	strcpy(&ki_actions[0x620].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x620].event[0], "ReconnectIPV6");
-	ki_actions[0x620].func=trace_winki_tcpgroup3_func;
-
-	strcpy(&ki_actions[0x622].subsys[0], "TcpIp");
-	strcpy(&ki_actions[0x622].event[0], "TCPCopyIPV6");
-	ki_actions[0x622].func=trace_winki_tcpgroup3_func;
-
-	strcpy(&ki_actions[0x80a].subsys[0], "UdpIp");
-	strcpy(&ki_actions[0x80a].event[0], "SendIPV4");
-	ki_actions[0x80a].func=trace_winki_udpgroup1_func;
-
-	strcpy(&ki_actions[0x80b].subsys[0], "UdpIp");
-	strcpy(&ki_actions[0x80b].event[0], "RecvIPV4");
-	ki_actions[0x80b].func=trace_winki_udpgroup1_func;
-
-	strcpy(&ki_actions[0x811].subsys[0], "UdpIp");
-	strcpy(&ki_actions[0x11b].event[0], "UdpFail");
-	ki_actions[0x811].func=trace_winki_udpfail_func;
-
-	strcpy(&ki_actions[0x81a].subsys[0], "UdpIp");
-	strcpy(&ki_actions[0x81a].event[0], "SendIPV6");
-	ki_actions[0x81a].func=trace_winki_udpgroup2_func;
-
-	strcpy(&ki_actions[0x81b].subsys[0], "UdpIp");
-	strcpy(&ki_actions[0x81b].event[0], "RecvIPV6");
-	ki_actions[0x81b].func=trace_winki_udpgroup2_func;
-
-	strcpy(&ki_actions[0xb0a].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb0a].event[0], "CPU");
-	ki_actions[0xb0a].func=trace_winki_sysconfig_cpu_func;
-
-	strcpy(&ki_actions[0xb0b].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb0b].event[0], "PhysDisk");
-	ki_actions[0xb0b].func=print_sysconfig_physdisk_func;
-
-	strcpy(&ki_actions[0xb0c].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb0c].event[0], "LogDisk");
-	ki_actions[0xb0c].func=trace_winki_sysconfig_logdisk_func;
-
-	strcpy(&ki_actions[0xb0d].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb0d].event[0], "NIC");
-	ki_actions[0xb0d].func=trace_winki_sysconfig_nic_func;
-
-	strcpy(&ki_actions[0xb0e].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb0e].event[0], "Video");
-
-	strcpy(&ki_actions[0xb0f].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb0f].event[0], "Services");
-	ki_actions[0xb0f].func=print_sysconfig_services_func;
-
-	strcpy(&ki_actions[0xb10].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb10].event[0], "Power");
-	ki_actions[0xb10].func=trace_winki_sysconfig_power_func;
-
-	strcpy(&ki_actions[0xb12].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb12].event[0], "OpticalDisk");
-
-	strcpy(&ki_actions[0xb15].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb15].event[0], "IRQ");
-	ki_actions[0xb15].func=trace_winki_sysconfig_irq_func;
-
-	strcpy(&ki_actions[0xb16].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb16].event[0], "PnP");
-	ki_actions[0xb16].func=trace_winki_sysconfig_pnp_func;
-
-	strcpy(&ki_actions[0xb18].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb18].event[0], "NumaNode");
-
-	strcpy(&ki_actions[0xb19].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb19].event[0], "Platform");
-
-	strcpy(&ki_actions[0xb1a].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb1a].event[0], "ProcessorGroup");
-
-	strcpy(&ki_actions[0xb1b].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb1b].event[0], "ProcessorGroup");
-
-	strcpy(&ki_actions[0xb1c].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb1c].event[0], "DPI");
-
-	strcpy(&ki_actions[0xb1d].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb1d].event[0], "CodeIntegrity");
-
-	strcpy(&ki_actions[0xb1e].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb1e].event[0], "TelemetryConfig");
-
-	strcpy(&ki_actions[0xb1f].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb1f].event[0], "Defragmentation");
-
-	strcpy(&ki_actions[0xb21].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb21].event[0], "DeviceFamily");
-
-	strcpy(&ki_actions[0xb22].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb22].event[0], "FlightIds");
-
-	strcpy(&ki_actions[0xb23].subsys[0], "SysConfig");
-	strcpy(&ki_actions[0xb23].event[0], "FlightIds");
-
-	strcpy(&ki_actions[0xf2e].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf2e].event[0], "SampleProfile");
-	ki_actions[0xf2e].func=perfinfo_profile_func;
-
-	strcpy(&ki_actions[0xf32].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf32].event[0], "ISR-MSI");
-	ki_actions[0xf32].func=perfinfo_isr_func;
-
-	strcpy(&ki_actions[0xf33].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf33].event[0], "SysClEnter");
-	ki_actions[0xf33].func=perfinfo_sysclenter_func;
-
-	strcpy(&ki_actions[0xf34].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf34].event[0], "SysClExit");
-	ki_actions[0xf34].func=perfinfo_sysclexit_func;
-
-	strcpy(&ki_actions[0xf42].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf42].event[0], "ThreadedDPC");
-	ki_actions[0xf42].func=perfinfo_dpc_func;
-
-	strcpy(&ki_actions[0xf43].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf43].event[0], "ISR");
-	ki_actions[0xf43].func=perfinfo_isr_func;
-
-	strcpy(&ki_actions[0xf44].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf44].event[0], "DPC");
-	ki_actions[0xf44].func=perfinfo_dpc_func;
-
-	strcpy(&ki_actions[0xf45].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf45].event[0], "TimeDPC");
-	ki_actions[0xf45].func=perfinfo_dpc_func;
-
-	strcpy(&ki_actions[0xf48].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf48].event[0], "SetInterval");
-	ki_actions[0xf48].func=perfinfo_interval_func;
-
-	strcpy(&ki_actions[0xf49].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf49].event[0], "CollectionStart");
-	ki_actions[0xf49].func=perfinfo_interval_func;
-
-	strcpy(&ki_actions[0xf4a].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf4a].event[0], "CollectionEnd");
-	ki_actions[0xf4a].func=perfinfo_interval_func;
-
-	strcpy(&ki_actions[0x1235].subsys[0], "Power");
-	strcpy(&ki_actions[0x1235].event[0], "Cstate");
-	ki_actions[0x1235].func=trace_winki_cstate_func;
-
-	strcpy(&ki_actions[0x1402].subsys[0], "Image");
-	strcpy(&ki_actions[0x1402].event[0], "UnLoad");
-	ki_actions[0x1402].func=print_image_func;
-
-	strcpy(&ki_actions[0x1403].subsys[0], "Image");
-	strcpy(&ki_actions[0x1403].event[0], "DCStart");
-	ki_actions[0x1403].func=print_image_func;
-
-	strcpy(&ki_actions[0x1404].subsys[0], "Image");
-	strcpy(&ki_actions[0x1404].event[0], "DCEnd");
-	ki_actions[0x1404].func=print_image_func;
-
-	strcpy(&ki_actions[0x140a].subsys[0], "Image");
-	strcpy(&ki_actions[0x140a].event[0], "Load");
-	ki_actions[0x140a].func=print_image_func;
-
-	strcpy(&ki_actions[0x1421].subsys[0], "Image");
-	strcpy(&ki_actions[0x1421].event[0], "KernelBase");
-	ki_actions[0x1421].func=print_image_func;
-
-	strcpy(&ki_actions[0x1820].subsys[0], "StackWalk");
-	strcpy(&ki_actions[0x1820].event[0], "Stack");
+	winki_init_actions(trace_winki_generic_func);
+
+	winki_enable_event(0, trace_winki_header_func);
+	winki_enable_event(0x5, trace_winki_common_func);
+	winki_enable_event(0x8, trace_winki_common_func);
+	winki_enable_event(0x20, trace_winki_common_func);
+	winki_enable_event(0x50, trace_winki_common_func);
+	winki_enable_event(0x10a, print_diskio_readwrite_func);
+	winki_enable_event(0x10b, print_diskio_readwrite_func);
+	winki_enable_event(0x10c, diskio_init_func);
+	winki_enable_event(0x10d, diskio_init_func);
+	winki_enable_event(0x10e, print_diskio_flush_func);
+	winki_enable_event(0x10f, diskio_init_func);
+	winki_enable_event(0x122, trace_winki_mjfncall_func);
+	winki_enable_event(0x123, trace_winki_mjfncall_func);
+	winki_enable_event(0x125, trace_winki_complrout_func);
+	winki_enable_event(0x134, trace_winki_complreq_func);
+	winki_enable_event(0x135, trace_winki_complreqret_func);
+	winki_enable_event(0x220, trace_winki_hardfault_func);
+	winki_enable_event(0x301, trace_winki_process_func);
+	winki_enable_event(0x302, trace_winki_process_func);
+	winki_enable_event(0x303, trace_winki_process_func);
+	winki_enable_event(0x304, trace_winki_process_func);
+	winki_enable_event(0x30a, print_process_load_func);
+	winki_enable_event(0x30b, trace_winki_process_terminate_func);
+	winki_enable_event(0x327, trace_winki_process_func);
+	winki_enable_event(0x400, print_fileio_name_func);
+	winki_enable_event(0x420, print_fileio_name_func);
+	winki_enable_event(0x423, print_fileio_name_func);
+	winki_enable_event(0x424, print_fileio_name_func);
+	winki_enable_event(0x440, print_fileio_create_func);
+	winki_enable_event(0x441, print_fileio_simpleop_func);
+	winki_enable_event(0x442, print_fileio_simpleop_func);
+	winki_enable_event(0x443, print_fileio_readwrite_func);
+	winki_enable_event(0x444, print_fileio_readwrite_func);
+	winki_enable_event(0x445, print_fileio_info_func);
+	winki_enable_event(0x446, print_fileio_info_func);
+	winki_enable_event(0x447, print_fileio_info_func);
+	winki_enable_event(0x449, print_fileio_simpleop_func);
+	winki_enable_event(0x44a, print_fileio_info_func);
+	winki_enable_event(0x44b, print_fileio_info_func);
+	winki_enable_event(0x44c, print_fileio_opend_func);
+	winki_enable_event(0x44d, print_fileio_direnum_func);
+	winki_enable_event(0x44f, print_fileio_name_func);
+	winki_enable_event(0x450, print_fileio_name_func);
+	winki_enable_event(0x501, print_thread_group1_func);
+	winki_enable_event(0x502, print_thread_group1_func);
+	winki_enable_event(0x503, print_thread_group1_func);
+	winki_enable_event(0x504, print_thread_group1_func);
+	winki_enable_event(0x524, thread_cswitch_func);
+	winki_enable_event(0x532, thread_readythread_func);
+	winki_enable_event(0x542, print_thread_autoboost_func);
+	winki_enable_event(0x543, print_thread_autoboost_func);
+	winki_enable_event(0x544, print_thread_autoboost_func);
+	winki_enable_event(0x548, thread_setname_func);
+	winki_enable_event(0x60a, print_tcpsendipv4_func);
+	winki_enable_event(0x60b, print_tcpgroup1_func);
+	winki_enable_event(0x60c, print_tcpgroup2_func);
+	winki_enable_event(0x60d, print_tcpgroup1_func);
+	winki_enable_event(0x60e, print_tcpgroup1_func);
+	winki_enable_event(0x60f, print_tcpgroup2_func);
+	winki_enable_event(0x610, print_tcpgroup1_func);
+	winki_enable_event(0x611, print_tcpudpfail_func);
+	winki_enable_event(0x612, print_tcpgroup1_func);
+	winki_enable_event(0x61a, print_tcpsendipv6_func);
+	winki_enable_event(0x61b, print_tcpgroup3_func);
+	winki_enable_event(0x61c, print_tcpgroup4_func);
+	winki_enable_event(0x61d, print_tcpgroup3_func);
+	winki_enable_event(0x61e, print_tcpgroup3_func);
+	winki_enable_event(0x61f, print_tcpgroup4_func);
+	winki_enable_event(0x620, print_tcpgroup3_func);
+	winki_enable_event(0x622, print_tcpgroup3_func);
+	winki_enable_event(0x80a, print_udpgroup1_func);
+	winki_enable_event(0x80b, print_udpgroup1_func);
+	winki_enable_event(0x811, print_tcpudpfail_func);
+	winki_enable_event(0x81a, print_udpgroup2_func);
+	winki_enable_event(0x81b, print_udpgroup2_func);
+	winki_enable_event(0xb0a, trace_winki_sysconfig_cpu_func);
+	winki_enable_event(0xb0b, print_sysconfig_physdisk_func);
+	winki_enable_event(0xb0c, trace_winki_sysconfig_logdisk_func);
+	winki_enable_event(0xb0d, trace_winki_sysconfig_nic_func);
+	winki_enable_event(0xb0f, print_sysconfig_services_func);
+	winki_enable_event(0xb10, trace_winki_sysconfig_power_func);
+	winki_enable_event(0xb15, trace_winki_sysconfig_irq_func);
+	winki_enable_event(0xb15, trace_winki_sysconfig_pnp_func);
+	winki_enable_event(0xf2e, perfinfo_profile_func);
+	winki_enable_event(0xf32, perfinfo_isr_func);
+	winki_enable_event(0xf33, perfinfo_sysclenter_func);
+	winki_enable_event(0xf34, perfinfo_sysclexit_func);
+	winki_enable_event(0xf35, perfinfo_dpc_func);
+	winki_enable_event(0xf42, perfinfo_dpc_func);
+	winki_enable_event(0xf43, perfinfo_isr_func);
+	winki_enable_event(0xf44, perfinfo_dpc_func);
+	winki_enable_event(0xf45, perfinfo_dpc_func);
+	winki_enable_event(0xf48, perfinfo_interval_func);
+	winki_enable_event(0xf49, perfinfo_interval_func);
+	winki_enable_event(0xf4a, perfinfo_interval_func);
+	winki_enable_event(0x1235, trace_winki_cstate_func);
+	winki_enable_event(0x1402, print_image_func);
+	winki_enable_event(0x1403, print_image_func);
+	winki_enable_event(0x1404, print_image_func);
+	winki_enable_event(0x140a, print_image_func);
+	winki_enable_event(0x1421, print_image_func);
 	ki_actions[0x1820].func=NULL;
 
 }
@@ -741,6 +386,13 @@ trace_filter_func (void *a, void *v)
 	if (IS_WINKI) return trcinfop->cur_event;
 
 	rec_ptr = conv_common_rec(a, &tt_rec_ptr);
+
+	if (rec_ptr->id >= 65536) {
+		printf ("trace_filter_func() - Bad rec id: %d for cpu %d\n", rec_ptr->id, rec_ptr->cpu);
+		hex_dump(rec_ptr,4);
+		exit(-231);
+	}
+
 	set_tgid(rec_ptr->pid, rec_ptr->tgid);
 
         if (!ki_actions[rec_ptr->id].execute) {
@@ -1506,282 +1158,6 @@ trace_winki_complrout_func (void *a, void *v)
 		p->Irp,
 		p->UniqMatchId);
 	
-	printf ("\n");
-
-	if (debug) hex_dump(p, 2);
-}
-
-int
-trace_winki_tcpsendipv4_func(void *a, void *v)
-{
-	trace_info_t *trcinfop = (trace_info_t *)a;
-	TcpSendIPV4_t *p = (TcpSendIPV4_t *)trcinfop->cur_event;
-
-	PRINT_COMMON_FIELDS_C011(p, 0, 0);
-
-	printf (" pid=%d size=%d seqnum=%d connid=%d",
-		p->Pid,
-		p->size,
-		p->seqnum,
-		p->connid);
-
-	printf (" src=%d.%d.%d.%d:%d", 
-		IP1(p->saddr),
-		IP2(p->saddr),
-		IP3(p->saddr),
-		IP4(p->saddr),
-		p->sport);
-
-	printf (" dest=%d.%d.%d.%d:%d", 
-		IP1(p->daddr),
-		IP2(p->daddr),
-		IP3(p->daddr),
-		IP4(p->daddr),
-		p->dport);
-
-	printf (" starttime=0x%x endtime=0x%x", 
-		p->starttime,
-		p->endtime); 
-
-	printf ("\n");
-
-	if (debug) hex_dump(p, 2);
-}
-
-int
-trace_winki_tcpsendipv6_func(void *a, void *v)
-{
-	trace_info_t *trcinfop = (trace_info_t *)a;
-	TcpSendIPV6_t *p = (TcpSendIPV6_t *)trcinfop->cur_event;
-
-	PRINT_COMMON_FIELDS_C011(p, 0, 0);
-
-	printf (" pid=%d size=%d seqnum=%d connid=%d",
-		p->Pid,
-		p->size,
-		p->seqnum,
-		p->connid);
-
-	printf (" ");
-	print_ip_v6(&p->saddr[0], NULL);
-	printf (":%d", p->sport);
-
-	printf (" ");
-	print_ip_v6(&p->daddr[0], NULL);
-	printf (":%d", p->dport);
-
-	printf (" starttime=0x%x endtime=0x%x", 
-		p->starttime,
-		p->endtime); 
-
-	printf ("\n");
-
-	if (debug) hex_dump(p, 4);
-}
-
-int
-trace_winki_tcpgroup1_func(void *a, void *v)
-{
-	trace_info_t *trcinfop = (trace_info_t *)a;
-	TcpGroup1_t *p = (TcpGroup1_t *)trcinfop->cur_event;
-
-	PRINT_COMMON_FIELDS_C011(p, 0, 0);
-
-	printf (" pid=%d size=%d seqnum=%d connid=%d",
-		p->Pid,
-		p->size,
-		p->seqnum,
-		p->connid);
-
-	printf (" src=%d.%d.%d.%d:%d", 
-		IP1(p->saddr),
-		IP2(p->saddr),
-		IP3(p->saddr),
-		IP4(p->saddr),
-		p->sport);
-
-	printf (" dest=%d.%d.%d.%d:%d", 
-		IP1(p->daddr),
-		IP2(p->daddr),
-		IP3(p->daddr),
-		IP4(p->daddr),
-		p->dport);
-
-	printf ("\n");
-
-	if (debug) hex_dump(p, 2);
-}
-
-int
-trace_winki_tcpgroup2_func(void *a, void *v)
-{
-	trace_info_t *trcinfop = (trace_info_t *)a;
-	TcpGroup2_t *p = (TcpGroup2_t *)trcinfop->cur_event;
-
-	PRINT_COMMON_FIELDS_C011(p, 0, 0);
-
-	printf (" pid=%d size=%d seqnum=%d connid=%d, mss=%d, sackopt=0x%x, tsopt=0x%x, wsopt=0x%x, rcvwin=%d, rcvwinscale=%d, sndwinscale=%d",
-		p->Pid,
-		p->size,
-		p->seqnum,
-		p->connid,
-		p->mss,
-		p->sackopt,
-		p->tsopt,
-		p->wsopt,
-		p->rcvwin,
-		p->rcvwinscale,
-		p->sndwinscale);
-
-	printf (" src=%d.%d.%d.%d:%d", 
-		IP1(p->saddr),
-		IP2(p->saddr),
-		IP3(p->saddr),
-		IP4(p->saddr),
-		p->sport);
-
-	printf (" dest=%d.%d.%d.%d:%d", 
-		IP1(p->daddr),
-		IP2(p->daddr),
-		IP3(p->daddr),
-		IP4(p->daddr),
-		p->dport);
-
-	printf ("\n");
-
-	if (debug) hex_dump(p, 2);
-}
-
-int
-trace_winki_tcpgroup3_func(void *a, void *v)
-{
-	trace_info_t *trcinfop = (trace_info_t *)a;
-	TcpGroup3_t *p = (TcpGroup3_t *)trcinfop->cur_event;
-
-	PRINT_COMMON_FIELDS_C011(p, 0, 0);
-
-	printf (" pid=%d size=%d seqnum=%d connid=%d",
-		p->Pid,
-		p->size,
-		p->seqnum,
-		p->connid);
-
-	printf (" ");
-	print_ip_v6(&p->saddr[0], NULL);
-	printf (":%d", p->sport);
-
-	printf (" ");
-	print_ip_v6(&p->daddr[0], NULL);
-	printf (":%d", p->dport);
-
-	printf ("\n");
-
-	if (debug) hex_dump(p, 4);
-}
-
-int
-trace_winki_tcpgroup4_func(void *a, void *v)
-{
-	trace_info_t *trcinfop = (trace_info_t *)a;
-	TcpGroup4_t *p = (TcpGroup4_t *)trcinfop->cur_event;
-
-	PRINT_COMMON_FIELDS_C011(p, 0, 0);
-
-	printf (" pid=%d size=%d seqnum=%d connid=%d, mss=%d, sackopt=0x%x, tsopt=0x%x, wsopt=0x%x, rcvwin=%d, rcvwinscale=%d, sndwinscale=%d",
-		p->Pid,
-		p->size,
-		p->seqnum,
-		p->connid,
-		p->mss,
-		p->sackopt,
-		p->tsopt,
-		p->wsopt,
-		p->rcvwin,
-		p->rcvwinscale,
-		p->sndwinscale);
-
-	printf (" ");
-	print_ip_v6(&p->saddr[0], NULL);
-	printf (":%d", p->sport);
-
-	printf (" ");
-	print_ip_v6(&p->daddr[0], NULL);
-	printf (":%d", p->dport);
-
-	printf ("\n");
-
-	if (debug) hex_dump(p, 4);
-}
-
-int
-trace_winki_udpgroup1_func(void *a, void *v)
-{
-	trace_info_t *trcinfop = (trace_info_t *)a;
-	UdpGroup1_t *p = (UdpGroup1_t *)trcinfop->cur_event;
-
-	PRINT_COMMON_FIELDS_C011(p, 0, 0);
-
-	printf (" pid=%d size=%d seqnum=%d connid=%d",
-		p->Pid,
-		p->size,
-		p->seqnum,
-		p->connid);
-
-	printf (" src=%d.%d.%d.%d:%d", 
-		IP1(p->saddr),
-		IP2(p->saddr),
-		IP3(p->saddr),
-		IP4(p->saddr),
-		p->sport);
-
-	printf (" dest=%d.%d.%d.%d:%d", 
-		IP1(p->daddr),
-		IP2(p->daddr),
-		IP3(p->daddr),
-		IP4(p->daddr),
-		p->dport);
-
-	printf ("\n");
-
-	if (debug) hex_dump(p, 2);
-}
-
-int
-trace_winki_udpgroup2_func(void *a, void *v)
-{
-	trace_info_t *trcinfop = (trace_info_t *)a;
-	UdpGroup2_t *p = (UdpGroup2_t *)trcinfop->cur_event;
-
-	PRINT_COMMON_FIELDS_C011(p, 0, 0);
-
-	printf (" pid=%d size=%d seqnum=%d connid=%d",
-		p->Pid,
-		p->size,
-		p->seqnum,
-		p->connid);
-
-	printf (" ");
-	print_ip_v6(&p->saddr[0], NULL);
-	printf (":%d", p->sport);
-
-	printf (" ");
-	print_ip_v6(&p->daddr[0], NULL);
-	printf (":%d", p->dport);
-
-	printf ("\n");
-
-	if (debug) hex_dump(p, 4);
-}
-
-int
-trace_winki_udpfail_func(void *a, void *v)
-{
-	trace_info_t *trcinfop = (trace_info_t *)a;
-	UdpFail_t *p = (UdpFail_t *)trcinfop->cur_event;
-
-	PRINT_COMMON_FIELDS_C011(p, 0, 0);
-
-	printf (" proto=%d failure_code=%d");
 	printf ("\n");
 
 	if (debug) hex_dump(p, 2);

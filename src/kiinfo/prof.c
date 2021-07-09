@@ -38,10 +38,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <curses.h>
 
 #include "winki.h"
-#include "SysConfig.h"
 #include "Image.h"
 #include "Pdb.h"
 #include "PerfInfo.h"
+#include "Process.h"
+#include "Thread.h"
 #include "winki_util.h"
 
 extern int pc_hugetlb_fault;
@@ -53,6 +54,7 @@ extern int pc_semctl;
 extern int pc_rwsem_down_write_failed;
 extern int pc_kstat_irqs_usr;
 extern int pc_pcc_cpufreq_target;
+extern int pc_kvm_mmu_page_fault;
 
 
 int prof_dummy_func(void *, void *);
@@ -61,23 +63,10 @@ int prof_ftrace_print_func(void *, void *);
 static inline void
 prof_winki_trace_funcs()
 {
-	int i;
-
-        for (i = 0; i < 65536; i++) {
-                ki_actions[i].id = i;
-                ki_actions[i].func = NULL;
-                ki_actions[i].execute = 0;
-        }
-
-        strcpy(&ki_actions[0].subsys[0], "EventTrace");
-        strcpy(&ki_actions[0].event[0], "Header");
-        ki_actions[0].func = winki_header_func;
-        ki_actions[0].execute = 1;
-
-	strcpy(&ki_actions[0xf2e].subsys[0], "PerfInfo");
-	strcpy(&ki_actions[0xf2e].event[0], "SampleProfile");
-	ki_actions[0xf2e].func=perfinfo_profile_func;
-	ki_actions[0xf2e].execute = 1;
+	winki_init_actions(NULL);
+	winki_enable_event(0x30a, process_load_func);
+	winki_enable_event(0x548, thread_setname_func);
+	winki_enable_event(0xf2e, perfinfo_profile_func);
 }
 
 
@@ -105,6 +94,7 @@ prof_init_func(void *v)
 	report_func_arg = filter_func_arg;
 
 	if (IS_WINKI) {
+		parse_SQLThreadList();
 		prof_winki_trace_funcs();
 		return;
 	}
@@ -126,7 +116,7 @@ prof_init_func(void *v)
         	ki_actions[TRACE_PRINT].func = prof_ftrace_print_func;
         	ki_actions[TRACE_PRINT].execute = 1;
 	}
-	
+
 	parse_cpuinfo();
 	parse_mpsched();
 	parse_kallsyms();
@@ -140,7 +130,6 @@ prof_init_func(void *v)
 		if (objfile) load_elf(objfile, &objfile_preg);
 		if (IS_LIKI) foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, load_perpid_mapfile, NULL, 0, NULL);
 
-		prof_csvfile = open_csv_file("kiprof", 1);
 	}
 }
 
@@ -340,7 +329,7 @@ hc_print_pc2(void *arg1, void *arg2)
                         sym = win_symlookup(pregp, key, &symaddr);
 			symfile = pregp->filename;
                 }
-        } else if ((pcinfop->state == HC_USER) || (key > globals->nsyms) || (key == UNKNOWN_SYMIDX))  {
+        } else if ((pcinfop->state != HC_USER) && ((key > globals->nsyms) || (key == UNKNOWN_SYMIDX)))  {
                 /* fall through */
 	} else if (key != UNKNOWN_SYMIDX) {
 		if (pcinfop->state == HC_USER) {
@@ -364,18 +353,24 @@ hc_print_pc2(void *arg1, void *arg2)
 		if ((pcinfop->count > 100) && (strstr(sym, "jbd2_journal_start") )) {
 			RED_FONT;
 			(*print_pc_args->warnflagp) |= WARNF_HAS_JOURNAL;
-		}
-
-		if ((((pcinfop->count*100.0) / hcinfop->total) > 2.0) && (strstr(sym, "semtimedop") || strstr(sym, "semctl"))) {
+		} else if ((((pcinfop->count*100.0) / hcinfop->total) > 2.0) &&
+			     (strstr(sym, "semtimedop") || strstr(sym, "semctl"))) {
 			RED_FONT;
 			(*print_pc_args->warnflagp) |= WARNF_SEMLOCK;
-		}
-
-		if ((((pcinfop->count*100.0) / hcinfop->total) > 0.5) && (strstr(sym, "sk_busy_loop") )) {
+		} else if ((((pcinfop->count*100.0) / hcinfop->total) > 0.5) &&
+			     (strstr(sym, "sk_busy_loop") )) {
 			RED_FONT;
 			(*print_pc_args->warnflagp) |= WARNF_SK_BUSY;
+		} else if ((((pcinfop->count*100.0) / hcinfop->total) > 2.0) &&
+			     (strstr(sym, "qosdUpdExprExecStatsRws") )) {
+			RED_FONT;
+			(*print_pc_args->warnflagp) |= WARNF_ORACLE_COLSTATS;
+		} else if ((((pcinfop->count*100.0) / hcinfop->total) > 2.0) &&
+			     (strstr(dmangle(sym), "LatchBase::AcquireInternal") ||
+			      strstr(dmangle(sym), "LatchBase::ReleaseInternal") )) {
+			RED_FONT;
+			(*print_pc_args->warnflagp) |= WARNF_SQL_STATS;
 		}
-
 	}
 		
 	if (sym == NULL) {
@@ -478,6 +473,7 @@ hc_print_stktrc(void *p1, void *p2)
 	int kstat_irqs_warn_cnt = 0;
 	int queued_spin_lock_slowpath_cnt = 0;
 	int rwsem_down_write_failed_cnt = 0;
+	int kvm_pagefault_warn_cnt = 0;
 	int cpufreq_warn_cnt = 0;
 
 	if (stktrcp->cnt == 0) return 0;
@@ -509,7 +505,7 @@ hc_print_stktrc(void *p1, void *p2)
 			pid_printf (pidfile, "  unknown");
 		} else if ((globals->symtable) && (key < globals->nsyms-1)) {
 			if (kparse_flag && print_pc_args->warnflagp) {
-				if (stktrcp->cnt >= 250) { 
+				if (stktrcp->cnt >= 200) { 
 					/* cannot use the pc key as there can be more than one queued_spin_lock_slowpath function in kallsyms */
 				 	if (strcmp(globals->symtable[key].nameptr, "queued_spin_lock_slowpath") == 0) queued_spin_lock_slowpath_cnt++;
 				 	if (key == pc_rwsem_down_write_failed) rwsem_down_write_failed_cnt++;
@@ -519,6 +515,7 @@ hc_print_stktrc(void *p1, void *p2)
 						semlock_warn_cnt=2;
 					else if (key == pc_kstat_irqs_usr) kstat_irqs_warn_cnt=2;
 					else if (key == pc_pcc_cpufreq_target) cpufreq_warn_cnt=2;
+					else if (key == pc_kvm_mmu_page_fault) kvm_pagefault_warn_cnt=2;
 				}
 
 				if (hugetlb_fault_warn_cnt >= 2) {
@@ -535,7 +532,12 @@ hc_print_stktrc(void *p1, void *p2)
 					kstat_irqs_warn_cnt = 0;
 				} else if (cpufreq_warn_cnt >= 2) {
 					RED_FONT;
+					cpufreq_warn_cnt = 0;
 					*print_pc_args->warnflagp |= WARNF_PCC_CPUFREQ;
+				} else if (kvm_pagefault_warn_cnt >= 2) {
+					RED_FONT;
+					kvm_pagefault_warn_cnt = 0;
+					*print_pc_args->warnflagp |= WARNF_KVM_PAGEFAULT;
 				}
 			}
 			pid_printf (pidfile, "  %s", globals->symtable[key].nameptr);
@@ -676,7 +678,7 @@ int print_pid_symbols(void *arg1, void *arg2)
 	BOLD ("Command: ");
         if (pidp->cmd) {
 		printf("%s ", pidp->cmd);
-		if (strstr(pidp->cmd, "kiinfo")) {
+		if (strstr(pidp->cmd, "kiinfo") == NULL) {
 			print_pc_args.warnflagp = &warnflag;
 		}
 	}
@@ -713,6 +715,17 @@ int print_pid_symbols(void *arg1, void *arg2)
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_HAS_JOURNAL, _LNK_1_4_5);
 		kp_warning(globals->warnings, warn_indx, _LNK_1_4_5); NL;
 	}
+
+	if (print_pc_args.warnflagp && ((*print_pc_args.warnflagp) & WARNF_SQL_STATS)) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SQL_STATS, _LNK_1_4_5);
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_5); NL;
+	}
+
+	if (print_pc_args.warnflagp && ((*print_pc_args.warnflagp) & WARNF_ORACLE_COLSTATS)) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_ORACLE_COLSTATS, _LNK_1_4_5);
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_5); NL;
+	}
+
 
 	return 0;
 }

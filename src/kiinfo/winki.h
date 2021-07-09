@@ -33,6 +33,7 @@ typedef struct etw_bufhd {
 /* Every trace records starts with a common set of fields */
 
 #define ioreq_type(EventType)  (EventType == 0x10a ? IO_READ : IO_WRITE)
+#define filereq_type(EventType)  (EventType == 0x443 ? IO_READ : IO_WRITE)
 
 #define ETW_COMMON_FIELDS				\
   uint16 TraceVersion;					\
@@ -487,6 +488,28 @@ typedef struct DiskIo_DrvComplRout
   uint32 UniqMatchId;
 } DiskIo_DrvComplRout_t;
 
+typedef struct NetCommonIPV4
+{
+  ETW_COMMON_FIELDS_c011;
+  uint32 Pid;
+  uint32 size;
+  uint32 daddr;
+  uint32 saddr;
+  uint16 dport;
+  uint16 sport;
+} NetCommonIPV4_t;
+
+typedef struct NetCommonIPV6
+{
+  ETW_COMMON_FIELDS_c011;
+  uint32 Pid;
+  uint32 size;
+  uint16 daddr[8];
+  uint16 saddr[8];
+  uint16 dport;
+  uint16 sport;
+} NetCommonIPV6_t;
+
 typedef struct TcpGroup1
 {
   ETW_COMMON_FIELDS_c011;
@@ -562,10 +585,10 @@ typedef struct TcpSendIPV4
   uint32 saddr;
   uint16 dport;
   uint16 sport;
-  uint32 starttime;
+  uint32 starttime;	/* 32-bit.  NOt sure tha tthis time is?? */
   uint32 endtime;
-  uint32 seqnum;
-  uint32 connid;
+  uint32 seqnum;	/* Unused */
+  uint32 connid;	/* Unused */
 } TcpSendIPV4_t;
 
 typedef struct TcpSendIPV6
@@ -582,6 +605,14 @@ typedef struct TcpSendIPV6
   uint32 seqnum;
   uint32 connid;
 } TcpSendIPV6_t;
+
+typedef struct TcpUdpFail
+{
+  ETW_COMMON_FIELDS_c011;
+  uint16 Proto;
+  uint16 FailureCode;
+} TcpUdpFail_t;
+
 
 typedef struct UdpGroup1
 {

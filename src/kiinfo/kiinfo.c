@@ -92,7 +92,6 @@ FILE *kipid_file = NULL;
 FILE *node_csvfile = NULL;
 FILE *pid_csvfile = NULL;
 FILE *dsk_csvfile = NULL;
-FILE *prof_csvfile = NULL;
 FILE *futex_csvfile = NULL;
 FILE *file_csvfile = NULL;
 FILE *socket_csvfile = NULL;
@@ -177,6 +176,8 @@ main(int argc, char *argv[])
 			else if (strstr(utsname.machine, "ppc64le")) arch_flag = PPC64LE;
 		}
 		clear_kgdboc();
+		syscall_arg_list = linux_syscall_arg_list;
+
 		likidump();
 		if (kgdboc_str) reset_kgdboc();
 		_exit(0);

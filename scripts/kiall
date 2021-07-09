@@ -47,6 +47,7 @@ shopt -s extglob
 # version 6.0   11/25/2019   Added -P num_threads to kiall -V for parallel processing
 # version 6.1   04/20/2020   Added -B to collect block frequency statistics for Kparse reports (this takes more time)
 # version 7.0   03/12/2021   Added processing Windows ETL trace files
+# version 7.1   06/29/2021   fixed kiall -f to use "find ." in process_f
 # 
 # DESCRIPTION:
 #  
@@ -263,9 +264,14 @@ process_winki()
     echo $DIR/kiinfo -kitrace -ts $tag 
     $DIR/kiinfo -kitrace -ts $tag >ki.$tag
 	    
-    echo $DIR/kiinfo -kiall csv$oracle$mangle$blkfrq -html -ts $tag
+    if [ $dotxt -eq 0 ] ; then
+    	echo $DIR/kiinfo -kiall csv$oracle$mangle$blkfrq -html -ts $tag
+        ( $DIR/kiinfo -kiall csv$oracle$mangle$blkfrq -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
+    else
+        echo $DIR/kiinfo -kiall csv$oracle$mangle$blkfrq -ts $tag
+        ( $DIR/kiinfo -kiall csv$oracle$mangle$blkfrq -ts $tag ; touch -r ki.bin.*$tag kp.$tag.txt)
+    fi
 
-    ( $DIR/kiinfo -kiall nop$oracle$mangle$blkfrq -html -ts $tag ; touch -r ki.bin.*$tag kp.$tag.html)
 }
 
 
@@ -501,7 +507,7 @@ process_c()
 
 process_f()
 {
-    for SUBDIR in `find * -type d `
+    for SUBDIR in `find . -type d `
     do
 	cd $SUBDIR
 	process_pwd

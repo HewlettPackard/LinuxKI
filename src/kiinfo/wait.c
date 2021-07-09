@@ -34,6 +34,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "conv.h"
 
 #include "Thread.h"
+#include "Process.h"
 #include "PerfInfo.h"
 #include "winki_util.h"
 
@@ -44,43 +45,13 @@ int wait_ftrace_print_func(void *, void *);
 static inline void
 wait_winki_trace_funcs()
 {
-	int i;
-
-	for (i = 0; i < 65536; i++) {
-		ki_actions[i].id = i;
-		ki_actions[i].func = NULL;
-		ki_actions[i].execute = 0;
-	}
-
-        strcpy(&ki_actions[0].subsys[0], "EventTrace");
-        strcpy(&ki_actions[0].event[0], "Header");
-        ki_actions[0].func = winki_header_func;
-        ki_actions[0].execute = 1;
-
-        strcpy(&ki_actions[0x524].subsys[0], "Thread");
-        strcpy(&ki_actions[0x524].event[0], "Cswitch");
-        ki_actions[0x524].func=thread_cswitch_func;
-        ki_actions[0x524].execute = 1;
-
-        strcpy(&ki_actions[0x532].subsys[0], "Thread");
-        strcpy(&ki_actions[0x532].event[0], "ReadyThread");
-        ki_actions[0x532].func=thread_readythread_func;
-        ki_actions[0x532].execute = 1;
-
-        strcpy(&ki_actions[0x548].subsys[0], "Thread");
-        strcpy(&ki_actions[0x548].event[0], "SetName");
-        ki_actions[0x548].func=thread_setname_func;
-        ki_actions[0x548].execute = 1;
-
-        strcpy(&ki_actions[0xf33].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf33].event[0], "SysClEnter");
-        ki_actions[0xf33].func=perfinfo_sysclenter_func;
-        ki_actions[0xf33].execute = 1;
-
-        strcpy(&ki_actions[0xf34].subsys[0], "PerfInfo");
-        strcpy(&ki_actions[0xf34].event[0], "SysClExit");
-        ki_actions[0xf34].func=perfinfo_sysclexit_func;
-        ki_actions[0xf34].execute = 1;
+	winki_init_actions(NULL);
+	winki_enable_event(0x30a, process_load_func);
+        winki_enable_event(0x524, thread_cswitch_func);
+        winki_enable_event(0x532, thread_readythread_func);
+        winki_enable_event(0x548, thread_setname_func);
+        winki_enable_event(0xf33, perfinfo_sysclenter_func);
+        winki_enable_event(0xf34, perfinfo_sysclexit_func);
 }
 
 /*
@@ -106,6 +77,8 @@ wait_init_func(void *v)
 		parse_systeminfo();	
 		parse_cpulist();
 		parse_corelist();
+		parse_SQLThreadList();
+		wait_csvfile = open_csv_file("kiwait", 1);
 		return;
 	} else if (!IS_LIKI) {
                 printf ("No switch functions or stack traces captured\n\n");

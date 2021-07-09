@@ -19,7 +19,7 @@ typedef struct win_action {
 	uint64  tracemask;
 } win_action_t;
 
-#define MAX_WIN		35
+#define MAX_WIN		36
 
 #define	WINMAIN		0
 #define WINPID		1
@@ -250,3 +250,8 @@ typedef struct win_action {
                                 (TT_BIT(TT_BLOCK_RQ_INSERT) | TT_BIT(TT_BLOCK_RQ_ISSUE) | \
                                  TT_BIT(TT_BLOCK_RQ_COMPLETE) | TT_BIT(TT_BLOCK_RQ_ABORT) | \
                                  TT_BIT(TT_BLOCK_RQ_REQUEUE))
+
+#define WINFILE_SEL	35
+#define WINFILE_SEL_FLAGS  (SORT_FLAG | FILE_FLAG )
+#define WINFILE_SEL_STATS  (GLOBAL_STATS | PERFD_STATS)
+#define WINFILE_SEL_TRACEMASK 0

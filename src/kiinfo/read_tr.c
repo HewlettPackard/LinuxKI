@@ -31,6 +31,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "kd_types.h"
 #include "hash.h"
 
+#include "winki_util.h"
+
 extern int break_flag;
 extern int debug;
 extern char *cmd_str;
@@ -342,7 +344,7 @@ get_fd_str(int fd, char *str, char ignore_err)
 	lseek(fd, 0, SEEK_SET);
 	if ((size = read(fd, str, 1024)) == 0) {
 		if (!ignore_err) {
-			fprintf (stderr, "put_fd_str(): write failed (errno=%d)\n", errno);
+			fprintf (stderr, "put_fd_str(): read failed (errno=%d)\n", errno);
 		}
 		return -1;
 	}
@@ -1424,7 +1426,6 @@ open_trace_files()
 		close (id_fd);
 	}
 
-	printf ("NCPUS=%d\n", ncpus);
 	return ncpus;
 }
 

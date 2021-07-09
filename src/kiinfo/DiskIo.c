@@ -85,6 +85,14 @@ diskio_incr_compl_iostats(DiskIo_ReadWrite_t *p, iostats_t *statp, uint64 qtm, u
 	statp->max_ioserv = MAX(statp->max_ioserv, svtm);
 	statp->max_iowait = MAX(statp->max_iowait, qtm);
 
+	if (statp->next_sector == p->ByteOffset/512) {
+		statp->seq_ios++;
+	} else {
+		statp->random_ios++;
+	}
+
+	statp->next_sector = p->ByteOffset/512 + p->TransferSize/512;
+
 	return 0;
 }
 
@@ -100,6 +108,24 @@ diskio_dev_complete_stats(DiskIo_ReadWrite_t *p, uint64 qtm, uint64 svtm)
 
 	devinfop = GET_DEVP(&globals->devhash, dev);
 	diskio_incr_compl_iostats(p, &devinfop->iostats[rw], qtm, svtm);
+}
+
+static inline void
+diskio_perfile_complete_stats(DiskIo_ReadWrite_t *p, uint64 qtm, uint64 svtm)
+{
+	fileobj_t *fobjinfop;
+	filedev_t *fdevinfop;
+	uint32 rw;
+	uint32 dev = p->DiskNumber;
+	uint64 obj = p->FileObject;
+
+	rw = ioreq_type(p->EventType);
+
+	fobjinfop = GET_FOBJP(&globals->fobj_hash, obj);
+	diskio_incr_compl_iostats(p, &fobjinfop->piostats[rw], qtm, svtm);
+
+	fdevinfop = GET_FDEVP(&fobjinfop->fdev_hash, dev);
+	diskio_incr_compl_iostats(p, &fdevinfop->stats[rw], qtm, svtm);
 }
 
 static inline void
@@ -119,7 +145,7 @@ diskio_perpid_complete_stats(DiskIo_ReadWrite_t *p, pid_info_t *pidp, uint64 qtm
 }	
 
 static inline void
-diskio_global_complete_stats(DiskIo_ReadWrite_t *p, pid_info_t *pidp, uint64 qtm, uint64 svtm)
+diskio_global_complete_stats(DiskIo_ReadWrite_t *p, uint64 qtm, uint64 svtm)
 {
 	iotimes_t *timesp;
 	uint32 rw;
@@ -179,7 +205,8 @@ int diskio_readwrite_func(void *a, void *v)
 	if (svtm > 0) {
 		if (perdsk_stats) diskio_dev_complete_stats(p, 0, svtm);
 		if (perpid_stats) diskio_perpid_complete_stats(p, pidp, 0, svtm);
-		if (global_stats) diskio_global_complete_stats(p, pidp, 0, svtm);
+		if (global_stats && perfd_stats) diskio_perfile_complete_stats(p, 0, svtm); 
+		if (global_stats) diskio_global_complete_stats(p, 0, svtm);
 	}
 }
 

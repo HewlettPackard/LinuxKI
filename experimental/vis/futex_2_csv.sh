@@ -1,3 +1,4 @@
+#!/bin/bash
 echo "time,cpu,pid,retval,sctime,addr,op,val" > futex_global.csv
 grep ' futex ' ki.$1 |grep -v entry| awk '{print $1","$2","$3","$7","$9","$10","$11","$12}' > futex_global.raw1
 grep -v ',,'  futex_global.raw1 >  futex_global.raw2

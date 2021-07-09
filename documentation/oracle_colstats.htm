@@ -1,0 +1,358 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:Consolas;
+	panose-1:2 11 6 9 2 2 4 3 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+a:link, span.MsoHyperlink
+	{color:#0563C1;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:#954F72;
+	text-decoration:underline;}
+p
+	{margin-right:0in;
+	margin-left:0in;
+	font-size:12.0pt;
+	font-family:"Times New Roman",serif;}
+pre
+	{mso-style-link:"HTML Preformatted Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	font-size:10.0pt;
+	font-family:Consolas;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+span.HTMLPreformattedChar
+	{mso-style-name:"HTML Preformatted Char";
+	mso-style-link:"HTML Preformatted";
+	font-family:Consolas;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:107%;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:.5in .5in .5in .5in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-GB link="#0563C1" vlink="#954F72">
+
+<div class=WordSection1>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;vertical-align:
+top'><b><i><span lang=EN-US style='font-size:12.0pt;font-family:"Arial",sans-serif;
+color:black'>LinuxKI Warning</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Oracle column tracking causing high
+CPU usage by Oracle processes</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Date: 05/13/21</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Problem</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Customer
+noticed very high CPU usage (&gt;85%) on both nodes of their Oracle RAC DB
+environment using two new SDFlex 4-socket servers with Platinum 8156
+processors.   The DB servers were running RHEL 7.5 and using Oracle 18c. </span></p>
+
+<p class=MsoNormal><b><span lang=EN-US style='font-size:10.0pt;line-height:
+107%;font-family:"Arial",sans-serif'>Investigation</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>LinuxKI data
+was collected during the period of high CPU usage.     Analysis on one of the
+busy Oracle processes shows most of the CPU time was spent in user (Oracle)
+code.   </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>PID 96116  oracleRACN2</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>  PPID 1  /usr/lib/systemd/systemd</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    ********* SCHEDULER ACTIVITY REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    RunTime    :  6.796174  SysTime   :  0.183690   <span
+style='background:yellow'>UserTime   :  6.462232</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    SleepTime  :  1.775952  Sleep Cnt :      9441   Wakeup Cnt
+:        63</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    RunQTime   : 11.432661  Switch Cnt:     10117   PreemptCnt
+:       676</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    HardIRQ    :  0.002621  HardIRQ-S :  0.000076    HardIRQ-U
+:  0.002545</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    SoftIRQ    :  0.147632  SoftIRQ-S :  0.012285    SoftIRQ-U
+:  0.135347</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    Last CPU   :        34  CPU Migrs :       338   NODE Migrs
+:         1</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    Policy     : SCHED_NORMAL     vss :  65267684          rss
+:     10473</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    busy    :     33.97%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>      sys   :      0.92%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>      <span style='background:yellow'>user  :     32.30%</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>      irq   :      0.75%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    runQ    :     57.15%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    sleep   :      8.88%</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>The CPU
+profile data showed that most of the CPU time was spent in a single Oracle
+function - qosdUpdExprExecStatsRws():</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    ******** CPU ACTIVITY REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    The percentages below reflect the percentage</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    of the Thread's total RunTime spent in either</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    User code or System code</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    RunTime:   6.7962</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>      Count    USER     SYS    INTR</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>        657     618      11      28</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>              94.06%   1.67%   4.26%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>    HARDCLOCK entries</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>       Count     Pct  State  Function</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>         <span style='background:yellow'>551  83.87%  USER  
+qosdUpdExprExecStatsRws [/product/oracle/app/db/18.3/bin/oracle]</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>           7   1.07%  INTR   call_softirq</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>           5   0.76%  USER   __intel_memset
+[/product/oracle/app/db/18.3/bin/oracle]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>           4   0.61%  SYS    __schedule</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>           3   0.46%  INTR   netif_receive_skb_internal</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
+"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US style='font-size:10.0pt;line-height:107%;
+font-family:"Arial",sans-serif'>While HPE does not have source code to review,
+the name of the found sounds like it’s related to statistics.    </span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Solution </span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>After
+consulting with Oracle and showing them the data, Oracle recommended changing
+_column_tracking_level from the default value of 21 to 1.     After changing
+the parameter, the CPU usage was reduced from 85-90% to below 13%.</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Note,
+changing hidden parameters in Oracle should be performed with care and after
+consultation with Oracle.   There may be other cases where the default
+_column_tracking_level provides a performance benefit.</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>For more
+information, please refer to <a
+href="https://support.oracle.com/knowledge/Oracle%20Database%20Products/2773012_1.html">Oracle
+Document ID 2773012.1</a>, which documents the following problem:</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><i><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Problem 3:</span></i></b><i><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'> High CPU
+for SQL statements with too many columns. The short stack shows functions
+spinning on qosdGetOptDir, qosdInitDirCtx, <b>qosdUpdExprExecStatsRws</b>.
+There could be high latch waits including GES latches in RAC.</span></i></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><i><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Solution:
+Set, _column_tracking_level=1 at system level. It’s a dynamic parameter. This
+is to avoid the extensive column usage tracking which could incur more CPU. The
+default value was 1 in 11.2 &amp; 12.1 and changed to 21 and higher from 12.2
+onwards.</span></i></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+</div>
+
+</body>
+
+</html>

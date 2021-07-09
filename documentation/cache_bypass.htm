@@ -1,0 +1,505 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Courier;
+	panose-1:2 7 4 9 2 2 5 2 4 4;}
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:Consolas;
+	panose-1:2 11 6 9 2 2 4 3 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+a:link, span.MsoHyperlink
+	{color:#0563C1;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:#954F72;
+	text-decoration:underline;}
+p
+	{margin-right:0in;
+	margin-left:0in;
+	font-size:12.0pt;
+	font-family:"Times New Roman",serif;}
+pre
+	{mso-style-link:"HTML Preformatted Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	font-size:10.0pt;
+	font-family:Consolas;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+span.HTMLPreformattedChar
+	{mso-style-name:"HTML Preformatted Char";
+	mso-style-link:"HTML Preformatted";
+	font-family:Consolas;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:107%;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:.5in .5in .5in .5in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-GB link="#0563C1" vlink="#954F72">
+
+<div class=WordSection1>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;vertical-align:
+top'><b><i><span lang=EN-US style='font-size:12.0pt;font-family:"Arial",sans-serif;
+color:black'>LinuxKI Warning</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Large I/Os (&gt;1MB) causing
+performance degradation on servers with PCIe Smart Array Controllers</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Date: 03/30/2017 </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Updated: 05/13/2021</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Problem</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Customer reported that their Apollo XL450&nbsp;Gen9 server with
+P440 PCIe Smart Array Controller was giving only them 260 MB/sec of write
+throughput using twelve 7200 RPM HDD drives. &nbsp; A similar non-HPE
+configuration yielded ~1300 MB/sec. &nbsp; &nbsp; Customer was using Ubuntu
+14.04 and was using the Flexible I/O Tester (fio) to generate the workload.
+&nbsp;&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-US style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>  </span></p>
+
+<p class=MsoNormal><b><span lang=EN-US style='font-size:10.0pt;line-height:
+107%;font-family:"Arial",sans-serif'>Investigation</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black;background:white'>A similar
+configuration in the lab using RHEL 6.7 (2.6.32-573) showed similar performance
+as the non-HPE system, but the same system on Ubuntu 14.04 (4.4.0-31) showed
+the poor performance. &nbsp; &nbsp;LinuxKI data from both the RHEL 6.7 and Ubuntu
+14.04 environments was collected.  The fio tool would perform sequential writes
+to a device and&nbsp;dirty many pages in the page cache. &nbsp; It would then
+call fsync() to flush the data to disk. &nbsp; &nbsp; LinuxKI&nbsp;shows the
+fio task spending a large amount of time in fsync():</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-family:"Arial",sans-serif;
+color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>PID 6457 &nbsp;fio</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; ********* SCHEDULER ACTIVITY REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; RunTime &nbsp; &nbsp;: &nbsp;6.364364 &nbsp;SysTime
+&nbsp; : &nbsp;4.224390 &nbsp; UserTime &nbsp; : &nbsp;2.139974</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; SleepTime &nbsp;: 53.018209 &nbsp;Sleep Cnt : &nbsp;
+&nbsp;152721 &nbsp; Wakeup Cnt : &nbsp; &nbsp;173769</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; RunQTime &nbsp; : &nbsp;0.617098 &nbsp;Switch Cnt:
+&nbsp; &nbsp;154822 &nbsp; PreemptCnt : &nbsp; &nbsp; &nbsp;2101</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; Last CPU &nbsp; : &nbsp; &nbsp; &nbsp; &nbsp; 2
+&nbsp;CPU Migrs : &nbsp; &nbsp; 15001 &nbsp; NODE Migrs : &nbsp; &nbsp; &nbsp;
+&nbsp; 0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; Policy &nbsp; &nbsp; : SCHED_NORMAL &nbsp; &nbsp;
+vss : &nbsp; &nbsp; 31226 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;rss : &nbsp; &nbsp;
+&nbsp; 582</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; ******** SYSTEM CALL REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; System Call Name &nbsp; &nbsp; Count &nbsp; &nbsp;
+Rate &nbsp; &nbsp; ElpTime &nbsp; &nbsp; &nbsp; &nbsp;Avg &nbsp; &nbsp; &nbsp;
+&nbsp;Max &nbsp; &nbsp;Errs &nbsp; &nbsp;AvSz &nbsp; &nbsp; KB/s</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; <span style='background:yellow'>fsync &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;1 &nbsp; &nbsp;
+&nbsp;0.0 &nbsp; 17.412360 &nbsp;17.412360 &nbsp;17.412360 &nbsp; &nbsp; &nbsp;
+0</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp;SLEEP &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp;152719 &nbsp; 2545.3 &nbsp; 14.500467 &nbsp; 0.000095</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Sleep Func &nbsp; &nbsp;152719
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;14.500467 &nbsp; 0.000095 &nbsp;
+1.364861 &nbsp;io_schedule_timeout</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp;RUNQ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp;0.613871</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp;CPU &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+2.298021</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; io_submit &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+3713 &nbsp; &nbsp; 61.9 &nbsp; &nbsp;1.924439 &nbsp; 0.000518 &nbsp; 0.001986
+&nbsp; &nbsp; &nbsp; 0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp;RUNQ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp;0.000619</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp;CPU &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+1.923820</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp;AIO Writes &nbsp; &nbsp; &nbsp; &nbsp;
+3546 &nbsp; &nbsp; 59.1 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 613.988601
+&nbsp; 0.173150 &nbsp; &nbsp; &nbsp; &nbsp; 2097152 &nbsp; &nbsp; &nbsp;0.2</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; io_destroy &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; 1 &nbsp; &nbsp; &nbsp;0.0 &nbsp; &nbsp;0.033004 &nbsp; 0.033004 &nbsp;
+0.033004 &nbsp; &nbsp; &nbsp; 0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp;SLEEP &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; 1 &nbsp; &nbsp; &nbsp;0.0 &nbsp; &nbsp;0.032976
+&nbsp; 0.032976</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Sleep Func &nbsp; &nbsp; &nbsp;
+&nbsp; 1 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 0.032976 &nbsp; 0.032976
+&nbsp; 0.032976 &nbsp;wait_for_completion</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp;RUNQ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp;0.000018</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; &nbsp; &nbsp;CPU &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+0.000009</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; io_getevents &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;3715
+&nbsp; &nbsp; 61.9 &nbsp; &nbsp;0.001337 &nbsp; 0.000000 &nbsp; 0.000141 &nbsp;
+&nbsp; &nbsp; 0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-indent:
+.5in;line-height:11.25pt;vertical-align:top'><span lang=EN-US style='font-size:
+10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>When looking at the physical I/O, the fio process would often issue
+I/Os greater than 2 MB:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>$ grep &quot;block_rq_insert&quot; ki.0224_0908&nbsp;| more</span><span
+style='font-size:9.0pt;font-family:"Cambria Math",serif;color:black'>​</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; 2.409639 cpu=7 pid=277 tgid=277 block_rq_insert
+dev_t=0x00800000 wr=write flags=SYNC|INTEGRITY|FLUSH sector=0x0 len=2224128
+async=0 sync=0 bytes=2224128</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; 2.409640 cpu=7 pid=277 tgid=277 block_rq_insert
+dev_t=0x00800000 wr=write flags=SYNC|INTEGRITY|FLUSH sector=0x10f8 len=2224128
+async=0 sync=0 bytes=2224128</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; 2.409640 cpu=7 pid=277 tgid=277 block_rq_insert
+dev_t=0x00800000 wr=write flags=SYNC|INTEGRITY|FLUSH sector=0x21f0 len=2224128
+async=0 sync=0 bytes=2224128</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; 2.409641 cpu=7 pid=277 tgid=277 block_rq_insert
+dev_t=0x00800000 wr=write flags=SYNC|INTEGRITY|FLUSH sector=0x32e8 len=2224128
+async=0 sync=0 bytes=2224128</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; 2.409641 cpu=7 pid=277 tgid=277 block_rq_insert
+dev_t=0x00800000 wr=write flags=SYNC|INTEGRITY|FLUSH sector=0x43e0 len=2224128
+async=0 sync=0 bytes=2224128</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:Courier;
+color:black'>&nbsp; &nbsp; 2.409641 cpu=7 pid=277 tgid=277 block_rq_insert
+dev_t=0x00800000 wr=write flags=SYNC|INTEGRITY|FLUSH sector=0x54d8 len=2224128
+async=0 sync=0 bytes=2224128</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Large IOs&nbsp;are&nbsp;being issued because the SCSI block device
+tunable <b>max_sectors_kb</b> was set to 4096 in the Ubuntu environment. &nbsp;
+On the RHEL environment, <b>max_sectors_kb</b> was set to 512.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Root Cause</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>HPE Smart
+Array Controllers with battery-backed or flash-backed write cache (FBWC), such
+as the P4xx and P8xx series controllers, have a feature called <b>write cache
+bypass threshold</b>:</span></p>
+
+<p class=MsoNormal style='margin-left:.5in;line-height:11.25pt;vertical-align:
+top'><strong><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black;background:white'>Write cache bypass threshold</span></strong><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'><br>
+<span style='background:white'>All writes larger than the specified value will
+bypass the write cache and be written directly to the disk for non-parity RAID
+volumes.&nbsp;&nbsp;A smaller value allows the controller to reserve write
+caching to I/O smaller than the threshold.</span></span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>By default,
+this value is set to 1040KB.  So writes larger than 1040KB will bypass the
+write cache, which can have a severe performance impact on a large writes to a RAID5
+volume.</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>While this
+behavior has been around for a while, <span style='color:black;background:white'>the
+default max_sectors_kb has changed on Linux 4.x kernels to be sized according
+the logical lun’s striping attributes.&nbsp; &nbsp; For example, if the logical
+lun is striped using a 1K stripe size across 4 disks, then the max_sectors_kb
+will be 4096.&nbsp; &nbsp;So simply upgrading to a new Linux kernel may cause
+large I/O performance to degrade.&nbsp;</span></span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>RedHat has
+documented an issue with RHEL 7.3 and hpsa which can cause the max_sectors_kb
+to be higher than expected.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><i><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif'>7.3 kernel with HPSA driver sees higher
+max_sectors_kb sizes assigned for the virtual device as number of back-end
+devices is increased.</span></i></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><i><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>This will
+result in coalescing of I/O so larger I/O is submitted to the device resulting
+in higher latency per I/O for transaction based workloads.​</span></i></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>For more
+information, refer to the following article:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span class=MsoHyperlink><span lang=EN-US
+style='font-size:10.0pt;font-family:"Arial",sans-serif'><a
+href="https://access.redhat.com/solutions/2917371">https://access.redhat.com/solutions/2917371</a></span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Solution </span></b></p>
+
+<p class=MsoNormal style='background:white'><span lang=EN-US style='font-size:
+10.0pt;line-height:107%;font-family:"Arial",sans-serif'>To resolve the problem,
+you can either tune the SCSI block device parameter <b>max_sectors_kb</b> to
+1024, or increase the <b>Write Cache Bypass Threshold Size</b>.</span><span
+lang=EN-US style='font-size:10.0pt;line-height:107%;font-family:"Arial",sans-serif;
+color:black'> </span><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif;color:black'>  After setting max_sectors_kb to 512 on the
+Apollo XL450 with the P440 Smart Array Controller, the write throughput for fio
+increased from 260 MB/sec to 1300 MB/sec.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:red'>WARNING!!! </span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+background:white'>Please note&nbsp;that reducing the max_sectors_kb online can
+cause IO hangs, path failures, and path fail over.&nbsp; &nbsp;Please refer to
+the following RHEL documents for more information on reducing the
+max_sectors_kb online!</span></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='color:black;line-height:normal;background:white'><span
+     style='font-size:10.0pt;font-family:"Arial",sans-serif'>Getting&nbsp;</span><span
+     style='font-size:10.0pt;font-family:"Arial",sans-serif;color:windowtext;
+     background:white'>error&nbsp;&quot;kernel: blk_rq_check_limits: over max
+     size limit&quot; when changing the max_sectors_kb value</span></li>
+</ul>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:7.5pt;
+margin-left:.5in;line-height:normal;background:white'><span style='font-size:
+10.0pt;font-family:"Arial",sans-serif;color:black'>​</span><u><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:#333333;
+background:white'><a href="https://access.redhat.com/solutions/145163"
+target="_blank"><span style='color:#333333'>https://access.redhat.com/solutions/145163</span></a></span></u></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='color:black;line-height:normal;background:white'><span
+     style='font-size:10.0pt;font-family:"Arial",sans-serif'>How to set custom
+     'max_sectors_kb' option for devices without causing any disruption to
+     ongoing IO operations?</span><span style='font-size:10.0pt;font-family:
+     "Arial",sans-serif;color:windowtext;background:white'>​</span></li>
+</ul>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:7.5pt;
+margin-left:.5in;line-height:normal;background:white'><span style='font-size:
+10.0pt;font-family:"Arial",sans-serif;color:black'>​</span><u><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:#333333;
+background:white'><a href="https://access.redhat.com/solutions/3014361"
+target="_blank"><span style='color:#333333'>https://access.redhat.com/solutions/3014361</span></a></span></u></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+</div>
+
+</body>
+
+</html>

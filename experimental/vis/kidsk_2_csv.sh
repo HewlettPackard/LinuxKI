@@ -1,3 +1,4 @@
+#!/bin/bash
 echo "time,device,rw,sector,length,qpid,spid,qtime,svctime" > kidsk_global.csv
 grep  block_rq_complete ki.$1 | grep ' tgid=' > /dev/null
 RETVAL=$?

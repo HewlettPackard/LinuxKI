@@ -320,7 +320,9 @@ void kp_toc()
 	    LI; ARF(_LNK_5_4, _MSG_5_4); NLt;
 	    LI; ARF(_LNK_5_5, _MSG_5_5); NLt;
 	    LI; ARF(_LNK_5_6, _MSG_5_6); NLt;
-	    if (IS_WINKI) LI; ARF(_LNK_5_7, _MSG_5_7); NLt;
+	    if (IS_WINKI) {
+		    LI; ARF(_LNK_5_7, _MSG_5_7); NLt; 
+	    }
 	  _UL;
 
 	  if (!IS_WINKI) {
@@ -2717,7 +2719,7 @@ kp_dimm(void *arg1, void *arg2)		/* Section 6.1 */
 
 			if (ldominfop->freekb < 100 * 1024) {
 				warnflag |= WARNF_NODE_LOWMEM;
-				RED_FONT; 
+				if (font_color == 0) RED_FONT; 
 			}
 
 			printf ("%4d  %8lld %8lld %8lld\n", i,

@@ -401,6 +401,11 @@ main(int argc, char *argv[])
 		live_cleanup_func(NULL);
 		
 	} else if (timestamp) {
+		/* Ignoring system calls is applied during data collection only */
+		if (sysignore) { 
+			fprintf (stderr, "Warning: sysignore file only applied at the time the trace is collected.  Ignoring sysignore option.\n");
+		}
+
 		cwd = get_current_dir_name();
 		for_each_file(".", "ki.bin.", timestamp, cluster_flag);
 

@@ -648,6 +648,7 @@ int filter_pdb(char *name)
 	else if (strcasestr(name, "wow64cpu.pdb") == name) return 1;
 	else if (strcasestr(name, "qds.pdb") == name) return 1;
 	else if (strcasestr(name, "afd.pdb") == name) return 1;
+	else if (strcasestr(name, "clr.pdb") == name) return 1;
 	else if (strcasestr(name, "msvcr120.amd64.pdb") == name) return 1;
 	else if (strcasestr(name, "kernel32.pdb") == name) return 1;
         else if (strcasestr(name, "user32.pdb") == name) return 1;

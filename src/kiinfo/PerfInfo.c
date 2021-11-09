@@ -551,6 +551,9 @@ perfinfo_sysclexit_func (void *a, void *v)
 
 	pidp = GET_PIDP(&globals->pid_hash, trcinfop->pid);
 
+	/* I haven't quite figured out how to handing nested system calls yet.   Here, we 
+	 * could have some really long system call values.  
+	 */
 	pop_win_syscall(pidp, &addr, &win_starttime);
 	starttime = CONVERT_WIN_TIME(win_starttime);
 	hrtime = CONVERT_WIN_TIME(p->TimeStamp);

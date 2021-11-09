@@ -73,6 +73,7 @@ pid_winki_trace_funcs()
 	winki_enable_event(0x400, fileio_name_func);
         winki_enable_event(0x420, fileio_name_func);
         winki_enable_event(0x423, fileio_name_func);
+        winki_enable_event(0x424, fileio_name_func);
         winki_enable_event(0x440, fileio_create_func);
         winki_enable_event(0x443, fileio_readwrite_func);
         winki_enable_event(0x444, fileio_readwrite_func);

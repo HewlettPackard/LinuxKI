@@ -678,7 +678,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define FD_HASH(fd) (fd & (FD_HSIZE-1))
 
 #define FOBJ lle.key
-#define FOBJ_HSIZE 0x80
+#define FOBJ_HSIZE 0x1000
 #define FOBJ_HASH(fobj) ((fobj << 10) & (FOBJ_HSIZE-1))
 
 #define FDEV lle.key

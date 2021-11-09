@@ -2414,6 +2414,15 @@ pop_win_syscall(void *arg1, uint64 *addr, uint64 *hrtime)
 
 	FREE(entry);
 
+	/* I have had problams with the nested system calls.   So here, let's drain the pipe
+	 * and make sure that the syscall stack is empty 
+	 */
+
+	while ((entry = (win_syscall_save_t *)pidp->win_active_syscalls) != NULL) {
+		pidp->win_active_syscalls = entry->next;
+		FREE(entry);
+	}
+
 	return 1;
 }
 

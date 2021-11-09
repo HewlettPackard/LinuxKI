@@ -897,7 +897,6 @@ add_oracle_sid(pid_info_t *pidp)
                         return ;
                 }
                 /* no match.  Need new SID entry */
-        /* XXX printf ("add_oracle_sid_3(): %s %s\n", pidp->cmd, sid_name); */
 		sprintf (sid_table[next_sid].sid_name, "%-19s", sid_name);
 		len = strlen(sid_name);
 		if (len > 19) len = 19;

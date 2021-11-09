@@ -125,6 +125,10 @@ font-family:"Arial",sans-serif;color:black'>Date: 05/12/21</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Updated: 11/09/2021</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span lang=EN-US style='font-size:10.0pt;
 font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
@@ -260,8 +264,8 @@ normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New"'>          Sleep Func                 23914           
-17.521185   0.000733   0.006618  KeWaitForSingleObject</span></p>
+"Courier New"'>          Sleep Func                 23914            17.521185 
+ 0.000733   0.006618  KeWaitForSingleObject</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -278,7 +282,7 @@ normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
-"Courier New"'>    NtReadFile                         121      5.8   
+"Courier New"'>    NtReadFile                         121      5.8   
 0.028911   0.000239   0.023906       0</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
@@ -320,9 +324,9 @@ style='color:#0033CC'>SysClEnter addr=ntoskrnl.exe?NtWaitForSingleObject+0x0</sp
 Stacktrace: ntoskrnl.exe?KiSystemServiceExitPico+0x297
 wow64cpu.dll?CpupSyscallStub+0xc wow64cpu.dll?Thunk0ArgReloadState+0x5
 wow64cpu.dll?BTCpuSimulate+0x9 wow64.dll?0x7ffb3789cfda
-wow64.dll?0x7ffb3789cea0 ntdll.dll?LdrpInitializeProcess+0x1789
-ntdll.dll?_control87$filt$0+0x1a9ed ntdll.dll?LdrpInitialize+0x3b
-ntdll.dll?LdrInitializeThunk+0xe ntdll.dll?RtlStringVPrintfWorkerW+0x58
+wow64.dll?0x7ffb3789cea0 ntdll.dll?LdrpInitializeProcess+0x1789 ntdll.dll?_control87$filt$0+0x1a9ed
+ntdll.dll?LdrpInitialize+0x3b ntdll.dll?LdrInitializeThunk+0xe
+ntdll.dll?RtlStringVPrintfWorkerW+0x58
 KernelBase.dll?c_PmapEntries_api_ms_win_rtcore_ntuser_window_l1_1_0+0x149
 KernelBase.dll?c_PmapEntries_api_ms_win_rtcore_ntuser_window_l1_1_0+0xa2
 msodbcsql17.dll?0x623d4a43 msodbcsql17.dll?0x623ab3b9
@@ -339,13 +343,13 @@ ideal_cpu=3 new_thread_waittime=30715 StackTrace:</span></p>
 normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
 "Courier New"'>    0.881776 cpu=6 tid=0 pid=0 Thread <span style='color:#0033CC'>ReadyThread
 target_tid=4508</span> target_pid=14532 adjreason=1 adjincr=2 flag=1
-StackTrace: ntoskrnl.exe?KiExitDispatcher+0x12b
-ntoskrnl.exe?IopfCompleteRequest+0x18b4 ntoskrnl.exe?IopPerfCompleteRequest+0x19f
-ntoskrnl.exe?_ctrlfp$filt$0+0x5fa22
+StackTrace: ntoskrnl.exe?KiExitDispatcher+0x12b ntoskrnl.exe?IopfCompleteRequest+0x18b4
+ntoskrnl.exe?IopPerfCompleteRequest+0x19f ntoskrnl.exe?_ctrlfp$filt$0+0x5fa22
 afd.sys?AfdTLCompleteBufferUserReceive+0x11a <span style='background:yellow'>tcpip.sys?TcpCompleteClientReceiveRequest+0x25</span>
 tcpip.sys?TcpPushRequestReceive+0x106 tcpip.sys?memset+0x20043 <span
-style='background:yellow'>tcpip.sys?TcpPeriodicTimeoutHandler</span>+0x3d9 ntoskrnl.exe?KiProcessExpiredTimerList+0x159
-ntoskrnl.exe?KiRetireDpcList+0x4a7 ntoskrnl.exe?KiIdleLoop+0x5a</span></p>
+style='background:yellow'>tcpip.sys?TcpPeriodicTimeoutHandler</span>+0x3d9
+ntoskrnl.exe?KiProcessExpiredTimerList+0x159 ntoskrnl.exe?KiRetireDpcList+0x4a7
+ntoskrnl.exe?KiIdleLoop+0x5a</span></p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
 normal;vertical-align:top'><span lang=EN-US style='font-size:9.0pt;font-family:
@@ -358,9 +362,10 @@ ntoskrnl.exe?KiCommitThreadWait+0x549 ntoskrnl.exe?KeWaitForSingleObject+0x520
 ntoskrnl.exe?NtWaitForSingleObject+0xfc
 ntoskrnl.exe?KiSystemServiceExitPico+0x2b9 wow64cpu.dll?CpupSyscallStub+0xc
 wow64cpu.dll?Thunk0ArgReloadState+0x5 wow64cpu.dll?BTCpuSimulate+0x9
-wow64.dll?0x7ffb3789cfda wow64.dll?0x7ffb3789cea0 ntdll.dll?LdrpInitializeProcess+0x1789
-ntdll.dll?_control87$filt$0+0x1a9ed ntdll.dll?LdrpInitialize+0x3b
-ntdll.dll?LdrInitializeThunk+0xe ntdll.dll?RtlStringVPrintfWorkerW+0x58
+wow64.dll?0x7ffb3789cfda wow64.dll?0x7ffb3789cea0
+ntdll.dll?LdrpInitializeProcess+0x1789 ntdll.dll?_control87$filt$0+0x1a9ed
+ntdll.dll?LdrpInitialize+0x3b ntdll.dll?LdrInitializeThunk+0xe
+ntdll.dll?RtlStringVPrintfWorkerW+0x58
 KernelBase.dll?c_PmapEntries_api_ms_win_rtcore_ntuser_window_l1_1_0+0x149
 KernelBase.dll?c_PmapEntries_api_ms_win_rtcore_ntuser_window_l1_1_0+0xa2
 msodbcsql17.dll?0x623d4a43 msodbcsql17.dll?0x623ab3b9
@@ -393,8 +398,8 @@ lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>The primary
 root cause is a missed interrupt.   Remember this environment is virtualized
 using Hyper-V, so the virtualization layer adds some additional complexity in
 the interrupt processing from a virtual LAN.    Complicating things even more
-is that the data being received is large (&gt; than the MTU size of 1500 bytes),
-so there is also some packet reassembly that needs to be done.</span></p>
+is that the data being received is large (&gt; than the MTU size of 1500
+bytes), so there is also some packet reassembly that needs to be done.</span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>The LinuxKI
@@ -429,14 +434,42 @@ color:#CC0000'>Warning: TCP Timeouts Detected </span><u><span style='font-size:
 font-family:"Arial",sans-serif'>&nbsp;</span></b></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Root Cause</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>The problem
+is caused due to missing the PSH flag in the last segment of a Large Send when
+the Host-based NIC is using Large Send Offload (LSO).   Additional details can
+be found in the following customer advisory:</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'><a
+href="https://support.hpe.com/hpesc/public/docDisplay?docId=emr_na-a00115965en_us">https://support.hpe.com/hpesc/public/docDisplay?docId=emr_na-a00115965en_us</a></span></span><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'> </span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Note that
+this problem can also occur when using VMWare ESXi as the host operating system.</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Workaround</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Disable LSO
+on the Synergy server for the host operating system.</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Solution </span></b></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
-lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>To resolve
-the issue, the customer enabled Jumbo Frames (MTU size of 9000 bytes) and they
-also enabled SR-IOV for more efficient network processing using virtualization
-technology such as Hyper-V.    After implementing SR-IOV and Jumbo Frames, the
-critical job completed in under 3 hours.   </span></p>
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>Please refer
+to the following customer advisory for details of the QLogic FastLinQ driver
+versions needed to resolve this issue:</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+class=MsoHyperlink><span lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'><a
+href="https://support.hpe.com/hpesc/public/docDisplay?docId=emr_na-a00115965en_us">https://support.hpe.com/hpesc/public/docDisplay?docId=emr_na-a00115965en_us</a></span></span><span
+lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'> </span></p>
 
 <p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
 lang=EN-US style='font-size:10.0pt;font-family:"Arial",sans-serif'>For more

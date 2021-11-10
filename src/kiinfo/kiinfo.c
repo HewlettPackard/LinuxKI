@@ -403,7 +403,7 @@ main(int argc, char *argv[])
 	} else if (timestamp) {
 		/* Ignoring system calls is applied during data collection only */
 		if (sysignore) { 
-			fprintf (stderr, "Warning: sysignore file only applied at the time the trace is collected.  Ignoring sysignore option.\n");
+			fprintf (stderr, "Warning: sysignore file is only applied at the time the trace is collected.  Ignoring sysignore option.\n");
 		}
 
 		cwd = get_current_dir_name();

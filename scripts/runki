@@ -1399,7 +1399,7 @@ ls -lR --time-style=locale /dev 		> ll_R_dev_all.$tag 2>&1
 
 cat $debugfs_mount_point/sched_features >sched_features.$tag 2>&1
 
-for dir in `ls -d /sys/block/*/queue`; do fgrep "" $dir/* >block_params.$tag; done
+for dir in `ls -d /sys/block/*/queue`; do fgrep -r "" $dir/* >block_params.$tag 2>/dev/null; done
 for file in `find /sys/devices -name speed | grep fc_host`; do echo "$file `cat $file`" >>fc_linkspeed.$tag 2>&1; done
 
 if [ $do_liki -eq 0 ]; then

@@ -1901,7 +1901,7 @@ live_pid_runtime_summary(void *arg1, void *arg2)
 
 	move(lineno, 0); clrtoeol();
 	
-	mvprintw (lineno++, 0, "%6d %5.1f%% %5.1f%% %5.1f%% %5.1f%% %5.1f%% %5.1f%%",
+	mvprintw (lineno++, 0, "%7d %5.1f%% %5.1f%% %5.1f%% %5.1f%% %5.1f%% %5.1f%%",
 		pidp->PID,
 		(SECS(statp->T_run_time)*100.0)/secs,
 		(SECS(statp->T_sys_time)*100.0)/secs,
@@ -2189,7 +2189,7 @@ print_pid_hc_live(void *arg1, void *arg2)
 			get_command(pidp, NULL);
 			if (globals->docker_hash) get_pid_cgroup(pidp, NULL);
 		}
-		mvprintw (lineno++, col, " %7d %7d %7d %7d %6d  %s",
+		mvprintw (lineno++, col, " %7d %7d %7d %7d %8d  %s",
 			hcinfop->total,
 			hcinfop->cpustate[HC_USER],
 			hcinfop->cpustate[HC_SYS],
@@ -2392,7 +2392,7 @@ print_irq_window()
 			
 	lineno = header_lineno;
 	lineno++;
-	col=75;
+	col=72;
 	if (COLS > 146) {
 		mvprintw(lineno++, col, "------------------------------- Soft IRQs -----------------------------");
 		mvprintw(lineno++, col, " IRQ Name                                Count     ElpTime   Avg(usecs)");
@@ -2527,8 +2527,8 @@ print_select_cpu_window()
 		irqheader_lineno = lineno;
 		lineno++;
 		col=0;
-		mvprintw(lineno++, col, "----------------------- Hard IRQs ---------------------");
-		mvprintw(lineno++, col, "IRQ Name                Count      ElpTime");
+		mvprintw(lineno++, col, "------------------------------- Hard IRQs -----------------------------");
+		mvprintw(lineno++, col, " IRQ Name                                Count     ElpTime    Avg(usec)");
 		irqinfop = cpuinfop->irqp;
 		if (irqinfop) {
 			irqtype = HARDIRQ;
@@ -2538,14 +2538,16 @@ print_select_cpu_window()
 
 		saved_lineno = lineno;
 		lineno = irqheader_lineno+1;
-		col=57;
-		mvprintw(lineno++, col, "------------- Soft IRQs ------------");
-		mvprintw(lineno++, col, "IRQ Name           Count     ElpTime");
-		irqinfop = cpuinfop->softirqp;
-		if (irqinfop) {
-			irqtype = SOFTIRQ;
-			foreach_hash_entry((void **)irqinfop->irq_entry_hash, IRQ_HSIZE,
+		col=72;
+		if (COLS > 146) {
+			mvprintw(lineno++, col, "------------------------------- Soft IRQs -----------------------------");
+			mvprintw(lineno++, col, " IRQ Name                                Count     ElpTime    Avg(usec)");
+			irqinfop = cpuinfop->softirqp;
+			if (irqinfop) {
+				irqtype = SOFTIRQ;
+				foreach_hash_entry((void **)irqinfop->irq_entry_hash, IRQ_HSIZE,
 					print_irq_entry_live, irq_sort_by_time, MIN(LINES_AVAIL, 5), &irqtype);
+			}
 		}
 
 		lineno = MAX(lineno, saved_lineno);
@@ -2556,7 +2558,7 @@ print_select_cpu_window()
 	if (is_alive && (LINES_AVAIL > 3)) {
 		lineno++;
 		mvprintw (lineno++, 0, "----------------------- Top Tasks by Hardclock Count ------------------------");
-		mvprintw (lineno++, 0, "   Count    USER     SYS    INTR    %s  Command", tlabel);
+		mvprintw (lineno++, 0, "   Count    USER     SYS    INTR      %s  Command", tlabel);
 		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
                            print_pid_hc_live, pid_sort_by_totalhc, LINES_AVAIL, NULL);
 	}
@@ -2745,7 +2747,7 @@ print_select_docker_window()
 	if (LINES_AVAIL > 3) {
 		lineno++;
 		mvprintw (lineno++,0,"Top Tasks sorted by CPU time");
-		mvprintw (lineno++,0,"   %s  busy%%   sys%%  user%%  runq%%   slp%%   stl%%", tlabel);
+		mvprintw (lineno++,0,"    %s  busy%%   sys%%  user%%  runq%%   slp%%   stl%%", tlabel);
 		if (COLS > 100) printw ("     IOPS     MB/s");
 		if (COLS > 120) printw ("   NetOPS  NetMB/s");
 		printw ("  Command");
@@ -3451,7 +3453,7 @@ print_hc_window()
 	if (!IS_FTRACE && (LINES_AVAIL > 3)) {
 		lineno++;
 		mvprintw(lineno++, 0, "----------------------- Top Tasks by Hardclock Count ------------------------");
-		mvprintw(lineno++, 0, "   Count    USER     SYS    INTR    %s  Command", tlabel);
+		mvprintw(lineno++, 0, "   Count    USER     SYS    INTR        %s  Command", tlabel);
 		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
                            print_pid_hc_live, pid_sort_by_totalhc, LINES_AVAIL, NULL);
 	}
@@ -3570,7 +3572,7 @@ print_main_window()
 	if (LINES_AVAIL > 3) {
 		lineno++;
 		mvprintw (lineno++,0,"Top tasks sorted by CPU time");
-		mvprintw (lineno++,0,"   %s  busy%%   sys%%  user%%  runq%%   slp%%   stl%%", tlabel);
+		mvprintw (lineno++,0,"    %s  busy%%   sys%%  user%%  runq%%   slp%%   stl%%", tlabel);
 		if (COLS > 100) printw ("     IOPS     MB/s");
 		if (COLS > 120) printw ("   NetOPS  NetMB/s");
 		printw ("  Command");

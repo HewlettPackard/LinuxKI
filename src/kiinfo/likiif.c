@@ -1072,7 +1072,7 @@ liki_pcpu_thread(void * vp_pcpu)
 	/* If sched_setscheduler fails, then skip this for the rest of the CPUs */
 	if ((sched_setscheduler(0, SCHED_RR, &sp) == -1) && (setsched_errs == 0)) {
 		perror("sched_setscheduler()");
-		fprintf(stderr, "failed to make per-CPU threads realtime (could be a bug in RHEL 7.3!)\n");
+		fprintf(stderr, "failed to make per-CPU threads realtime (possible due to selinux being enabled)\n");
 		setsched_errs = 1;
 	}
 

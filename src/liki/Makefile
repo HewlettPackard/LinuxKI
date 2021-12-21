@@ -197,7 +197,7 @@ else ifeq ($(hostdistro),debian) # Debian, same as SLES
     endif
 else ifeq ($(hostdistro),fedora)
    #FEDORA 
-   EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
+   EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=6 -DOTHER_STACK_SKIP=2
 else ifeq ($(hostdistro),ubuntu)
     ifneq (,$(findstring 18,$(hostversion)))
 	#UBUNTU 18.X

@@ -395,8 +395,7 @@ char *symlookup(void *arg1, Elf64_Addr symaddr, uint64 *offsetp)
 	 * we have the default virtual address defined in the object file.  These MAY not be the same.   So we will get
 	 * the offset from the start of the ELF in memory and use that to map the symaddr into the ELF file.    
 	 */
-	offset = symaddr - (pregp->p_vaddr - pregp->p_off);
-	symaddr = pregp->elf_vaddr + offset;
+	symaddr = symaddr - (pregp->p_vaddr - pregp->elf_vaddr);
 
 	/* printf ("symlookup():  addr: 0x%llx   pregp: vaddr 0x%llx p_off 0x%llx elf_vaddr 0x%llx\n", symaddr, pregp->p_vaddr, pregp->p_off, pregp->elf_vaddr); */
 	/* build the sorted symbol table, if it is not already built */

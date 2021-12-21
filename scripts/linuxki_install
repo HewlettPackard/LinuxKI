@@ -33,7 +33,12 @@ if ([ "$ARCH" == "x86_64" ] || [ "$ARCH" == "amd64" ]); then
 			if [ $? == 0 ]; then
                 		ln /opt/linuxki/kiinfo.rhel8 /opt/linuxki/kiinfo
 			else
-				ln /opt/linuxki/kiinfo.x86_64 /opt/linuxki/kiinfo
+				grep "Fedora Linux 35" /etc/os-release >/dev/null 2>&1
+				if [ $? == 0 ]; then
+                			ln /opt/linuxki/kiinfo.rhel8 /opt/linuxki/kiinfo
+				else
+					ln /opt/linuxki/kiinfo.x86_64 /opt/linuxki/kiinfo
+				fi
 			fi
 		fi
 	fi
@@ -54,7 +59,12 @@ elif [ "$ARCH" == "ppc64le" ]; then
 			if [ $? == 0 ]; then
                 		ln /opt/linuxki/kiinfo-rhel8.ppc64le /opt/linuxki/kiinfo
 			else
-				ln /opt/linuxki/kiinfo-rhel7_8.ppc64le /opt/linuxki/kiinfo
+				grep "Fedora Linux 35" /etc/os-release >/dev/null 2>&1
+				if [ $? == 0 ]; then
+                			ln /opt/linuxki/kiinfo-rhel8.ppc64le /opt/linuxki/kiinfo
+				else
+					ln /opt/linuxki/kiinfo-rhel7_8.ppc64le /opt/linuxki/kiinfo
+				fi
 			fi
 		fi
 	fi

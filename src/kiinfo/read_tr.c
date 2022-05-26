@@ -204,6 +204,22 @@ liki_action()
 	strcpy(&liki_actions[TT_MM_PAGE_FREE].subsys[0], "kmem");
 	strcpy(&liki_actions[TT_MM_PAGE_FREE].event[0], "mm_page_free");
 
+	liki_actions[TT_CALL_FUNCTION_ENTRY].id = TT_CALL_FUNCTION_ENTRY;
+	strcpy(&liki_actions[TT_CALL_FUNCTION_ENTRY].subsys[0], "irq");
+	strcpy(&liki_actions[TT_CALL_FUNCTION_ENTRY].event[0], "call_function_entry");
+
+	liki_actions[TT_CALL_FUNCTION_EXIT].id = TT_CALL_FUNCTION_EXIT;
+	strcpy(&liki_actions[TT_CALL_FUNCTION_EXIT].subsys[0], "irq");
+	strcpy(&liki_actions[TT_CALL_FUNCTION_EXIT].event[0], "call_function_exit");
+
+	liki_actions[TT_CALL_FUNCTION_SINGLE_ENTRY].id = TT_CALL_FUNCTION_SINGLE_ENTRY;
+	strcpy(&liki_actions[TT_CALL_FUNCTION_SINGLE_ENTRY].subsys[0], "irq");
+	strcpy(&liki_actions[TT_CALL_FUNCTION_SINGLE_ENTRY].event[0], "call_function_single_entry");
+
+	liki_actions[TT_CALL_FUNCTION_SINGLE_EXIT].id = TT_CALL_FUNCTION_SINGLE_EXIT;
+	strcpy(&liki_actions[TT_CALL_FUNCTION_SINGLE_EXIT].subsys[0], "irq");
+	strcpy(&liki_actions[TT_CALL_FUNCTION_SINGLE_EXIT].event[0], "call_function_single_exit");
+
 	return liki_actions;
 }
 
@@ -416,6 +432,10 @@ THese events cause panics on SLES 15, so removing them!!
 		else if (strcmp(ki_actions[i].event, "mm_page_alloc") == 0) TRACE_MM_PAGE_ALLOC = i;
 		else if (strcmp(ki_actions[i].event, "mm_page_free_direct") == 0) TRACE_MM_PAGE_FREE_DIRECT = i;
 		else if (strcmp(ki_actions[i].event, "mm_page_free") == 0) TRACE_MM_PAGE_FREE = i;
+		else if (strcmp(ki_actions[i].event, "call_function_entry") == 0) TRACE_CALL_FUNCTION_ENTRY = i;
+		else if (strcmp(ki_actions[i].event, "call_function_exit") == 0) TRACE_CALL_FUNCTION_EXIT = i;
+		else if (strcmp(ki_actions[i].event, "call_function_single_entry") == 0) TRACE_CALL_FUNCTION_SINGLE_ENTRY = i;
+		else if (strcmp(ki_actions[i].event, "call_function_single_exit") == 0) TRACE_CALL_FUNCTION_SINGLE_EXIT = i;
 		else if (strcmp(ki_actions[i].event, "walltime") == 0) TRACE_WALLTIME = i;
 	}
 }
@@ -690,6 +710,10 @@ set_events_default()
 	ki_actions[TRACE_IRQ_HANDLER_EXIT].execute = 1;	
 	ki_actions[TRACE_SOFTIRQ_ENTRY].execute = 1;	
 	ki_actions[TRACE_SOFTIRQ_EXIT].execute = 1;	
+	ki_actions[TRACE_CALL_FUNCTION_ENTRY].execute = 1;	
+	ki_actions[TRACE_CALL_FUNCTION_EXIT].execute = 1;	
+	ki_actions[TRACE_CALL_FUNCTION_SINGLE_ENTRY].execute = 1;	
+	ki_actions[TRACE_CALL_FUNCTION_SINGLE_EXIT].execute = 1;	
 }
 
 int 
@@ -743,6 +767,10 @@ set_events_options(void *v)
 				if (TRACE_WORKQUEUE_EXECUTION) ki_actions[TRACE_WORKQUEUE_EXECUTION].execute = 1;
 				if (TRACE_WORKQUEUE_ENQUEUE) ki_actions[TRACE_WORKQUEUE_ENQUEUE].execute = 1;
 				if (TRACE_WORKQUEUE_EXECUTE) ki_actions[TRACE_WORKQUEUE_EXECUTE].execute = 1;
+				ki_actions[TRACE_CALL_FUNCTION_ENTRY].execute = 1;	
+				ki_actions[TRACE_CALL_FUNCTION_EXIT].execute = 1;	
+				ki_actions[TRACE_CALL_FUNCTION_SINGLE_ENTRY].execute = 1;	
+				ki_actions[TRACE_CALL_FUNCTION_SINGLE_EXIT].execute = 1;	
 			} else if (strcmp(fi->fi_item_str, "kidsk") == 0) {
 				filter_cnt++;
 				ki_actions[TRACE_BLOCK_RQ_ISSUE].execute = 1;
@@ -809,6 +837,10 @@ set_events_options(void *v)
 				if (TRACE_CACHE_EVICT) ki_actions[TRACE_CACHE_EVICT].execute = 1;
 				if (TRACE_ANON_FAULT) ki_actions[TRACE_ANON_FAULT].execute = 1;
 				if (TRACE_FILEMAP_FAULT) ki_actions[TRACE_FILEMAP_FAULT].execute = 1;
+				ki_actions[TRACE_CALL_FUNCTION_ENTRY].execute = 1;	
+				ki_actions[TRACE_CALL_FUNCTION_EXIT].execute = 1;	
+				ki_actions[TRACE_CALL_FUNCTION_SINGLE_ENTRY].execute = 1;	
+				ki_actions[TRACE_CALL_FUNCTION_SINGLE_EXIT].execute = 1;	
 #if 0
 These events cause panics on SLES 15
 				if (TRACE_KERNEL_PAGEFAULT) ki_actions[TRACE_KERNEL_PAGEFAULT].execute = 0;

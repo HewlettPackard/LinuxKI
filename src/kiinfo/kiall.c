@@ -163,6 +163,10 @@ kiall_init_func(void *v)
 	ki_actions[TRACE_SOFTIRQ_ENTRY].func = softirq_entry_func;
 	ki_actions[TRACE_SOFTIRQ_EXIT].func = softirq_exit_func;
 	ki_actions[TRACE_SOFTIRQ_RAISE].func = kiall_generic_func;
+	ki_actions[TRACE_CALL_FUNCTION_ENTRY].func = call_function_entry_func;
+	ki_actions[TRACE_CALL_FUNCTION_EXIT].func = call_function_exit_func;
+	ki_actions[TRACE_CALL_FUNCTION_SINGLE_ENTRY].func = call_function_entry_func;
+	ki_actions[TRACE_CALL_FUNCTION_SINGLE_EXIT].func = call_function_exit_func;
 	SET_KIACTION_FUNCTION(TRACE_SCSI_DISPATCH_CMD_START, kiall_generic_func);
 	SET_KIACTION_FUNCTION(TRACE_SCSI_DISPATCH_CMD_DONE, kiall_generic_func);
 	SET_KIACTION_FUNCTION(TRACE_WORKQUEUE_INSERTION, kiall_generic_func);
@@ -206,6 +210,10 @@ kiall_init_func(void *v)
 		ki_actions[TRACE_SOFTIRQ_RAISE].execute = 1;
 		ki_actions[TRACE_SOFTIRQ_ENTRY].execute = 1;
 		ki_actions[TRACE_SOFTIRQ_EXIT].execute = 1;
+		ki_actions[TRACE_CALL_FUNCTION_ENTRY].execute = 1;
+		ki_actions[TRACE_CALL_FUNCTION_EXIT].execute = 1;
+		ki_actions[TRACE_CALL_FUNCTION_SINGLE_ENTRY].execute = 1;
+		ki_actions[TRACE_CALL_FUNCTION_SINGLE_EXIT].execute = 1;
 		SET_KIACTION_EXECUTE(TRACE_SCSI_DISPATCH_CMD_START, 1);
 		SET_KIACTION_EXECUTE(TRACE_SCSI_DISPATCH_CMD_DONE, 1);
 		SET_KIACTION_EXECUTE(TRACE_WORKQUEUE_INSERTION, 1);

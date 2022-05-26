@@ -86,15 +86,35 @@ ifeq ($(hostdistro),rhel) # Red Hat Enterprise Linux (RHEL)
    else ifneq (,$(findstring 7.,$(hostversion)))
       #RHEL 7 (3.10)
       EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=9 -DOTHER_STACK_SKIP=2
-   else ifneq (,$(findstring 8.0,$(hostversion)))
-      #RHEL 8.0 (4.18)
-      EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-   else ifneq (,$(findstring 8.1,$(hostversion)))
-      #RHEL 8.1(4.18)
-      EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
    else ifneq (,$(findstring 8.,$(hostversion)))
-      #RHEL 8.2 and later (4.18)
-      EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      #RHEL 8.X
+      ifneq (,$(findstring 4.18.0-80.,$(hostkernel)))
+        #RHEL 8.0
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-147.,$(hostkernel)))
+        #RHEL 8.1
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-193.,$(hostkernel)))
+        #RHEL 8.2
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-240.,$(hostkernel)))
+        #RHEL 8.3
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-305.,$(hostkernel)))
+        #RHEL 8.4
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-348.,$(hostkernel)))
+        #RHEL 8.5
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-372.,$(hostkernel)))
+        #RHEL 8.6 
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL86 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL86 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      endif
+   else ifneq (,$(findstring 9.,$(hostversion)))
+        #RHEL 9.0
+        EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
    endif
 else ifeq ($(hostdistro),centos) #  Centos
    ifneq (,$(findstring 6.,$(hostversion)))
@@ -103,62 +123,75 @@ else ifeq ($(hostdistro),centos) #  Centos
    else ifneq (,$(findstring 7.,$(hostversion)))
       #RHEL 7 (3.10)
       EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=9 -DOTHER_STACK_SKIP=2
-   else ifneq (,$(findstring 8.0,$(hostversion)))
-      #RHEL 8.0 (4.18)
-      EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-   else ifneq (,$(findstring 8.1,$(hostversion)))
-      #RHEL 8.1(4.18)
-      EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
    else ifneq (,$(findstring 8.,$(hostversion)))
-      #RHEL 8 (4.18)
-      EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      #RHEL 8.X
+      ifneq (,$(findstring 4.18.0-80.,$(hostkernel)))
+        #RHEL 8.0
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-147.,$(hostkernel)))
+        #RHEL 8.1
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-193.,$(hostkernel)))
+        #RHEL 8.2
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-240.,$(hostkernel)))
+        #RHEL 8.3
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-305.,$(hostkernel)))
+        #RHEL 8.4
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-348.,$(hostkernel)))
+        #RHEL 8.5
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-372.,$(hostkernel)))
+        #RHEL 8.6 
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL86 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL86 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      endif
+   else ifneq (,$(findstring 9.,$(hostversion)))
+	#RHEL 9.X
+	EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
    endif
 else ifeq ($(hostdistro),ol) # Oracle Linux (OL)
    ifeq (,$(findstring uek,$(hostkernel)))
       #OL Red Hat compatible kernel
       ifneq (,$(findstring 6.,$(hostversion)))
-         #RHEL6 (2.6)
-         EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-      else ifneq (,$(findstring 7.,$(hostversion)))
-         #RHEL 7 (3.10)
-         EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=9 -DOTHER_STACK_SKIP=2
-      else ifneq (,$(findstring 8.0,$(hostversion)))
-         #RHEL 8.0 (4.18)
-         EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-      else ifneq (,$(findstring 8.1,$(hostversion)))
-        #RHEL 8.1(4.18)
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-      else ifneq (,$(findstring 8.,$(hostversion)))
-        #RHEL 8.2 and later (4.18)
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-      else ifeq ($(hostdistro),ol) # Oracle Linux (OL)
-   ifeq (,$(findstring uek,$(hostkernel)))
-      #OL Red Hat compatible kernel
-      ifneq (,$(findstring 6.,$(hostversion)))
-         #RHEL6 (2.6)
-         EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-      else ifneq (,$(findstring 7.,$(hostversion)))
-         #RHEL 7 (3.10)
-         EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=9 -DOTHER_STACK_SKIP=2
-      else ifneq (,$(findstring 8.0,$(hostversion)))
-         #RHEL 8.0 (4.18)
-         EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-      else ifneq (,$(findstring 8.1,$(hostversion)))
-        #RHEL 8.1(4.18)
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-      else ifneq (,$(findstring 8.,$(hostversion)))
-        #RHEL 8.2 and later (4.18)
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-      else
+        #RHEL6 (2.6)
         EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-      endif
-   else ifneq (,$(findstring uek,$(hostkernel)))
-      #OL Unbreakable Enterprise Kernel (UEK)
-      EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
-   endif
-else
-        EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-      endif
+      else ifneq (,$(findstring 7.,$(hostversion)))
+        #RHEL 7 (3.10)
+        EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=9 -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 8.,$(hostversion)))
+        #RHEL 8.X
+        ifneq (,$(findstring 4.18.0-80.,$(hostkernel)))
+          #RHEL 8.0
+          EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        else ifneq (,$(findstring 4.18.0-147.,$(hostkernel)))
+          #RHEL 8.1
+          EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        else ifneq (,$(findstring 4.18.0-193.,$(hostkernel)))
+          #RHEL 8.2
+          EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        else ifneq (,$(findstring 4.18.0-240.,$(hostkernel)))
+          #RHEL 8.3
+          EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        else ifneq (,$(findstring 4.18.0-305.,$(hostkernel)))
+          #RHEL 8.4
+          EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        else ifneq (,$(findstring 4.18.0-348.,$(hostkernel)))
+          #RHEL 8.5
+          EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        else ifneq (,$(findstring 4.18.0-372.,$(hostkernel)))
+          #RHEL 8.6 
+          EXTRA_CFLAGS=-g -O3 -Wall -DRHEL86 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        else
+          EXTRA_CFLAGS=-g -O3 -Wall -DRHEL86 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        endif
+     else ifneq (,$(findstring 9.,$(hostversion)))
+	#RHEL 9.X
+	EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+     endif
    else ifneq (,$(findstring uek,$(hostkernel)))
       #OL Unbreakable Enterprise Kernel (UEK)
       EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2

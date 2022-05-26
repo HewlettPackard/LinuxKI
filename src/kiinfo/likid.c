@@ -117,7 +117,9 @@ run_dumper_thread(void * mystream)
 	sp.sched_priority = sched_get_priority_min(SCHED_RR);
 	if (sched_setscheduler(0, SCHED_RR, &sp) == -1) {
 		perror("sched_setscheduler()");
-		fprintf(stderr, "failed to make per-CPU thread realtime\n");
+		fprintf(stderr, "failed to make per-CPU threads realtime.  Continuing without realtime priority\n");
+                fprintf(stderr, "See https://access.redhat.com/articles/3696121 or try to disable selinux\n");
+
 	}
 #endif
 

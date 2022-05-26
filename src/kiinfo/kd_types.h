@@ -104,7 +104,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define PRINT_TIME(hrtime) { \
 	if (IS_WINKI) {															\
 		if (abstime_flag) {													\
-			printf ("%12.09f", (hrtime*1.0)/winki_hdr->PerfFreq);								\
+			printf ("%12.06f", (hrtime*1.0)/winki_hdr->PerfFreq);								\
 		} else if (fmttime_flag || epoch_flag) {										\
 			/* TBD Just use abstime for now */										\
 			printf ("%12.09f", (hrtime*1.0)/winki_hdr->PerfFreq);								\
@@ -271,6 +271,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define TRACE_MM_PAGE_FREE		trace_ids.trace_mm_page_free
 #define TRACE_MM_PAGE_FREE_DIRECT	trace_ids.trace_mm_page_free_direct
 
+#define TRACE_CALL_FUNCTION_ENTRY	trace_ids.trace_call_function_entry
+#define TRACE_CALL_FUNCTION_EXIT	trace_ids.trace_call_function_exit
+#define TRACE_CALL_FUNCTION_SINGLE_ENTRY	trace_ids.trace_call_function_single_entry
+#define TRACE_CALL_FUNCTION_SINGLE_EXIT	trace_ids.trace_call_function_single_exit
+
 typedef struct kd_print {
 	kd_rec_t kdrec;
 	uint32	filler;
@@ -319,6 +324,8 @@ extern kdtype_attr_t kernel_pagefault_attr[];
 extern kdtype_attr_t filemap_pagecache_attr[];
 extern kdtype_attr_t mm_page_alloc_attr[];
 extern kdtype_attr_t mm_page_free_attr[];
+extern kdtype_attr_t call_function_entry_attr[];
+extern kdtype_attr_t call_function_exit_attr[];
 extern kdtype_attr_t listen_overflow[];
 extern kdtype_attr_t walltime[];
 extern kdtype_attr_t marker_attr[];

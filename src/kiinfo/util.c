@@ -1771,8 +1771,6 @@ print_stacktrace(unsigned long *stktrc, unsigned long depth, int start, uint64 p
 }
 
 
-int stack_switch_start = 0;
-
 int 
 find_switch_start(uint64 *stack, uint64 depth)
 {
@@ -1812,6 +1810,40 @@ find_switch_start(uint64 *stack, uint64 depth)
 			else if (strncmp(symptr, "sched_switch_trace", 18) == 0) retval= i+1;
 			else if (strncmp(symptr, "pick_next_task_fair", 19) == 0) retval= i+1;
 			else if (strncmp(symptr, "__sched_text_start", 18) == 0) retval= i+1;		/* ARM64, l4tm */
+			else continue;
+		}
+        }
+        return retval;
+}
+
+int 
+find_hc_start(uint64 *stack, uint64 depth)
+{
+	int i;
+	char *symptr;
+	int retval=1;
+
+
+	if (globals->nsyms==0) return 0;
+	if (depth == 0) return 0;
+	if (stack[0] != STACK_CONTEXT_KERNEL) {
+		/* we should find the KERNEL CONTEXT marker for a switch record */
+		return 0;
+	}
+	
+	for (i=1; i < depth; i++) { 
+		if (STACK_CONTEXT(stack[i])) {
+			/* stop at next CONTEXT marker, if we get this far
+			 * then we did not find a switch overhead func 
+			 */
+			break;
+		}
+	
+		symptr = findsym(stack[i]);
+		
+		if (symptr)  {
+			if (strncmp(symptr, "apic_timer_interrupt", 20) == 0)  retval=i+1;
+			else if (strncmp(symptr, "ret_from_intr", 18) == 0) retval= i+1;		/* ARM64, l4tm */
 			else continue;
 		}
         }

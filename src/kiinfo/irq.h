@@ -17,3 +17,5 @@ extern int irq_handler_exit_func(void *, void *);
 extern int softirq_entry_func(void *, void *);
 extern int softirq_exit_func(void *, void *);
 extern int softirq_raise_func(void *, void *);
+extern int call_function_entry_func(void *, void *);
+extern int call_function_exit_func(void *, void *);

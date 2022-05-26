@@ -236,6 +236,35 @@ print_softirq_exit_rec(void *a, uint64 irqtm)
 
 	return 0;
 }
+
+static inline int
+print_call_function_entry_rec(void *a)
+{
+	softirq_entry_t *rec_ptr = (softirq_entry_t *)a;
+
+	PRINT_COMMON_FIELDS(rec_ptr);
+	PRINT_EVENT(rec_ptr->id);
+	printf ("%cvec=%d\n", 
+		fsep, rec_ptr->vec);
+
+	return 0;
+}
+
+static inline int
+print_call_function_exit_rec(void *a, uint64 irqtm)
+{
+	softirq_exit_t *rec_ptr = (softirq_exit_t *)a;
+
+	PRINT_COMMON_FIELDS(rec_ptr);
+	PRINT_EVENT(rec_ptr->id);
+	printf ("%cvec=%d", 
+		fsep, rec_ptr->vec);
+
+	if (irqtm) printf ("%cirqtm=%11.6f", fsep, SECS(irqtm));
+	printf ("\n");
+
+	return 0;
+}
 	
 int
 irq_handler_entry_func(void *a, void *v)
@@ -324,6 +353,49 @@ softirq_exit_func(void *a, void *v)
 	delta = irq_exit_update_stats(rec_ptr->hrtime, rec_ptr->cpu, rec_ptr->pid, rec_ptr->vec, SOFTIRQ);
 	if (kitrace_flag) {
 		print_softirq_exit_rec(rec_ptr, cpuinfop->last_softirq_time ? rec_ptr->hrtime - cpuinfop->last_softirq_time : delta);
+	}
+
+	cpuinfop->last_softirq_vec = 0;
+	cpuinfop->last_softirq_time = 0;
+
+	return 0;
+}
+
+int
+call_function_entry_func(void *a, void *v)
+{
+	trace_info_t *trcinfo = (trace_info_t *)a;
+	softirq_entry_t tt_rec_ptr;
+	softirq_entry_t *rec_ptr;
+	int irq;
+	
+	if (debug) printf ("call_function_entry_func()\n");
+	
+	rec_ptr = conv_softirq_entry(a, &tt_rec_ptr);
+
+	if (pertrc_stats) incr_trc_stats(rec_ptr, NULL);
+	irq_entry_update_stats(rec_ptr->hrtime, rec_ptr->cpu, rec_ptr->pid, rec_ptr->vec, SOFTIRQ);
+	if (kitrace_flag) print_call_function_entry_rec(rec_ptr);
+
+	return 0;
+}
+
+int
+call_function_exit_func(void *a, void *v)
+{
+	trace_info_t *trcinfo = (trace_info_t *)a;
+	softirq_exit_t tt_rec_ptr;
+	softirq_exit_t *rec_ptr;
+	uint64 delta;
+	cpu_info_t *cpuinfop;
+
+	rec_ptr = conv_softirq_exit(a, &tt_rec_ptr);
+	cpuinfop = GET_CPUP(&globals->cpu_hash, rec_ptr->cpu);
+
+	if (pertrc_stats) incr_trc_stats(rec_ptr, NULL);
+	delta = irq_exit_update_stats(rec_ptr->hrtime, rec_ptr->cpu, rec_ptr->pid, rec_ptr->vec, SOFTIRQ);
+	if (kitrace_flag) {
+		print_call_function_exit_rec(rec_ptr, cpuinfop->last_softirq_time ? rec_ptr->hrtime - cpuinfop->last_softirq_time : delta);
 	}
 
 	cpuinfop->last_softirq_vec = 0;

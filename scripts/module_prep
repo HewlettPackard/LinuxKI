@@ -13,7 +13,7 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #***************************************************************************
 DIR=/opt/linuxki
-PATH=$PATH:/usr/sbin:/sbin
+PATH=$PATH:/usr/sbin:/sbin:/usr/bin
 #
 # Check if we already have the module installed
 #
@@ -65,6 +65,10 @@ TMP_SRC_DIR=`mktemp -d -p /tmp`
 cp $DIR/src/liki/* $TMP_SRC_DIR
 cd $TMP_SRC_DIR
 make
+
+# need to do chcon to tag likit.ko as a module if selinux is enabled
+chcon -t modules_object_t likit.ko >/dev/null 2>&1
+
 insmod likit.ko 
 if [ $? -eq 0 ]; then
 	echo -e "\\tCompiled compatible LiKI module successfully"

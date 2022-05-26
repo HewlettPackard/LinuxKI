@@ -95,6 +95,10 @@ trace_len(char *t)
 		case TT_MM_PAGE_FREE;
 		case TT_CACHE_INSERT:
 		case TT_CACHE_EVICT:
+		case TT_CALL_FUNCTION_ENTRY:
+		case TT_CALL_FUNCTION_EXIT:
+		case TT_CALL_FUNCTION_SINGLE_ENTRY:
+		case TT_CALL_FUNCTION_SINGLE_EXIT:
 			return(cp->reclen);
 		default:
 			fprintf(stderr, "LiKI: trace_len() passed an invalid trace! (id = %d)\n", cp->id);
@@ -1072,7 +1076,8 @@ liki_pcpu_thread(void * vp_pcpu)
 	/* If sched_setscheduler fails, then skip this for the rest of the CPUs */
 	if ((sched_setscheduler(0, SCHED_RR, &sp) == -1) && (setsched_errs == 0)) {
 		perror("sched_setscheduler()");
-		fprintf(stderr, "failed to make per-CPU threads realtime (possible due to selinux being enabled)\n");
+		fprintf(stderr, "failed to make per-CPU threads realtime.  Continuing without realtime priority\n");
+	        fprintf(stderr, "See https://access.redhat.com/articles/3696121 or try to disable selinux\n");
 		setsched_errs = 1;
 	}
 
@@ -1308,7 +1313,9 @@ liki_merge_thread(void * mpv)
 	sp.sched_priority = sched_get_priority_min(SCHED_RR) + 1;
 	if (sched_setscheduler(0, SCHED_RR, &sp) == -1) {
 		perror("sched_setscheduler()");
-		fprintf(stderr, "failed to make per-CPU threads realtime\n");
+	        fprintf(stderr, "failed to make per-CPU threads realtime.  Continuing without realtime priority\n");
+                fprintf(stderr, "See https://access.redhat.com/articles/3696121 or try to disable selinux\n");
+
 	}
 #endif
 

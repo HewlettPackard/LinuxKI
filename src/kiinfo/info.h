@@ -513,6 +513,7 @@ extern void 	bt();
 extern int 	for_each_file(char *, char *, char *, uint64);
 extern double 	duration(uint64, uint64);
 extern int	find_switch_start(uint64 *, uint64);
+extern int	find_hc_start(uint64 *, uint64);
 extern uint64   save_kernel_stack(uint64 *, uint64 *, uint64);
 extern uint64   save_entire_stack(uint64 *, uint64 *, uint64);
 extern int	is_idle_pc(uint64);

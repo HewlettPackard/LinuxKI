@@ -11,6 +11,8 @@
 #    0.72 - adding new file output (csv wo quotes ) ,  new script parameter
 #    0.73 - adding copyright
 #    0.74 - adding try catch
+#    0.75 - added Wait and Spin Stats (Mark Ray)
+#    0.76 - changed extensions from .out to .csv or .txt, which ever is more appropriate
 # --------------------------------------------------------------------------------------
 
 
@@ -37,7 +39,7 @@ Write-Host "$sqlInstances_cnt SQL Instance(s) were detected on the server - Star
 # globales
 # 1 file with all SQL-Instances and reponding services with PID - Instance Overview_PID
 # per Instance
-# 1 file per Instance <Instance>_<PID>_Threadlist_<Timestamp>.out
+# 1 file per Instance <Instance>_<PID>_Threadlist_<Timestamp>.txt
 # Timestamp: mmdd_HHMM (Problems with locales)
 # 
 # loop over all SQL instances 
@@ -51,7 +53,7 @@ if ($DateStr -eq '')
 
 
 # create output file name
-$instance_overview_pid = 'SQL_InstanceOverview_PID_' + $DateStr + '.out'
+$instance_overview_pid = 'SQL_InstanceOverview_PID_' + $DateStr + '.txt'
 
 # create output file for overview thread list
 $SQLThreadList = 'SQLThreadList' + '.' + $DateStr
@@ -114,7 +116,7 @@ $collectionInstance | foreach-Object {
   # --------------------------------------------------------------------------------------------
   # gather version and setup information
   Write-Host "SQL-Instance $sqlInstanceName : Version and Config" -ForegroundColor Green
-  $instance_version = 'SQL_' + $sqlInstanceShort + '_' + $sqlProcessID + '_Version_' + $DateStr + '.out'   # create output file name
+  $instance_version = 'SQL_' + $sqlInstanceShort + '_' + $sqlProcessID + '_Version_' + $DateStr + '.csv'   # create output file name
 
   try {
 	  $out_version = Invoke-Sqlcmd -Query "SELECT	
@@ -133,19 +135,30 @@ $collectionInstance | foreach-Object {
 
 	  # gather OS Memory usage for SQL-Server Instance / Process
 	  Write-Host "SQL-Instance $sqlInstanceName : OS Memory usage for SQL-Server Instance / Process" -ForegroundColor Green
-	  $instance_procmem = 'SQL_' + $sqlInstanceShort + '_' + $sqlProcessID + '_ProcMem_' + $DateStr + '.out'   # create output file name
+	  $instance_procmem = 'SQL_' + $sqlInstanceShort + '_' + $sqlProcessID + '_ProcMem_' + $DateStr + '.csv'   # create output file name
 	  Invoke-Sqlcmd -Query "select * from sys.dm_os_process_memory" -ServerInstance $sqlInstanceName -verbose | export-csv -verbose $instance_procmem -notypeinformation
 	  
 	  # gather OS Memory Node(NUMA) configuration (sys.dm_os_memory_nodes)
 	  Write-Host "SQL-Instance $sqlInstanceName : OS Memory Node(NUMA) configuration" -ForegroundColor Green
-	  $instance_nodemem = 'SQL_' + $sqlInstanceShort + '_' + $sqlProcessID + '_NodeMem_' + $DateStr + '.out'   # create output file name
+	  $instance_nodemem = 'SQL_' + $sqlInstanceShort + '_' + $sqlProcessID + '_NodeMem_' + $DateStr + '.csv'   # create output file name
 	  Invoke-Sqlcmd -Query "select * from sys.dm_os_memory_nodes" -ServerInstance $sqlInstanceName -verbose | export-csv -verbose $instance_nodemem -notypeinformation
 
 	  # gather thread information for SQL-Server scheduler, worker and threads
 	  Write-Host "SQL-Instance $sqlInstanceName : OS thread information for SQL-Server scheduler, worker and threads" -ForegroundColor Green
-	  $instance_threadlist = 'SQL_' + $sqlInstanceShort + '_' + $sqlProcessID + '_ThreadList_' + $DateStr + '.out'   # create output file name
+	  $instance_threadlist = 'SQL_' + $sqlInstanceShort + '_' + $sqlProcessID + '_ThreadList_' + $DateStr + '.csv'   # create output file name
 	  Invoke-Sqlcmd -Query "select p.kpid, p.cmd, s.*  from sys.dm_os_tasks t JOIN sys.dm_os_schedulers s on s.scheduler_id = t.scheduler_id 
 						   JOIN sys.sysprocesses p on p.spid = t.session_id" -ServerInstance $sqlInstanceName -verbose | export-csv -verbose $instance_threadlist -notypeinformation
+
+      # gather  SQL-Server Wait statistics
+      $instance_waitstats = 'SQL_' + $sqlInstanceShort + '_' + $sqlProcessID + '_WaitStats_' + $DateStr + '.csv'   # create output file name
+      Write-Host "SQL-Instance $sqlInstanceName Wait Statistics"
+      Invoke-Sqlcmd -InputFile ".\wait.sql" | export-csv -verbose $instance_waitstats -notypeinformation
+
+      # gather  SQL-Server Wait statistics
+      $instance_spinstats = 'SQL_' + $sqlInstanceShort + '_' + $sqlProcessID + '_SpinStats_' + $DateStr + '.csv'   # create output file name
+      Write-Host "SQL-Instance $sqlInstanceName Spin Statistics"
+      Invoke-Sqlcmd -InputFile ".\spin.sql" | export-csv -verbose $instance_spinstats -notypeinformation
+
   }  catch {
      Write-Host($error) -ForegroundColor RED
   } 

@@ -25,22 +25,32 @@ if ([ "$ARCH" == "x86_64" ] || [ "$ARCH" == "amd64" ]); then
 	if [ $? == 0 ]; then
 		ln /opt/linuxki/kiinfo.sles15 /opt/linuxki/kiinfo
 	else
-		grep "Red Hat Enterprise Linux 8" /etc/os-release >/dev/null 2>&1
-		if [ $? == 0 ]; then
-                	ln /opt/linuxki/kiinfo.rhel8 /opt/linuxki/kiinfo
-		else 
-			grep "CentOS Linux 8" /etc/os-release >/dev/null 2>&1
-			if [ $? == 0 ]; then
-                		ln /opt/linuxki/kiinfo.rhel8 /opt/linuxki/kiinfo
-			else
-				grep "Fedora Linux 35" /etc/os-release >/dev/null 2>&1
-				if [ $? == 0 ]; then
-                			ln /opt/linuxki/kiinfo.rhel8 /opt/linuxki/kiinfo
-				else
-					ln /opt/linuxki/kiinfo.x86_64 /opt/linuxki/kiinfo
-				fi
-			fi
-		fi
+	  grep "Red Hat Enterprise Linux 8" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+               	ln /opt/linuxki/kiinfo.rhel8 /opt/linuxki/kiinfo
+	else 
+	  grep "Red Hat Enterprise Linux 9" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+               	ln /opt/linuxki/kiinfo.rhel8 /opt/linuxki/kiinfo
+	else
+	  grep "CentOS Linux 8" /etc/os-release >/dev/null 2>&1
+  	  if [ $? == 0 ]; then
+          	ln /opt/linuxki/kiinfo.rhel8 /opt/linuxki/kiinfo
+	else
+	  grep "CentOS Linux 9" /etc/os-release >/dev/null 2>&1
+  	  if [ $? == 0 ]; then
+          	ln /opt/linuxki/kiinfo.rhel8 /opt/linuxki/kiinfo
+	else
+	  grep "Fedora Linux 35" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+         	ln /opt/linuxki/kiinfo.rhel8 /opt/linuxki/kiinfo
+	else
+	  ln /opt/linuxki/kiinfo.x86_64 /opt/linuxki/kiinfo
+	fi
+	fi
+	fi
+	fi
+	fi
 	fi
 elif [ "$ARCH" == "aarch64" ]; then
 	rm /opt/linuxki/kiinfo >/dev/null 2>&1
@@ -51,22 +61,32 @@ elif [ "$ARCH" == "ppc64le" ]; then
 	if [ $? == 0 ]; then
 		ln /opt/linuxki/kiinfo-sles15.ppc64le /opt/linuxki/kiinfo
 	else
-		grep "Red Hat Enterprise Linux 8" /etc/os-release >/dev/null 2>&1
-		if [ $? == 0 ]; then
-                	ln /opt/linuxki/kiinfo-rhel8.ppc64le /opt/linuxki/kiinfo
-		else 
-			grep "CentOS Linux 8" /etc/os-release >/dev/null 2>&1
-			if [ $? == 0 ]; then
-                		ln /opt/linuxki/kiinfo-rhel8.ppc64le /opt/linuxki/kiinfo
-			else
-				grep "Fedora Linux 35" /etc/os-release >/dev/null 2>&1
-				if [ $? == 0 ]; then
-                			ln /opt/linuxki/kiinfo-rhel8.ppc64le /opt/linuxki/kiinfo
-				else
-					ln /opt/linuxki/kiinfo-rhel7_8.ppc64le /opt/linuxki/kiinfo
-				fi
-			fi
-		fi
+	  grep "Red Hat Enterprise Linux 8" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+               	ln /opt/linuxki/kiinfo-rhel8.ppc64le /opt/linuxki/kiinfo
+	else
+	  grep "Red Hat Enterprise Linux 9" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+               	ln /opt/linuxki/kiinfo-rhel8.ppc64le /opt/linuxki/kiinfo
+	else 
+	  grep "CentOS Linux 8" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+         	ln /opt/linuxki/kiinfo-rhel8.ppc64le /opt/linuxki/kiinfo
+	else 
+	  grep "CentOS Linux 9" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+         	ln /opt/linuxki/kiinfo-rhel8.ppc64le /opt/linuxki/kiinfo
+	else
+	  grep "Fedora Linux 35" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+          ln /opt/linuxki/kiinfo-rhel8.ppc64le /opt/linuxki/kiinfo
+	else
+	  ln /opt/linuxki/kiinfo-rhel7_8.ppc64le /opt/linuxki/kiinfo
+	fi
+	fi
+	fi
+	fi
+	fi
 	fi
 else
 	echo "Unknown Architecture.  Only x86_64, aarch64, ppc64le supported"

@@ -96,8 +96,8 @@
 #define TT_LISTEN_OVERFLOW		22
 #define	TT_WALLTIME			23
 #define	TT_STARTUP			23	/* Enhances and replaces walltime */
-#define	UNUSED1				24
-#define	UNUSED2				25
+#define TT_CALL_FUNCTION_ENTRY		24
+#define TT_CALL_FUNCTION_EXIT		25
 #define TT_FILEMAP_FAULT		26
 #define TT_WORKQUEUE_ENQUEUE		27
 #define TT_WORKQUEUE_EXECUTE		28
@@ -106,17 +106,19 @@
 #define TT_CACHE_EVICT			31	/* obsolete - unused */
 #define TT_MM_PAGE_ALLOC                32
 #define TT_MM_PAGE_FREE			33
+#define TT_CALL_FUNCTION_SINGLE_ENTRY	34
+#define TT_CALL_FUNCTION_SINGLE_EXIT	35
 
 /* These aren't real probes. They are used internally to clean up
  * some traced resource related data etc. They should never be 
  * enabled as per a regular trace, and should always be last
  * in the list.
  */
-#define TT_SCHED_PROCESS_EXIT		34
-#define TT_SCHED_PROCESS_FORK		35
+#define TT_SCHED_PROCESS_EXIT		36
+#define TT_SCHED_PROCESS_FORK		37
 
-#define TT_NUM_PROBES			36
-#define TT_NUM_USER_PROBES		34
+#define TT_NUM_PROBES			38
+#define TT_NUM_USER_PROBES		36
 
 
 
@@ -139,6 +141,8 @@
 				 TT_BIT(TT_SYSCALL_ENTER) | TT_BIT(TT_SYSCALL_EXIT) | \
 				 TT_BIT(TT_HARDCLOCK) | TT_BIT(TT_POWER_FREQ) | \
 				 TT_BIT(TT_SOFTIRQ_ENTRY) | TT_BIT(TT_SOFTIRQ_EXIT) | \
+				 TT_BIT(TT_CALL_FUNCTION_ENTRY | TT_BIT(TT_CALL_FUNCTION_EXIT) | \
+				 TT_BIT(TT_CALL_FUNCTION_SINGLE_ENTRY | TT_BIT(TT_CALL_FUNCTION_SINGLE_EXIT) | \
 				 TT_BIT(TT_IRQ_HANDLER_ENTRY) | TT_BIT(TT_IRQ_HANDLER_EXIT))
 
 
@@ -427,19 +431,16 @@ typedef struct softirq_entry_trace {
 	int		vec;
 } softirq_entry_t;
 
-
 typedef struct softirq_exit_trace {
 	COMMON_FIELDS;
 	int		vec;
 } softirq_exit_t;
-
 
 typedef struct softirq_raise_trace {
 	COMMON_FIELDS;
 	int		vec;
 	char		name[IRQ_NAME_LEN];
 } softirq_raise_t;
-
 
 typedef struct tasklet_enqueue_trace {
 	COMMON_FIELDS;

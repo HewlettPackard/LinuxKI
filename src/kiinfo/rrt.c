@@ -75,7 +75,6 @@ void alloc_thread_this_cpu(uint64 mycpu)
                 FATAL(error, "failed to reate reader thread", "CPU:", mycpu);
     }
 }
- 
 
 __thread uint64 cpu;
 __thread int curr_buf;
@@ -85,8 +84,57 @@ __thread int flush_buf;
 void *
 run_reader_thread(void * vcpuno)
 {
-    cpu= (uint64)vcpuno;
-    if (debug) printf(" run_reader-thread for cpu %d \n",cpu);
+        int             affin_cpu;
+	int		ret;
+        cpu_set_t       *cpusetp;
+        size_t          cpusetsz;
+#ifdef __LIKI_REALTIME_PCPU_THREADS
+        struct          sched_param sp;
+#endif
+
+        cpu= (uint64)vcpuno;
+        if (debug) printf(" run_reader-thread for cpu %d \n",cpu);
+
+#ifdef __LIKI_REALTIME_PCPU_THREADS
+        /* Make dumper thread low priority realtime */
+        sp.sched_priority = sched_get_priority_min(SCHED_RR);
+        if (sched_setscheduler(0, SCHED_RR, &sp) == -1) {
+                perror("sched_setscheduler()");
+                fprintf(stderr, "failed to make per-CPU threads realtime.  Continuing without realtime priority\n");
+                fprintf(stderr, "See https://access.redhat.com/articles/3696121 or try to disable selinux\n");
+
+        }
+#endif
+
+            /* Affinitize the dumper thread appropriately. Ideally I'd
+         ** affinitize to the node of the target CPU, but there is
+         ** no straightforward way of doing this in linux without
+         ** using libnuma - and that's a piece of shirt. So..
+         **
+         ** I don't want to affinitize threads to the CPU for which
+         ** they are collecting traces because then I'd be piling
+         ** more work on the busiest CPU. So I affinitize each
+         ** thread also to the "adjacent" CPU, exploiting the fact
+         ** that sockets always seem to have an even number of cores
+         ** to keep the trace data on the same socket.
+         **/
+        if ((cpusetp = CPU_ALLOC(MAXCPUS)) != NULL) {
+                cpusetsz = CPU_ALLOC_SIZE(MAXCPUS);
+
+                CPU_ZERO_S(cpusetsz, cpusetp);
+
+                affin_cpu = (cpu & 1UL ? (cpu - 1) : (cpu + 1));
+
+                CPU_SET_S(cpu, cpusetsz, cpusetp);
+                CPU_SET_S(affin_cpu, cpusetsz, cpusetp);
+
+                if ((ret=pthread_setaffinity_np(pthread_self(), cpusetsz, cpusetp)) != 0) {
+                        fprintf(stderr, "failed to affinitize per-CPU thread, error=%d\n", ret);
+                }
+
+                CPU_FREE(cpusetp);
+        }
+
     sprintf (trc_cntl[cpu].srcfile, "%s/tracing/per_cpu/cpu%d/trace_pipe_raw", debug_dir, cpu);
 
     if (timestamp) {
@@ -269,27 +317,15 @@ read_raw_trace()
 
 int setup_percpu_readers(void)
 {
-	size_t size;
         uint64 i;
         int nrcpus = MAXCPUS;
-
-   realloc:
-        mask = CPU_ALLOC(nrcpus);
-        size = CPU_ALLOC_SIZE(nrcpus);
-        CPU_ZERO_S(size, mask);
-        if ( sched_getaffinity(0, size, mask) == -1 ) {
-        	CPU_FREE(mask);
-                if (errno == EINVAL &&
-                           nrcpus < (1024 << 8)) {
-                              nrcpus = nrcpus << 2;
-                              goto realloc;
-                }
-                perror("sched_getaffinity");
-                return -1;
-        }
+	char percpu_file[200];
+	struct stat statbuf;
 
         for ( i = 0; i < nrcpus; i++ ) {
-                if ( CPU_ISSET_S(i, size, mask) ) {
+		sprintf (percpu_file, "%s/tracing/per_cpu/cpu%d/trace_pipe_raw", debug_dir, i);
+		if (stat(percpu_file, &statbuf) == 0) { 
+                /* if ( CPU_ISSET_S(i, size, mask) ) { */
 			alloc_thread_this_cpu(i); 
 			if (debug) printf("CPU %d found \n",i);
                 }

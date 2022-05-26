@@ -70,7 +70,7 @@ static inline int
 collect_pc_info(hardclock_t *rec_ptr, hc_info_t *hcinfop, pid_info_t *pidp)
 {
 	pc_info_t *pcinfop;
-	int state;
+	int state, start;
 	uint64 offset;
 	vtxt_preg_t *pregp = NULL;
 	uint64 key = UNKNOWN_SYMIDX;
@@ -83,7 +83,9 @@ collect_pc_info(hardclock_t *rec_ptr, hc_info_t *hcinfop, pid_info_t *pidp)
 	/* printf ("collect_pc_info(): state: %d stack_depth: %d  ips: 0x%llx 0x%llx ", state, rec_ptr->stack_depth, rec_ptr->ips[0], rec_ptr->ips[1]);  */
 	if (state==HC_IDLE) return 0;
 	if (rec_ptr->stack_depth >= 2) {
-	    pc = rec_ptr->ips[1];
+	    start = find_hc_start(&rec_ptr->ips[0], rec_ptr->stack_depth);
+	    if (start == 0) start = 1;
+	    pc = rec_ptr->ips[start];
 	    if (rec_ptr->ips[0] == STACK_CONTEXT_USER) {	
 		if (objfile_preg.elfp && (pc < 0x10000000)) {
 			if (symlookup(&objfile_preg, pc, &offset)) {
@@ -124,7 +126,7 @@ collect_hc_stktrc(hardclock_t *rec_ptr, hc_info_t *hcinfop, pid_info_t *pidp)
 	uint64 stktrc[LEGACY_STACK_DEPTH];
 	uint64 cnt;
 	int len, i;
-	int state;
+	int state, start = 0;
 
 	if (cluster_flag) return 0;		/* don't collect stack traces for cluster-wide reports */
 	if (rec_ptr->stack_depth == 0) return 0;
@@ -142,10 +144,12 @@ collect_hc_stktrc(hardclock_t *rec_ptr, hc_info_t *hcinfop, pid_info_t *pidp)
 	    	if (pidp && (pidp->vtxt_pregp == NULL)) return 0;
 	}
 
+	start = find_hc_start(&rec_ptr->ips[0], rec_ptr->stack_depth);
+	if (start == 0) start = 1;
 	if (pidp) {
-		cnt = save_entire_stack(&stktrc[0], &rec_ptr->ips[1], MIN(rec_ptr->stack_depth-1, LEGACY_STACK_DEPTH));
+		cnt = save_entire_stack(&stktrc[0], &rec_ptr->ips[start], MIN(rec_ptr->stack_depth-1, LEGACY_STACK_DEPTH));
 	} else {
-		cnt = save_kernel_stack(&stktrc[0], &rec_ptr->ips[1], MIN(rec_ptr->stack_depth-1, LEGACY_STACK_DEPTH));
+		cnt = save_kernel_stack(&stktrc[0], &rec_ptr->ips[start], MIN(rec_ptr->stack_depth-1, LEGACY_STACK_DEPTH));
 	}
 		
 	if (cnt == 0) return 0;
@@ -253,7 +257,7 @@ static inline int
 print_hardclock_rec(void *a)
 {
         hardclock_t *rec_ptr = (hardclock_t *)a;
-        int state;
+        int state, start = 0;
 
         PRINT_COMMON_FIELDS(rec_ptr);
         PRINT_EVENT(rec_ptr->id);
@@ -273,7 +277,8 @@ print_hardclock_rec(void *a)
 
         /* if ((state != HC_IDLE) && (state != HC_INTR) && (rec_ptr->stack_depth)) { */
         if ((state != HC_IDLE) && (rec_ptr->stack_depth)) {
-                print_stacktrace(&rec_ptr->ips[0], rec_ptr->stack_depth, 0, rec_ptr->pid);
+		start = find_hc_start(&rec_ptr->ips[0], rec_ptr->stack_depth);
+                print_stacktrace(&rec_ptr->ips[0], rec_ptr->stack_depth, start, rec_ptr->pid);
                 /* print_stacktrace_hex(&rec_ptr->ips[0], rec_ptr->stack_depth);  */
         }
 

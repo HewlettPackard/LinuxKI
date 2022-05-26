@@ -287,6 +287,10 @@ set_trace_funcs()
 	if (TRACE_MM_PAGE_ALLOC) ki_actions[TRACE_MM_PAGE_ALLOC].func = trace_mm_page_alloc_func;
 	if (TRACE_MM_PAGE_FREE) ki_actions[TRACE_MM_PAGE_FREE].func = trace_mm_page_free_func;
 	if (TRACE_MM_PAGE_FREE_DIRECT) ki_actions[TRACE_MM_PAGE_FREE_DIRECT].func = trace_mm_page_free_func;
+        ki_actions[TRACE_CALL_FUNCTION_ENTRY].func = call_function_entry_func;
+        ki_actions[TRACE_CALL_FUNCTION_EXIT].func = call_function_exit_func;
+        ki_actions[TRACE_CALL_FUNCTION_SINGLE_ENTRY].func = call_function_entry_func;
+        ki_actions[TRACE_CALL_FUNCTION_SINGLE_EXIT].func = call_function_exit_func;
 
 	ki_actions[TRACE_PRINT].func = trace_ftrace_print_func;
 }

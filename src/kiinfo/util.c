@@ -1902,22 +1902,48 @@ is_idle_pc(uint64 pc)
 /*
  * convert_pc_to_key()
  */
-uint64 convert_pc_to_key(uint64 pc)
+uint64 convert_pc_to_key(uint64 mode, void *arg2, uint64 pc)
 {
+	pid_info_t *pidp = (pid_info_t *)arg2;
         uint64 key=0, offset=0;
+	vtxt_preg_t *pregp = NULL;
+	key = UNKNOWN_SYMIDX;
 	int idx;
 
 	/* do not convert the CONTEXT markers */	
 	if (STACK_CONTEXT(pc)) return pc;
 
-	if (globals->symtable == NULL) return UNKNOWN_SYMIDX;
-	idx = findsym_idx(pc);	
-        offset = pc - globals->symtable[idx].addr;
-        if ((idx > 0) && (idx < globals->nsyms-1) && (offset < 0x10000)) {
-                return idx;
-        } else {	
-		return pc;
-        }
+	if (mode == STACK_CONTEXT_KERNEL) {
+		if (globals->symtable == NULL) return UNKNOWN_SYMIDX;
+		idx = findsym_idx(pc);	
+        	offset = pc - globals->symtable[idx].addr;
+        	if ((idx > 0) && (idx < globals->nsyms-1) && (offset < 0x10000)) {
+			key = idx;
+        	} else {	
+			key = pc;
+        	}
+	} else {
+                if (objfile_preg.elfp && (pc < 0x10000000)) {
+                        if (symlookup(&objfile_preg, pc, &offset)) {
+                                key = pc - offset;
+                        }
+                } else if (pidp) {
+                        /* if multi-threaded, use TGID */
+                        if (pidp->PID != pidp->tgid) pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
+
+                        if (pregp = find_vtext_preg(pidp->vtxt_pregp, pc)) {
+                                if (symlookup(pregp, pc, &offset)) {
+                                        key = pc - offset;
+                                } else if (maplookup(pidp->mapinfop, pc, &offset)) {
+                                        key = pc - offset;
+                                }
+                        } else if (maplookup(pidp->mapinfop, pc, &offset)) {
+                                key = pc - offset;
+                        }
+                }
+	}
+
+	return key;
 }
 
 

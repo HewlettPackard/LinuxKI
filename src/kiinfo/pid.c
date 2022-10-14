@@ -512,6 +512,7 @@ print_syscall_info(void *arg1, void *arg2)
 			(statp->bytes) / (secs * 1024.0));
 	}
 
+	if (debug) pid_printf (pidfile, "     idx: %d", syscallp->lle.key);
 	pid_printf (pidfile, "\n");
 
 	if (scdetail_flag) {

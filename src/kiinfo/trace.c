@@ -1178,7 +1178,7 @@ trace_winki_process_func (void *a, void *v)
 	ppidp = GET_PIDP(&globals->pid_hash, p->ParentID);
 	pidp->ppid = p->ParentID;
 
-	PRINT_COMMON_FIELDS_C011(p, 0, 0);
+	PRINT_COMMON_FIELDS_C002(p);
 	printf (" key=0x%x pid=%d ppid=%d sessionid=%d exitstatus=%d dirbase=0x%llx userSID=%d", 
 		p->UniqueProcessKey,
 		p->ProcessID,

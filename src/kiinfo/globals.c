@@ -6831,7 +6831,8 @@ char *win_thread_wait_reason[MaxThreadWaitReasons] = {
 	"WrGuardedMutex",
 	"WrRundown",
 	"WrAlertThreadId",
-	"WrDeferredPreempt"
+	"WrDeferredPreempt",
+	"Unknown"
 };
 
 char *win_irq_flags[IRQ_NRBIT] = {

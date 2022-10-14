@@ -32,16 +32,18 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "winki_util.h"
 
 void 
-winki_update_slp_info(pid_info_t *pidp, void *arg2, winki_stack_info_t *stkinfop, uint64 delta, uint64 wpid)
+winki_update_slp_info(pid_info_t *pidp, void *arg2, winki_stack_info_t *stkinfop, uint64 delta, uint8 WaitReason)
 {
 	slp_info_t ***slp_hash = arg2;
 	slp_info_t *slpinfop;
+	wait_info_t *waitinfop;
 	uint64	key, ip;
 	uint64 symaddr = 0;
 	char *symptr;
 	vtxt_preg_t *pregp = NULL;
 	int i;
 
+	if (pidp->last_sleep_delta == 0) return;
 	if (stkinfop->depth == 0) return;
 
         for (i = 0; i < stkinfop->depth; i++) {
@@ -52,19 +54,24 @@ winki_update_slp_info(pid_info_t *pidp, void *arg2, winki_stack_info_t *stkinfop
 				else if (strncmp(symptr, "KiSwapContext", 13) == 0) continue;
 				else if (strncmp(symptr, "KiSwapThread", 12) == 0) continue;
 				else if (strncmp(symptr, "KiCommitThreadWait", 18) == 0) continue;
+				else if (strncmp(symptr, "EtwTraceContextSwap", 19) == 0) continue;
                                 key = pregp->p_vaddr + symaddr;
                         }
 		}
 		break;
 	}
 
-
 	slpinfop = GET_SLPINFOP(slp_hash, key);
 	slpinfop->count++;
-	if (pidp->last_sleep_delta) {
-		slpinfop->sleep_time += pidp->last_sleep_delta;
-	}
-	slpinfop->max_time = MAX(slpinfop->max_time, delta);
+	slpinfop->sleep_time += pidp->last_sleep_delta;
+	slpinfop->max_time = MAX(slpinfop->max_time, pidp->last_sleep_delta);
+
+	/* printf ("PID: %d count: %d wait_reason: %s\n", pidp->PID, slpinfop->count, win_thread_wait_reason[WaitReason]); */
+
+	waitinfop = GET_WAITINFOP(&slpinfop->wait_hash, WaitReason);
+	waitinfop->count++;
+	waitinfop->sleep_time += pidp->last_sleep_delta;
+	waitinfop->max_time = MAX(waitinfop->max_time, pidp->last_sleep_delta);
 }
 
 void
@@ -79,6 +86,7 @@ winki_update_stktrc_info(pid_info_t *pidp, void *arg1,  winki_stack_info_t *stki
 	vtxt_preg_t *pregp = NULL;
 	uint64 stktrc[LEGACY_STACK_DEPTH];
 
+	if (pidp->last_sleep_delta == 0) return;
         if (stkinfop->depth == 0) return;
 	if (cluster_flag) return;
 
@@ -91,6 +99,7 @@ winki_update_stktrc_info(pid_info_t *pidp, void *arg1,  winki_stack_info_t *stki
 				else if (strncmp(symptr, "KiSwapContext", 13) == 0) continue;
 				else if (strncmp(symptr, "KiSwapThread", 12) == 0) continue;
 				else if (strncmp(symptr, "KiCommitThreadWait", 18) == 0) continue;
+				else if (strncmp(symptr, "EtwTraceContextSwap", 19) == 0) continue;
                                 key = pregp->p_vaddr + symaddr;
                         }
 		}
@@ -111,10 +120,7 @@ winki_update_stktrc_info(pid_info_t *pidp, void *arg1,  winki_stack_info_t *stki
 
 	stktrcp->pidp = pidp;
 	stktrcp->cnt++;
-	/* stktrcp->slptime += delta; */
-	if (pidp->last_sleep_delta) {
-		stktrcp->slptime += pidp->last_sleep_delta;
-	}
+	stktrcp->slptime += pidp->last_sleep_delta;
 	stktrcp->stklen = depth; 
 }
 
@@ -203,9 +209,12 @@ perpid_source_cswitch_stats(int cpu, Cswitch_t *p, pid_info_t *pidp)
 	if (p->OldThreadState == Waiting || p->OldThreadState==Terminated) {
 		statp->state = SWTCH | (old_state & (USER | SYS));
 		statp->C_sleep_cnt++;
+		statp->LastWaitReason = p->OldThreadWaitReason;
+		/* printf ("Switch off: PID: %d old_state: 0x%x new_state: 0x%x  delta: %9.6f\n", pidp->PID, old_state, statp->state, 0); */
 	} else {
 		statp->state = RUNQ | (old_state & (USER | SYS));
 		statp->C_preempt_cnt++;
+		statp->LastWaitReason = p->OldThreadWaitReason;
 	}
 
 	delta = update_sched_time(statp, hrtime); 
@@ -266,6 +275,7 @@ perpid_target_cswitch_stats(int cpu, Cswitch_t *p, pid_info_t *pidp, winki_stack
 	schedp = (sched_info_t *)find_sched_info(pidp);
 	statp = &schedp->sched_stats;
 	old_state = statp->state;
+	new_state = RUNNING | (statp->state & (USER | SYS));
 	old_cpu = schedp->cpu;
 
 	/* the following accounts wakeups on an idle CPU */
@@ -280,13 +290,16 @@ perpid_target_cswitch_stats(int cpu, Cswitch_t *p, pid_info_t *pidp, winki_stack
 		sched_rqhist_resume(cpu, pidp, old_state, delta); 
 	}
 
-	/* printf ("Cswitch: PID: %d old_state: 0x%x new_state: 0x%x  delta: %9.6f\n", pidp->PID, old_state, new_state, SECS(delta)); */
+	/* printf ("Switch on: PID: %d old_state: 0x%x new_state: 0x%x  delta: %9.6f\n", pidp->PID, old_state, new_state, SECS(delta));  */
 	winki_update_sched_state(statp, old_state, new_state, delta);
 	update_sched_prio(schedp, p->OldThreadPriority);
 	update_sched_cpu(schedp, cpu);
-
-	if (sleep_stats) winki_update_slp_info(pidp, &pidp->slp_hash, stkinfop, delta, 0);
-	if (stktrc_stats) winki_update_stktrc_info(pidp, &pidp->stktrc_hash, stkinfop, delta, 0);
+	
+	if (pidp->last_sleep_delta) { 
+		/* if the PID was sleeping previously, the last_sleep_delta should have a value */
+		if (sleep_stats) winki_update_slp_info(pidp, &pidp->slp_hash, stkinfop, delta, statp->LastWaitReason);
+		if (stktrc_stats) winki_update_stktrc_info(pidp, &pidp->stktrc_hash, stkinfop, delta, 0);
+	}
 
 	entry = (win_syscall_save_t *)pidp->win_active_syscalls;
 	if (scall_stats && entry) {
@@ -299,17 +312,19 @@ perpid_target_cswitch_stats(int cpu, Cswitch_t *p, pid_info_t *pidp, winki_stack
 		delta = update_sched_time(tstatp, hrtime);
 		winki_update_sched_state(tstatp, old_state, tstatp->state, delta);
 
-		if (sleep_stats) winki_update_slp_info(pidp, &syscallp->slp_hash, stkinfop, delta, 0);
+		if (sleep_stats && pidp->last_sleep_delta) winki_update_slp_info(pidp, &syscallp->slp_hash, stkinfop, delta, statp->LastWaitReason);
 	}	
 
-	if (global_stats) {
+	if (global_stats && pidp->last_sleep_delta) {
 		gschedp = GET_ADD_SCHEDP(&globals->schedp);
-		if (sleep_stats) winki_update_slp_info(pidp, &globals->slp_hash, stkinfop, delta, 0);
+		if (sleep_stats) winki_update_slp_info(pidp, &globals->slp_hash, stkinfop, delta, statp->LastWaitReason);
 		if (stktrc_stats) winki_update_stktrc_info(pidp, &globals->stktrc_hash, stkinfop, delta, 1);
 	}
 
 	/* reset for the next sleep */
 	pidp->last_sleep_delta = 0;
+	pidp->last_stack_depth = 0;
+	statp->LastWaitReason = UnknownReason;
 }
 
 static inline int
@@ -540,7 +555,6 @@ thread_readythread_func (void *a, void *v)
 	tstatp = &tschedp->sched_stats;
 	old_state = coop_old_state = tstatp->state;
 	delta = coop_delta = update_sched_time(tstatp, hrtime); 
-	tpidp->last_sleep_delta = delta;
 
 	/* update Source PID stats */
 	if (perpid_stats) {
@@ -559,7 +573,8 @@ thread_readythread_func (void *a, void *v)
 	}
 
 	/* update Target PID stats */
-	if (perpid_stats && ((tstatp->state & RUNNING) == 0)) {
+	if (perpid_stats && ((old_state & RUNNING) == 0)) {
+		tpidp->last_sleep_delta = delta;
 		tstatp->C_setrq_cnt++;
 		new_state = RUNQ | (old_state & (USER | SYS));
 		/* printf ("readythread: PID: %d old_state: 0x%x new_state: 0x%x  delta: %9.6f\n", tpidp->PID, old_state, new_state, SECS(delta)); */

@@ -45,7 +45,17 @@ if ([ "$ARCH" == "x86_64" ] || [ "$ARCH" == "amd64" ]); then
 	  if [ $? == 0 ]; then
          	ln /opt/linuxki/kiinfo.rhel8 /opt/linuxki/kiinfo
 	else
+	  grep "Fedora Linux 36" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+         	ln /opt/linuxki/kiinfo.rhel8 /opt/linuxki/kiinfo
+	else
+	  grep "Fedora Linux 37" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+         	ln /opt/linuxki/kiinfo.rhel8 /opt/linuxki/kiinfo
+	else
 	  ln /opt/linuxki/kiinfo.x86_64 /opt/linuxki/kiinfo
+	fi
+	fi
 	fi
 	fi
 	fi
@@ -54,7 +64,48 @@ if ([ "$ARCH" == "x86_64" ] || [ "$ARCH" == "amd64" ]); then
 	fi
 elif [ "$ARCH" == "aarch64" ]; then
 	rm /opt/linuxki/kiinfo >/dev/null 2>&1
-	ln /opt/linuxki/kiinfo.aarch64 /opt/linuxki/kiinfo
+	grep "SUSE Linux Enterprise Server 15" /etc/os-release >/dev/null 2>&1
+	if [ $? == 0 ]; then
+		/* this is suspect as I have not tested SLES on ARM64 */
+		ln /opt/linuxki/kiinfo-rhel8.aarch64 /opt/linuxki/kiinfo
+	else
+	  grep "Red Hat Enterprise Linux 8" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+               	ln /opt/linuxki/kiinfo-rhel8.aarch64 /opt/linuxki/kiinfo
+	else 
+	  grep "Red Hat Enterprise Linux 9" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+               	ln /opt/linuxki/kiinfo-rhel8.aarch64 /opt/linuxki/kiinfo
+	else
+	  grep "CentOS Linux 8" /etc/os-release >/dev/null 2>&1
+  	  if [ $? == 0 ]; then
+          	ln /opt/linuxki/kiinfo-rhel8.aarch64 /opt/linuxki/kiinfo
+	else
+	  grep "CentOS Linux 9" /etc/os-release >/dev/null 2>&1
+  	  if [ $? == 0 ]; then
+          	ln /opt/linuxki/kiinfo-rhel8.aarch64 /opt/linuxki/kiinfo
+	else
+	  grep "Fedora Linux 35" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+         	ln /opt/linuxki/kiinfo-rhel8.aarch64 /opt/linuxki/kiinfo
+	else
+	  grep "Fedora Linux 36" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+         	ln /opt/linuxki/kiinfo-rhel8.aarch64 /opt/linuxki/kiinfo
+	else
+	  grep "Fedora Linux 37" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+         	ln /opt/linuxki/kiinfo-rhel8.aarch64 /opt/linuxki/kiinfo
+	else
+	  ln /opt/linuxki/kiinfo.aarch64 /opt/linuxki/kiinfo
+	fi
+	fi
+	fi
+	fi
+	fi
+	fi
+	fi
+	fi
 elif [ "$ARCH" == "ppc64le" ]; then
 	rm /opt/linuxki/kiinfo >/dev/null 2>&1
 	grep "SUSE Linux Enterprise Server 15" /etc/os-release >/dev/null 2>&1
@@ -79,9 +130,19 @@ elif [ "$ARCH" == "ppc64le" ]; then
 	else
 	  grep "Fedora Linux 35" /etc/os-release >/dev/null 2>&1
 	  if [ $? == 0 ]; then
-          ln /opt/linuxki/kiinfo-rhel8.ppc64le /opt/linuxki/kiinfo
+          	ln /opt/linuxki/kiinfo-rhel8.ppc64le /opt/linuxki/kiinfo
+	else
+	  grep "Fedora Linux 36" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+          	ln /opt/linuxki/kiinfo-rhel8.ppc64le /opt/linuxki/kiinfo
+	else
+	  grep "Fedora Linux 37" /etc/os-release >/dev/null 2>&1
+	  if [ $? == 0 ]; then
+          	ln /opt/linuxki/kiinfo-rhel8.ppc64le /opt/linuxki/kiinfo
 	else
 	  ln /opt/linuxki/kiinfo-rhel7_8.ppc64le /opt/linuxki/kiinfo
+	fi
+	fi
 	fi
 	fi
 	fi

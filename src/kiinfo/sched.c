@@ -374,11 +374,11 @@ update_slp_info(pid_info_t *pidp, void *arg2, uint64 delta, uint64 wpid)
         uint64          key;
 
         if (pidp->last_stack_depth == 0) return;
+	if (key == STACK_CONTEXT_USER) return;
 
-        key = convert_pc_to_key(pidp->last_stktrc[0]);
+        key = convert_pc_to_key(STACK_CONTEXT_KERNEL, pidp, pidp->last_stktrc[0]);
 
 	/* this means no kernel stack was collected */
-	if (key == STACK_CONTEXT_USER) return;
 
         slpinfop = GET_SLPINFOP(slp_hash, key);
         slpinfop->count++;
@@ -401,6 +401,7 @@ update_stktrc_info(uint64 last_stktrc[], uint64 stack_depth, void ***arg2, uint6
 	stktrc_info_t *stktrcp;
 	uint64		key;
 	uint64 stktrc[LEGACY_STACK_DEPTH];
+	uint64		mode = STACK_CONTEXT_KERNEL;
 	int cnt, i, len;
 
 	if (cluster_flag) return;   /* don't collect stack traces for cluster-wide reporting */
@@ -410,7 +411,8 @@ update_stktrc_info(uint64 last_stktrc[], uint64 stack_depth, void ***arg2, uint6
 		if ((pidp == NULL) && (last_stktrc[i] == STACK_CONTEXT_USER)) {
 			break;
 		}
-		stktrc[i] = convert_pc_to_key(last_stktrc[i]);
+		if (last_stktrc[i] == STACK_CONTEXT_USER) mode = STACK_CONTEXT_USER;
+		stktrc[i] = convert_pc_to_key(mode, pidp, last_stktrc[i]);
 	}
 
 	len = i * sizeof(uint64);

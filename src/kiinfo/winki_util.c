@@ -242,8 +242,13 @@ winki_update_sched_state(void *arg, int old_state, int new_state, uint64 delta)
                         statp->T_idle_time += delta;
                 }
 	} else if (new_state & RUNQ) {
-		/* assume thread with UNKNOWN was sleeptng if it is being woken up */
+		/* assume thread was sleeping if it is being woken up */
                 statp->T_sleep_time += delta;
+		statp->LastWaitReason = UnknownReason;
+		if (old_state & UNKNOWN) {
+			statp->C_sleep_cnt++;
+			statp->C_switch_cnt++;
+		}
         } else {
                 /* if the oldstate is UNKNOWN, we just dont account for it */
         } 
@@ -270,10 +275,9 @@ syscall_addr_to_id(uint64 ip)
 	if (syscall_hash_entryp->idx == 0) {
 		syspidp = GET_PIDP(&globals->pid_hash, 0);
 		name = get_win_sym(ip, syspidp);
-		if (name == NULL) { 
-			return 0;
-		}	
-		idx = (last_syscall_idx++);
+		if (name == NULL) return 0;
+
+		idx = ++last_syscall_idx;
 		syscall_hash_entryp->idx = idx;
 		globals->syscall_index_64[idx] = idx;
 		win_syscall_arg_list[idx].name = name;
@@ -283,8 +287,10 @@ syscall_addr_to_id(uint64 ip)
 			win_syscall_arg_list[idx].args[i].label=NULL;
 			win_syscall_arg_list[idx].args[i].format=SKIP;
 		}
+
 		/* printf ("syscall_addr_to_id():   ip: 0x%llx  name %s   id: %d\n",
-			ip, win_syscall_arg_list[idx].name, idx); */
+			ip, win_syscall_arg_list[idx].name, idx);
+		*/
 	}
 
 	return syscall_hash_entryp->idx;

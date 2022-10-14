@@ -471,7 +471,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WrRundown		36
 #define WrAlertThreadId		37
 #define WrDeferredPreempt	38
-#define MaxThreadWaitReasons	39
+#define UnknownReason		39
+#define MaxThreadWaitReasons	40	
 
 /* Thread States */
 #define Initialized		0
@@ -521,6 +522,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define GET_ADDR_TO_IDX_HASH_ENTRYP(hashp, key)  (addr_to_idx_hash_entry_t *)find_add_hash_entry((lle_t ***)hashp, ADDR_TO_IDX_HASHSZ, key, ADDR_TO_IDX_HASH(key), sizeof(addr_to_idx_hash_entry_t))
 #define GET_SCDWINFOP(hashp, key)  (scd_waker_info_t *)find_add_hash_entry((lle_t ***)hashp, WPID_HSIZE, key, WPID_HASH(key), sizeof(scd_waker_info_t))
 #define GET_SLPINFOP(hashp, key)  (slp_info_t *)find_add_hash_entry((lle_t ***)hashp, SLP_HSIZE, key, SLP_HASH(key), sizeof(slp_info_t))
+#define GET_WAITINFOP(hashp, key)  (wait_info_t *)find_add_hash_entry((lle_t ***)hashp, WAIT_HSIZE, key, WAIT_HASH(key), sizeof(wait_info_t))
+#define GET_RQINFOP(hashp, key)  (runq_info_t *)find_add_hash_entry((lle_t ***)hashp, CPU_HASHSZ, key, CPU_HASH(key), sizeof(runq_info_t))
 #define GET_RQINFOP(hashp, key)  (runq_info_t *)find_add_hash_entry((lle_t ***)hashp, CPU_HASHSZ, key, CPU_HASH(key), sizeof(runq_info_t))
 #define GET_SETRQP(hashp, key)  (setrq_info_t *)find_add_hash_entry((lle_t ***)hashp, WPID_HSIZE, key, WPID_HASH(key), sizeof(setrq_info_t))
 #define GET_PGCACHEP(hashp, dev, node) (pgcache_t *)find_add_hash_entry((lle_t ***)hashp, PGCACHE_HASHSZ, PGCACHE_KEY(dev,node),		\
@@ -666,6 +669,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #define SLP_HSIZE 0x20
 #define SLP_HASH(key)  ((key >> 9) & (SLP_HSIZE-1))
+
+#define WAIT_HSIZE 0x20
+#define WAIT_HASH(key)  (SLP_HSIZE-1)
 
 #define PDB_HSIZE 0x400
 #define PDB_HASH(key) (key & (PDB_HSIZE-1))
@@ -1332,12 +1338,6 @@ typedef struct lviostats {
 	uint64		max_time;
 } lviostats_t;
 
-typedef struct wait_info {
-	uint64 		sleep_time;
-	uint64		max_time;
-	uint32     		count;
-} wait_info_t;
-
 /* the first part of fd_stats must the the same as sd_stats */
 struct fd_stats {
 	uint64          total_time;
@@ -1416,7 +1416,7 @@ typedef struct pid_info {
 	/* information saved on sched_switch when going to SLEEP */
 	uint64		last_stack_depth;
 	uint64		last_stktrc[LEGACY_STACK_DEPTH];	
-	uint64 		last_sleep_delta;		/* needed for WinKI */
+	uint64 		last_sleep_delta;		/* needed for WinKI, time between sleep and RunQ */
 
 	/* global pid information */
 	uint32		syscall_cnt;
@@ -1505,8 +1505,17 @@ typedef struct slp_info {
 	uint64 			sleep_time;
 	uint64			max_time;
         void                    **scd_wpid_hash;    /* hashed list of tids waking us up from this kernel func.  Used in the scdetail kipid option */
+	void			**wait_hash;
 	int     		count;
 } slp_info_t;
+
+typedef struct wait_info {
+	lle_t   	lle;			/* key = base addr of kernel function  */
+	uint64 		sleep_time;
+	uint64		max_time;
+	uint32		count;
+} wait_info_t;
+
 
 #define LLC_REF		0
 #define LLC_MISSES	1
@@ -1600,6 +1609,9 @@ typedef struct sched_stats {
 	unsigned long	msr_total[MSR_NREGS];
 	int		cnt[N_CNT_STATS];
 	int     	state;   		/* UNKNOWN, RUNNING, ON_RUNQ, SLEEPING */
+	int		LastWaitReason;		/* Windows Wait Reason */
+	int		LastWaitTime;		/* Windows Wait Time */
+
 } sched_stats_t;
 
 /* For coop tracking we map the interaction using:

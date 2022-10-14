@@ -70,6 +70,8 @@ extern int slp_scd_sort_by_time(const void *, const void *);
 extern int slp_scd_sort_by_count(const void *, const void *);
 extern int slp_sort_by_time(const void *, const void *);
 extern int slp_sort_by_count(const void *, const void *);
+extern int wait_sort_by_time(const void *, const void *);
+extern int wait_sort_by_count(const void *, const void *);
 extern int stktrc_sort_by_cnt(const void *, const void *);
 extern int stktrc_sort_by_slptime(const void *, const void *);
 extern int mpath_sort_by_cpu(const void *, const void *);

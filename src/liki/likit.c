@@ -18,7 +18,7 @@
  *
  * likit.c	LInux Kernel Instrumentation
  *
- *		v7.3
+ *		v7.5
  *		colin.honess@gmail.com
  *		mark.ray@hpe.com
  *		pokilfoyle@gmail.com
@@ -46,7 +46,7 @@
 #include <linux/profile.h>
 #include <linux/blkdev.h>
 #include <linux/bio.h>
-#include <linux/genhd.h>
+/* #include <linux/genhd.h> */
 #include <asm/syscall.h>
 #include <linux/hardirq.h>
 #include <linux/irq.h>
@@ -75,23 +75,25 @@
 #elif defined CONFIG_ARM64
 #include <../arch/arm64/include/asm/unistd.h>
 #include <../arch/arm64/include/asm/stacktrace.h>
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0)
-#define IS_32BIT(regs)  !user_64bit_mode(regs)
-#else
-#define	IS_32BIT(regs)	test_thread_flag(TIF_IA32)
-#endif
+#define IS_32BIT(regs)   test_thread_flag(TIF_32BIT)
 
 #elif defined CONFIG_PPC64
 #include <../arch/powerpc/include/asm/unistd.h>
 #include <../include/linux/stacktrace.h>
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0)
-#define IS_32BIT(regs)  !user_64bit_mode(regs)
-#else
-#define	IS_32BIT(regs)	test_thread_flag(TIF_IA32)
-#endif
+#define IS_32BIT(regs)   test_thread_flag(TIF_32BIT)
 
 #else
 Confused about platform!
+#endif
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,18,0) && (defined RHEL8)
+#define ACCESS_OK(flag, addr, size) access_ok(flag, addr, size)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4,18,0) && (defined RHEL81 || defined RHEL82 || defined RHEL86)
+#define ACCESS_OK(flag, addr, size) access_ok(addr, size)
+#elif LINUX_VERSION_CODE < KERNEL_VERSION(5,0,0)
+#define ACCESS_OK(flag, addr, size) access_ok(flag, addr, size)
+#else
+#define ACCESS_OK(flag, addr, size) access_ok(addr, size)
 #endif
 
 #ifndef NR_syscalls
@@ -504,7 +506,7 @@ void save_stack_trace_regs(struct stack_trace *st, struct pt_regs *regs)
 #define STACK_TRACE(DATA, REGS)						\
 	save_stack_trace_regs(DATA, NULL);
 
-#elif (defined RHEL8)
+#elif (defined RHEL8 || defined RHEL81)
 #define STACK_TRACE(DATA, REGS)						\
 	save_stack_trace_regs_fp(NULL, DATA);
 
@@ -644,7 +646,7 @@ liki_copy_from_user(void *to, const void __user *from, unsigned long n)
         else
                 return 0;
 #else
-        if (__range_not_ok(from, n, TASK_SIZE))
+        if (!ACCESS_OK(VERIFY_READ, from, n))
                 return n;
 
         pagefault_disable();
@@ -908,7 +910,7 @@ liki_stack_unwind(struct pt_regs *regs, int skip, int *start)
 	
 
 	/* for user stacks, regs must be filled out */
-	if (regs && !IS_32BIT(res)) {
+	if (regs && !IS_32BIT(regs)) {
 		callchain->ip[callchain->nr++] = STACK_CONTEXT_USER;
 		callchain->ip[callchain->nr++] = regs->pc;
 
@@ -916,7 +918,7 @@ liki_stack_unwind(struct pt_regs *regs, int skip, int *start)
 
 		while (callchain->nr < MAX_STACK_DEPTH && fp &&
 			!((unsigned long)fp & 0xf)) {
-			if (!access_ok(VERIFY_READ, fp, sizeof(buftail)))
+			if (!ACCESS_OK(VERIFY_READ, fp, sizeof(buftail)))
 				break;
 
 			pagefault_disable();
@@ -2690,12 +2692,17 @@ sched_migrate_task_trace(RXUNUSED struct task_struct *p, unsigned int new_cpu)
 	return;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,16,0)					
+#define GENDISK q->disk
+#else
+#define GENDISK r->rq_disk
+#endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0)					
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,18,0)					
 #define POPULATE_COMMON_BLOCK_FIELDS(q, r, T)						\
-	T->dev = r->rq_disk ? disk_devt(r->rq_disk) : 0;				\
+	T->dev = GENDISK ? disk_devt(GENDISK) : 0;				\
 	T->sector = blk_rq_is_passthrough(r) ? 0 : blk_rq_pos(r);			\
 	T->nr_sectors = blk_rq_is_passthrough(r) ? 0 : blk_rq_sectors(r);	 	\
 	T->cmd_type = 0;								\
@@ -2704,7 +2711,7 @@ sched_migrate_task_trace(RXUNUSED struct task_struct *p, unsigned int new_cpu)
 	T->sync_in_flight = q->in_flight[BLK_RW_SYNC];					
 #else
 #define POPULATE_COMMON_BLOCK_FIELDS(q, r, T)						\
-	T->dev = r->rq_disk ? disk_devt(r->rq_disk) : 0;				\
+	T->dev = GENDISK ? disk_devt(GENDISK) : 0;				\
 	T->sector = blk_rq_is_passthrough(r) ? 0 : blk_rq_pos(r);			\
 	T->nr_sectors = blk_rq_is_passthrough(r) ? 0 : blk_rq_sectors(r);	 	\
 	T->cmd_type = 0;								\
@@ -2715,7 +2722,7 @@ sched_migrate_task_trace(RXUNUSED struct task_struct *p, unsigned int new_cpu)
 
 #else
 #define POPULATE_COMMON_BLOCK_FIELDS(q, r, T)						\
-	T->dev = r->rq_disk ? disk_devt(r->rq_disk) : 0;				\
+	T->dev = GENDISK ? disk_devt(GENDISK) : 0;				\
 	T->sector = (unsigned long)((r->cmd_type == REQ_TYPE_BLOCK_PC) ? 		\
 			0 : blk_rq_pos(r));						\
 	T->nr_sectors = (r->cmd_type == REQ_TYPE_BLOCK_PC) ? 0 : blk_rq_sectors(r); 	\
@@ -2763,7 +2770,7 @@ block_rq_insert_trace(RXUNUSED struct request_queue *q, struct request *r)
 
 	if (unlikely(tracing_state == TRACING_RESOURCES)) {
 
-		dev_t	dev = r->rq_disk ? disk_devt(r->rq_disk) : 0;
+		dev_t	dev = GENDISK ? disk_devt(GENDISK) : 0;
 
 		if (!(resource_is_traced(PID_RESOURCE(current->pid)) ||
 		      resource_is_traced(TGID_RESOURCE(current->tgid)) ||
@@ -2829,7 +2836,7 @@ block_rq_issue_trace(RXUNUSED struct request_queue *q, struct request *r)
 
 	if (unlikely(tracing_state == TRACING_RESOURCES)) {
 
-		dev_t	dev = r->rq_disk ? disk_devt(r->rq_disk) : 0;
+		dev_t	dev = GENDISK ? disk_devt(GENDISK) : 0;
 
 		if ((enabled_features & DEVICE_FILTERING) &&
 		    !resource_is_traced(DEVICE_RESOURCE(dev)))
@@ -2904,7 +2911,7 @@ block_rq_complete_trace(RXUNUSED struct request_queue *q, struct request *r)
 
 	if (unlikely(tracing_state == TRACING_RESOURCES)) {
 
-		dev_t	dev = r->rq_disk ? disk_devt(r->rq_disk) : 0;
+		dev_t	dev = GENDISK ? disk_devt(GENDISK) : 0;
 
 		if ((enabled_features & DEVICE_FILTERING) &&
 		    !resource_is_traced(DEVICE_RESOURCE(dev)))
@@ -2976,7 +2983,7 @@ block_rq_requeue_trace(RXUNUSED struct request_queue *q, struct request *r)
 
 	if (unlikely(tracing_state == TRACING_RESOURCES)) {
 
-		dev_t	dev = r->rq_disk ? disk_devt(r->rq_disk) : 0;
+		dev_t	dev = GENDISK ? disk_devt(GENDISK) : 0;
 
 		if ((enabled_features & DEVICE_FILTERING) &&
 		    !resource_is_traced(DEVICE_RESOURCE(dev)))
@@ -5386,6 +5393,7 @@ softirq_raise_trace(RXUNUSED struct softirq_action *h, struct softirq_action *ve
 	return;
 }
 
+#ifndef CONFIG_ARM64
 STATIC void
 call_function_entry_trace(RXUNUSED unsigned int vec_nr)
 {
@@ -5469,6 +5477,7 @@ call_function_exit_trace(RXUNUSED unsigned int vec_nr)
 
 	return;
 }
+#endif  /* ifndef CONFIG_ARM64 */
 
 
 STATIC void
@@ -6335,8 +6344,13 @@ struct tp_struct tp_table[TT_NUM_PROBES] = {
 	{NULL, "scsi_dispatch_cmd_done", scsi_dispatch_cmd_done_trace},
 	{NULL, NULL, NULL},
 	{NULL, NULL, NULL},
+#ifndef CONFIG_ARM64
 	{NULL, "call_function_entry", call_function_entry_trace},
 	{NULL, "call_function_exit", call_function_exit_trace},
+#else
+	{NULL, NULL, NULL},
+	{NULL, NULL, NULL},
+#endif
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
 	{NULL, "mm_filemap_fault", mm_filemap_fault_trace},
 #else
@@ -6363,8 +6377,13 @@ struct tp_struct tp_table[TT_NUM_PROBES] = {
 #else 
 	{NULL, "mm_page_free_direct", mm_page_free_trace},
 #endif
+#ifndef CONFIG_ARM64
 	{NULL, "call_function_single_entry", call_function_entry_trace},
 	{NULL, "call_function_single_exit", call_function_exit_trace},
+#else
+	{NULL, NULL, NULL},
+	{NULL, NULL, NULL},
+#endif
 	{NULL, "sched_process_exit", exit_hook},
 	{NULL, "sched_process_fork", fork_hook},
 };
@@ -6902,7 +6921,7 @@ liki_initialize(void)
 	int	i;
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,15,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,20,0)
 	printk(KERN_INFO "LiKI: unsupported kernel version\n");
 	return(-EINVAL);
 #else

@@ -1378,9 +1378,9 @@ sched_print_setrq_pids(void *arg1, void *arg2)
 		coopinfop->waker_is_ICS = 1;
         } else {
         	if (pidp->cmd) pid_printf (pidfile, "  %s", pidp->cmd);
-		if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
+		if (pidp->hcmd) pid_printf (pidfile, "  {%s}", pidp->hcmd);
 		if (pidp->thread_cmd) pid_printf (pidfile, "  (%s)", pidp->thread_cmd);
-		if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
+		if (pidp->dockerp) pid_printf (pidfile, HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 	        coopinfop->waker_is_ICS = 0;
         }
         PNL;
@@ -1428,9 +1428,9 @@ print_slp_info(void *arg1, void *arg2)
 	sched_stats_t *statsp = (sched_stats_t *)vararg->arg2;
 	sched_info_t *gschedp;
 	uint64 idx, symaddr;
-	pid_info_t *pidp;
 	char *sym = NULL, *symfile = NULL;
 	vtxt_preg_t *pregp = NULL;
+	var_arg_t wait_info_args;
 
 	if (slpinfop->count == 0) return 0;
 	gschedp = globals->schedp;
@@ -1482,6 +1482,62 @@ print_slp_info(void *arg1, void *arg2)
                                                 print_scd_slp_info,
                                                 slp_scd_sort_by_time, 0, pidfile);
                     }
+	    PNL;
+        }
+
+	if (slpinfop->wait_hash) {
+		wait_info_args.arg1 = pidfile;
+		wait_info_args.arg2 = statsp;
+
+		foreach_hash_entry((void **)slpinfop->wait_hash, 
+					WAIT_HSIZE, 
+					print_wait_info, 
+					wait_sort_by_time, 0, &wait_info_args);
+	}
+
+	return 0;
+}
+
+int
+print_wait_info(void *arg1, void *arg2)
+{
+	wait_info_t *waitinfop = (wait_info_t *)arg1;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+	FILE *pidfile = (FILE *)vararg->arg1;
+	sched_stats_t *statsp = (sched_stats_t *)vararg->arg2;
+	sched_info_t *gschedp; 
+
+	if (waitinfop->count == 0) return 0;
+	gschedp = globals->schedp;
+
+	if (gschedp && statsp == &gschedp->sched_stats) {
+            pid_printf(pidfile, "%s%8d %6.2f%% %10.4f %6.2f%% %10.3f %10.3f      %s", tab, 
+                    waitinfop->count,
+                    (waitinfop->count * 100.0) / statsp->C_sleep_cnt,
+                    SECS(waitinfop->sleep_time),
+                    (waitinfop->sleep_time *100.0) / statsp->T_sleep_time,
+                    MSECS(waitinfop->sleep_time / waitinfop->count),
+                    MSECS(waitinfop->max_time),
+		    win_thread_wait_reason[waitinfop->lle.key]);
+	    PNL;
+	} else if (statsp != NULL) {
+            pid_printf(pidfile, "%s%8d %6.2f%% %10.4f %6.2f%% %9.2f%% %10.3f %10.3f      %s", tab, 
+                    waitinfop->count,
+                    (waitinfop->count * 100.0) / statsp->C_sleep_cnt,
+                    SECS(waitinfop->sleep_time),
+                    (waitinfop->sleep_time *100.0) / statsp->T_sleep_time,
+		    (waitinfop->sleep_time *100.0) / (statsp->T_sleep_time + statsp->T_runq_time + statsp->T_run_time),
+                    MSECS(waitinfop->sleep_time / waitinfop->count),
+                    MSECS(waitinfop->max_time),
+		    win_thread_wait_reason[waitinfop->lle.key]);
+	    PNL;
+         } else {
+             pid_printf(pidfile, "%s        %-23s %6d          %11.6f %10.6f %10.6f", tab,
+		    win_thread_wait_reason[waitinfop->lle.key],
+                    waitinfop->count,
+                    SECS(waitinfop->sleep_time),
+                    SECS(waitinfop->sleep_time / waitinfop->count),
+                    SECS(waitinfop->max_time));
 	    PNL;
         }
 
@@ -1842,6 +1898,7 @@ print_slp_info_json(void *arg1, void *arg2)
                     idx == UNKNOWN_SYMIDX ? "unknown" : symb_p);
             strcat(json_detail,json_temp);
         }
+
         if (symb_p)
                 FREE(symb_p);
         return 0;
@@ -2229,7 +2286,11 @@ pid_json_print_summary(FILE *pid_jsonfile, pid_info_t *pidp, sched_stats_t *stat
                 else sprintf (json_temp, "  (%s)", pidp->thread_cmd);
                 strcat(json_detail,json_temp);
         }
-	if (pidp->dockerp) sprintf (json_temp, HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
+	if (pidp->dockerp) { 
+		sprintf (json_temp, HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
+        	strcat(json_detail,json_temp);
+	}
+
         sprintf (json_temp, "\\n");
         strcat(json_detail,json_temp);
 

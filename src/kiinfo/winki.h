@@ -231,7 +231,7 @@ typedef struct ReadyThread
 
 typedef struct Process_TypeGroup1 
 {
-  ETW_COMMON_FIELDS_c011;
+  ETW_COMMON_FIELDS_c002;
   uint64 UniqueProcessKey;
   uint32 ProcessID;
   uint32 ParentID;

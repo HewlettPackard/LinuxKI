@@ -108,7 +108,7 @@ collect_pc_info(hardclock_t *rec_ptr, hc_info_t *hcinfop, pid_info_t *pidp)
 			}
 		}
 	    } else {
-	 	key = convert_pc_to_key(pc);
+	 	key = convert_pc_to_key(STACK_CONTEXT_KERNEL, pidp, pc);
 	    }
 	}
 
@@ -125,6 +125,7 @@ collect_hc_stktrc(hardclock_t *rec_ptr, hc_info_t *hcinfop, pid_info_t *pidp)
 	uint64 key;
 	uint64 stktrc[LEGACY_STACK_DEPTH];
 	uint64 cnt;
+	uint64 mode = STACK_CONTEXT_KERNEL;
 	int len, i;
 	int state, start = 0;
 
@@ -135,11 +136,10 @@ collect_hc_stktrc(hardclock_t *rec_ptr, hc_info_t *hcinfop, pid_info_t *pidp)
 
 	if (state == HC_IDLE) return 0;
 
-	/* Only collect USER stack traces if we have potential mappings avaiable and
-	 * there is more then one function in the trace 
-	 */
+	/* Only collect USER stack traces if we have potential mappings avaiable */
 	if (rec_ptr->ips[0] == STACK_CONTEXT_USER) {
-		if (rec_ptr->stack_depth <= 2) return 0;
+		mode = STACK_CONTEXT_USER;
+		if (rec_ptr->stack_depth <= 1) return 0;
 		if (pidp == NULL) return 0;
 	    	if (pidp && (pidp->vtxt_pregp == NULL)) return 0;
 	}
@@ -155,7 +155,8 @@ collect_hc_stktrc(hardclock_t *rec_ptr, hc_info_t *hcinfop, pid_info_t *pidp)
 	if (cnt == 0) return 0;
 
 	for (i = 0; i < cnt; i++) {
-		stktrc[i] = convert_pc_to_key(stktrc[i]);
+		if (stktrc[i] == STACK_CONTEXT_USER) mode = STACK_CONTEXT_USER;
+		stktrc[i] = convert_pc_to_key(mode, pidp, stktrc[i]);
 	}
 
 	len = cnt * sizeof(uint64);

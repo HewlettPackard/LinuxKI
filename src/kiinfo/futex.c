@@ -215,7 +215,7 @@ futex_print_ops_detail(void *arg1, void *arg2)
                 /* PID_URL_FIELD8_2(fopsp->max_waker); */
 
 		if (wpidp->cmd) pid_printf (pidfile, " %s", wpidp->cmd);
-		if (wpidp->hcmd) printf (" {%s}", wpidp->hcmd);
+		if (wpidp->hcmd) pid_printf (pidfile," {%s}", wpidp->hcmd);
 		if (wpidp->thread_cmd) pid_printf (pidfile, " (%s)", wpidp->thread_cmd);
 		if (wpidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(wpidp->dockerp))->ID);
 		pid_printf (pidfile, "\n");

@@ -42,7 +42,7 @@ typedef signed long int64;
 #define MiSECS(value) ((value) / 1000.0) 	/* milliseconds to seconds */
 #define JiSECS(value) ((value) / 100.0)		/* Jiffy/centiseconds to seconds */
 #define NSECS(value) ((value))
-#define KI_MAXTRACECALLS 2500
+#define KI_MAXTRACECALLS 2600
 #define LIKI_MAXTRACECALLS 64 
 #define KI_MAXSYSCALLS	 500
 

@@ -2,6 +2,7 @@ archive
 *.tgz
 modules
 aarch64
+experimental
 src/kiinfo.win
 src/kiinfo/kiinfo.aarch64
 src/kiinfo/kiinfo.rhel8

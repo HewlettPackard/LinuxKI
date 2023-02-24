@@ -78,6 +78,7 @@ pid_winki_trace_funcs()
         winki_enable_event(0x443, fileio_readwrite_func);
         winki_enable_event(0x444, fileio_readwrite_func);
 	winki_enable_event(0x524, thread_cswitch_func);
+	winki_enable_event(0x529, thread_spinlock_func);
 	winki_enable_event(0x532, thread_readythread_func);
 	winki_enable_event(0x548, thread_setname_func);
 	winki_enable_event(0x60a, tcpip_sendipv4_func);
@@ -576,6 +577,19 @@ print_syscall_info(void *arg1, void *arg2)
 	return 0;	
 }
 
+void pid_spin_report(pid_info_t *pidp, FILE *pidfile) {
+	spinlock_info_t *spinlockp;
+
+	if ((spinlockp = pidp->spinlockp) == NULL) return;
+
+	pid_printf (pidfile, "\n%s******** SPINLOCK REPORT ********\n", tab);
+	pid_printf (pidfile, "%s     Count       Rate    TotWaitCy  AvgWaitCy    TotHeldCy  AvgHeldCy   TotSpinCnt AvgSpinCnt  Caller Address\n", tab);
+	print_spin_stats(&spinlockp->stats, "TOTAL", pidfile);
+	foreach_hash_entry((void **)spinlockp->spin_hash, SPIN_HSIZE, print_spin_info, spin_sort_by_count, nsym, pidfile);
+}
+
+
+
 void 
 pid_syscall_report(pid_info_t *pidp, FILE *pidfile) { 
 	var_arg_t vararg;
@@ -1032,6 +1046,7 @@ pid_report(void *arg1, void *v)
 	tab=tab4;
 	if (sched_flag) sched_report(pidp, pidfile, pid_jsonfile, pid_wtree_jsonfile);
 	if (hc_flag) cpu_report(pidp, pidfile);
+	if (hc_flag) pid_spin_report(pidp, pidfile);
 	if (scall_flag) pid_syscall_report(pidp, pidfile);
 	if (file_flag) pid_fd_report(pidp, pidfile);
 	if (file_flag) pid_socket_report(pidp, pidfile);

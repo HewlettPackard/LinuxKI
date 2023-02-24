@@ -246,6 +246,31 @@ print_win_sym(unsigned long ip, pid_info_t *pidp)
 	}
 }
 
+int
+sprint_win_sym(char *str, unsigned long ip, pid_info_t *pidp) 
+{
+	uint64 offset;
+	uint64 symaddr = 0ull;
+	vtxt_preg_t *pregp;
+	char *symptr=NULL;
+
+	if (ip == 0x0) return 0;
+	/* sprintf (str, "0x%llx ", ip); return 0; */
+
+	if (pregp = get_win_pregp(ip, pidp)) {
+		if (symptr = win_symlookup(pregp, ip, &symaddr)) {
+			sprintf (str, "%s?%s+0x%llx ", pregp->filename, symptr, (ip - pregp->p_vaddr) - symaddr);
+			/* sprintf (str, "%s?%s+0x%x (0x%llx) ", pregp->filename, symptr, (ip - pregp->p_vaddr) - symaddr, ip); */
+		} else if (pregp->filename) {
+			sprintf (str, "%s?0x%llx ", pregp->filename, ip);
+		} else {
+			sprintf (str, "0x%llx ", ip);
+		}
+	} else {
+		sprintf (str, "0x%llx ", ip);
+	}
+}
+
 	
 int pdb_symidx_sort_func(const void *v1, const void *v2)
 {
@@ -644,6 +669,11 @@ int filter_pdb(char *name)
 	else if (strcasestr(name, "vmbus.pdb") == name) return 1;
 	else if (strcasestr(name, "vmbkmcl.pdb") == name) return 1;
 	else if (strcasestr(name, "storport.pdb") == name) return 1;
+	else if (strcasestr(name, "storport.pdb") == name) return 1;
+	else if (strcasestr(name, "stornvme.pdb") == name) return 1;
+	else if (strcasestr(name, "volmgrx.pdb") == name) return 1;
+	else if (strcasestr(name, "volmgr.pdb") == name) return 1;
+	else if (strcasestr(name, "mpio.pdb") == name) return 1;
 	else if (strcasestr(name, "mswsock.pdb") == name) return 1;
 	else if (strcasestr(name, "wow64cpu.pdb") == name) return 1;
 	else if (strcasestr(name, "qds.pdb") == name) return 1;

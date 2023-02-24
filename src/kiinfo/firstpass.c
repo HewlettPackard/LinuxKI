@@ -206,7 +206,7 @@ firstpass_provider_func (void *a, void *v)
 
 	if ((p->guid[0] == 0xb3e675d7) && (p->guid[1] == 0x4f182554) && (p->guid[2] == 0x62270b83) && (p->guid[3] == 0xde602573)) {	
 		if (p->EventType == 64) {
-			control_image_func((ControlImage_t *)p);
+			file_version_func((FileVersion_t *)p);
                 } else if (p->EventType == 36) {
                         pdb_image_func((PdbImage_t *)p);
                 }

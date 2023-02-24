@@ -1,0 +1,1153 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+a:link, span.MsoHyperlink
+	{color:#0563C1;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:#954F72;
+	text-decoration:underline;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:107%;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:.5in .5in .5in .5in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US link="#0563C1" vlink="#954F72">
+
+<div class=WordSection1>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+justify;vertical-align:top'><b><i><span style='font-size:12.0pt;font-family:
+"Arial",sans-serif;color:black'>LinuxKI Warning</span></i></b></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:11.25pt;vertical-align:top'><b><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>​​​​RunQ delays for critical processes can impact performance in a
+variety of ways</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>01/24/2023</span></p>
+
+<p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+text-align:center;line-height:11.25pt;vertical-align:top'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-family:"Arial",sans-serif;
+color:black'>Background</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>When critical threads such as
+kernel daemons or other critical application threads are stuck waiting for CPU
+for an extended period of time (hundreds of milliseconds), critical processing
+can be delayed which can impact the system in a variety of ways, including the
+following:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpFirst style='margin-bottom:0in;margin-bottom:.0001pt;
+text-indent:-.25in;line-height:normal;background:white'><span lang=EN-GB
+style='font-size:10.0pt;font-family:Symbol;color:black'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-GB style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black;background:white'>Poor transaction response time</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;text-indent:-.25in;line-height:normal;background:white'><span
+lang=EN-GB style='font-size:10.0pt;font-family:Symbol;color:black'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-GB style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black;background:white'>Delayed network processing</span></p>
+
+<p class=MsoListParagraphCxSpLast style='margin-bottom:0in;margin-bottom:.0001pt;
+text-indent:-.25in;line-height:normal;background:white'><span lang=EN-GB
+style='font-size:10.0pt;font-family:Symbol;color:black'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span lang=EN-GB style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black;background:white'>Delayed I/O processing</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>In a recent case, a customer
+was complaining about poor DB transaction times reported by their applications
+on the application servers.  The database environment consisted of a 4-node
+Oracle RAC cluster on 32-socket Superdome Flex servers running RHEL 8.2 and
+Oracle 19c.  The customer noticed “gc cr blocks lost” and/or “gc current block
+lost” in the Oracle statistics.  </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>Oracle and Network specialists
+were consulted to identify the root cause without success.  There were no
+errors identified in the network.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-family:"Arial",sans-serif;
+color:black'>Investigation</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>LinuxKI data was taken from each node in the Oracle RAC cluster. 
+In this case, the customer duplicated the “gc cr lost block” issue in their
+test environment with 2 8-socket Superdome Flex nodes in an Oracle RAC
+cluster.  </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>With LinuxKI version 7.6 and later, the kirunq report and the
+kparse report will show the top threads waiting for CPU and the maximum wait
+time for each thread:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'> DB01: </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>Top PIDs Waiting on RunQ (in secs):</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>    PID     RunTime     SysTime    UserTime    RunqTime  
+SleepTime    <span style='background:yellow'>MaxRqTm</span>  Command</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>10434      0.433559    0.432090    0.000000    1.952888  
+17.606416   0.012748  [kworker/29:256-qla2xxx_wq]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:yellow'>86         0.006261    0.000551    0.000000   
+1.244216   10.207918   1.090735  [ksoftirqd/12]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>189        0.336050    0.064713    0.000000    1.221545  
+18.435195   0.007781  [ksoftirqd/29]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:yellow'>85         0.000161    0.000161    0.000000   
+1.122090   10.724576   1.086476  [migration/12]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>62240      0.002011    0.000342    0.001651    1.000320  
+18.227063   0.000018  /oracle/grid/bin/ocssd.bin (ocssd.bin)</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>4502       0.059227    0.059007    0.000000    0.993057  
+18.006118   0.012657  [kworker/7:0-qla2xxx_wq]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>57659      0.032151    0.032064    0.000000    0.870923  
+18.219785   0.011555  [kworker/6:0-qla2xxx_wq]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>40040      0.073071    0.072825    0.000000    0.812661  
+18.237132   0.012211  [kworker/5:3-qla2xxx_wq]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>58023      0.074657    0.074522    0.000000    0.745883  
+19.179023   0.011152  [kworker/10:2-qla2xxx_wq]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>46720      0.095365    0.095183    0.000000    0.725575  
+18.365656   0.012164  [kworker/23:2-qla2xxx_wq]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>DB02:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>Top PIDs Waiting on RunQ (in secs):</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>    PID     RunTime     SysTime    UserTime    RunqTime  
+SleepTime     <span style='background:yellow'>MaxRqTm</span>  Command</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:yellow'>49         0.016824    0.003212    0.000000   
+1.559800   18.418257    0.945055  [ksoftirqd/6]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:yellow'>10         0.017402    0.002189    0.000000   
+0.973956   18.973557    0.331432  [ksoftirqd/0]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>39557      0.248601    0.247677    0.000000    0.669578   19.075703   
+0.011034  [kworker/16:1-qla2xxx_wq]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:yellow'>18         0.009177    0.001228    0.000000   
+0.651452   19.275017    0.199351  [ksoftirqd/1]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:yellow'>19564      0.018380    0.018120    0.000000   
+0.634757   19.341763    0.518353  [kworker/6:1-qla2xxx_wq]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>111        0.090462    0.039958    0.000000    0.435837  
+19.467572    0.007786  [ksoftirqd/16]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:yellow'>30         0.003932    0.000544    0.000000   
+0.375023   19.454637    0.161932  [ksoftirqd/3]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:yellow'>36         0.012768    0.003193    0.000000   
+0.344801   19.611427    0.140760  [ksoftirqd/4]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black;background:yellow'>4123       0.031982    0.031696    0.000000   
+0.299297   19.637754    0.152399  [kworker/4:170-xfs-cil/dm-825]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>24         0.008386    0.001209    0.000000    0.260933  
+19.720507    0.007989  [ksoftirqd/2]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>The RunQTime shows the cumulative amount of time waiting for CPU
+over the trace period (default 20 second trace).  By itself, this does not
+indicate an issue but can be a factor of the thread having to be scheduled frequently. 
+ However, the Maximum RunQ Time (MaxRqTm) shows the maximum amount of time the
+thread spent waiting on CPU at some point in the trace.   For example, PID 86
+on DB01 was delayed once by 1.090735 seconds during the trace.    </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>                             </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Impact of the RunQ delays</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>The impact of the RunQ delay depends on the threads being delayed
+and the functions they perform.  Below are 2 of the theads impacted in the
+customer environment:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraph style='margin-bottom:0in;margin-bottom:.0001pt;
+text-indent:-.25in;line-height:normal;background:white'><span style='font-size:
+10.0pt;font-family:Symbol;color:black'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>ksoftirqd threads</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>There is a
+ksoftirqd thread associated with each core.   Typically, the SoftIRQ interrupts
+are handled on the Interrupt Control Stack (ICS) and interrupt whatever is
+running.   However, if the CPU has spends 2 msecs processing SoftIRQ
+interrupts, then the SoftIRQ is queued up and handling deferred to the
+ksoftirqd daemon.   The ksoftirqd threads run with normal timeshare priority.  
+If they are delayed, then SoftIRQ processing is delayed, such as NET_RX and
+BLOCK SoftIRQs.   These delays could cause disk IO and Network completions to
+be delayed.   </span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>In the
+customer example, the ksoftirqd delays prevented the server from processing the
+NET_RX SoftIRQs, thus delaying the delivery of the UDP packets sent across the
+Oracle RAC interconnect.  This caused GC traffic delays including “gc cr blocks
+lost”.</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraph style='margin-bottom:0in;margin-bottom:.0001pt;
+text-indent:-.25in;line-height:normal;background:white'><span style='font-size:
+10.0pt;font-family:Symbol;color:black'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>qla2xxx-wq threads</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Similar to
+ksoftirqd threads, the qla2xxx_wq threads run with normal timeshare
+priority.    If these threads are delayed, then disk IO completions can be
+delayed.   Note in the DB02 RunQ data above, PID 19564 was delayed for 0.518353
+seconds.  Meanwhile, we can see multiple IOs delayed for over 500 msecs, which
+finally completed on CPU 6, which is where the qla2xxx_wq was assigned:</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>&gt; grep
+&quot;block_rq_complete&quot; ki.1229_1809 | grep -v &quot;dev_t=0x0f&quot; |
+sort -r -n -k 18,18 | more</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>   17.185686
+cpu=6 pid=19564 tgid=19564 block_rq_complete dev_t=0x08300c90 wr=write
+flags=FAILFAST_TRANSPORT|SYNC|NOMERGE|IDLE sector=0x3e3b7b90 len=131072 async=0
+sync=0 qpid=10018 spid=10018 qtm=  0.000000 <span style='background:yellow'>svtm= 
+0.519407</span></span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>   17.185675
+cpu=6 pid=19564 tgid=19564 block_rq_complete dev_t=0x08200c80 wr=write
+flags=FAILFAST_TRANSPORT|SYNC|NOMERGE|IDLE sector=0x33e36d20 len=131072 async=0
+sync=0 qpid=10018 spid=10018 qtm=  0.000000 <span style='background:yellow'>svtm= 
+0.519349</span></span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>   17.185696
+cpu=6 pid=19564 tgid=19564 block_rq_complete dev_t=0x08400ba0 wr=write
+flags=FAILFAST_TRANSPORT|SYNC|NOMERGE|IDLE sector=0x210ea70 len=40960 async=0
+sync=0 qpid=10018 spid=10018 qtm=  0.000000 <span style='background:yellow'>svtm= 
+0.519331</span></span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>   17.185654
+cpu=6 pid=19564 tgid=19564 block_rq_complete dev_t=0x00800d10 wr=write
+flags=FAILFAST_TRANSPORT|SYNC|NOMERGE|IDLE sector=0x210f6b0 len=40960 async=0
+sync=0 qpid=10018 spid=10018 qtm=  0.000000 <span style='background:yellow'>svtm= 
+0.519297</span></span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>   17.185705
+cpu=6 pid=19564 tgid=19564 block_rq_complete dev_t=0x04200b30 wr=write
+flags=FAILFAST_TRANSPORT|SYNC|NOMERGE|IDLE sector=0x2fd50fc0 len=32768 async=0
+sync=0 qpid=10018 spid=10018 qtm=  0.000000 <span style='background:yellow'>svtm= 
+0.517860</span></span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>   17.185715
+cpu=6 pid=19564 tgid=19564 block_rq_complete dev_t=0x08200ca0 wr=write
+flags=FAILFAST_TRANSPORT|SYNC|NOMERGE|IDLE sector=0x387a60d0 len=131072 async=0
+sync=0 qpid=10018 spid=10018 qtm=  0.000000 <span style='background:yellow'>svtm= 
+0.517808</span></span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>...</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>The above list is not exhaustive.   Other threads could be
+impacted, such as the migration thread for DB01.  However, if the migration
+thread doesn’t run for over 1 second, it is not quite as critical as not being
+able to complete IO.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Root Cause of the RunQ delays</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>There can be many causes of the RunQ delays.   Below are 2 of the main
+causes seen for this specific customer issue:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpFirst style='margin-bottom:0in;margin-bottom:.0001pt;
+text-indent:-.25in;line-height:normal;background:white'><span style='font-size:
+10.0pt;font-family:Symbol;color:black'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Real-time processes starving out critical timeshare processes,
+like ksoftirqd or qla2xxx_wq threads</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Once you identify when a delay
+occurs, you can look at the detailed traces on the CPU to see what was running
+at the time.   </span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>For example, on DB02, PID 18 (ksoftirqd/1)
+shows a MaxRqTm of 0.199351 seconds.   Looking at the detail trace for this
+PID, this occurred at the following time:</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>    9.629854 cpu=1 pid=-1 tgid=-1
+sched_wakeup target_pid=18 prio=120 target_cpu=1 success=1</span></p>
+
+<p class=MsoListParagraphCxSpLast style='margin-bottom:0in;margin-bottom:.0001pt;
+line-height:normal;background:white'><span style='font-size:9.0pt;font-family:
+"Courier New";color:black'>    9.829206 cpu=1 pid=54837 tgid=54750 sched_switch
+syscall=futex prio=0 state=SLEEP next_pid=18 next_prio=120 next_tgid=18
+policy=SCHED_NORMAL vss=315888 rss=42145 futex_wait_queue_me+0xc1
+futex_wait+0x13f do_futex+0x3e4 __x64_sys_futex+0x143 do_syscall_64+0x5b
+entry_SYSCALL_64_after_hwframe+0x65 |  [libpthread-2.28.so]:pthread_cond_timedwait@@GLIBC_2.3.2+0x2f8</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Note in the
+above records, PID 18 was woken up 9.629854 seconds into the trace.  But it did
+not start running on the CPU until 9.829206 seconds into the trace, a delay of
+~0.199351. Next, we need to look at CPU 1 to see what was running during this
+~200 msec window:</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>&gt; kiinfo
+-kitrace cpu=1 -ts 1229_1809 -start 9.629850 | grep -e &quot;hardclock&quot; -e
+&quot;syscallbeg=&quot; | more</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    9.629865
+cpu=1 pid=5760 tgid=5760 openat [257] ret=6 syscallbeg=    0.000005 dirfd=-100
+*pathname=0x7fffe276cbf0 flags=RDONLY|CLOEXEC mode=00</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    9.629866
+cpu=1 pid=5760 tgid=5760 fstat [5] ret=0x0 syscallbeg=    0.000001 fd=6
+*buf=0x7fffe276caf0</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    9.629867
+cpu=1 pid=5760 tgid=5760 fstat [5] ret=0x0 syscallbeg=    0.000000 fd=6
+*buf=0x7fffe276c980</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    9.629870
+cpu=1 pid=5760 tgid=5760 read [0] ret=0x64a syscallbeg=    0.000002 fd=6
+*buf=0x5592bdf3ed40 count=4096 type=REG dev=0x00000018 ino=1898635</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    9.629871
+cpu=1 pid=5760 tgid=5760 read [0] ret=0x0 syscallbeg=    0.000001 fd=6
+*buf=0x5592bdf3ed40 count=4096</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    9.629872
+cpu=1 pid=5760 tgid=5760 close [3] ret=0x0 syscallbeg=    0.000000 fd=6</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    9.629879
+cpu=1 pid=5760 tgid=5760 getrandom [318] ret=0x10 syscallbeg=    0.000001</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    9.629885
+cpu=1 pid=5760 tgid=5760 getrandom [318] ret=0x10 syscallbeg=    0.000000</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    9.629895
+cpu=1 pid=5760 tgid=5760 getrandom [318] ret=0x10 syscallbeg=    0.000000</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>...</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Note that
+PID 5670 is /sbin/pvs, which is trying to get information on all of the IO
+devices on the system, and for this system, there are thousands of devices.  
+Note that this processing is running in real-time:</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>PID 5760 
+/sbin/pvs</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>  PPID 5758 
+/bin/sh</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    *********
+SCHEDULER ACTIVITY REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    RunTime    : 
+1.736941  SysTime   :  0.714887   UserTime   :  1.001997</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    SleepTime  : 
+8.802571  Sleep Cnt :        16   Wakeup Cnt :       488</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    RunQTime   : 
+0.000212  Switch Cnt:        48   PreemptCnt :        32</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    HardIRQ    : 
+0.000141  HardIRQ-S :  0.000057    HardIRQ-U :  0.000084</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    SoftIRQ    : 
+0.019915  SoftIRQ-S :  0.007678    SoftIRQ-U :  0.012238</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    Last CPU  
+:         0  CPU Migrs :        32   NODE Migrs :         0</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    <span
+style='background:yellow'>Policy     : SCHED_FIFO</span>       vss :    
+26339          rss :     11998</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>This
+process will periodically migrate from one CPU core to another, thus it can
+impact different CPU cores at different times.    Note that pvs is invoked on
+behalf of /opt/perf/bin/midaemon, which is part of Operations Agent by
+Microfocus.</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.5in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Other
+real-time processes can have the same impact.   On the customer’s system, the Oracle
+process osysmond also runs with real-time priority and caused some delays as
+well.</span></p>
+
+<p class=MsoListParagraphCxSpFirst style='margin-bottom:0in;margin-bottom:.0001pt;
+line-height:normal;background:white'><span style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;text-indent:-.25in;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:Symbol;color:black'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Timeshare processes that make long CPU-intensive system calls
+without yielding the CPU</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Again, once you can identify when a
+delay occurs, you can look at the detail traces on the CPU to see what was
+running at the time.  </span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>For example, on DB01, PID 86 (ksoftirqd/12)
+was be running on CPU 12.    Looking at the detailed traces for PID 86, we can
+see the following delay, where PID 86 was woken up, but failed to run for over
+1 second:</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>   10.268325 cpu=12 pid=-1 tgid=-1
+sched_wakeup target_pid=86 prio=120 target_cpu=12 success=1</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>   11.359061 cpu=12 pid=85 tgid=85
+sched_switch syscall=restart_sycsall prio=0 state=SLEEP next_pid=86
+next_prio=120 next_tgid=86 policy=SCHED_NORMAL vss=0 rss=0
+smpboot_thread_fn+0x10b kthread+0x112 ret_from_fork+0x1f</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Now we can look to see what was
+executing on CPU 12 during this period:</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>&gt; kiinfo -kitrace cpu=12 -ts
+1229_1809 -start 10.2 | grep -e &quot;hardclock&quot; -e
+&quot;syscallbeg=&quot; | more </span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>...</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>   10.229435 cpu=12 pid=466 tgid=65258
+hardclock state=SYS _raw_spin_unlock_irqrestore+0x11 count_partial+0x55 get_slabinfo+0x53
+memcg_accumulate_slabinfo+0x88 cache_show+0x47 <span style='background:yellow'>slab_show</span>+0x25
+seq_read+0x2e9 proc_reg_read+0x3c vfs_read+0x91 ksys_read+0x4f
+do_syscall_64+0x5b entry_SYSCALL_64_after_hwframe+0x65 | 
+[libc-2.28.so]:read+0x44</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>   10.241327 cpu=12 pid=466 tgid=65258
+hardclock state=SYS _raw_spin_unlock_irqrestore+0x11 count_partial+0x55
+get_slabinfo+0x53 memcg_accumulate_slabinfo+0x88 cache_show+0x47 <span
+style='background:yellow'>slab_show</span>+0x25 seq_read+0x2e9
+proc_reg_read+0x3c vfs_read+0x91 ksys_read+0x4f do_syscall_64+0x5b
+entry_SYSCALL_64_after_hwframe+0x65 |  [libc-2.28.so]:read+0x44</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>   10.253326 cpu=12 pid=466 tgid=65258
+hardclock state=SYS get_slabinfo+0x81 memcg_accumulate_slabinfo+0x88
+cache_show+0x47 <span style='background:yellow'>slab_show</span>+0x25
+seq_read+0x2e9 proc_reg_read+0x3c vfs_read+0x91 ksys_read+0x4f do_syscall_64+0x5b
+entry_SYSCALL_64_after_hwframe+0x65 |  [libc-2.28.so]:read+0x44</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>   10.263326 cpu=12 pid=466 tgid=65258
+hardclock state=SYS get_slabinfo+0x81 memcg_accumulate_slabinfo+0x88
+cache_show+0x47 <span style='background:yellow'>slab_show</span>+0x25
+seq_read+0x2e9 proc_reg_read+0x3c vfs_read+0x91 ksys_read+0x4f
+do_syscall_64+0x5b entry_SYSCALL_64_after_hwframe+0x65 | 
+[libc-2.28.so]:read+0x44</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>   11.359050 cpu=12 pid=466 tgid=65258
+read [0] ret=0x400 <span style='background:yellow'>syscallbeg=    1.131711</span>
+fd=213 *buf=0x7f34c4b11560 count=1024 type=REG dev=0x00000004 ino=4026532176</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Note that PID 466 is an Operations
+Agent thread (oacore) which is reading /proc/slabinfo.   The process has normal
+timeshare priority, but since the read() system call on the /proc/slabinfo file
+takes 1.131711 seconds, it ends up delaying the ksoftirqd thread on the same
+CPU. </span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>PID 466  /opt/OV/bin/oacore  (oacore)</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>  TGID 65258  /opt/OV/bin/oacore</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>    NLWP: 18</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>    ********* SCHEDULER ACTIVITY REPORT
+********</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>    RunTime    : 11.479054  SysTime   : 
+7.769834   UserTime   :  3.584032</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>    SleepTime  :  8.193780  Sleep Cnt
+:        47   Wakeup Cnt :      1042</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>    RunQTime   :  0.155903  Switch
+Cnt:      4773   PreemptCnt :      4726</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>    HardIRQ    :  0.003113  HardIRQ-S : 
+0.001968    HardIRQ-U :  0.001145</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>    SoftIRQ    :  0.122075  SoftIRQ-S : 
+0.079305    SoftIRQ-U :  0.042769</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>    Last CPU   :        12  CPU Migrs
+:       239   NODE Migrs :         6</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>    <span style='background:yellow'>Policy    
+: SCHED_NORMAL</span>     vss :    265245          rss :     40670</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:9.0pt;
+font-family:"Courier New";color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Reading /proc/slabinfo has long
+been an issue on Linux.   While the code was improved on RHEL 7.X, a large
+kernel memory cache with many partially filled slabs, such as the dentry cache,
+can still cause the read() to take an extended amount of time.   </span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>There are many tools that can read
+from /proc/slabinfo.   The following tools were observed to read slabinfo and
+defer the ksoftirqd and qla2xxx_wq on the customer’s system:</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-top:0in;margin-right:0in;
+margin-bottom:0in;margin-left:1.0in;margin-bottom:.0001pt;text-indent:-.25in;
+line-height:normal;background:white'><span style='font-size:10.0pt;font-family:
+"Courier New";color:black'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Operations Agent (OA) from Microfocus</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-top:0in;margin-right:0in;
+margin-bottom:0in;margin-left:1.5in;margin-bottom:.0001pt;text-indent:-.25in;
+line-height:normal;background:white'><span style='font-size:10.0pt;font-family:
+Wingdings;color:black'>§<span style='font:7.0pt "Times New Roman"'>&nbsp; </span></span><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>oacore </span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-top:0in;margin-right:0in;
+margin-bottom:0in;margin-left:1.5in;margin-bottom:.0001pt;text-indent:-.25in;
+line-height:normal;background:white'><span style='font-size:10.0pt;font-family:
+Wingdings;color:black'>§<span style='font:7.0pt "Times New Roman"'>&nbsp; </span></span><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>hpsensor  </span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-top:0in;margin-right:0in;
+margin-bottom:0in;margin-left:1.5in;margin-bottom:.0001pt;text-indent:-.25in;
+line-height:normal;background:white'><span style='font-size:10.0pt;font-family:
+Wingdings;color:black'>§<span style='font:7.0pt "Times New Roman"'>&nbsp; </span></span><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>perfd</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>While the OA tools are known to
+read slabinfo, other tools, such as sosreport and LinuxKI, can also read the
+slabinfo file, although these tool are not running constantly like the
+performance monitoring tools.   Beginning with version 7.6, LinuxKI no longer
+reads /proc/slabinfo.</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Meanwhile, the following should be
+added to the /var/opt/perf/parm file to prevent oacore from reading the
+/proc/slabinfo file:</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;margin-bottom:
+.0001pt;line-height:normal;background:white'><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-top:0in;margin-right:0in;
+margin-bottom:0in;margin-left:1.0in;margin-bottom:.0001pt;line-height:normal;
+background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>DISABLE_SLAB_METRICS=t</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-top:0in;margin-right:0in;
+margin-bottom:0in;margin-left:1.0in;margin-bottom:.0001pt;line-height:normal;
+background:white'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;margin-bottom:.0001pt;
+line-height:normal;background:white'><b><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>Summary</span></b></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;margin-bottom:.0001pt;
+line-height:normal;background:white'><span style='font-size:9.0pt;font-family:
+"Courier New";color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;margin-bottom:.0001pt;
+line-height:normal;background:white'><span style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>When critical threads are delayed, such as
+kernel daemons like ksoftirqd and qla2xxx_wq, the impact can affect other
+processing on the system, such delayed IO completions and delayed network
+processing, which can then impact the performance of other processes on the
+system. </span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;margin-bottom:.0001pt;
+line-height:normal;background:white'><span style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;margin-bottom:.0001pt;
+line-height:normal;background:white'><span style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>LinuxKI 7.6 has been enhanced to display a
+warning if any of the top PIDs are delayed more than 100 msecs. For example:</span></p>
+
+<p class=MsoListParagraphCxSpLast style='margin-bottom:0in;margin-bottom:.0001pt;
+line-height:normal;background:white'><span style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#FFD1A4'>
+ <tr>
+  <td style='padding:1.5pt 2.25pt 1.5pt 2.25pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span style='font-size:10.0pt;
+  font-family:"Courier New"'>2.2.2 Top Threads Waiting on CPU (in secs)</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><u><span style='font-size:10.0pt;font-family:"Courier New";
+  color:blue'>[Prev Subsection][Next Subsection]---[Prev Section][Next
+  Section][Table of Contents]</span></u></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+PID     RunTime     SysTime    UserTime    RunqTime   SleepTime     MaxRqTm  
+Command</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:9.0pt;font-family:"Courier New";color:blue'>10434</span></u><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>      0.433559   
+0.432090    0.000000    1.952888   17.606416    0.012748 
+[kworker/29:256-qla2xxx_wq]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:9.0pt;font-family:"Courier New";color:blue'>86</span></u><span
+style='font-size:9.0pt;font-family:"Courier New";color:#CC0000'>        
+0.006261    0.000551    0.000000    1.244216   10.207918    1.090735 
+[ksoftirqd/12]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:9.0pt;font-family:"Courier New";color:blue'>189</span></u><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>       
+0.336050    0.064713    0.000000    1.221545   18.435195    0.007781 
+[ksoftirqd/29]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:9.0pt;font-family:"Courier New";color:blue'>85</span></u><span
+style='font-size:9.0pt;font-family:"Courier New";color:#CC0000'>        
+0.000161    0.000161    0.000000    1.122090   10.724576    1.086476 
+[migration/12]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:9.0pt;font-family:"Courier New";color:blue'>62240</span></u><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>      0.002011   
+0.000342    0.001651    1.000320   18.227063    0.000018 
+/oracle/grid/bin/ocssd.bin (ocssd.bin)</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:9.0pt;font-family:"Courier New";color:blue'>4502</span></u><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>      
+0.059227    0.059007    0.000000    0.993057   18.006118    0.012657 
+[kworker/7:0-qla2xxx_wq]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:9.0pt;font-family:"Courier New";color:blue'>57659</span></u><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>      0.032151   
+0.032064    0.000000    0.870923   18.219785    0.011555 
+[kworker/6:0-qla2xxx_wq]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:9.0pt;font-family:"Courier New";color:blue'>40040</span></u><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>      0.073071   
+0.072825    0.000000    0.812661   18.237132    0.012211 
+[kworker/5:3-qla2xxx_wq]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:9.0pt;font-family:"Courier New";color:blue'>58023</span></u><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>      0.074657   
+0.074522    0.000000    0.745883   19.179023    0.011152 
+[kworker/10:2-qla2xxx_wq]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:9.0pt;font-family:"Courier New";color:blue'>46720</span></u><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>      0.095365   
+0.095183    0.000000    0.725575   18.365656    0.012164 
+[kworker/23:2-qla2xxx_wq]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:9.0pt;font-family:"Courier New";color:blue'>[CSV]</span></u></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><a name=warncheck1></a><span style='font-size:9.0pt;font-family:"Courier New";
+color:#CC0000'>Warning: Threads delayed on RunQ with max wait time more than
+100 msecs </span><span style='font-size:9.0pt;font-family:"Courier New";
+color:#0033CC'>[<u>INFO</u>][<u>Next</u>]</span></p>
+
+<p class=MsoListParagraph style='margin-bottom:0in;margin-bottom:.0001pt;
+line-height:normal;background:white'><span style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>To understand the impact of the RunQ delay, you will need to
+identify when the delay occurred, what was running on the CPU that caused the
+delay, and what processing may have been postponed due to the delay, such as
+NET_RX interrupts or IO completions.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+</div>
+
+</body>
+
+</html>

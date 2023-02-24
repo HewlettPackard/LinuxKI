@@ -43,6 +43,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define _LNK_1_6_1	"subsection1.6.1"
 #define _LNK_1_6_2	"subsection1.6.2"
 #define _LNK_1_6_3	"subsection1.6.3"
+#define _LNK_1_7	"subsection1.7"
+#define _LNK_1_7_1	"subsection1.7.1"
+#define _LNK_1_7_2	"subsection1.7.2"
 #define _LNK_2_0	"Section2"
 #define _LNK_2_1	"subsection2.1"
 #define _LNK_2_1_1	"subsection2.1.1"
@@ -137,6 +140,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define _HTTP_SQL_STATS "sql_stats.htm"
 #define _HTTP_ORACLE_COLSTATS "oracle_colstats.htm"
 #define _HTTP_CACHE_BYPASS "cache_bypass.htm"
+#define _HTTP_RUNQ_DELAYS "runq_delays.htm"
 #define _HTTP_4_5 "#subsection4.5"
 
 #define _MSG_LINK_INFO \

@@ -1069,7 +1069,13 @@ ki_clone(void *arg1, void *arg2, uint64 scalltime)
 	if (rec_ptr->ret <= 0) return 0;
 
 	npidp = GET_PIDP(&globals->pid_hash, rec_ptr->ret);
-	npidp->ppid = pidp->PID;
+
+	if (pidp->last_syscall_args[0] & CLONE_THREAD) {
+		npidp->tgid = pidp->PID;
+		npidp->ppid = pidp->ppid;
+	} else {
+		npidp->ppid = pidp->PID;
+	}
 
 	if (pidp->cmd) {
 		repl_command(&npidp->cmd, pidp->cmd);

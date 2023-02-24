@@ -163,6 +163,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define MSR_FLAG		0x2000000000000ull
 #define DOCKTREE_FLAG		0x4000000000000ull
 #define ETLDUMP_FLAG		0x8000000000000ull
+#define SYSCONFIG_FLAG		0x10000000000000ull
 
 #define SET_STAT(flag) (kiinfo_stats |= flag)
 #define CLEAR_STAT(flag) (kiinfo_stats &= ~flag)
@@ -234,6 +235,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define	kiall_flag		(ISSET(KIALL_FLAG))
 #define mangle_flag		(ISSET(MANGLE_FLAG))
 #define info_flag		(ISSET(INFO_FLAG))
+#define sysconfig_flag		(ISSET(SYSCONFIG_FLAG))
 #define kitrace_flag		(ISSET(KITRACE_FLAG))
 #define filter_flag		(ISSET(FILTER_FLAG))
 #define msr_flag		(ISSET(MSR_FLAG))
@@ -502,6 +504,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define GET_ADD_IRQINFOP(addr)  (irq_info_t *)find_add_info((void **)addr, sizeof(irq_info_t))
 #define GET_ADD_SCALL_STATSP(addr) (syscall_stats_t *)find_add_info((void **)addr, sizeof(syscall_stats_t))
 #define GET_IOV_STATSP(addr)	(iov_stats_t *)find_add_info((void **)addr, sizeof(iov_stats_t))
+#define GET_SPINLOCKP(addr)  (spinlock_info_t *)find_add_info((void **)addr, sizeof(spinlock_info_t))
 
 #define GET_DOCKERP(hashp, key) (docker_info_t *)find_add_hash_entry((lle_t ***)hashp, DOCKER_HASHSZ, key, DOCKER_HASH(key), sizeof(docker_info_t))
 #define GET_DKPIDP(hashp, key)	(dkpid_info_t *)find_add_hash_entry((lle_t ***)hashp, PID_HASHSZ, key, PID_HASH(key), sizeof(dkpid_info_t))
@@ -518,6 +521,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define GET_FDINFOP(hashp, key)  (fd_info_t *)find_add_hash_entry((lle_t ***)hashp, FD_HSIZE, key, FD_HASH(key), sizeof(fd_info_t))
 #define GET_FDEVP(hashp, key)  (filedev_t *)find_add_hash_entry((lle_t ***)hashp, FDEV_HSIZE, key, FDEV_HASH(key), sizeof(filedev_t))
 #define GET_FOBJP(hashp, key)  (fileobj_t *)find_add_hash_entry((lle_t ***)hashp, FOBJ_HSIZE, key, FOBJ_HASH(key), sizeof(fileobj_t))
+#define GET_SPININFOP(hashp, key)  (spin_info_t *)find_add_hash_entry((lle_t ***)hashp, SPIN_HSIZE, key, SPIN_HASH(key), sizeof(spin_info_t))
 #define GET_SYSCALLP(hashp, key)  (syscall_info_t *)find_add_hash_entry((lle_t ***)hashp, SYSCALL_HASHSZ, key, SYSCALL_HASH(key), sizeof(syscall_info_t))
 #define GET_ADDR_TO_IDX_HASH_ENTRYP(hashp, key)  (addr_to_idx_hash_entry_t *)find_add_hash_entry((lle_t ***)hashp, ADDR_TO_IDX_HASHSZ, key, ADDR_TO_IDX_HASH(key), sizeof(addr_to_idx_hash_entry_t))
 #define GET_SCDWINFOP(hashp, key)  (scd_waker_info_t *)find_add_hash_entry((lle_t ***)hashp, WPID_HSIZE, key, WPID_HASH(key), sizeof(scd_waker_info_t))
@@ -686,6 +690,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define FOBJ lle.key
 #define FOBJ_HSIZE 0x1000
 #define FOBJ_HASH(fobj) ((fobj << 10) & (FOBJ_HSIZE-1))
+
+#define CALLER_ADDR lle.key
+#define SPIN_HSIZE 0x100
+#define SPIN_HASH(fobj) ((fobj >> 6) & (SPIN_HSIZE-1))
 
 #define FDEV lle.key
 #define FDEV_HSIZE 0x20
@@ -940,7 +948,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 /* macros for managing the Notes and Warnings messages and links.  */
 /* update with warnmsg[] definitions in globals.c */
-#define MAXWARNMSG		33	
+#define MAXWARNMSG		34
 #define MAXNOTEMSG		0
 #define MAXNOTEWARN		MAXWARNMSG+MAXNOTEMSG
 #define WARN_CPU_BOTTLENECK		0		
@@ -976,6 +984,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARN_CACHE_BYPASS		30
 #define WARN_MEM_IMBALANCE		31
 #define WARN_NODE_LOWMEM		32
+#define WARN_RUNQ_DELAYS		33
 #define NOTE_NUM1		MAXWARNMSG+0
 
 /* warn flags passed to "foreach" functions for detection */
@@ -1002,6 +1011,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARNF_CACHE_BYPASS		0x100000ull
 #define WARNF_MEM_IMBALANCE		0x200000ull
 #define WARNF_NODE_LOWMEM		0x400000ull
+#define WARNF_RUNQ_DELAYS		0x800000ull
 
 /* warn flags specific to hardclocks warnflag */ 
 #define WARNF_SEMLOCK			0x1ull
@@ -1230,6 +1240,23 @@ typedef struct hc_info {
 	uint32		cpustate[HC_STATES];
 } hc_info_t;
 
+typedef struct spin_stats {
+	uint64		waitcycles;
+	uint64		heldcycles;
+	uint64		spincnt;
+	int		count;
+} spin_stats_t;
+
+typedef struct spin_info {
+	lle_t		lle;
+	spin_stats_t	stats;
+} spin_info_t;
+
+typedef struct spinlock_info {
+	void		**spin_hash;
+	spin_stats_t	stats;
+} spinlock_info_t;
+
 typedef struct syscall_arg {
 	char *label;
 	int	format;
@@ -1381,6 +1408,7 @@ typedef struct pid_info {
 	void		*dockerp;	/* docker pointer */
 	void *schedp;			/* struct sched_info */
 	hc_info_t *hcinfop;		/* struct hc_info */
+	void *spinlockp;		/* struct spinlock_info_t  WINDOWS ONLY */
 	void **devhash;			/* struct dev_info */
 	void **mdevhash;		/* struct dev_info */
 	void **scallhash;		/* struct syscallinfo */
@@ -2201,7 +2229,7 @@ typedef struct server_info {
 	void **stktrc_hash;		/* struct stktrc_info */
 	void **syscall_hash;		/* struct syscall_info */
 	void **fdata_hash;		/* struct fdata_info_t */
-	void **fobj_hash;		/* struct fileobj_t   WINDOWS only */
+	void **fobj_hash;		/* struct fileobj_t   WINDOWS ONLY */
 	void **sdata_hash;		/* struct sdata_info_t */
 	void **ipip_hash;		/* struct ipip_info_t */
 	void **rip_hash;		/* struct ip_info_t */
@@ -2224,6 +2252,7 @@ typedef struct server_info {
 	void **ctx_hash;		/* struct ctx_info_t */
 	void **win_syscall_hash;	/* struct addr_to_idx_hash_entry_t */
 	void **win_dpc_hash;		/* struct addr_to_idx_hash_entry_t */
+	void *spinlockp;		/* struct spinlock_info_t  WINDOWS ONLY */
 	short *syscall_index_32;
 	short *syscall_index_64;
 	/* for optional irq processing */

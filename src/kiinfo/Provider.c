@@ -31,10 +31,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "Pdb.h"
 
 int
-print_pdb_image(PdbImage_t *p)
+print_pdb_image(void *a)
 {
+	trace_info_t *trcinfop = (trace_info_t *)a;
+        PdbImage_t *p = (PdbImage_t *)trcinfop->cur_event;
 	int i;
-	printf (" PdbImage: %s %08x-%04hx-%04hx-", p->Name, p->guid1, p->guid2, p->guid3);
+
+	PRINT_COMMON_FIELDS_C014(p);
+	printf (" ImageID Pdb %s %08x-%04hx-%04hx-", p->Name, p->guid1, p->guid2, p->guid3);
 
 	for (i = 0; i < 4; i++) {
 		printf ("%02hhx", p->guid4[i]);
@@ -49,17 +53,19 @@ print_pdb_image(PdbImage_t *p)
 int
 pdb_image_func(PdbImage_t *p)
 {
-
 	get_pdb(p);
 }
 
 int
-print_control_image(ControlImage_t *p)
+print_file_version(void *a)
 {
+	trace_info_t *trcinfop = (trace_info_t *)a;
+        FileVersion_t *p = (FileVersion_t *)trcinfop->cur_event;
 	uint16 *chr;
 
+	PRINT_COMMON_FIELDS_C014(p);
 	chr = &p->Name[0];
-	printf (" ControlImage: size=%d datetime=0x%x", p->ImageSize, p->TimeDateStamp);
+	printf (" ImageID FileVersion size=%d datetime=0x%x", p->ImageSize, p->TimeDateStamp);
 	printf (" Orig=\"");
 	PRINT_WIN_NAME2(chr);
 	printf ("\" FileDesc=\"");
@@ -80,10 +86,11 @@ print_control_image(ControlImage_t *p)
 	PRINT_WIN_NAME2(chr);
 	printf ("\" ProgramId=\"");
 	PRINT_WIN_NAME2(chr);
+	printf ("\"\n");
 }
 
 int
-control_image_func(ControlImage_t *p)
+file_version_func(FileVersion_t *p)
 {
 	uint16 *chr;
 	char	str[512];
@@ -106,3 +113,85 @@ control_image_func(ControlImage_t *p)
 	pdbinfop->ControlImagePtr = (void *)p;
 	/* printf ("ImageName: %s [%d] Ptr: 0x%llx\n", pdbinfop->strlle.key, strlen(pdbinfop->strlle.key), pdbinfop->ControlImagePtr); */
 }
+
+int
+print_image_id(void *a)
+{
+	trace_info_t *trcinfop = (trace_info_t *)a;
+        ImageID_t *p = (ImageID_t *)trcinfop->cur_event;
+	uint16 *chr;
+
+	PRINT_COMMON_FIELDS_C014(p);
+	chr = &p->Name[0];
+	printf (" ImageID Image ImageBase=0x%llx ImageSize=%lld DateTime=\"", p->ImageBase, p->ImageSize);
+	PRINT_WIN_FMTTIME((uint64)p->TimeDateStamp);
+	printf ("\" FileName=\"");
+	PRINT_WIN_NAME2(chr);
+	printf ("\"\n");
+
+}
+
+int
+print_build_info(void *a)
+{
+	trace_info_t *trcinfop = (trace_info_t *)a;
+        BuildInfo_t *p = (BuildInfo_t *)trcinfop->cur_event;
+	uint16 *chr;
+
+	chr = &p->Name[0];
+	PRINT_COMMON_FIELDS_C014(p);
+	printf (" SysConfig BuildInfo InstallDate=\"");
+	PRINT_WIN_FMTTIME((uint64)p->InstallDate);
+	printf("\" BuildLab=\"");
+	PRINT_WIN_NAME2(chr);
+	printf ("\" ProductName=\"");
+	PRINT_WIN_NAME2(chr);
+	printf ("\"\n");
+}
+
+int
+print_system_paths(void *a)
+{
+	trace_info_t *trcinfop = (trace_info_t *)a;
+        Provider_t *p = (Provider_t *)trcinfop->cur_event;
+	uint16 *chr;
+
+	chr = &p->Name[0];
+	PRINT_COMMON_FIELDS_C014(p);
+	printf (" SysConfig SystemPaths SystemDirectory=\"");;
+	PRINT_WIN_NAME2(chr);
+	printf ("\" SystemWindowDirectory=\"");
+	PRINT_WIN_NAME2(chr);
+	printf ("\"\n");
+}
+
+int
+print_unknown_volume(void *a)
+{
+	trace_info_t *trcinfop = (trace_info_t *)a;
+        Provider_t *p = (Provider_t *)trcinfop->cur_event;
+	uint16 *chr;
+
+	chr = &p->Name[0];
+	PRINT_COMMON_FIELDS_C014(p);
+	printf (" SysConfig UnknownVolume Volume\"");;
+	PRINT_WIN_NAME2(chr);
+	printf ("\"\n");
+}
+
+int
+print_volume_mapping(void *a)
+{
+	trace_info_t *trcinfop = (trace_info_t *)a;
+        Provider_t *p = (Provider_t *)trcinfop->cur_event;
+	uint16 *chr;
+
+	chr = &p->Name[0];
+	PRINT_COMMON_FIELDS_C014(p);
+	printf (" SysConfig VolumeMapping NtPath=\"");;
+	PRINT_WIN_NAME2(chr);
+	printf ("\" DosPath=\"");
+	PRINT_WIN_NAME2(chr);
+	printf ("\"\n");
+}
+

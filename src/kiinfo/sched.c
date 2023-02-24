@@ -635,7 +635,7 @@ sched_rqhist_wakeup(int cpu, pid_info_t *pidp, int old_state, uint64 runq_time)
         }
 
         time = runq_time / 1000;
-        if (perpid_stats && !kparse_flag) {
+        if (perpid_stats || kparse_flag) {
                 trqinfop = GET_ADD_RQINFOP(&schedp->rqinfop);
                 incr_runq_stats (trqinfop, old_state, time, migrated, ldom_migrated);
 
@@ -701,7 +701,7 @@ sched_rqhist_resume(int cpu, pid_info_t *pidp, int old_state, uint64 runq_time)
 */
         time = runq_time / 1000;
 
-        if (perpid_stats && !kparse_flag) {
+        if (perpid_stats || kparse_flag) {
                 trqinfop = GET_ADD_RQINFOP(&schedp->rqinfop);
                 incr_runq_stats (trqinfop, old_state, time, migrated, ldom_migrated);
 

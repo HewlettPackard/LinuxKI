@@ -103,11 +103,15 @@ winki_init_actions(int func(void *, void*))
 	strcpy(&ki_actions[0x44d].subsys[0], "FileIo"); strcpy(&ki_actions[0x44d].event[0], "DirNotify");
 	strcpy(&ki_actions[0x44f].subsys[0], "FileIo"); strcpy(&ki_actions[0x44f].event[0], "DeletePath");
 	strcpy(&ki_actions[0x450].subsys[0], "FileIo"); strcpy(&ki_actions[0x450].event[0], "RenamePath");
+	strcpy(&ki_actions[0x454].subsys[0], "FileIo"); strcpy(&ki_actions[0x454].event[0], "QuerySecurity");
+	strcpy(&ki_actions[0x456].subsys[0], "FileIo"); strcpy(&ki_actions[0x456].event[0], "QueryEA");
 	strcpy(&ki_actions[0x501].subsys[0], "Thread"); strcpy(&ki_actions[0x501].event[0], "Start");
 	strcpy(&ki_actions[0x502].subsys[0], "Thread"); strcpy(&ki_actions[0x502].event[0], "End");
 	strcpy(&ki_actions[0x503].subsys[0], "Thread"); strcpy(&ki_actions[0x503].event[0], "DCStart");
 	strcpy(&ki_actions[0x504].subsys[0], "Thread"); strcpy(&ki_actions[0x504].event[0], "DCEnd");
 	strcpy(&ki_actions[0x524].subsys[0], "Thread"); strcpy(&ki_actions[0x524].event[0], "Cswitch");
+	strcpy(&ki_actions[0x529].subsys[0], "Thread"); strcpy(&ki_actions[0x529].event[0], "Spinlock");
+	strcpy(&ki_actions[0x52b].subsys[0], "Thread"); strcpy(&ki_actions[0x52b].event[0], "Resource");
 	strcpy(&ki_actions[0x532].subsys[0], "Thread"); strcpy(&ki_actions[0x532].event[0], "ReadyThread");
 	strcpy(&ki_actions[0x542].subsys[0], "Thread"); strcpy(&ki_actions[0x542].event[0], "AutoBoostSetFloor");
 	strcpy(&ki_actions[0x543].subsys[0], "Thread"); strcpy(&ki_actions[0x543].event[0], "AutoBoostClearFloor");
@@ -167,6 +171,9 @@ winki_init_actions(int func(void *, void*))
 	strcpy(&ki_actions[0xf48].subsys[0], "PerfInfo"); strcpy(&ki_actions[0xf48].event[0], "SetInterval");
 	strcpy(&ki_actions[0xf49].subsys[0], "PerfInfo"); strcpy(&ki_actions[0xf49].event[0], "CollectionStart");
 	strcpy(&ki_actions[0xf4a].subsys[0], "PerfInfo"); strcpy(&ki_actions[0xf4a].event[0], "CollectionEnd");
+	strcpy(&ki_actions[0xf4b].subsys[0], "PerfInfo"); strcpy(&ki_actions[0xf4b].event[0], "SpinlockStartRundown");
+	strcpy(&ki_actions[0xf4c].subsys[0], "PerfInfo"); strcpy(&ki_actions[0xf4c].event[0], "SpinlockEndRundown");
+	strcpy(&ki_actions[0x1233].subsys[0], "Power"); strcpy(&ki_actions[0x1233].event[0], "Pstate");
 	strcpy(&ki_actions[0x1235].subsys[0], "Power"); strcpy(&ki_actions[0x1235].event[0], "Cstate");
 	strcpy(&ki_actions[0x1402].subsys[0], "Image"); strcpy(&ki_actions[0x1402].event[0], "UnLoad");
 	strcpy(&ki_actions[0x1403].subsys[0], "Image"); strcpy(&ki_actions[0x1403].event[0], "DCStart");

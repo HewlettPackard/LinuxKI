@@ -40,6 +40,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define _MSG_1_6_1	"1.6.1 Top Hard IRQ Events"
 #define _MSG_1_6_2	"1.6.2 Top Hard IRQ Events Per CPU"
 #define _MSG_1_6_3	"1.6.3 Top Soft IRQ Events"
+#define _MSG_1_7	"1.7 Windows Spinlock Report"
+#define _MSG_1_7_1	"1.7.1 Spinlock Stats by Caller Address"
+#define _MSG_1_7_2	"1.7.2 Top Tasks accessing Spinlocks"
 
 #define _MSG_2_0	"2.0 What is it waiting for?"
 #define _MSG_2_1	"2.1 Kernel sleep functions (SWITCH)"

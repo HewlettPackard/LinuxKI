@@ -18,7 +18,7 @@
  *
  * likit.c	LInux Kernel Instrumentation
  *
- *		v7.5
+ *		v7.6
  *		colin.honess@gmail.com
  *		mark.ray@hpe.com
  *		pokilfoyle@gmail.com
@@ -1787,6 +1787,13 @@ startup_msr(void)
 		case 78:	/* 14nm SkyLake Mobile  */
 		case 85:	/* 14nm SkyLake (Purley) */
 		case 94:	/* 14nm SkyLake Desktop  */		
+
+		case 0x6a:      /* Ice Lake X */
+		case 0x6c:      /* Ice Lake D */
+		case 0x7d:      /* Ice Lake */
+		case 0x7e:      /* Ice Lake L */
+		case 0x9d:      /* Ice Lake NNPI */
+
 			break;
 		case 87:	/* Knights Landing - needs testing!!! */
 		case 133:	/* Knights Mill - needs testing!!! */
@@ -2692,7 +2699,7 @@ sched_migrate_task_trace(RXUNUSED struct task_struct *p, unsigned int new_cpu)
 	return;
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,16,0)					
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,16,0) || (defined RHEL91)
 #define GENDISK q->disk
 #else
 #define GENDISK r->rq_disk
@@ -6921,7 +6928,7 @@ liki_initialize(void)
 	int	i;
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,20,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,2,0)
 	printk(KERN_INFO "LiKI: unsupported kernel version\n");
 	return(-EINVAL);
 #else

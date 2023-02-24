@@ -589,6 +589,8 @@ Kitrace(init_t *init, arg_t *arg)
 			jstackfname = prop->p_value.s;
 		} else if (strcmp("info", prop->p_name) == 0) {
 			SET(INFO_FLAG);
+		} else if (strcmp("sysconfig", prop->p_name) == 0) {
+			SET(SYSCONFIG_FLAG);
                 } else if (strcmp("sysignore", prop->p_name) == 0) {
                         sysignore = prop->p_value.s;
                 } else if (strcmp("pdbfiles", prop->p_name) == 0) {
@@ -1352,6 +1354,7 @@ flag_t trace_flags[] = {
   { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "msr",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "info",	NULL,     FA_ALL, FT_OPT | FT_HIDDEN, NULL },
+  { "sysconfig",	NULL,     FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "help",        NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
 };

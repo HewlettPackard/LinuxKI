@@ -250,6 +250,7 @@ extern void   parse_pself();
 extern void   parse_jstack();
 extern void   parse_scavuln(char);
 extern void   parse_devices();
+extern void   parse_irqlist();
 extern void   io_controllers(uint64 *, char);
 extern void   print_docker_ps();
 extern uint64 get_container_id (char *);
@@ -319,6 +320,7 @@ extern int    sum_iostats(void *, void *);
 
 extern int    print_pid_swtch_summary(void *, void *);
 extern int    print_pid_runtime_summary(void *, void *);
+extern int    print_pid_runqtime_summary(void *, void *);
 extern int    print_pid_memory(void *, void *);
 
 extern int    calc_dev_totals(void *, void *);
@@ -363,6 +365,9 @@ extern int    hc_missed_hc(uint64, uint64, void *);
 extern void   hc_update_sched_state(sched_info_t *, int, uint64);
 extern int    need_IDLE();
 extern int    print_hc_stktrc(void *, void *); 
+extern int    print_spin_stats(void *, char *, FILE *);
+extern int    print_spin_info(void *, void *);
+extern int    print_pid_spinlock_summary(void *, void *);
 
 extern int    wio_pc(uint64);
 extern int    wino_pc(uint64);
@@ -594,9 +599,9 @@ extern FILE *cluster_csvfile;
 extern FILE *cluster_network_csvfile;
 extern FILE *server_vis_csvfile;
 extern FILE *cluster_vis_csvfile;
-extern FILE *kipid_file;
 extern FILE *dockfile;
 extern FILE *node_csvfile;
+extern FILE *sysconfig_file;
 
 extern int nsym;
 extern int npid;

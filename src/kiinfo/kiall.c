@@ -62,6 +62,7 @@ kiall_winki_trace_funcs()
 	winki_enable_event(0x443, fileio_readwrite_func);
 	winki_enable_event(0x444, fileio_readwrite_func);
 	winki_enable_event(0x524, thread_cswitch_func);
+	winki_enable_event(0x529, thread_spinlock_func);
 	winki_enable_event(0x532, thread_readythread_func);
 	winki_enable_event(0x548, thread_setname_func);
 	winki_enable_event(0x60a, tcpip_sendipv4_func);
@@ -271,6 +272,7 @@ kiall_init_func(void *v)
         	parse_ll_R();
         	parse_mpath();
         	parse_jstack();
+		parse_irqlist();
 		if (IS_LIKI) foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, load_perpid_mapfile, NULL, 0, NULL);
 	}
 

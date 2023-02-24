@@ -173,6 +173,7 @@ runq_init_func(void *v)
 			parse_pself();
 			parse_edus();
 			parse_jstack();
+			parse_irqlist();
 
 			runq_csvfile = open_csv_file("kirunq", 1);
 		}
@@ -2904,7 +2905,6 @@ print_pid_runtime_summary(void *arg1, void *arg2)
 	pid_info_t *pidp = arg1;
 	sched_info_t *schedp;
 	sched_stats_t *statp;
-	uint64 *warnflagp = (uint64 *)arg2;
 
 	if (pidp->PID == 0ull) return 0;
 	if ((schedp = pidp->schedp) == NULL) return 0;
@@ -2931,6 +2931,60 @@ print_pid_runtime_summary(void *arg1, void *arg2)
 	}
 
         if (cluster_flag && dockfile == NULL) { SPACE; SERVER_URL_FIELD_BRACKETS(globals) }
+
+	DNL;
+
+        return 0;
+
+}
+
+int
+print_pid_runqtime_summary(void *arg1, void *arg2)
+{
+	pid_info_t *pidp = arg1;
+	sched_info_t *schedp;
+	sched_stats_t *statp;
+	runq_info_t *rqinfop;
+	uint64 *warnflagp = (uint64 *)arg2;
+	char runq_delay = 0;
+
+	if (pidp->PID == 0ull) return 0;
+	if ((schedp = pidp->schedp) == NULL) return 0;
+	statp = &schedp->sched_stats;
+
+	rqinfop = schedp->rqinfop;
+	if (warnflagp && rqinfop && (SECS(rqinfop->max_time*1000.0) > 0.1)) {
+		runq_delay = 1;
+		RED_FONT;
+		(*warnflagp) |= WARNF_RUNQ_DELAYS;
+	}
+
+	if (dockfile) {
+		dock_printf ("%-8d", pidp->PID);
+	} else {
+		PID_URL_FIELD8(pidp->PID);
+	}
+
+        dock_printf (" %12.6f %12.6f %12.6f %12.6f %12.6f %12.6f", 
+                SECS(statp->T_run_time),
+                SECS(statp->T_sys_time),
+                SECS(statp->T_user_time),
+                SECS(statp->T_runq_time),
+                SECS(statp->T_sleep_time),
+		rqinfop ? SECS(rqinfop->max_time*1000.0) : 0.0);
+
+	if (pidp->cmd) dock_printf ("  %s", (char *)pidp->cmd);
+	if (pidp->hcmd) dock_printf ("  {%s}", pidp->hcmd);
+	if (pidp->thread_cmd) dock_printf (" (%s)", pidp->thread_cmd);
+	if (pidp->dockerp && (dockfile == NULL)) {
+		printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
+	}
+
+        if (cluster_flag && dockfile == NULL) { SPACE; SERVER_URL_FIELD_BRACKETS(globals) }
+
+	if (runq_delay) {
+		BLACK_FONT;
+	} 
 
 	DNL;
 
@@ -2978,7 +3032,7 @@ print_systime_pids(uint64 *warnflagp)
 	foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_pid_runtime_summary,
                            (int (*)()) pid_sort_by_systime,
-                           npid, warnflagp);
+                           npid, NULL);
 }
 
 int
@@ -2988,15 +3042,16 @@ print_runtime_pids(uint64 *warnflagp)
 	foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_pid_runtime_summary,
                            (int (*)()) pid_sort_by_runtime,
-                           npid, warnflagp);
+                           npid, NULL);
 }
 
 int 
 print_runq_pids(uint64 *warnflagp)
 {
-	BOLD ("    %s       RunTime      SysTime     UserTime     RunqTime    SleepTime  Command", tlabel); NL;
+	BOLD ("    %s       RunTime      SysTime     UserTime     RunqTime    SleepTime      MaxRqTm   Command", tlabel); NL; 
+
 	foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ,
-                           (int (*)(void *, void *))print_pid_runtime_summary,
+                           (int (*)(void *, void *))print_pid_runqtime_summary,
                            (int (*)()) pid_sort_by_runqtime,
                            npid, warnflagp);
 }

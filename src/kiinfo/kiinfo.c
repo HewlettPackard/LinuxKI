@@ -88,7 +88,6 @@ char ts_begin_marker[64];
 char ts_end_marker[64];
 
 FILE *dockfile = NULL;
-FILE *kipid_file = NULL;
 FILE *node_csvfile = NULL;
 FILE *pid_csvfile = NULL;
 FILE *dsk_csvfile = NULL;
@@ -101,6 +100,7 @@ FILE *cluster_csvfile = NULL;
 FILE *cluster_network_csvfile = NULL;
 FILE *server_vis_csvfile = NULL;
 FILE *cluster_vis_csvfile = NULL;
+FILE *syscofig_file = NULL;
 
 #include "custom_options.h"
 

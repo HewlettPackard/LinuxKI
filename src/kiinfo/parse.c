@@ -2555,3 +2555,58 @@ parse_dmidecode()
 	}
 }
 
+void
+parse_irqlist()
+{
+        FILE *f = NULL;
+	char fname[30];
+        char *rtnptr;
+	uint32 irq;
+	uint32 node;
+	char cpu_list[512];
+	char affinity_mask[1024];
+        char name[512];
+	irq_name_t *irqnamep;
+	char found;
+
+
+	/* if (debug) fprintf (stderr, "parse_irqlist\n");  */
+	if (is_alive) {
+		return;
+	} else {
+		sprintf (fname, "irqlist.%s", timestamp);
+	}
+
+        if ( (f = fopen(fname,"r")) == NULL) {
+                return;
+        }
+	
+	/* first line here should be the header */
+	found = 0;
+        rtnptr = fgets((char *)&input_str, 1024, f);
+	while (rtnptr != NULL) {
+		if (found) {
+                	if (sscanf(rtnptr, "%d %d %s %s %s", &irq, &node, cpu_list, affinity_mask, name)) {
+				irqnamep = GET_IRQNAMEP(&globals->irqname_hash, irq);
+				if (strlen(name) > 16) {
+					add_command(&irqnamep->name, name);
+					/* if (debug) printf ("parse_irqlist: IRQ %d  %s\n", irq, name);  */
+				}
+			}
+                }
+
+		if (strncmp(input_str, "========", 8 ) == 0) {
+			found = 1;
+		}
+
+                rtnptr = fgets((char *)&input_str, 1024, f);
+	}
+
+	fclose(f);
+	if (is_alive) {
+		unlink(fname);	
+	}
+
+	return;
+}
+

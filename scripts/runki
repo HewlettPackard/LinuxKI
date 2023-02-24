@@ -1190,12 +1190,20 @@ if [[ -d /sys/devices/system/node && -f /usr/bin/numastat ]]; then
 fi
 
 date                    >> netstat-s.$tag 2>&1
-netstat -s              >> netstat-s.$tag 2>&1
+if [ -f /usr/bin/netstat ] ; then
+	netstat -s              >> netstat-s.$tag 2>&1
+else
+	awk '{for(i=1;i<=NF;i++)title[i] = $i; getline; print title[1]; for(i=2;i<=NF;i++)printf " %s: %s\n", title[i], $i }' /proc/net/netstat >> netstat-s.$tag 2>&1
+fi
 
 kitrace_data
 
 date                    >> netstat-s.$tag 2>&1
-netstat -s              >> netstat-s.$tag 2>&1
+if [ -f /usr/bin/netstat ] ; then
+	netstat -s              >> netstat-s.$tag 2>&1
+else
+	awk '{for(i=1;i<=NF;i++)title[i] = $i; getline; print title[1]; for(i=2;i<=NF;i++)printf " %s: %s\n", title[i], $i }' /proc/net/netstat >> netstat-s.$tag 2>&1
+fi
 
 echo "=== Getting Processor C-state information ..." | tee -a ki.err.$tag
 get_cstates_diff
@@ -1256,7 +1264,11 @@ mount -v 		> mount-v.$tag 2>&1
 cat /etc/fstab 		> fstab.$tag 2>&1
 ipcs -m 		> ipcs-m.$tag 2>&1
 hostname 		> hostname.$tag 2>&1
-netstat -neopa 		> netstat-neopa.$tag 2>&1
+if [ -f /usr/bin/netstat ] ; then
+	netstat -neopa 		> netstat-neopa.$tag 2>&1
+else
+	ss -nep >ss-naep.$tag 2>&1
+fi
 route -n 		> route-n.$tag 2>&1
 ifconfig 		> ifconfig.$tag 2>&1
 ip -s addr		> ip_addr.$tag 2>&1
@@ -1332,8 +1344,9 @@ printf "\n--- meminfo ---\n" 		>> mem_info.$tag 2>&1
 cat /proc/meminfo 			>> mem_info.$tag
 printf "\n--- buddyinfo ---\n"		>> mem_info.$tag 2>&1
 cat /proc/buddyinfo			>> mem_info.$tag
-printf "\n--- slabinfo ---\n"		>> mem_info.$tag 2>&1
-cat /proc/slabinfo			>> mem_info.$tag
+# reading /proc/slabinfo can cause issues on servers with extremely large slabs, especially dentry 
+# printf "\n--- slabinfo ---\n"		>> mem_info.$tag 2>&1
+# cat /proc/slabinfo			>> mem_info.$tag
 
 for node in `ls -d /sys/devices/system/node/node*`; do cat $node/meminfo >> numa_meminfo.$tag; done
 

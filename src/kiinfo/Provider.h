@@ -11,7 +11,13 @@ should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 ***************************************************************************/
-extern int print_control_image(ControlImage_t *);
-extern int control_image_func(ControlImage_t *);
-extern int print_pdb_image(PdbImage_t *);
+extern int print_control_image(void *);
+extern int file_version_func(FileVersion_t *);
+extern int print_pdb_image(void *);
 extern int pdb_image_func(PdbImage_t *);
+extern int print_image_id(void *);
+extern int print_build_info(void *);
+extern int print_file_version(void *);
+extern int print_system_paths(void *);
+extern int print_unknown_volume(void *);
+extern int print_volume_mapping(void *);

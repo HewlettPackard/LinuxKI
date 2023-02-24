@@ -443,6 +443,85 @@ thread_cswitch_func (void *a, void *v)
         trcinfop->pid = p->NewThreadId;
 }
 
+static inline int
+incr_spin_stats(Spinlock_t *p, void **spinlockp_addr)
+{
+	spinlock_info_t *spinlockp;
+	spin_info_t *spininfop;
+
+	spinlockp = GET_SPINLOCKP(spinlockp_addr);
+	spinlockp->stats.count++;
+	spinlockp->stats.waitcycles += p->WaitTimeInCycles;
+	spinlockp->stats.heldcycles += p->ReleaseTime - p->AcquireTime;
+	spinlockp->stats.spincnt += p->SpinCount;
+
+        spininfop = GET_SPININFOP(&spinlockp->spin_hash, p->CallerAddress);
+	spininfop->stats.count++;
+	spininfop->stats.waitcycles += p->WaitTimeInCycles;
+	spininfop->stats.heldcycles += p->ReleaseTime - p->AcquireTime;
+	spininfop->stats.spincnt += p->SpinCount;
+}
+
+int
+print_thread_spinlock_func (trace_info_t *trcinfop, pid_info_t *pidp)
+{
+        Spinlock_t *p = (Spinlock_t *)trcinfop->cur_event;
+
+	PRINT_COMMON_FIELDS_C011(p, p->ThreadId , pidp->tgid);
+
+        printf (" addr=0x%llx", p->SpinLockAddress);
+	printf (" caller=");
+	print_win_sym(p->CallerAddress, NULL);
+	printf (" AcqTm=0x%llx RelTm=0x%llx", p->AcquireTime, p->ReleaseTime);
+	printf (" waitcycles=%d heldcycles=%lld", p->WaitTimeInCycles, p->ReleaseTime - p->AcquireTime);
+	printf (" spincnt=%d intrcnt=%d", p->SpinCount, p->InterruptCount);
+	printf (" flags=0x%x", p->Flags);
+        printf ("\n");
+
+        if (debug) hex_dump(p, 6);
+}
+
+int
+thread_spinlock_func (void *a, void *v)
+{
+        trace_info_t *trcinfop = (trace_info_t *)a;
+        Spinlock_t *p = (Spinlock_t *)trcinfop->cur_event;
+	pid_info_t *pidp;
+
+        pidp = GET_PIDP(&globals->pid_hash, p->ThreadId);
+
+	if (global_stats) incr_spin_stats(p, &globals->spinlockp);
+	if (perpid_stats) incr_spin_stats(p, &pidp->spinlockp);
+
+	if (kitrace_flag) print_thread_spinlock_func(trcinfop, pidp);
+}
+
+int
+print_thread_resource_func (trace_info_t *trcinfop, pid_info_t *pidp)
+{
+        Resource_t *p = (Resource_t *)trcinfop->cur_event;
+
+	PRINT_COMMON_FIELDS_C011(p, p->ThreadId , pidp->tgid);
+
+        printf (" addr=", p->Resource);
+	printf (" action=", p->Action);
+        printf ("\n");
+
+        if (debug) hex_dump(p, 6);
+}
+
+int
+thread_resource_func (void *a, void *v)
+{
+        trace_info_t *trcinfop = (trace_info_t *)a;
+        Resource_t *p = (Resource_t *)trcinfop->cur_event;
+	pid_info_t *pidp;
+
+        pidp = GET_PIDP(&globals->pid_hash, p->ThreadId);
+	
+	if (kitrace_flag) print_thread_resource_func(trcinfop, pidp);
+}
+
 int
 print_thread_group1_func (void *a, void *v)
 {

@@ -65,6 +65,7 @@ prof_winki_trace_funcs()
 {
 	winki_init_actions(NULL);
 	winki_enable_event(0x30a, process_load_func);
+	winki_enable_event(0x529, thread_spinlock_func);
 	winki_enable_event(0x548, thread_setname_func);
 	winki_enable_event(0xf2e, perfinfo_profile_func);
 }
@@ -304,6 +305,66 @@ hc_print_pc(void *arg1, void *arg2)
 	if ((lineno & 0x1) == 0) _SPAN;
 	lineno++;
 }
+
+int
+print_spin_stats(void *arg1, char *name, FILE *pidfile)
+{
+	spin_stats_t *statp = (spin_stats_t *)arg1;
+
+	if (kilive) {
+		mvprintw (lineno, 0, "%10d %10.1f %12d %10.1f %12d %10.1f %12d %10.1f  %s", 
+				statp->count, 
+				statp->count / globals->total_secs,
+				statp->waitcycles,
+				statp->waitcycles / (statp->count * 1.0),
+				statp->heldcycles,
+				statp->heldcycles / (statp->count * 1.0),
+				statp->spincnt,
+				statp->spincnt / (statp->count * 1.0),
+				name);
+	} else {
+		pid_printf (pidfile, "%s%10d %10.1f %12d %10.1f %12d %10.1f %12d %10.1f  %s", tab, 
+				statp->count, 
+				statp->count / globals->total_secs,
+				statp->waitcycles,
+				statp->waitcycles / (statp->count * 1.0),
+				statp->heldcycles,
+				statp->heldcycles / (statp->count * 1.0),
+				statp->spincnt,
+				statp->spincnt / (statp->count * 1.0),
+				name);
+		PNL;
+	}
+}
+
+
+int
+print_spin_info(void *arg1, void *arg2)
+{
+	spin_info_t *spininfop = (spin_info_t *)arg1;
+	FILE *pidfile = (FILE *)arg2;
+	uint64 addr;
+	char caller_str[256];
+	
+	/* if (spininfop->count == 0) return 0; */
+	addr = spininfop->CALLER_ADDR;
+	sprint_win_sym(caller_str, addr, NULL);
+
+	print_spin_stats(&spininfop->stats, caller_str, pidfile);
+	lineno++;
+}
+
+int print_pid_spinlock_summary(void *arg1, void *arg2)
+{
+	pid_info_t *pidp = (pid_info_t *)arg1;
+	spinlock_info_t *spinlockp;
+
+	if ((spinlockp = pidp->spinlockp) == NULL) return 0;
+
+	PID_URL_FIELD8(pidp->PID);
+	print_spin_stats(&spinlockp->stats, pidp->cmd, NULL);
+}
+
 
 int
 hc_print_pc2(void *arg1, void *arg2)

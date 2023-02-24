@@ -242,6 +242,13 @@ void kp_toc()
                 LI; ARF(_LNK_1_6_3, _MSG_1_6_3); NLt;
 	      _UL;
 	    }
+	    if (globals->spinlockp) {
+	      LI; ARF(_LNK_1_7, _MSG_1_7); NLt;
+	      UL;
+                LI; ARF(_LNK_1_7_1, _MSG_1_7_1); NLt;
+                LI; ARF(_LNK_1_7_2, _MSG_1_7_2); NLt;
+	      _UL;
+	    }
 	  _UL;
 
 	  LI; ARF(_LNK_2_0, _MSG_2_0); NLt;
@@ -1184,6 +1191,7 @@ kp_softirqs()				/* Section 1.6.3 */
         HEAD3(_MSG_1_6_3);
         FONT_SIZE(-1);
         ARFx(_LNK_1_6_2,"[Prev Subsection]"); 
+        if (globals->spinlockp) ARFx(_LNK_1_7,"[Next Subsection]"); 
         ARFx(_LNK_1_0,"---[Prev Section]");
         ARFx(_LNK_2_0,"[Next Section]"); 
         ARFx(_LNK_TOC,"[Table of Contents]"); 
@@ -1199,6 +1207,68 @@ kp_softirqs()				/* Section 1.6.3 */
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_ADD_RANDOM, _LNK_1_6_3);
                 kp_warning(globals->warnings, warn_indx, _LNK_1_6_3); NL;
 	}
+}
+
+void 
+kp_spinlocks()				/* Section 1.7 */
+{
+        GREEN_TABLE;
+        ANM(_LNK_1_7);
+        HEAD3(_MSG_1_7);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_6,"[Prev Subsection]"); 
+        ARFx(_LNK_1_7_1,"[Next Subsection]"); 
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+}
+
+void 
+kp_global_spinlocks()				/* Section 1.7.1 */
+{
+	spinlock_info_t *spinlockp;
+
+        ORANGE_TABLE;
+        ANM(_LNK_1_7_1);
+        HEAD3(_MSG_1_7_1);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_7,"[Prev Subsection]"); 
+        ARFx(_LNK_1_7_2,"[Next Subsection]"); 
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+
+	if ((spinlockp = globals->spinlockp) == NULL) return;
+
+        BOLD ("     Count       Rate    TotWaitCy  AvgWaitCy    TotHeldCy  AvgHeldCy   TotSpinCnt AvgSpinCnt  Caller Address"); NL;
+        print_spin_stats(&spinlockp->stats, "TOTAL", NULL);
+        foreach_hash_entry((void **)spinlockp->spin_hash, SPIN_HSIZE, print_spin_info, spin_sort_by_count, 20, NULL);
+
+}
+
+void 
+kp_top_pid_spinlocks()				/* Section 1.7.2 */
+{
+	spinlock_info_t *spinlockp;
+
+        ORANGE_TABLE;
+        ANM(_LNK_1_7_2);
+        HEAD3(_MSG_1_7_2);
+        FONT_SIZE(-1);
+        ARFx(_LNK_1_7_1,"[Prev Subsection]"); 
+        ARFx(_LNK_1_0,"---[Prev Section]");
+        ARFx(_LNK_2_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+
+	if ((spinlockp = globals->spinlockp) == NULL) return;
+
+        BOLD ("%s          Count       Rate    TotWaitCy  AvgWaitCy    TotHeldCy  AvgHeldCy   TotSpinCnt AvgSpinCnt  Command", tlabel); NL;
+	printf ("TOTAL   ");
+        print_spin_stats(&spinlockp->stats, " ", NULL);
+        foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_spinlock_summary, pid_sort_by_spinlock_cnt, 20, NULL); 
 }
 
 void
@@ -1448,6 +1518,9 @@ kp_runq_statistics()			/* Section 2.2.1 */
 void
 kp_top_runq_pids()				/* Section 2.2.2 */
 {
+        uint64 warnflag = 0ull;
+        int warn_indx;
+
         ORANGE_TABLE;
         ANM(_LNK_2_2_2);
         HEAD3(_MSG_2_2_2);
@@ -1460,8 +1533,12 @@ kp_top_runq_pids()				/* Section 2.2.2 */
         _TABLE;
 
         npid=10;
-        print_runq_pids(NULL);
+        print_runq_pids(&warnflag);
 	CSV_FIELD("kipid", "[CSV]");
+        if (warnflag & WARNF_RUNQ_DELAYS) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_RUNQ_DELAYS, _LNK_2_2_2);
+                kp_warning(globals->warnings, warn_indx, _LNK_2_2_2);  NL;
+	}
 }
 
 void

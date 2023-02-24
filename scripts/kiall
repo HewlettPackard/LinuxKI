@@ -48,6 +48,7 @@ shopt -s extglob
 # version 6.1   04/20/2020   Added -B to collect block frequency statistics for Kparse reports (this takes more time)
 # version 7.0   03/12/2021   Added processing Windows ETL trace files
 # version 7.1   06/29/2021   fixed kiall -f to use "find ." in process_f
+# version 7.6   02/22/2023   Made Visulation option hidden again
 # 
 # DESCRIPTION:
 #  
@@ -118,7 +119,7 @@ dovis=0
 
 help()
 {
-    printf "Usage: %s: [-l] [-m] [-r] [-f] [-c] [-x] [-M] [-B] [-V] [-P num_threads] [-t timestamp]\n" "$0"
+    printf "Usage: %s: [-l] [-m] [-r] [-f] [-c] [-x] [-M] [-B] [-t timestamp]\n" "$0"
 	printf "       -h               Help\n"
 	printf "       -l               Lite version - bypasses some options\n" 
 	printf "       -m               Do not process collectl or MWA data\n"
@@ -128,9 +129,6 @@ help()
 	printf "       -x               Generate Kparse text format instead of html format\n"
 	printf "       -M               Leave C++ function names mangled\n"
 	printf "       -B               Do not report Disk Block Frequency stats in Kparse output\n"
-	printf "       -V               Use visualization options where possible in reports\n"
-	printf "       -P <num_threads> Number of parallel threads for Visualization processing\n"
-	printf "			default=0 - Use 1 thread per logical core\n"
 	printf "       -t <timestamp>   Only process KI budle with matching timestamp\n"
 }
 
@@ -226,7 +224,7 @@ likimerge()
 	echo "kiinfo -likimerge cannot merge ki.bin files.  Suspect default tracing (ftrace) used."
 	rm ki.bin.$tag >/dev/null 2>&1
 	if [ $dovis -eq 1 ] ; then
-	    echo "-V visualization option works best with liki DLKM tracing. Only limit visualization charts are available with Ftrace."
+	    echo "-V visualization option works best with liki DLKM tracing. Only limited visualization charts are available with Ftrace."
 	fi
 	
     fi

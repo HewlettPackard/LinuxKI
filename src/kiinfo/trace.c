@@ -76,6 +76,7 @@ int trace_mm_page_free_func(void *, void *);
 int trace_winki_generic_func(void *, void *);
 int trace_winki_common_func(void *, void *);
 int trace_winki_cstate_func(void *, void *);
+int trace_winki_pstate_func(void *, void *);
 int trace_winki_hardfault_func(void *, void *);
 int trace_winki_mjfnret_func(void *, void *);
 int trace_winki_mjfncall_func(void *, void *);
@@ -88,6 +89,7 @@ int trace_winki_sysconfig_logdisk_func(void *, void *);
 int trace_winki_sysconfig_power_func(void *, void *);
 int trace_winki_sysconfig_pnp_func(void *, void *);
 int trace_winki_sysconfig_irq_func(void *, void *);
+int trace_winki_sysconfig_buildinfo_func(void *, void *);
 int trace_winki_image_func(void *, void *);
 int trace_winki_process_func(void *, void *);
 int trace_winki_process_terminate_func(void *, void *);
@@ -172,11 +174,16 @@ win_set_trace_funcs()
 	winki_enable_event(0x44d, print_fileio_direnum_func);
 	winki_enable_event(0x44f, print_fileio_name_func);
 	winki_enable_event(0x450, print_fileio_name_func);
+	winki_enable_event(0x454, print_fileio_info_func);
+	winki_enable_event(0x456, print_fileio_info_func);
+	winki_enable_event(0x450, print_fileio_name_func);
 	winki_enable_event(0x501, print_thread_group1_func);
 	winki_enable_event(0x502, print_thread_group1_func);
 	winki_enable_event(0x503, print_thread_group1_func);
 	winki_enable_event(0x504, print_thread_group1_func);
 	winki_enable_event(0x524, thread_cswitch_func);
+	winki_enable_event(0x529, thread_spinlock_func);
+	winki_enable_event(0x52b, thread_resource_func);
 	winki_enable_event(0x532, thread_readythread_func);
 	winki_enable_event(0x542, print_thread_autoboost_func);
 	winki_enable_event(0x543, print_thread_autoboost_func);
@@ -211,7 +218,7 @@ win_set_trace_funcs()
 	winki_enable_event(0xb0f, print_sysconfig_services_func);
 	winki_enable_event(0xb10, trace_winki_sysconfig_power_func);
 	winki_enable_event(0xb15, trace_winki_sysconfig_irq_func);
-	winki_enable_event(0xb15, trace_winki_sysconfig_pnp_func);
+	winki_enable_event(0xb16, trace_winki_sysconfig_pnp_func);
 	winki_enable_event(0xf2e, perfinfo_profile_func);
 	winki_enable_event(0xf32, perfinfo_isr_func);
 	winki_enable_event(0xf33, perfinfo_sysclenter_func);
@@ -224,6 +231,9 @@ win_set_trace_funcs()
 	winki_enable_event(0xf48, perfinfo_interval_func);
 	winki_enable_event(0xf49, perfinfo_interval_func);
 	winki_enable_event(0xf4a, perfinfo_interval_func);
+	winki_enable_event(0xf4b, perfinfo_interval_func);
+	winki_enable_event(0xf4c, perfinfo_interval_func);
+	winki_enable_event(0x1233, trace_winki_pstate_func);
 	winki_enable_event(0x1235, trace_winki_cstate_func);
 	winki_enable_event(0x1402, print_image_func);
 	winki_enable_event(0x1403, print_image_func);
@@ -1012,6 +1022,22 @@ trace_winki_cstate_func (void *a, void *v)
 	if (debug) hex_dump(p, 2);
 }
 
+int
+trace_winki_pstate_func (void *a, void *v)
+{
+	trace_info_t *trcinfop = (trace_info_t *)a;
+	Pstate_t *p = (Pstate_t *)trcinfop->cur_event;
+
+	PRINT_COMMON_FIELDS_C011(p, 0 , 0);
+
+	printf (" pstate=%d", p->pstate);
+	printf (" prev_freq=%d", p->prev_freq);
+	printf (" next_freq=%d", p->next_freq);
+	printf (" cpumask=0x%x", p->cpumask);
+	printf ("\n");
+
+	if (debug) hex_dump(p, 2);
+}
 
 int
 trace_winki_hardfault_func (void *a, void *v)
@@ -1168,26 +1194,67 @@ trace_winki_complrout_func (void *a, void *v)
 }
 
 int
-trace_winki_process_func (void *a, void *v)
+print_process_fields (ProcessCommonFields_t *p)
 {
-	trace_info_t *trcinfop = (trace_info_t *)a;
-	Process_TypeGroup1_t *p = (Process_TypeGroup1_t *)trcinfop->cur_event;
-	pid_info_t *pidp, *ppidp;
+	uint8 *ptr;
+	uint16 *chr;
 
-	pidp = GET_PIDP(&globals->pid_hash, p->ProcessID);
-	ppidp = GET_PIDP(&globals->pid_hash, p->ParentID);
-	pidp->ppid = p->ParentID;
-
-	PRINT_COMMON_FIELDS_C002(p);
-	printf (" key=0x%x pid=%d ppid=%d sessionid=%d exitstatus=%d dirbase=0x%llx userSID=%d", 
+	printf (" key=0x%llx pid=%d ppid=%d sessionid=%d exitstatus=%d dirbase=0x%llx", 
 		p->UniqueProcessKey,
 		p->ProcessID,
 		p->ParentID,
 		p->SessionID,
 	 	p->ExitStatus,
-		p->DirectoryTableBase,
-		p->UserSID);
+		p->DirectoryTableBase);
 
+	ptr = &p->UserSID[0];
+	if (p->UserSID[7] == 0xc0) {
+		ptr += 48;
+	} else if (p->UserSID[7] == 0xbc) {
+		ptr += 32;
+	} else {
+		printf (" UserSID[7]=0x%x\n", p->UserSID[7]);	
+		return 0;
+	}
+		
+
+	printf (" name=\"%s\"", ptr);
+
+	ptr +=  strlen(ptr) + 1;
+
+	chr = (uint16 *)ptr;
+
+	printf (" command=\"");
+	PRINT_WIN_NAME2(chr);
+	printf ("\"");
+}
+
+int
+trace_winki_process_func (void *a, void *v)
+{
+	trace_info_t *trcinfop = (trace_info_t *)a;
+	Process_TypeGroup1_t *p = (Process_TypeGroup1_t *)trcinfop->cur_event;
+	Process_TypeGroup1_c011_t *p11 = (Process_TypeGroup1_c011_t *)trcinfop->cur_event;
+	pid_info_t *pidp, *ppidp;
+
+
+	if (p->ReservedHeaderField == 0xc002) {
+		pidp = GET_PIDP(&globals->pid_hash, p->fields.ProcessID);
+		ppidp = GET_PIDP(&globals->pid_hash, p->fields.ParentID);
+		pidp->ppid = p->fields.ParentID;
+		PRINT_COMMON_FIELDS_C002(p);
+		print_process_fields(&p->fields);
+	} else if (p->ReservedHeaderField == 0xc011) {
+		pidp = GET_PIDP(&globals->pid_hash, p11->fields.ProcessID);
+		ppidp = GET_PIDP(&globals->pid_hash, p11->fields.ParentID);
+		pidp->ppid = p11->fields.ParentID;
+		PRINT_COMMON_FIELDS_C011(p11, 0, 0);
+		print_process_fields(&p11->fields);
+	} else {
+		printf (" INVALID_HDR=%x]\n", p->ReservedHeaderField);
+		trace_winki_common_func(a, v);
+		hex_dump(p, 6);
+	}
 	printf ("\n");	
 
 	if (debug) hex_dump(p, 6);
@@ -1245,14 +1312,18 @@ trace_winki_sysconfig_nic_func (void *a, void *v)
 	trace_info_t *trcinfop = (trace_info_t *)a;
 	SysConfig_NIC_t *p = (SysConfig_NIC_t *)trcinfop->cur_event;
 	uint16 *chr;
+	int i;
 
 	chr = &p->Name[0];
 
-	PRINT_COMMON_FIELDS_C011(p, 0, 0);
-	
-	printf (" addr=0x%llx len=%d",
-		p->PhysicalAddr,
-		p->PhysicalAddrLen);
+	PRINT_COMMON_FIELDS_C002(p);
+
+	printf (" addr=%x", p->PhysicalAddr[0]);
+	for (i=1; i < p->PhysicalAddrLen; i++) {
+		printf ("-%x", p->PhysicalAddr[i]);
+	}
+
+	if (debug) printf (" len=%d", p->PhysicalAddrLen);
 
 	printf (" desc=\"");
 	PRINT_WIN_NAME2(chr);
@@ -1311,6 +1382,10 @@ trace_winki_sysconfig_pnp_func (void *a, void *v)
 	PRINT_WIN_NAME2(chr);
 	printf ("\" FriendlyName=\"");
 	PRINT_WIN_NAME2(chr);
+	printf ("\" PdoName=\"");
+	PRINT_WIN_NAME2(chr);
+	printf ("\" ServiceName=\"");
+	PRINT_WIN_NAME2(chr);
 
 	printf ("\"\n");
 
@@ -1360,6 +1435,9 @@ trace_winki_sysconfig_power_func (void *a, void *v)
 	if (debug) hex_dump(p, 3);
 }
 
+#define WindowsKernel ((p->guid[0] == 0x9b79ee91) && (p->guid[1] == 0x41c0b5fd) && (p->guid[2] == 0x484243a2) && (p->guid[3] == 0xd0e966e2))
+#define KernelTraceControl ((p->guid[0] == 0xb3e675d7) && (p->guid[1] == 0x4f182554) && (p->guid[2] == 0x62270b83) && (p->guid[3] == 0xde602573))
+
 /* These traces are very tricky */
 int
 trace_winki_provider_func (void *a, void *v)
@@ -1367,39 +1445,46 @@ trace_winki_provider_func (void *a, void *v)
 	trace_info_t *trcinfop = (trace_info_t *)a;
 	Provider_t *p = (Provider_t *)trcinfop->cur_event;
 	int i;
+	int unknown = 0;
 
-	PRINT_COMMON_FIELDS_C014(p);
-
-	printf (" guid={");
-	for (i=0; i<4; i++) {
-		if (i != 0) printf ("-");
-		printf ("%x", p->guid[i]);
-	}
-	printf ("}");
-
-	if ((p->guid[0] == 0x9b79ee91) && (p->guid[1] == 0x41c0b5fd) && (p->guid[2] == 0x484243a2) && (p->guid[3] == 0xd0e966e2)) {	
-	    if ((p->EventType >=32) && (p->EventType <=35)) {
-		uint16 *chr;
-		printf(" \"");
-		chr = &p->Name[0];	
-		PRINT_WIN_NAME2(chr);
-		printf (" ");
-		PRINT_WIN_NAME2(chr);
-		printf("\"");	
+	if (WindowsKernel) {
+	    if (p->EventType == 32) {
+		    print_build_info(a);
+	    } else if (p->EventType == 33) {
+		    print_system_paths(a);
+	    } else if (p->EventType == 34) {
+		    print_unknown_volume(a);
+	    } else if (p->EventType == 35) {
+		    print_volume_mapping(a);
+	    } else {
+		unknown=1;
 	    }
-	}
-
-	if ((p->guid[0] == 0xb3e675d7) && (p->guid[1] == 0x4f182554) && (p->guid[2] == 0x62270b83) && (p->guid[3] == 0xde602573)) {	
+	} else if (KernelTraceControl) {
 		if (p->EventType == 64) {
-			print_control_image((ControlImage_t *)p);
-			control_image_func((ControlImage_t *)p);
+			print_file_version(a);
+			file_version_func((FileVersion_t *)p);
 		} else if (p->EventType == 36) {
-			print_pdb_image((PdbImage_t *)p);
+			print_pdb_image(a);
+		} else if (p->EventType == 0) {
+			print_image_id(a);
+		} else {
+			unknown=1;
 		}
 	}
 
-	printf ("\n");
-	if (debug) hex_dump(p, 32);
+	if (unknown) { 
+		uint16 *chr;
+		PRINT_COMMON_FIELDS_C014(p);
+		printf (" Provider id=%d", p->EventType);
+		printf (" guid={");
+		for (i=0; i<4; i++) {
+			if (i != 0) printf ("-");
+			printf ("%x", p->guid[i]);
+		}
+		printf ("}");
+		printf ("\n");
+		hex_dump(p, 8);
+	}
 
 }
 

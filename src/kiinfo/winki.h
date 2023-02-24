@@ -129,7 +129,7 @@ typedef struct Provider
   uint16 Name[];
 } Provider_t;
 
-typedef struct ControlImage
+typedef struct FileVersion
 {
   ETW_COMMON_FIELDS_c014;
   uint32 guid[4];
@@ -137,8 +137,18 @@ typedef struct ControlImage
   uint32 ImageSize;
   uint32 TimeDateStamp;
   uint16 Name[];
-} ControlImage_t;
+} FileVersion_t;
 
+typedef struct ImageID
+{
+  ETW_COMMON_FIELDS_c014;
+  uint32 guid[4];
+  uint32 Reserved[2];
+  uint64 ImageBase;
+  uint64 ImageSize;
+  uint64 TimeDateStamp;
+  uint16 Name[];
+} ImageID_t;
 
 typedef struct PdbImage
 {
@@ -153,6 +163,15 @@ typedef struct PdbImage
   uint32 guid6;
   char Name[];
 } PdbImage_t;
+
+typedef struct BuildInfo
+{
+  ETW_COMMON_FIELDS_c014;
+  uint32 guid[4];
+  uint32 Reserved[2];
+  uint64 InstallDate;
+  uint16 Name[];
+} BuildInfo_t;
 
 
 typedef struct Image_Load_c011
@@ -229,18 +248,69 @@ typedef struct ReadyThread
   uint8 Reserved;
 } ReadyThread_t;
 
-typedef struct Process_TypeGroup1 
+typedef struct Spinlock
 {
-  ETW_COMMON_FIELDS_c002;
+  ETW_COMMON_FIELDS_c011;
+  uint64 SpinLockAddress;
+  uint64 CallerAddress;
+  uint64 AcquireTime;
+  uint64 ReleaseTime;
+  uint32 WaitTimeInCycles;
+  uint32 SpinCount;
+  uint32 ThreadId;
+  uint32 InterruptCount;
+  uint32 Flags;
+  uint32 Reserved;
+} Spinlock_t;
+
+typedef struct Resource
+{
+  ETW_COMMON_FIELDS_c011;
+  uint64 AcquireTime;
+  uint64 HoldTime;
+  uint64 ReleaseTime;
+  uint32 MaxRecursionDepth;
+  uint32 ThreadId;
+  uint32 Resource;
+  uint32 Action;
+  uint32 ContentionDelta;
+} Resource_t;
+
+/*
+Action:
+0x00000001 when acquiring a resource;
+0x00000002 when releasing a resource;
+0x00000004 when waiting for a resource;
+0x00000008 when initialising a resource;
+0x00000010 for a repeated or recursive operation on a resource;
+0x00000020 when ownership is exclusive;
+0x00000040 when ownership is shared;
+0x00000100 when setting a resource’s owner pointer;
+0x00000200 for an operation that exceeds some tolerance.
+*/
+
+typedef struct ProcessCommonFields {
   uint64 UniqueProcessKey;
   uint32 ProcessID;
   uint32 ParentID;
   uint32 SessionID;
   uint32 ExitStatus;
   uint64 DirectoryTableBase;
-  uint32 UserSID;
-  char ImageFileName[];
+  uint8  UserSID[];
+} ProcessCommonFields_t;
+
+
+typedef struct Process_TypeGroup1 
+{
+  ETW_COMMON_FIELDS_c002;
+  ProcessCommonFields_t fields;
 } Process_TypeGroup1_t;
+
+typedef struct Process_TypeGroup1_c011
+{
+  ETW_COMMON_FIELDS_c011;
+  ProcessCommonFields_t fields;
+} Process_TypeGroup1_c011_t;
 
 typedef struct ProcessLoad
 {
@@ -313,6 +383,17 @@ typedef struct Cstate
   uint32 cpumask;
   uint32 filler;
 } Cstate_t;
+  
+typedef struct Pstate
+{
+  ETW_COMMON_FIELDS_c011;
+  uint32 pstate;
+  uint32 prev_freq;
+  uint32 next_freq;
+  uint32 unknown2;
+  uint32 cpumask;
+  uint32 filler;
+} Pstate_t;
   
 
 typedef struct HardFault
@@ -672,8 +753,8 @@ typedef struct SysConfig_CPU
 
 typedef struct SysConfig_NIC 
 {
-  ETW_COMMON_FIELDS_c011;
-  uint64 PhysicalAddr;
+  ETW_COMMON_FIELDS_c002;
+  uint8 PhysicalAddr[8];
   uint32 PhysicalAddrLen;
   uint32 Reserved1;
   uint64 Reserved2;

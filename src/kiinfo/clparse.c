@@ -142,6 +142,7 @@ clparse_init_func(void *v)
 		parse_mem_info();
 		parse_scavuln(0);
 		parse_uname(cluster_flag);
+		parse_irqlist();
 
 		if (vis) vis_clparse_init();
 	}

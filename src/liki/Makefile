@@ -113,8 +113,13 @@ ifeq ($(hostdistro),rhel) # Red Hat Enterprise Linux (RHEL)
         EXTRA_CFLAGS=-g -O3 -Wall -DRHEL86 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
       endif
    else ifneq (,$(findstring 9.,$(hostversion)))
+      ifneq (,$(findstring 5.14.0-162.,$(hostkernel)))
+	#RHEL 9.1
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL91 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else
         #RHEL 9.0
-        EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL90 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      endif
    endif
 else ifeq ($(hostdistro),centos) #  Centos
    ifneq (,$(findstring 6.,$(hostversion)))
@@ -150,8 +155,13 @@ else ifeq ($(hostdistro),centos) #  Centos
         EXTRA_CFLAGS=-g -O3 -Wall -DRHEL86 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
       endif
    else ifneq (,$(findstring 9.,$(hostversion)))
-	#RHEL 9.X
-	EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      ifneq (,$(findstring 5.14.0-162.,$(hostkernel)))
+        #RHEL 9.1
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL91 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else
+        #RHEL 9.0
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL90 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      endif
    endif
 else ifeq ($(hostdistro),ol) # Oracle Linux (OL)
    ifeq (,$(findstring uek,$(hostkernel)))
@@ -189,8 +199,13 @@ else ifeq ($(hostdistro),ol) # Oracle Linux (OL)
           EXTRA_CFLAGS=-g -O3 -Wall -DRHEL86 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
         endif
      else ifneq (,$(findstring 9.,$(hostversion)))
-	#RHEL 9.X
-	EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      ifneq (,$(findstring 5.14.0-162.,$(hostkernel)))
+	#RHEL 9.1
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL91 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      else
+        #RHEL 9.0
+        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL90 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      endif
      endif
    else ifneq (,$(findstring uek,$(hostkernel)))
       #OL Unbreakable Enterprise Kernel (UEK)

@@ -14,11 +14,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 extern int    thread_header_func(void *, void *);
 extern int    print_thread_group1_func(void *, void *);
 extern int    print_thread_cswitch_func(void *, void *);
+extern int    print_thread_spinlock_func(void *, void *);
+extern int    print_thread_resource_func(void *, void *);
 extern int    print_thread_readythread_func(void *, void *);
 extern int    print_thread_autoboost_func(void *, void *);
 
 extern int    thread_group1_func(void *, void *);
 extern int    thread_cswitch_func(void *, void *);
+extern int    thread_spinlock_func(void *, void *);
+extern int    thread_resource_func(void *, void *);
 extern int    thread_readythread_func(void *, void *);
 extern int    thread_setname_func(void *, void *);
 extern int    thread_autoboost_func(void *, void *);

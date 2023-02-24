@@ -6769,7 +6769,8 @@ warnmsg_t warnmsg[MAXNOTEWARN] = {
 	{ "Warning: Excessive CPU time in Oracle column stats code. Consider disabling column stats", _HTTP_ORACLE_COLSTATS},
 	{ "Warning: Large I/Os (>1MB)  may degradge performance on PCIe Smart Array Controllers", _HTTP_CACHE_BYPASS},
 	{ "Warning: Memory is not balanced across NUMA nodes, check for missing/unconfigured memory DIMMS", NULL},
-	{ "Warning: Memory on one or more NUMA nodes is below 100 MB", NULL}
+	{ "Warning: Memory on one or more NUMA nodes is below 100 MB", NULL},
+	{ "Warning: Threads delayed on RunQ with max wait time more than 100 msecs", _HTTP_RUNQ_DELAYS}
 };
 
 

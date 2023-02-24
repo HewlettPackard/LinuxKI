@@ -68,6 +68,7 @@ kparse_winki_trace_funcs()
 	winki_enable_event(0x443, fileio_readwrite_func);
 	winki_enable_event(0x444, fileio_readwrite_func);
 	winki_enable_event(0x524, thread_cswitch_func);
+	winki_enable_event(0x529, thread_spinlock_func);
 	winki_enable_event(0x532, thread_readythread_func);
 	winki_enable_event(0x548, thread_setname_func);
 	winki_enable_event(0x60a, tcpip_sendipv4_func);
@@ -207,6 +208,7 @@ kparse_init_func(void *v)
 		parse_edus();
 		parse_jstack();
         	parse_mpath();
+		parse_irqlist();
 	}
 }
 
@@ -438,6 +440,11 @@ kparse_print_report(void *v)
 		kp_hardirqs();					/* Section 1.6.1 */
 		kp_hardirqs_by_cpu();				/* Section 1.6.2 */
 		kp_softirqs();					/* Section 1.6.3 */
+	}
+	if (globals->spinlockp) {
+		kp_spinlocks();					/* Section 1.7 */
+		kp_global_spinlocks();				/* Section 1.7.1 */
+		kp_top_pid_spinlocks();				/* Section 1.7.2 */
 	}
 
 	kp_whats_it_waiting_for();			/* Section 2.0 */

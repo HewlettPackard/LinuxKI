@@ -36,8 +36,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 		curtime.tv_sec = (wintime - UNIX_TIME_START) / TICKS_PER_SECOND;					\
 		curtime.tv_nsec = ((wintime - UNIX_TIME_START) % TICKS_PER_SECOND) * 100;				\
 		ctime_r(&curtime.tv_sec, timebuf);									\
-		timebuf[19] = 0;											\
-		printf ("%s.%09lld", timebuf, curtime.tv_nsec);								\
+		timebuf[19] = 0; 											\
+		timebuf[24] = 0;											\
+		printf ("%s.%09lld %s", timebuf, curtime.tv_nsec, &timebuf[20]);					\
 }
 
 #define PRINT_WIN_FILENAME(str)	{											\
@@ -149,31 +150,32 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 		printf ("%cpid=%d%ctgid=%d", fsep, rec_ptr->pid, fsep, rec_ptr->tgid);							\
 }
 
-#define PRINT_COMMON_FIELDS_C002(p) {													\
-        PRINT_TIME(p->TimeStamp);													\
-        printf ("%ccpu=%d", fsep, trcinfop->cpu);											\
-        printf ("%ctid=%d%cpid=%d", fsep, p->tid, fsep, p->pid);       /* Windows uses PID/TID rather than TGID/TID */			\
-	/* printf ("%cver=%d", fsep, p->TraceVersion);			 */								\
-        /* printf ("%cid=0x%x", fsep, p->EventType);			 */								\
-        PRINT_EVENT(p->EventType);													\
+#define PRINT_COMMON_FIELDS_C002(p) {											\
+        PRINT_TIME(p->TimeStamp);											\
+        printf ("%ccpu=%d", fsep, trcinfop->cpu);									\
+        printf ("%ctid=%d%cpid=%d", fsep, p->tid, fsep, p->pid);       /* Windows uses PID/TID rather than TGID/TID */	\
+	if (p->ReservedHeaderField != 0xc002)  printf ("%cINVALID_ HDR=%d", fsep, p->ReservedHeaderField);			\
+	/* printf ("%cver=%d", fsep, p->TraceVersion); */								\
+        /* printf ("%cid=0x%x", fsep, p->EventType);			 */						\
+        PRINT_EVENT(p->EventType);											\
 }
 
-#define PRINT_COMMON_FIELDS_C011(p, tid, pid) {												\
-        PRINT_TIME(p->TimeStamp);													\
-        printf ("%ccpu=%d", fsep, trcinfop->cpu);											\
-        printf ("%ctid=%d%cpid=%d", fsep, tid, fsep, pid);       /* Windows uses PID/TID rather than TGID/TID */			\
-	/* printf ("%cver=%d", fsep, p->TraceVersion); */										\
-        /* printf ("%cid=0x%x", fsep, p->EventType); */											\
-        PRINT_EVENT(p->EventType);													\
+#define PRINT_COMMON_FIELDS_C011(p, tid, pid) {										\
+        PRINT_TIME(p->TimeStamp);											\
+        printf ("%ccpu=%d", fsep, trcinfop->cpu);									\
+        printf ("%ctid=%d%cpid=%d", fsep, tid, fsep, pid);       /* Windows uses PID/TID rather than TGID/TID */	\
+	if (p->ReservedHeaderField != 0xc011)  printf ("%cINVALID_HDR=%d", fsep, p->ReservedHeaderField);	\
+	/* printf ("%cver=%d", fsep, p->TraceVersion); */								\
+        /* printf ("%cid=0x%x", fsep, p->EventType); */									\
+        PRINT_EVENT(p->EventType);											\
 }
 
-#define PRINT_COMMON_FIELDS_C014(p) {													\
-        PRINT_TIME(p->TimeStamp);													\
-        printf ("%ccpu=%d", fsep, trcinfop->cpu);											\
-        printf ("%ctid=%d%cpid=%d", fsep, 0, fsep, 0);       /* Windows uses PID/TID rather than TGID/TID */				\
-	printf ("%cProvider", fsep, p->EventType);												\
-	printf ("%cid=%d", fsep, p->EventType);												\
-	printf ("%cver=%d", fsep, p->TraceVersion);			 								\
+#define PRINT_COMMON_FIELDS_C014(p) {											\
+        PRINT_TIME(p->TimeStamp);											\
+        printf ("%ccpu=%d", fsep, trcinfop->cpu);									\
+        printf ("%ctid=%d%cpid=%d", fsep, 0, fsep, 0);       /* Windows uses PID/TID rather than TGID/TID */		\
+	if (p->ReservedHeaderField != 0xc014)  printf ("%cINVALID_HDR=0x%x", fsep, p->ReservedHeaderField);	\
+	/* printf ("%cver=%d", fsep, p->TraceVersion);	*/								\
 }
 
 #define PRINT_KD_REC(rec_ptr)												\

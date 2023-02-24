@@ -13,7 +13,7 @@ REM # with this program; if not, write to the Free Software Foundation,
 REM # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 REM #***************************************************************************
 REM # runki script  -- captures WinKI trace data (ETL)
-@echo ** runki for Windows $Date: 2022/05/26 $Revision: 7.5	 **
+@echo ** runki for Windows $Date: 2022/05/26 $Revision: 7.6	 **
 
 REM # Buf size is 2GB by default (2048).   Increase for large systems (>=64 cores) or very active systems.
 REM # You can also reduce the timeout value to have a better change of avoiding missing trace events.
@@ -26,7 +26,7 @@ if [%tmo%] EQU [0] set tmo=20
 for /F %%A in ('wmic os get LocalDateTime ^| find "."') do set tag1=%%A
 set tag=%tag1:~4,4%_%tag1:~8,4%
 
-@echo ** runki for Windows $Date: 2021/11/09 $Revision: 7.5 ** >ki.err.%tag%
+@echo ** runki for Windows $Date: 2021/11/09 $Revision: 7.6 ** >ki.err.%tag%
 tasklist >tasklist.%tag%
 xperf -on Latency+PROC_THREAD+POWER+LOADER+CSWITCH+DISPATCHER+DISK_IO+DISK_IO_INIT+PROFILE+FILENAME+FILE_IO+FILE_IO_INIT+DPC+Interrupt+NETWORK+SYSCALL+SPINLOCK -stackwalk CSwitch+Profile+ReadyThread -BufferSize %bufsz% -MaxBuffers %bufsz% -MaxFile %bufsz% -FileMode Circular && timeout %tmo%
 if [%errorlevel%] NEQ [0] goto error

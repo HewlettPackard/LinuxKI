@@ -990,8 +990,8 @@ kitracedump()
 	put_fd_int(traceon_fd, 1, 0);
 	if ((enable_fd >= 0) && !enable_value) put_fd_int(enable_fd, 1, 1);
 
-	printf ("Pausing 10 seconds to sync CPU clocks, please wait...\n");
-	sleep(10);
+	printf ("Pausing 2 seconds to sync CPU clocks, please wait...\n");
+	sleep(2);
 
 	/* startup percpu read thread */
     	if (setup_percpu_readers()) {

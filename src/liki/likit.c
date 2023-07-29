@@ -18,7 +18,7 @@
  *
  * likit.c	LInux Kernel Instrumentation
  *
- *		v7.6
+ *		v7.7
  *		colin.honess@gmail.com
  *		mark.ray@hpe.com
  *		pokilfoyle@gmail.com
@@ -510,11 +510,11 @@ void save_stack_trace_regs(struct stack_trace *st, struct pt_regs *regs)
 #define STACK_TRACE(DATA, REGS)						\
 	save_stack_trace_regs_fp(NULL, DATA);
 
-#elif (defined SLES15)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4,9,0) && ((defined SLES12) || (defined SLES15) || (defined SLES15SP5))
 #define STACK_TRACE(DATA, REGS)						\
 	save_stack_trace_regs_fp(NULL, DATA);
 
-#elif LINUX_VERSION_CODE > KERNEL_VERSION(4,0,0)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
 #define STACK_TRACE(DATA, REGS)						\
 	save_stack_trace_regs_fp(REGS, DATA);
 
@@ -595,8 +595,25 @@ save_stack_trace(DATA);
 #endif
 
 #elif defined CONFIG_ARM64
-#define STACK_TRACE(DATA, REGS)						\
-	save_stack_trace(DATA);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
+struct stack_trace {
+        unsigned int nr_entries, max_entries;
+        unsigned long *entries;
+        int skip;       /* input argument: How many entries to skip */
+};
+
+void save_stack_trace_regs(struct stack_trace *st, struct pt_regs *regs)
+{
+        st->nr_entries = stack_trace_save(st->entries, st->max_entries, st->skip);
+}
+
+#define STACK_TRACE(DATA, REGS)                                         \
+        save_stack_trace_regs(DATA, NULL);
+
+#else
+#define STACK_TRACE(DATA, REGS)                                         \
+        save_stack_trace(DATA);
+#endif
 
 #endif // CONFIG_ARM64
 
@@ -1039,7 +1056,8 @@ restore_sles11_backtrace_state(void)
 	if (__liki_old_call_trace_state == BOGUS_CALL_TRACE) {
 
 		/* Very unexpected! */
-		printk(KERN_WARNING "LiKI: BOGUS_CALL_TRACE found. Please report to HP.\n");
+		printk(KERN_WARNING "LiKI: BOGUS_CALL_TRACE found. Please log issue at https://github.com/HewlettPackard/LinuxKI/issues\n");
+
 		return;
 	}
 
@@ -1793,6 +1811,8 @@ startup_msr(void)
 		case 0x7d:      /* Ice Lake */
 		case 0x7e:      /* Ice Lake L */
 		case 0x9d:      /* Ice Lake NNPI */
+
+		case 0x8f:      /* SapphireRapids */
 
 			break;
 		case 87:	/* Knights Landing - needs testing!!! */
@@ -2699,7 +2719,7 @@ sched_migrate_task_trace(RXUNUSED struct task_struct *p, unsigned int new_cpu)
 	return;
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,16,0) || (defined RHEL91)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,16,0) || (defined RHEL9) || (defined SLES15SP5)
 #define GENDISK q->disk
 #else
 #define GENDISK r->rq_disk
@@ -4932,7 +4952,11 @@ static struct kprobe kp0, kp1;
 
 KPROBE_PRE_HANDLER(handler_pre0)
 {
+#if defined CONFIG_ARM64
+  kln_addr = (regs->pc);
+#else 
   kln_addr = (--regs->ip);
+#endif
 
   return 0;
 }
@@ -6928,7 +6952,7 @@ liki_initialize(void)
 	int	i;
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,2,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,5,0)
 	printk(KERN_INFO "LiKI: unsupported kernel version\n");
 	return(-EINVAL);
 #else
@@ -7055,4 +7079,4 @@ module_exit(liki_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("colin.honess@gmail.com");
-MODULE_DESCRIPTION("LInux Kernel Instrumentation. Intended for use only under the guidance of HP.");
+MODULE_DESCRIPTION("LInux Kernel Instrumentation. Intended for use only under the guidance of HPE.");

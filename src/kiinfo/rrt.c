@@ -59,7 +59,7 @@ typedef struct {
 ** the 1MB buffer is not allocated unless the CPU exists 
 */
 
-rrt_cntl_t trc_cntl[512];
+rrt_cntl_t trc_cntl[MAXCPUS];
 
 void read_raw_trace();
 int  setup_percpu_readers();
@@ -319,13 +319,15 @@ int setup_percpu_readers(void)
 {
         uint64 i;
         int nrcpus = MAXCPUS;
-	char percpu_file[200];
+	char percpu_file[40];
+	char trace_pipe_file[128];
 	struct stat statbuf;
 
         for ( i = 0; i < nrcpus; i++ ) {
-		sprintf (percpu_file, "%s/tracing/per_cpu/cpu%d/trace_pipe_raw", debug_dir, i);
-		if (stat(percpu_file, &statbuf) == 0) { 
-                /* if ( CPU_ISSET_S(i, size, mask) ) { */
+		sprintf (percpu_file, "/sys/devices/system/cpu/cpu%d", i);
+		sprintf (trace_pipe_file, "%s/tracing/per_cpu/cpu%d/trace_pipe_raw", debug_dir, i);
+		if ((stat(percpu_file, &statbuf) == 0) &&
+		    (stat(trace_pipe_file, &statbuf) == 0)) {
 			alloc_thread_this_cpu(i); 
 			if (debug) printf("CPU %d found \n",i);
                 }

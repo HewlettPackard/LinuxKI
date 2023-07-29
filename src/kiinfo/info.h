@@ -224,7 +224,6 @@ extern int    pid_print_func(void *);
 extern int    pid_report_func(void *);
 extern int    pid_print_report(void *);
 extern int    pid_bufmiss_func(void *, void *);
-extern void   parse_dmidecode();
 extern void   parse_systeminfo();   /* WinKI */
 extern int    parse_cpulist();   /* WinKI */
 extern int    parse_corelist();	 /* WinKI */
@@ -234,7 +233,8 @@ extern void   parse_cpumaps();
 extern void   parse_mpsched();
 extern void   parse_mpscheds();
 extern void   parse_mem_info();
-extern void   parse_dmidecode();
+extern void   parse_dmidecode1();
+extern void   parse_dmidecode2();
 extern void   parse_lsof();
 extern void   parse_ll_R();
 extern void   parse_maps();
@@ -242,6 +242,7 @@ extern void   parse_mpath();
 extern void   parse_dmsetup();
 extern void   parse_cstates();
 extern void   parse_uname(char);
+extern void   parse_lscpu();
 extern void   parse_edus();
 extern void   parse_docker_ps();
 extern void   parse_proc_cgroup();

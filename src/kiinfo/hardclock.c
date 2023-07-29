@@ -73,12 +73,14 @@ collect_pc_info(hardclock_t *rec_ptr, hc_info_t *hcinfop, pid_info_t *pidp)
 	int state, start;
 	uint64 offset;
 	vtxt_preg_t *pregp = NULL;
-	uint64 key = UNKNOWN_SYMIDX;
+	uint64 key = UNKNOWN_USER_SYMIDX;
 	uint64 pc;
 
 	hcinfop->total++;
 	state = get_cpu_state(rec_ptr);
 	hcinfop->cpustate[state]++;
+
+	if (state==HC_SYS) key = UNKNOWN_KERNEL_SYMIDX;
 
 	/* printf ("collect_pc_info(): state: %d stack_depth: %d  ips: 0x%llx 0x%llx ", state, rec_ptr->stack_depth, rec_ptr->ips[0], rec_ptr->ips[1]);  */
 	if (state==HC_IDLE) return 0;

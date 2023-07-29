@@ -49,6 +49,7 @@ shopt -s extglob
 # version 7.0   03/12/2021   Added processing Windows ETL trace files
 # version 7.1   06/29/2021   fixed kiall -f to use "find ." in process_f
 # version 7.6   02/22/2023   Made Visulation option hidden again
+# version 7.7   07/28/2023   change egrep to grep -E                
 # 
 # DESCRIPTION:
 #  
@@ -149,7 +150,7 @@ extract_ki_files()
 {
 # tag and NODENAME must be set 
 # First, unzip regular files; not tar archives 
-    for file in `ls *$tag*gz 2>/dev/null | egrep -v "\.tar|\.tgz"`
+    for file in `ls *$tag*gz 2>/dev/null | grep -E -v "\.tar|\.tgz"`
     do
         echo gunzip $file
         gunzip $file

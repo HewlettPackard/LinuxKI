@@ -385,7 +385,7 @@ get_pathname(void *arg1, void *arg2)
 	uint64	dev;
 	ssize_t sz;
 	char    *pos;
-	int 	path1, path2, path3, path4;
+	int 	path1=0, path2=0, path3=0, path4=0, npaths=0;
 
 	if (!is_alive)  return 0;
 	
@@ -399,8 +399,12 @@ get_pathname(void *arg1, void *arg2)
 	pos = strrchr(linkstr, '/');
 	pos++;
 	
-	sscanf (pos, "%d:%d:%d:%d", &path1, &path2, &path3, &path4);
-	devinfop->devpath = FCPATH(path1, path2, path3, path4);
+	npaths = sscanf (pos, "%d:%d:%d:%d", &path1, &path2, &path3, &path4);
+	if (npaths < 2) {
+		devinfop->devpath = -1;
+	} else {
+		devinfop->devpath = FCPATH(path1, path2, path3, path4);
+	}
 }
 		
 	
@@ -1844,6 +1848,7 @@ find_hc_start(uint64 *stack, uint64 depth)
 		if (symptr)  {
 			if (strncmp(symptr, "apic_timer_interrupt", 20) == 0)  retval=i+1;
 			else if (strncmp(symptr, "ret_from_intr", 18) == 0) retval= i+1;		/* ARM64, l4tm */
+			else if (strncmp(symptr, "__irqentry_text_start", 21) == 0) retval= i+1;		/* ARM64, l4tm */
 			else continue;
 		}
         }
@@ -1907,14 +1912,14 @@ uint64 convert_pc_to_key(uint64 mode, void *arg2, uint64 pc)
 	pid_info_t *pidp = (pid_info_t *)arg2;
         uint64 key=0, offset=0;
 	vtxt_preg_t *pregp = NULL;
-	key = UNKNOWN_SYMIDX;
 	int idx;
 
 	/* do not convert the CONTEXT markers */	
 	if (STACK_CONTEXT(pc)) return pc;
 
 	if (mode == STACK_CONTEXT_KERNEL) {
-		if (globals->symtable == NULL) return UNKNOWN_SYMIDX;
+		key = UNKNOWN_KERNEL_SYMIDX;
+		if (globals->symtable == NULL) return UNKNOWN_KERNEL_SYMIDX;
 		idx = findsym_idx(pc);	
         	offset = pc - globals->symtable[idx].addr;
         	if ((idx > 0) && (idx < globals->nsyms-1) && (offset < 0x10000)) {
@@ -1923,6 +1928,7 @@ uint64 convert_pc_to_key(uint64 mode, void *arg2, uint64 pc)
 			key = pc;
         	}
 	} else {
+		key = UNKNOWN_USER_SYMIDX;
                 if (objfile_preg.elfp && (pc < 0x10000000)) {
                         if (symlookup(&objfile_preg, pc, &offset)) {
                                 key = pc - offset;

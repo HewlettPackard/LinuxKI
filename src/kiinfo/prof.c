@@ -55,7 +55,11 @@ extern int pc_rwsem_down_write_failed;
 extern int pc_kstat_irqs_usr;
 extern int pc_pcc_cpufreq_target;
 extern int pc_kvm_mmu_page_fault;
-
+extern int pc_do_numa_page;
+extern int pc_migrate_pages;
+extern int pc_pagevec_lru_move_fn;
+extern int pc_release_pages;
+extern int pc_alloc_pages_nodemask;
 
 int prof_dummy_func(void *, void *);
 int prof_ftrace_print_func(void *, void *);
@@ -247,7 +251,7 @@ hc_print_pc(void *arg1, void *arg2)
 	hc_info_t *hcinfop = print_pc_args->hcinfop;
 	vtxt_preg_t *pregp;
 
-	uint64 key = UNKNOWN_SYMIDX;
+	uint64 key;
 	char *sym = NULL; 
 	char *symfile = NULL;
 	uint64 offset, symaddr;
@@ -263,7 +267,7 @@ hc_print_pc(void *arg1, void *arg2)
                         sym = win_symlookup(pregp, key, &symaddr);
 			symfile = pregp->filename;
                 }
-	} else if (key != UNKNOWN_SYMIDX) {
+	} else if (!UNKNOWN_SYMIDX(key)) {
 		if (key < globals->nsyms-1)  {
 			sym = globals->symtable[key].nameptr;
 		} else {
@@ -390,9 +394,9 @@ hc_print_pc2(void *arg1, void *arg2)
                         sym = win_symlookup(pregp, key, &symaddr);
 			symfile = pregp->filename;
                 }
-        } else if ((pcinfop->state != HC_USER) && ((key > globals->nsyms) || (key == UNKNOWN_SYMIDX)))  {
+        } else if ((pcinfop->state != HC_USER) && ((key > globals->nsyms) || UNKNOWN_SYMIDX(key)))  {
                 /* fall through */
-	} else if (key != UNKNOWN_SYMIDX) {
+	} else if (!UNKNOWN_SYMIDX(key)) {
 		if (pcinfop->state == HC_USER) {
 			if (objfile_preg.elfp && (key < 0x10000000)) {
 				sym = symlookup(&objfile_preg, key, &offset);
@@ -429,13 +433,17 @@ hc_print_pc2(void *arg1, void *arg2)
 		} else if ((((pcinfop->count*100.0) / hcinfop->total) > 2.0) &&
 			     (strstr(dmangle(sym), "LatchBase::AcquireInternal") ||
 			      strstr(dmangle(sym), "LatchBase::ReleaseInternal") )) {
-			RED_FONT;
 			(*print_pc_args->warnflagp) |= WARNF_SQL_STATS;
+			RED_FONT;
+		} else if ((((pcinfop->count*100.0) / hcinfop->total) > 1.0) &&
+			((key == pc_pagevec_lru_move_fn) || (key == pc_alloc_pages_nodemask) || (key == pc_release_pages))) {
+			*print_pc_args->warnflagp |= WARNF_LARGE_NUMA_NODE;
+			RED_FONT;
 		}
 	}
 		
 	if (sym == NULL) {
-		if (key == UNKNOWN_SYMIDX) {
+		if (UNKNOWN_SYMIDX(key)) {
 			printf ("%s%8d %6.2f%%  %-6s %s", tab,
 				pcinfop->count,
 				(pcinfop->count*100.0) / hcinfop->total,
@@ -491,7 +499,7 @@ hc_print_pc_sys(void *arg1, void *arg2)
 		if (pregp = get_win_pregp(idx, NULL)) {
 			symptr = win_symlookup(pregp, idx, &symaddr);
 		} 
-	} else if ((pcinfop->state == HC_USER) || (idx > globals->nsyms) || (idx == UNKNOWN_SYMIDX))  {
+	} else if ((pcinfop->state == HC_USER) || (idx > globals->nsyms) || (UNKNOWN_SYMIDX(idx)))  {
 		/* fall through */
 	} else {
 		symptr = globals->symtable[idx].nameptr;
@@ -536,6 +544,7 @@ hc_print_stktrc(void *p1, void *p2)
 	int rwsem_down_write_failed_cnt = 0;
 	int kvm_pagefault_warn_cnt = 0;
 	int cpufreq_warn_cnt = 0;
+        int migrate_pages_warn_cnt = 0;
 
 	if (stktrcp->cnt == 0) return 0;
 
@@ -562,7 +571,7 @@ hc_print_stktrc(void *p1, void *p2)
 			continue;
 		} else if (key == STACK_CONTEXT_USER) {
 			pid_printf (pidfile, "  |");
-		} else if (key == UNKNOWN_SYMIDX) {
+		} else if (UNKNOWN_SYMIDX(key)) {
 			pid_printf (pidfile, "  unknown");
 		} else if ((globals->symtable) && (key < globals->nsyms-1)) {
 			if (kparse_flag && print_pc_args->warnflagp) {
@@ -577,6 +586,7 @@ hc_print_stktrc(void *p1, void *p2)
 					else if (key == pc_kstat_irqs_usr) kstat_irqs_warn_cnt=2;
 					else if (key == pc_pcc_cpufreq_target) cpufreq_warn_cnt=2;
 					else if (key == pc_kvm_mmu_page_fault) kvm_pagefault_warn_cnt=2;
+					else if ((key == pc_do_numa_page) || (key == pc_migrate_pages)) migrate_pages_warn_cnt++;
 				}
 
 				if (hugetlb_fault_warn_cnt >= 2) {
@@ -599,6 +609,11 @@ hc_print_stktrc(void *p1, void *p2)
 					RED_FONT;
 					kvm_pagefault_warn_cnt = 0;
 					*print_pc_args->warnflagp |= WARNF_KVM_PAGEFAULT;
+                                } else if (migrate_pages_warn_cnt >= 2) {
+                                        RED_FONT;
+                                        migrate_pages_warn_cnt = 0;
+                                        *print_pc_args->warnflagp |= WARNF_MIGRATE_PAGES;
+
 				}
 			}
 			pid_printf (pidfile, "  %s", globals->symtable[key].nameptr);

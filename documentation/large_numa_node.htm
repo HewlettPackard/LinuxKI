@@ -1,0 +1,450 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+a:link, span.MsoHyperlink
+	{color:#0563C1;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:#954F72;
+	text-decoration:underline;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:107%;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:.5in .5in .5in .5in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US link="#0563C1" vlink="#954F72">
+
+<div class=WordSection1>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;vertical-align:
+top'><b><i><span style='font-size:12.0pt;font-family:"Arial",sans-serif;
+color:black'>LinuxKI Warning</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>High System CPU utilization during memory allocations,
+deallocations, and page faults</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Dated: 07/21/2023</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Problem</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>When using
+CPUs with large numbers of cores, frequent memory allocations, deallocations,
+and page faults may cause high System CPU utilization due to spinlock
+contention on the lru or zone spinlocks.   </span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Processor
+manufacturers such as Intel, AMD, and Ampere have recently introduced CPU
+processors with very high core counts.  For example:</span></p>
+
+<p class=MsoListParagraphCxSpFirst style='margin-left:38.6pt;text-indent:-.25in;
+line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+font-family:Symbol;color:black'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Intel - up to 60 cores with Sapphire Rapids</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-left:38.6pt;text-indent:-.25in;
+line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+font-family:Symbol;color:black'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>AMD - up to 96 cores with Genoa and up to 128 cores with Bergamo</span></p>
+
+<p class=MsoListParagraphCxSpLast style='margin-left:38.6pt;text-indent:-.25in;
+line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+font-family:Symbol;color:black'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Ampere - 80 cores with Ampere Altra and 128 cores with Ampere Altra
+Max</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>These
+high-core count processor can experience high System CPU utilizations during
+periods of frequent memory allocations, deallocations and page faults caused by
+spinlock contention on either the pgdat lru lock, or the specific memory zone
+lock.  </span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Note that
+the Linux memory allocator is NUMA aware, with memory divided into zones.  
+Each NUMA node will have a zone for general memory allocations, and you may
+also see some memory zones for DMA allocations.   For example, the
+/proc/buddyinfo file for a DL325 server shows the following:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>$ cat /proc/buddyinfo</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>Node 0, zone      DMA      1      1      1      0      2     
+1      1      0      1      1      3</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>Node 0, zone    DMA32    668    522    493    804    407    371   
+340    246     91     20    283</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>Node 0, zone   Normal 449641 296737 415122 910470 569301 299100
+123620  40545  11205   3838    163</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Note that
+there is a single NUMA node configured, so all the primary memory allocations
+will come from the “Node 0, Normal” zone.  </span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Investigation</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>A recent customer
+using an HPE ProLiant DL325 with the AMD EPYC 9654P 96-core processors
+experienced performance issues during their driver builds.  LinuxKI data was
+collected and analyzed.   The CPU utilization was high, especially for the
+System CPU utilizations:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>   Busy      <span style='background:yellow'>sys</span>      usr     idle 
+hardirq_sys hardirq_user hardirq_idle  softirq_sys softirq_user softirq_idle</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'> 97.22%   <span style='background:yellow'>36.36%</span>  
+60.50%    2.76%        0.01%        0.01%        0.00%        0.10%       
+0.24%        0.01%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>The top
+functions using System CPU according to the Kparse Report (kp.&lt;ts&gt;.html):
+</span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#FFD1A4'>
+ <tr>
+  <td style='padding:1.5pt 2.25pt 1.5pt 2.25pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span style='font-size:10.0pt;
+  font-family:"Times New Roman",serif'>1.4.3 Report of non-idle kernel
+  functions at each clock tick</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><u><span style='font-size:9.0pt;font-family:"Times New Roman",serif;
+  color:blue'><a
+  href="http://gse-rose-st068.us.hpecorp.net/work2/mcr/acme/mobile-u64-p217/0628_1230/kp.0628_1230.html#subsection1.4.2"><span
+  style='color:blue'>[Prev Subsection]</span></a><a
+  href="http://gse-rose-st068.us.hpecorp.net/work2/mcr/acme/mobile-u64-p217/0628_1230/kp.0628_1230.html#subsection1.4.4"><span
+  style='color:blue'>[Next Subsection]</span></a><a
+  href="http://gse-rose-st068.us.hpecorp.net/work2/mcr/acme/mobile-u64-p217/0628_1230/kp.0628_1230.html#Section1"><span
+  style='color:blue'>---[Prev Section]</span></a><a
+  href="http://gse-rose-st068.us.hpecorp.net/work2/mcr/acme/mobile-u64-p217/0628_1230/kp.0628_1230.html#Section2"><span
+  style='color:blue'>[Next Section]</span></a><a
+  href="http://gse-rose-st068.us.hpecorp.net/work2/mcr/acme/mobile-u64-p217/0628_1230/kp.0628_1230.html#TOC"><span
+  style='color:blue'>[Table of Contents]</span></a></span></u></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><b><span style='font-size:9.0pt;font-family:"Courier New";color:black'>  
+Count     Pct  State  Function </span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";background:#EEEEEE'>  
+<span style='color:red'>91085  36.27%  SYS    pagevec_lru_move_fn</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>   73870  29.42% 
+USER   unknown</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";background:#EEEEEE'>  
+<span style='color:red'>41761  16.63%  SYS    release_pages</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>    8283  
+3.30%  SYS    unknown</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";background:#EEEEEE'>   
+<span style='color:red'>3475   1.38%  SYS    __alloc_pages_nodemask</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New"'>    2594  
+1.03%  SYS    prep_new_page</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:#EEEEEE'>    2343   0.93%  SYS    __handle_mm_fault</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>   
+2018   0.80%  SYS    unmap_single_vma</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:#EEEEEE'>    1339   0.53%  SYS    do_page_fault</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>    
+846   0.34%  SYS    ovl_override_creds</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Root Cause</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>The
+functions pagevec_lru_move_fn() and release_pages() must obtain the pgdat
+lru_lock, and __alloc_page_nodemask() must obtain the zone lock.   Since there
+is only a single pgdat and a single Primary Zone, spinlock contention can occur
+in these functions when there are frequent memory allocations, deallocations,
+and page faults.</span></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><b><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Solution</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>The
+simplest solution is to split each processor socket into multiple NUMA nodes.  
+There following BIOS settings can be used to achieve this:</span></p>
+
+<p class=MsoListParagraphCxSpFirst style='text-indent:-.25in;line-height:11.25pt;
+vertical-align:top'><span style='font-size:10.0pt;font-family:Symbol;
+color:black'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Intel - Sub-NUMA Clustering (SNC/SNC-2, SNC-4)</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='text-indent:-.25in;line-height:11.25pt;
+vertical-align:top'><span style='font-size:10.0pt;font-family:Symbol;
+color:black'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>AMD</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-left:1.0in;text-indent:-.25in;
+line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+font-family:"Courier New";color:black'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>NUMA Nodes per Socket (NPS=1, 2, or 4)</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-left:1.0in;text-indent:-.25in;
+line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+font-family:"Courier New";color:black'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Last Level Cache as NUMA node</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='text-indent:-.25in;line-height:11.25pt;
+vertical-align:top'><span style='font-size:10.0pt;font-family:Symbol;
+color:black'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Ampere</span></p>
+
+<p class=MsoListParagraphCxSpLast style='margin-left:1.0in;text-indent:-.25in;
+line-height:11.25pt;vertical-align:top'><span style='font-size:10.0pt;
+font-family:"Courier New";color:black'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Ampere NUMA Control (ANC = Monolithic, Hemisphere, Quadrant)</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Arial",sans-serif;
+color:black'>After changing the BIOS setting to enable LLC as NUMA node, the
+96-cores were divided into 12 NUMA nodes, each with 8-cores:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>$
+cat /proc/buddyinfo</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>Node
+0, zone      DMA      1      1      1      0      2      1      1      0     
+1      1      3</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>Node
+0, zone    DMA32      9     14     11     12     11     11      9      9     
+8      7    437</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>Node
+0, zone   Normal  29177  17043   8107   3213   1027    721    308     91    
+18    112   5035</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>Node
+1, zone   Normal  23656  14414   5348   1755    722    469     89     36     
+6     63   4450</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>Node
+2, zone   Normal  11709   8207   5086   2852   1079    536    254     29     
+5    178   5572</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>Node
+3, zone   Normal  25590  13775   7884   2525   1062   1130    402     88     24   
+139   4009</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>Node
+4, zone   Normal    910   1748   4714   2120    823    503    255    108    
+28    124   5816</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>Node
+5, zone   Normal  20706  11084   6386   3444   1155    845    328    122    
+44    165   3442</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>Node
+6, zone   Normal  16555   8844   4219   2608   1712    983    247     29     
+5    164   5916</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>Node
+7, zone   Normal    933   4541   6200   2278   1538    737    189     45     
+9    115   3222</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>Node
+8, zone   Normal  15225  10531   6186   2336   1447    776    445    195    
+77    106   5512</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>Node
+9, zone   Normal   3102  25158   9534   6717   3340   1702    511     68    
+10     15    939</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>Node
+10, zone   Normal  22971   9711   3239   1411    784    512    174     50     
+5    162   4176</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>Node
+11, zone   Normal   1443   1508   1019    675    897    492    118      1     
+0      1      0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New";color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif;color:black'>The customer also enabled Transparent
+Hugepages, since many of the memory page faults were on the anonymous memory
+mapped regions.  </span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif;color:black'>Be cautious when setting LLC as NUMA node as
+the NUMA nodes with a small number of cores may introduce new issues.    Typically,
+dividing the processor socket into 4 NUMA nodes is sufficient.  Transparent
+Hugepages can also have some overhead with regards to memory fragmentation, so
+use with care.</span></p>
+
+<p class=MsoNormal><b><span style='font-size:10.0pt;line-height:107%;
+font-family:"Arial",sans-serif;color:black'>Note</span></b></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif;color:black'>The Linux 5.11 kernel modified the Memory
+Resource Controller to introduce a new per memcg lru lock.   This kernel change
+may help alleviate some of the contention.   See also </span><span
+class=MsoHyperlink><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif'><a href="https://lwn.net/Articles/835577/">https://lwn.net/Articles/835577/</a></span></span><span
+style='font-size:10.0pt;line-height:107%;font-family:"Arial",sans-serif'>.</span></p>
+
+</div>
+
+</body>
+
+</html>

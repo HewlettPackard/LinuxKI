@@ -223,6 +223,7 @@ pid_init_func(void *v)
 		ki_actions[TRACE_PRINT].execute = 1;
 	}
 
+	parse_dmidecode1();
 	parse_cpuinfo();
 	parse_kallsyms();
 	parse_devices();
@@ -236,6 +237,7 @@ pid_init_func(void *v)
 	}
 
 	parse_mpsched();
+	parse_lscpu();
 	parse_proc_cgroup();
 	parse_pself();
 	parse_edus();

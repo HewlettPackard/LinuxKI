@@ -6744,7 +6744,7 @@ warnmsg_t warnmsg[MAXNOTEWARN] = {
 	{ "Warning: Excessive Block I/O requeues detected", NULL },
 	{ "Warning: Average Service Times > 30 msecs", NULL },
 	{ "Warning: Spinlock contention detected in ext4 journal due to writes by kiinfo", NULL},
-	{ "Warning: Performance impact due to excessive page migrations on RHEL7", _HTTP_NUMA_BALANCING},
+	{ "Warning: Performance impact due to excessive page migrations", _HTTP_NUMA_BALANCING},
 	{ "Warning: Check for un-terminated lans on IXGBE network interface cards", _HTTP_UNTERMINATED_IXGBE},
 	{ "Warning: System booted with NUMA features disabled.", _HTTP_NUMA_OFF},
 	{ "Warning: Suspect large SEMMSL value causing high System CPU usage", _HTTP_SEMLOCK},
@@ -6770,7 +6770,8 @@ warnmsg_t warnmsg[MAXNOTEWARN] = {
 	{ "Warning: Large I/Os (>1MB)  may degradge performance on PCIe Smart Array Controllers", _HTTP_CACHE_BYPASS},
 	{ "Warning: Memory is not balanced across NUMA nodes, check for missing/unconfigured memory DIMMS", NULL},
 	{ "Warning: Memory on one or more NUMA nodes is below 100 MB", NULL},
-	{ "Warning: Threads delayed on RunQ with max wait time more than 100 msecs", _HTTP_RUNQ_DELAYS}
+	{ "Warning: Threads delayed on RunQ with max wait time more than 100 msecs", _HTTP_RUNQ_DELAYS},
+	{ "Warning: High System CPU utilization during memory allocations, deallocations, and page faults", _HTTP_LARGE_NUMA_NODE}
 };
 
 

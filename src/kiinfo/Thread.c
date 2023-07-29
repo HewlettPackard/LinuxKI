@@ -600,12 +600,15 @@ thread_readythread_func (void *a, void *v)
         syscall_info_t *tsyscallp;
 	win_syscall_save_t *entry;
         StackWalk_t *stk = NULL;
-        uint32 pid=0, tid=0;
+        uint32 pid=0, tid=0, i=0;
 	int old_state, new_state, coop_old_state;
 	uint64 delta = 0, coop_delta = 0, hrtime;
+	uint64 ip = 0, symaddr = 0;
+	char *symptr = NULL;
         uint64 *s;
 	short syscall_id;
-	winki_stack_info_t stkinfo;
+	winki_stack_info_t stkinfo, *stkinfop;
+	vtxt_preg_t *pregp = NULL;
 
         /* we have to peak to see if the next event for the buffer it a StackWalk event */
         /* However, if we are at the end of the buffer, we need to move to the next one */
@@ -625,6 +628,22 @@ thread_readythread_func (void *a, void *v)
 		trcinfop->pid = tid; 
 
 		winki_save_stktrc(trcinfop, stk, &stkinfo);
+
+		/* Need to inspect stack and see if it is due to a KiRetireDpcList() all, 
+		 * if so, then the ReadyThread was done on the ICS */
+		stkinfop = &stkinfo;
+	        for (i = 0; i < stkinfop->depth; i++) {
+                	ip = stkinfop->Stack[i];
+                	if (pregp = get_win_pregp(ip, pidp)) {
+                        	if (symptr = win_symlookup(pregp, ip, &symaddr)) {
+                                	if (strncmp(symptr, "KiRetireDpcList", 15) == 0) {
+						tid = 0;
+						pid = 0;
+						break;
+					}
+				}
+                        }
+                }
         }
 
         pidp = GET_PIDP(&globals->pid_hash, tid);

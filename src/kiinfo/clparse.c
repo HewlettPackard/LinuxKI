@@ -127,25 +127,25 @@ clparse_init_func(void *v)
 
 	parse_cpuinfo();
 	parse_mpsched();
+	parse_lscpu();
 	parse_kallsyms();
 	parse_devices();
         parse_ll_R();
 
-	if (timestamp) {
-		parse_docker_ps();
-		parse_proc_cgroup();
-        	parse_lsof();
-        	parse_pself();
-        	parse_edus();
-        	parse_jstack();
-        	parse_mpath();
-		parse_mem_info();
-		parse_scavuln(0);
-		parse_uname(cluster_flag);
-		parse_irqlist();
+	parse_dmidecode1();
+	parse_docker_ps();
+	parse_proc_cgroup();
+        parse_lsof();
+        parse_pself();
+        parse_edus();
+        parse_jstack();
+        parse_mpath();
+	parse_mem_info();
+	parse_scavuln(0);
+	parse_uname(cluster_flag);
+	parse_irqlist();
 
-		if (vis) vis_clparse_init();
-	}
+	if (vis) vis_clparse_init();
 }
 
 int

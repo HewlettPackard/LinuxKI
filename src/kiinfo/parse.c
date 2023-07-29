@@ -64,6 +64,11 @@ int pc_mutex_lock_slowpath = -1;
 int pc_kstat_irqs_usr = -1;
 int pc_pcc_cpufreq_target = -1;
 int pc_kvm_mmu_page_fault = -1;
+int pc_migrate_pages = -1;
+int pc_do_numa_page = -1;
+int pc_pagevec_lru_move_fn = -1;
+int pc_release_pages = -1;
+int pc_alloc_pages_nodemask = -1;
 
 
 void
@@ -482,6 +487,156 @@ parse_cpulist()
 
 }
 
+/* parse_lscpu */
+void
+parse_lscpu()
+{
+	FILE *f = NULL;
+	char fname[32];
+	char *rtnptr;
+	char *pos, *dash, *comma;
+	int Ampere = 0;
+	int cpu1, cpu2, ldom, i;
+	cpu_info_t *cpuinfop;
+
+	if (IS_WINKI) return;
+
+	if (debug) {
+	printf ("Model: %s\n", globals->model);
+	printf ("PCPUs: %d\n", globals->ncpu);
+	printf ("LCPUs: %d\n", globals->nlcpu);
+	printf ("NUMA Nodes: %d\n", globals->nldom);
+	printf ("Sockets: %d\n", globals->nsockets);
+	printf ("Cores per socket: %d\n", globals->cores_per_socket);
+	printf ("Thd per core: %d\n", globals->thr_per_core);
+	printf ("HT Enabled: %d\n", globals->HT_enabled);
+	printf ("SNC Enabled: %d\n", globals->SNC_enabled);
+	printf ("\n");
+	}
+
+	sprintf (fname, "lscpu.%s", timestamp);
+
+        if ( (f = fopen(fname,"r")) == NULL) {
+                if (debug) fprintf (stderr, "Unable to open file %s, errno %d\n", fname, errno);
+                return;
+        }
+
+	if (globals->thr_per_core == 0) globals->thr_per_core = 1;
+	while (1) {
+		rtnptr = fgets((char *)&input_str, 511, f);
+		if (rtnptr == NULL) {
+			/* stop if at the end of the file */
+			break;
+		}
+
+		if (strncmp(input_str, "CPU(s):", 7) == 0) {
+			pos = strchr(input_str, ':') + 1;
+			sscanf (pos, "%d\n", &globals->nlcpu);
+		} else if (strncmp(input_str, "NUMA node(s):", 13) == 0) {
+			pos = strchr(input_str, ':') + 1;
+			sscanf (pos, "%d\n", &globals->nldom);
+		} else if (strncmp(input_str, "Socket(s):", 10) == 0) {
+			pos = strchr(input_str, ':') + 1;
+			sscanf (pos, "%d\n", &globals->nsockets);
+		} else if (strncmp(input_str, "Core(s) per socket:", 19) == 0) {
+			pos = strchr(input_str, ':') + 1;
+			sscanf (pos, "%d\n", &globals->cores_per_socket);
+		} else if (strncmp(input_str, "Thread(s) per core:", 19) == 0) {
+			pos = strchr(input_str, ':') + 1;
+			sscanf (pos, "%d\n", &globals->thr_per_core);
+
+			if (globals->thr_per_core > 1) 
+				globals->HT_enabled = TRUE;
+			else
+				globals->HT_enabled = FALSE;
+		} else if (strncmp(input_str, "Model name:", 11) == 0) {
+			if (strstr(input_str, "Neoverse-N1")) {
+				Ampere = 1;
+			} else {
+				pos = strchr(input_str, ':') + 1;
+				pos[strlen(pos)-1] = 0;
+				while (pos[0] == ' ') pos++;
+				add_command(&globals->model, pos);
+			}
+		} else if (strncmp(input_str, "BIOS Model name:", 16) == 0) {
+			if (Ampere) {
+				pos = strchr(input_str, ':') + 1;
+				pos[strlen(pos)-1] = 0;
+				while (pos[0] == ' ') pos++;
+				add_command(&globals->model, pos);
+			} 
+		} else if (strncmp(input_str, "NUMA node", 9) == 0)  {
+			pos = input_str+9;
+			sscanf(pos, "%d", &ldom);
+			ldom = atoi(pos);
+			pos = strchr(pos, ':') + 1;
+			pos++;
+			do {
+				cpu1 = atoi(pos);
+				cpuinfop = GET_CPUP(&globals->cpu_hash, cpu1);
+				cpuinfop->ldom = ldom;
+				cpuinfop->cpu = cpu1;
+
+				dash = strchr(pos, '-');
+				comma = strchr(pos, ',');
+				if ((dash == NULL) && (comma == NULL)) 
+					break;
+
+				if (dash==NULL) { 
+					pos = comma + 1;
+				} else if (comma == NULL) {
+					pos = dash + 1;
+					cpu2 = atoi(pos);
+					for (i = cpu1+1; i <= cpu2; i++) { 
+						cpuinfop = GET_CPUP(&globals->cpu_hash, i);
+						cpuinfop->ldom = ldom;
+						cpuinfop->cpu = i;
+					}
+					break;
+				} else if (comma < dash) { 
+					pos = comma + 1;
+				} else {
+					pos = dash + 1;
+					cpu2 = atoi(pos);
+					for (i = cpu1+1; i <= cpu2; i++) { 
+						cpuinfop = GET_CPUP(&globals->cpu_hash, i);
+						cpuinfop->ldom = ldom;
+						cpuinfop->cpu = i;
+					}
+					comma = strchr(pos, ',');
+					pos = comma + 1;
+				}
+					
+
+			} while (1);
+
+
+		}
+	}
+	globals->ncpu = globals->nlcpu / globals->thr_per_core;
+	globals->nodes_per_socket = globals->nldom / globals->nsockets;
+	if (globals->nodes_per_socket > 1) 
+		globals->SNC_enabled = TRUE;
+	else
+		globals->SNC_enabled = FALSE;
+
+	if (debug)  {
+	printf ("Model: %s\n", globals->model);
+	printf ("PCPUs: %d\n", globals->ncpu);
+	printf ("LCPUs: %d\n", globals->nlcpu);
+	printf ("NUMA Nodes: %d\n", globals->nldom);
+	printf ("Sockets: %d\n", globals->nsockets);
+	printf ("Cores per socket: %d\n", globals->cores_per_socket);
+	printf ("Thd per core: %d\n", globals->thr_per_core);
+	printf ("HT Enabled: %d\n", globals->HT_enabled);
+	printf ("SNC Enabled: %d\n", globals->SNC_enabled);
+	}
+
+	fclose(f);
+
+	return;
+}
+
 
 /* parse_cpuinfo */
 void
@@ -495,7 +650,7 @@ parse_cpuinfo()
 	pcpu_info_t *pcpuinfop;
 	int	cpu, node, physid = -1;
 	int	prev_node = -1;
-	float   ghz;
+	float   ghz, mhz;
 
 	if (is_alive) {
 		sprintf (fname, "/proc/cpuinfo");
@@ -523,6 +678,13 @@ parse_cpuinfo()
 			cpuinfop = GET_CPUP(&globals->cpu_hash, cpu);
 			cpuinfop->cpu = cpu;
 			globals->nlcpu++;
+		}
+
+
+		if (strncmp(input_str, "model name", 10) == 0) {
+			pos = strchr(input_str, ':') + 2;
+			pos[strlen(pos)-1] = 0;
+			add_command (&globals->model, pos);
 		}
 
 		if (strncmp(input_str, "core id", 7) == 0) {
@@ -557,7 +719,7 @@ parse_cpuinfo()
 		}
 
 		/* while this isn't set for the first CPU, it should be OK as the first CPU
-		 * should have a node of 0 
+		 * should have a node of 0.  
 		 */
 		if (strncmp(input_str, "flags", 5) == 0) { 
 			if (strstr(input_str, "hypervisor")) {
@@ -571,6 +733,14 @@ parse_cpuinfo()
 				 sscanf (pos+1, "%f\n", &ghz);
 				 globals->clk_mhz = ghz*1000.0;
 			}
+		}
+
+		/* for come CPUs, the GHz is not on the model name, so get the 
+		 * frequency from the cpu MHz field.   Hopefully, this is the Base Freq */
+		if (strstr(input_str, "cpu MHz") && (globals->clk_mhz == 0)) {
+			pos = strrchr(input_str, ' ');
+			sscanf (pos+1, "%f\n", &mhz);
+			globals->clk_mhz = mhz;
 		}
 
 	}
@@ -588,6 +758,7 @@ parse_cpuinfo()
 				/* we have a match! Note that cpu J will be the lowest numbered CPU */
 				globals->ncpu++;
 				globals->HT_enabled = TRUE;
+				globals->thr_per_core = 2;
 
 				cpu2infop->lcpu_sibling = j;
 				cpu2infop->cpu_attr = LCPU;
@@ -608,9 +779,7 @@ parse_cpuinfo()
 		    }
 		}
 	    }
-	} else {
-	    globals->VM_guest = TRUE;
-	}
+	} 
 
 	if (globals->ncpu == 0) globals->ncpu = globals->nlcpu;
 	if (globals->nldom == 1) globals->nldom = 0;              /* only one node? Then no nodes */
@@ -675,6 +844,9 @@ parse_cpumaps()
 		globals->nldom = ldom;
 		globals->SNC_enabled = TRUE;
 	}
+
+	globals->nsockets = ldom;
+	globals->cores_per_socket = globals->ncpu / globals->nsockets;
 }
 
 
@@ -691,7 +863,7 @@ parse_mpsched()
 	char *rtnptr;
 	int i, ret;
 	cpu_info_t *cpuinfop;
-	int cpu[96], ldom, nlcpu;
+	int cpu[128], ldom, nlcpu;
 	short nitems, nldom;
 	char parse_start = FALSE;
 
@@ -721,7 +893,7 @@ parse_mpsched()
 
 		if (!parse_start) continue;
 		
-		nitems = sscanf (input_str, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", 
+		nitems = sscanf (input_str, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", 
 			&ldom, 
 			&cpu[0], &cpu[1], &cpu[2], &cpu[3], &cpu[4], &cpu[5], &cpu[6], &cpu[7],
 			&cpu[8], &cpu[9], &cpu[10], &cpu[11], &cpu[12], &cpu[13], &cpu[14], &cpu[15],
@@ -734,7 +906,11 @@ parse_mpsched()
 			&cpu[64], &cpu[65], &cpu[66], &cpu[67], &cpu[68], &cpu[69], &cpu[70], &cpu[71],
 			&cpu[72], &cpu[73], &cpu[74], &cpu[75], &cpu[76], &cpu[77], &cpu[78], &cpu[79],
 			&cpu[80], &cpu[81], &cpu[82], &cpu[83], &cpu[84], &cpu[85], &cpu[86], &cpu[87],
-			&cpu[88], &cpu[89], &cpu[90], &cpu[91], &cpu[92], &cpu[93], &cpu[94], &cpu[95]);
+			&cpu[88], &cpu[89], &cpu[90], &cpu[91], &cpu[92], &cpu[93], &cpu[94], &cpu[95],
+			&cpu[96], &cpu[97], &cpu[98], &cpu[99], &cpu[100], &cpu[101], &cpu[102], &cpu[103],
+			&cpu[104], &cpu[105], &cpu[106], &cpu[107], &cpu[108], &cpu[109], &cpu[110], &cpu[111],
+			&cpu[112], &cpu[113], &cpu[114], &cpu[115], &cpu[116], &cpu[117], &cpu[118], &cpu[119],
+			&cpu[120], &cpu[121], &cpu[122], &cpu[123], &cpu[124], &cpu[125], &cpu[126], &cpu[127]);
 
 		if (nitems > 1) {
 			nldom++;
@@ -753,77 +929,9 @@ parse_mpsched()
 		globals->nlcpu = nlcpu;
 		globals->SNC_enabled = TRUE;
 	}
-	fclose(f);
-}
 
-/* parse_mpscheds */
-void
-parse_mpscheds()
-{
-	FILE *f = NULL;
-	char fname[30];
-	char *rtnptr, *cptr;
-	int cpu1 = -1;
-	int cpu2 = -1;
-	int i, ret1;
-	cpu_info_t *cpuinfop;
-	pcpu_info_t *pcpuinfop;
-	int found = 0;
-
-	sprintf (fname, "mpscheds.%s", timestamp);
-        if ( (f = fopen(fname,"r")) == NULL) {
-                fprintf (stderr, "Unable to open file %s, errno %d\n", fname, errno);
-                fprintf (stderr, "Continuing without HT reporting\n");
-                return;
-        }
-
-	while (1) {
-		rtnptr = fgets((char *)&input_str, 511, f);
-		if (rtnptr == NULL)  {
-			/* stop if at the end of the file */
-			break;
-		}
-		
-		cptr = strchr(input_str, '[');
-		while (cptr) {
-			cptr += 1;
-			ret1 = sscanf (cptr, "%d %d", &cpu1, &cpu2);
-	
-			if (ret1==2) {
-				if (!found) {
-					found = 1;
-					globals->HT_enabled = TRUE;
-				}
-				globals->ncpu++;
-			        /* Check for HT CPUs siblings and record */
-                                if (debug) fprintf (stderr, "HT cpus -  %d / %d\n", cpu1, cpu2);
-
-				cpuinfop = GET_CPUP(&globals->cpu_hash, cpu1);
-                                cpuinfop->cpu = cpu1;
-                                cpuinfop->cpu_attr = LCPU;
-                                cpuinfop->lcpu_sibling = cpu2;
-                                cpuinfop->pcpu_idx = cpu1;
-                                cpuinfop->lcpu_state = LCPU_UNKNOWN;
-
-				cpuinfop = GET_CPUP(&globals->cpu_hash, cpu2);
-                                cpuinfop->cpu = cpu2;
-                                cpuinfop->cpu_attr = LCPU;
-                                cpuinfop->lcpu_sibling = cpu1;
-                                cpuinfop->pcpu_idx = cpu1;
-                                cpuinfop->lcpu_state = LCPU_UNKNOWN;
-
-                                pcpuinfop = GET_PCPUP(&globals->pcpu_hash, cpu1);
-                                pcpuinfop->lcpu1 = cpu1;
-                                pcpuinfop->lcpu2 = cpu2;
-                                pcpuinfop->last_time = 0;
-                        }
-
-			cptr = strchr(cptr, '[');
-			
-		}
-	}
-
-	if (globals->ncpu == 0) globals->ncpu = globals->nlcpu;
+	globals->nsockets = nldom;
+	if (globals->nsockets) globals->cores_per_socket = globals->ncpu / globals->nsockets;
 	fclose(f);
 }
 
@@ -1137,8 +1245,8 @@ parse_ll_R()
         if (debug) fprintf (stderr, "parse_ll_R\n"); 
         if (is_alive) {
 		/* only need the by-path info here */
-                ret = system("ls -lR /dev >/tmp/.ll_R  2>/dev/null");
-                sprintf (fname, "/tmp/.ll_R");
+                ret = system("ls -lR /dev >/dev/shm/.ll_R  2>/dev/null");
+                sprintf (fname, "/dev/shm/.ll_R");
         } else {
                 sprintf (fname, "ll_R_dev_all.%s", timestamp);
         }
@@ -1569,6 +1677,12 @@ parse_kallsyms()
 		else if (strcmp(globals->symtable[i].nameptr, "__mutex_lock_slowpath") == 0)  pc_mutex_lock_slowpath = i; 
 		else if (strcmp(globals->symtable[i].nameptr, "pcc_cpufreq_target") == 0)  pc_pcc_cpufreq_target = i; 
 		else if (strcmp(globals->symtable[i].nameptr, "kvm_mmu_page_fault") == 0) pc_kvm_mmu_page_fault = i;
+		else if (strcmp(globals->symtable[i].nameptr, "do_numa_pge") == 0) pc_do_numa_page = i;
+                else if (strcmp(globals->symtable[i].nameptr, "migrate_pages") == 0) pc_migrate_pages = i;
+                else if (strcmp(globals->symtable[i].nameptr, "pagevec_lru_move_fn") == 0) pc_pagevec_lru_move_fn = i;
+                else if (strcmp(globals->symtable[i].nameptr, "release_pages") == 0) pc_release_pages = i;
+                else if (strcmp(globals->symtable[i].nameptr, "__alloc_pages_nodemask") == 0) pc_alloc_pages_nodemask = i;
+
 	}
 
 	globals->nsyms = nsyms;
@@ -1879,8 +1993,8 @@ print_docker_ps()
 
 	/* if (debug) fprintf (stderr, "print_docker_ps\n"); */
 	if (is_alive) {
-		ret = system("docker ps >/tmp/.docker_ps  2>/dev/null");
-		sprintf (fname, "/tmp/.docker_ps");
+		ret = system("docker ps >/dev/shm/.docker_ps  2>/dev/null");
+		sprintf (fname, "/dev/shm/.docker_ps");
 	} else {
 		sprintf (fname, "docker_ps.%s", timestamp);
 	}
@@ -1927,8 +2041,8 @@ parse_docker_ps()
 
 	/* if (debug) fprintf (stderr, "parse_docker_ps\n"); */
 	if (is_alive) {
-		ret = system("docker ps >/tmp/.docker_ps  2>/dev/null");
-		sprintf (fname, "/tmp/.docker_ps");
+		ret = system("docker ps >/dev/shm/.docker_ps  2>/dev/null");
+		sprintf (fname, "/dev/shm/.docker_ps");
 	} else {
 		sprintf (fname, "docker_ps.%s", timestamp);
 	}
@@ -2174,7 +2288,11 @@ parse_corelist()
 		} else if (strncmp(util_str, "SocketDesignation=", 18) == 0) {
 			nldom++;
 			globals->nldom = nldom;
-			if (nlcores > ncores) globals->HT_enabled = TRUE;
+			if (nlcores > ncores) { 
+				globals->HT_enabled = TRUE;
+				globals->thr_per_core = 2;
+			}
+
 
 			for (i = 0; i < ncores; i++) {
 				cpu = nlcpu;
@@ -2482,8 +2600,46 @@ io_controllers(uint64 *warnflagp, char print_flag)
 	show_fc_linkspeeds();
 }
 
+void 
+parse_dmidecode1()
+{
+	FILE *f = NULL;
+	char fname[30];
+	char *rtnptr;
+	char *pos;
+
+	if (IS_WINKI) return;
+
+	sprintf (fname, "dmidecode.%s", timestamp);
+
+        if ( (f = fopen(fname,"r")) == NULL) {
+                return;
+        }
+
+	while (1) {
+		rtnptr = fgets((char *)&input_str, 511, f);
+		if (rtnptr == NULL) {
+			/* stop if at the end of the file */
+			break;
+		}
+
+		if (pos = strstr(input_str, "Product Name: ")) {
+			pos = pos+14;
+			pos[strlen(pos)-1] = 0;
+			add_command(&globals->product, pos);
+			globals->product[strlen(globals->product)] = 0;
+		} else if (pos = strstr(input_str, "Vendor: ")) {
+			pos = pos+9;
+			pos[strlen(pos)-1] = 0;
+			if (strstr(pos, "Phoenix Technoligies") || strstr(pos, "SeaBIOS")) {
+				globals->VM_guest = TRUE;
+			}
+		}
+	}
+}
+
 void
-parse_dmidecode() 
+parse_dmidecode2() 
 {
 	FILE *f = NULL;
 	char fname[30];

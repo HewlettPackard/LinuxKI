@@ -320,7 +320,7 @@ update_file_stats(void *a, pid_info_t *pidp, int fd, uint64 syscallbegtm, int ol
 	fd_info_t *fdinfop, *tfdinfop, *ofdinfop;
 	fdata_info_t *fdatap;
 	sdata_info_t *sdatap;
-	uint64 delta;
+	uint64 delta = 0;
 	uint32 syscallno;
 	uint64 key, device=0;
 	uint64 node=0, ftype=0;

@@ -141,6 +141,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define _HTTP_ORACLE_COLSTATS "oracle_colstats.htm"
 #define _HTTP_CACHE_BYPASS "cache_bypass.htm"
 #define _HTTP_RUNQ_DELAYS "runq_delays.htm"
+#define _HTTP_LARGE_NUMA_NODE "large_numa_node.htm"
 #define _HTTP_4_5 "#subsection4.5"
 
 #define _MSG_LINK_INFO \

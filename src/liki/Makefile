@@ -55,6 +55,9 @@ ifneq (,$(wildcard /etc/oracle-release))
 else ifneq (,$(wildcard /etc/fedora-release))
    hostdistro:=fedora
    hostversion:=$(shell grep -oE '[0-9]+' /etc/fedora-release)
+else ifneq (,$(wildcard /etc/rocky-release))
+   hostdistro:=rocky
+   hostversion:=$(shell grep -oE '[0-9]+\.[0-9]+' /etc/rocky-release)
 else ifneq (,$(wildcard /etc/centos-release))
    hostdistro:=centos
    hostversion:=$(shell grep -oE '[0-9]+\.[0-9]+' /etc/centos-release)
@@ -75,6 +78,15 @@ else ifneq (,$(wildcard /etc/os-release))
    hostversion:=$(shell uname -r | sed 's/-/ /g' | sed 's/_/ /g' | awk '{print $$1}')
 endif
 
+# set default HARDCLOCK_STACK_SKIP to 11 for ARM servers, and 8 for the rest.   
+# Note that some enviorments will use 9
+# Currently, RL300 only support Ubuntu and RHEL.  May need to adjust if more OS versions are supported
+hostarch:=$(shell uname -p)
+hcskip:=8
+ifeq ($(hostarch),aarch64)  # ARM
+        hcskip:=11
+endif
+
 $(info hostkernel=${hostkernel})
 $(info hostdistro=${hostdistro})
 $(info hostversion=${hostversion})
@@ -82,7 +94,7 @@ $(info hostversion=${hostversion})
 ifeq ($(hostdistro),rhel) # Red Hat Enterprise Linux (RHEL)
    ifneq (,$(findstring 6.,$(hostversion)))
       #RHEL6 (2.6)
-      EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
    else ifneq (,$(findstring 7.,$(hostversion)))
       #RHEL 7 (3.10)
       EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=9 -DOTHER_STACK_SKIP=2
@@ -90,41 +102,71 @@ ifeq ($(hostdistro),rhel) # Red Hat Enterprise Linux (RHEL)
       #RHEL 8.X
       ifneq (,$(findstring 4.18.0-80.,$(hostkernel)))
         #RHEL 8.0
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL8 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       else ifneq (,$(findstring 4.18.0-147.,$(hostkernel)))
         #RHEL 8.1
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL81 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL81 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       else ifneq (,$(findstring 4.18.0-193.,$(hostkernel)))
         #RHEL 8.2
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL82 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       else ifneq (,$(findstring 4.18.0-240.,$(hostkernel)))
         #RHEL 8.3
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL82 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       else ifneq (,$(findstring 4.18.0-305.,$(hostkernel)))
         #RHEL 8.4
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL82 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       else ifneq (,$(findstring 4.18.0-348.,$(hostkernel)))
         #RHEL 8.5
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL82 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       else ifneq (,$(findstring 4.18.0-372.,$(hostkernel)))
         #RHEL 8.6 
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL86 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL86 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       else
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL86 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL86 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       endif
    else ifneq (,$(findstring 9.,$(hostversion)))
-      ifneq (,$(findstring 5.14.0-162.,$(hostkernel)))
-	#RHEL 9.1
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL91 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-      else
         #RHEL 9.0
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL90 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL9 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
+   endif
+else ifeq ($(hostdistro),rocky) #  Rocky 
+   ifeq ($(hostarch),aarch64)  # ARM
+	# Rocky on ARM is undefined, so get all the functions for now
+        hcskip:=0
+   endif
+   ifneq (,$(findstring 8.,$(hostversion)))
+      #RHEL 8.X
+      ifneq (,$(findstring 4.18.0-80.,$(hostkernel)))
+        #RHEL 8.0
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL8 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-147.,$(hostkernel)))
+        #RHEL 8.1
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL81 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-193.,$(hostkernel)))
+        #RHEL 8.2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL82 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-240.,$(hostkernel)))
+        #RHEL 8.3
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL82 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-305.,$(hostkernel)))
+        #RHEL 8.4
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL82 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-348.,$(hostkernel)))
+        #RHEL 8.5
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL82 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 4.18.0-372.,$(hostkernel)))
+        #RHEL 8.6 
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL86 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
+      else
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL86 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       endif
+   else ifneq (,$(findstring 9.,$(hostversion)))
+        #RHEL 9.0
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL9 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
    endif
 else ifeq ($(hostdistro),centos) #  Centos
    ifneq (,$(findstring 6.,$(hostversion)))
       #RHEL6 (2.6)
-      EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+      EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
    else ifneq (,$(findstring 7.,$(hostversion)))
       #RHEL 7 (3.10)
       EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=9 -DOTHER_STACK_SKIP=2
@@ -132,43 +174,38 @@ else ifeq ($(hostdistro),centos) #  Centos
       #RHEL 8.X
       ifneq (,$(findstring 4.18.0-80.,$(hostkernel)))
         #RHEL 8.0
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL8 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       else ifneq (,$(findstring 4.18.0-147.,$(hostkernel)))
         #RHEL 8.1
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL81 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL81 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       else ifneq (,$(findstring 4.18.0-193.,$(hostkernel)))
         #RHEL 8.2
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL82 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       else ifneq (,$(findstring 4.18.0-240.,$(hostkernel)))
         #RHEL 8.3
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL82 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       else ifneq (,$(findstring 4.18.0-305.,$(hostkernel)))
         #RHEL 8.4
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL82 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       else ifneq (,$(findstring 4.18.0-348.,$(hostkernel)))
         #RHEL 8.5
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL82 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       else ifneq (,$(findstring 4.18.0-372.,$(hostkernel)))
         #RHEL 8.6 
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL86 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL86 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       else
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL86 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL86 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       endif
    else ifneq (,$(findstring 9.,$(hostversion)))
-      ifneq (,$(findstring 5.14.0-162.,$(hostkernel)))
-        #RHEL 9.1
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL91 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-      else
         #RHEL 9.0
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL90 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-      endif
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL9 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
    endif
 else ifeq ($(hostdistro),ol) # Oracle Linux (OL)
    ifeq (,$(findstring uek,$(hostkernel)))
       #OL Red Hat compatible kernel
       ifneq (,$(findstring 6.,$(hostversion)))
         #RHEL6 (2.6)
-        EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall  -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       else ifneq (,$(findstring 7.,$(hostversion)))
         #RHEL 7 (3.10)
         EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=9 -DOTHER_STACK_SKIP=2
@@ -176,40 +213,35 @@ else ifeq ($(hostdistro),ol) # Oracle Linux (OL)
         #RHEL 8.X
         ifneq (,$(findstring 4.18.0-80.,$(hostkernel)))
           #RHEL 8.0
-          EXTRA_CFLAGS=-g -O3 -Wall -DRHEL8 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+          EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL8 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
         else ifneq (,$(findstring 4.18.0-147.,$(hostkernel)))
           #RHEL 8.1
-          EXTRA_CFLAGS=-g -O3 -Wall -DRHEL81 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+          EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL81 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
         else ifneq (,$(findstring 4.18.0-193.,$(hostkernel)))
           #RHEL 8.2
-          EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+          EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL82 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
         else ifneq (,$(findstring 4.18.0-240.,$(hostkernel)))
           #RHEL 8.3
-          EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+          EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL82 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
         else ifneq (,$(findstring 4.18.0-305.,$(hostkernel)))
           #RHEL 8.4
-          EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+          EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL82 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
         else ifneq (,$(findstring 4.18.0-348.,$(hostkernel)))
           #RHEL 8.5
-          EXTRA_CFLAGS=-g -O3 -Wall -DRHEL82 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+          EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL82 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
         else ifneq (,$(findstring 4.18.0-372.,$(hostkernel)))
           #RHEL 8.6 
-          EXTRA_CFLAGS=-g -O3 -Wall -DRHEL86 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+          EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL86 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
         else
-          EXTRA_CFLAGS=-g -O3 -Wall -DRHEL86 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+          EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL86 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
         endif
      else ifneq (,$(findstring 9.,$(hostversion)))
-      ifneq (,$(findstring 5.14.0-162.,$(hostkernel)))
-	#RHEL 9.1
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL91 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-      else
         #RHEL 9.0
-        EXTRA_CFLAGS=-g -O3 -Wall -DRHEL90 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
-      endif
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL9 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
      endif
    else ifneq (,$(findstring uek,$(hostkernel)))
       #OL Unbreakable Enterprise Kernel (UEK)
-      EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
+      EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=2
    endif
 else ifneq (,$(findstring sles,$(hostdistro))) # SUSE Linux Enterprise Server (SLES)
     ifneq (,$(findstring 11.,$(hostversion)))
@@ -217,10 +249,15 @@ else ifneq (,$(findstring sles,$(hostdistro))) # SUSE Linux Enterprise Server (S
         EXTRA_CFLAGS=-g -O3 -Wall -DSLES11 -DHARDCLOCK_STACK_SKIP=11 -DOTHER_STACK_SKIP=3
     else ifneq (,$(findstring 12.,$(hostversion)))
         #SLES12
-        EXTRA_CFLAGS=-g -O3 -Wall -DSLES12 -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=3
+        EXTRA_CFLAGS=-g -O3 -Wall -DSLES12 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=3
     else ifneq (,$(findstring 15,$(hostversion)))
-        #SLES15
-        EXTRA_CFLAGS=-g -O3 -Wall -DSLES15 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=3
+      ifneq (,$(findstring 5.14.21-150500.,$(hostkernel)))
+        #SLES15 SP5
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DSLES15SP5 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=3
+      else
+        #SLES15 
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DSLES15 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=3
+      endif
     endif
 else ifneq (,$(findstring opensuse,$(hostdistro))) # Open SUSE (opensuse)
     ifneq (,$(findstring 11.,$(hostversion)))
@@ -230,38 +267,46 @@ else ifneq (,$(findstring opensuse,$(hostdistro))) # Open SUSE (opensuse)
         #SLES12
         EXTRA_CFLAGS=-g -O3 -Wall -DSLES12 -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=3
     else ifneq (,$(findstring 15,$(hostversion)))
+      ifneq (,$(findstring 5.14.21-150500.,$(hostkernel)))
+        #SLES15 SP5
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DSLES15SP5 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=3
+      else
         #SLES15
-        EXTRA_CFLAGS=-g -O3 -Wall -DSLES15 -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=3
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DSLES15 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=3
+      endif
     endif
 else ifeq ($(hostdistro),debian) # Debian, same as SLES
     ifneq (,$(findstring 8,$(hostversion)))
         #Debian 8
-        EXTRA_CFLAGS=-g -O3 -Wall -DSLES12 -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=3
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DSLES12 -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=3
     else ifneq (,$(findstring 9,$(hostversion)))
         #Debian 9
-        EXTRA_CFLAGS=-g -O3 -Wall -DSLES12 -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=3
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DSLES12 -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=3
     else
-        EXTRA_CFLAGS=-g -O3 -Wall -DSLES11 -DHARDCLOCK_STACK_SKIP=11 -DOTHER_STACK_SKIP=3
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DSLES11 -DHARDCLOCK_STACK_SKIP=11 -DOTHER_STACK_SKIP=3
     endif
 else ifeq ($(hostdistro),fedora)
    #FEDORA 
-   EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=6 -DOTHER_STACK_SKIP=2
+   EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DHARDCLOCK_STACK_SKIP=6 -DOTHER_STACK_SKIP=2
 else ifeq ($(hostdistro),ubuntu)
+    ifeq ($(hostarch),aarch64)  # ARM
+       	hcskip:=12
+    endif
     ifneq (,$(findstring 18,$(hostversion)))
 	#UBUNTU 18.X
-        EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
     else
    	#UBUNTU 12.04, 12.10 (3.5)
-        EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
     endif
 else ifeq ($(hostdistro),arch)
    #ARCH Linux
-   EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=8 -DOTHER_STACK_SKIP=0
+   EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=0
 else
    #
    # Defaults
    #
-   EXTRA_CFLAGS=-g -O3 -Wall -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=0
+   EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DHARDCLOCK_STACK_SKIP=0 -DOTHER_STACK_SKIP=0
 endif
 
 $(info EXTRA_CFLAGS=${EXTRA_CFLAGS})

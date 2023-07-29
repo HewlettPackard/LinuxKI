@@ -136,7 +136,7 @@ profile_global_stats(SampleProfile_t *p, pid_info_t *pidp, winki_stack_info_t *s
 	hcinfop->total++;
 	hcinfop->cpustate[state]++;
 
-	if (!WINKERN_ADDR(ip)) ip = UNKNOWN_SYMIDX;
+	if (!WINKERN_ADDR(ip)) ip = UNKNOWN_USER_SYMIDX;
 	
 	collect_profile_info(ip, pidp, hcinfop, state);
 	if (state == HC_SYS) collect_profile_stk(pidp, hcinfop, stkinfop, state, 1);
@@ -158,7 +158,7 @@ profile_percpu_stats(SampleProfile_t *p, pid_info_t *pidp, int cpu, winki_stack_
 	hcinfop->total++;
 	hcinfop->cpustate[state]++;
 
-	if (!WINKERN_ADDR(ip)) ip = UNKNOWN_SYMIDX;
+	if (!WINKERN_ADDR(ip)) ip = UNKNOWN_USER_SYMIDX;
 	
 	collect_profile_info(ip, pidp, hcinfop, state);
 	if (state == HC_SYS) collect_profile_stk(pidp, hcinfop, stkinfop, state, 1);

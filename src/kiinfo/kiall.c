@@ -255,6 +255,7 @@ kiall_init_func(void *v)
         dsk_io_sizes[7]= 500;
         dsk_io_sizes[8]= 1000;
 
+	parse_dmidecode1();
 	parse_cpuinfo();
 	parse_mem_info();
 	if (is_alive) parse_cpumaps();
@@ -263,6 +264,7 @@ kiall_init_func(void *v)
 
 	if (timestamp) {
 		parse_mpsched();
+		parse_lscpu();
 		parse_docker_ps();
        		parse_proc_cgroup();
         	parse_lsof();

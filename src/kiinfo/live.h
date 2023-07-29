@@ -23,7 +23,7 @@ typedef struct win_action {
 
 #define	WINMAIN		0
 #define WINPID		1
-#define WINPID_FLAGS  (SORT_FLAG | SCHED_FLAG | SCALL_FLAG )
+#define WINPID_FLAGS  (SORT_FLAG | SCHED_FLAG | SCALL_FLAG)
 #define WINPID_STATS  (PERPID_STATS | SLEEP_STATS | SCALL_STATS )
 #define WINPID_TRACEMASK \
                                 (TT_BIT(TT_SCHED_SWITCH) | TT_BIT(TT_SCHED_WAKEUP) | \
@@ -131,7 +131,7 @@ typedef struct win_action {
 
 #define WINFILE		15
 #define WINFILE_FLAGS  (SORT_FLAG | SCHED_FLAG | SCALL_FLAG | FILE_FLAG)
-#define WINFILE_STATS  (GLOBAL_STATS | SLEEP_STATS | SCALL_STATS | PERFD_STATS )
+#define WINFILE_STATS  (GLOBAL_STATS | SLEEP_STATS | SCALL_STATS | PERFD_STATS | PERPID_STATS)
 #define WINFILE_TRACEMASK \
                                 (TT_BIT(TT_SCHED_SWITCH) | TT_BIT(TT_SCHED_WAKEUP) | \
                                  TT_BIT(TT_SYSCALL_ENTER) | TT_BIT(TT_SYSCALL_EXIT))

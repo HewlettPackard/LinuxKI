@@ -273,7 +273,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define TMP_SASIZE 50
 #define PID_SASIZE 1000
 #define IS_ERR_VALUE(x)  ((signed long)x >= -4095 && (signed long)x < 0)
-#define UNKNOWN_SYMIDX 0xffffffffffffffffull
+#define UNKNOWN_SYMIDX(key) (key==UNKNOWN_USER_SYMIDX || key==UNKNOWN_KERNEL_SYMIDX)
+#define UNKNOWN_USER_SYMIDX   0xffffffffffffffffull
+#define UNKNOWN_KERNEL_SYMIDX 0xfffffffffffffffeull
 #define DUMMY_SYSCALL 9999
 
 #define MAX_MAJORS      256
@@ -625,10 +627,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define FIND_REQP(hash, key) (futex_reque_t *)find_entry((lle_t **)hash, key, FUTEX_HASH(key))
 #define FUTEX_KEY(tgid, uaddr) ((uaddr & 0xffffffffff) | ((uint64)tgid << 40))
 #define FUTEX_TGID(key) ((key & 0xffffff0000000000) >> 40)
-#define FUTEX_HSIZE 0x400
-#define FUTEX_HASH(key)  ((key & (key >> 32)) % FUTEX_HSIZE)
+#define FUTEX_HSIZE 0x1000
+#define FUTEX_HASH(key)  (((key >> 8) & (key >> 40)) % FUTEX_HSIZE)
 #define GFUTEX_HSIZE 0x4000
-#define GFUTEX_HASH(key)  ((key & (key >> 32)) % GFUTEX_HSIZE)
+#define GFUTEX_HASH(key)  (((key >> 8) & (key >> 40)) % GFUTEX_HSIZE)
 #define FUTEXOP_HSIZE 0x8
 #define FUTEXOP_HASH(key) (key %  FUTEXOP_HSIZE)
 #define FUTEXPID_HSIZE 0x40
@@ -636,7 +638,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define FUTEXRET_HSIZE 0x10 
 #define FUTEXRET_HASH(key) ((key & 0xff) %  FUTEXRET_HSIZE)
 
-#define CLFUTEX_HASHSZ 0x100
+#define CLFUTEX_HASHSZ 0x400
 #define CLFUTEX_HASH(server, addr)  ((server+addr) % CLFUTEX_HASHSZ)
 #define CLFUTEX_KEY(server, addr)  ((uint64) server << 48 | addr & 0xffffffffffffull)
 #define CLFUTEX_ADDR(key) (key & 0xffffffffffffull)
@@ -948,7 +950,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 /* macros for managing the Notes and Warnings messages and links.  */
 /* update with warnmsg[] definitions in globals.c */
-#define MAXWARNMSG		34
+#define MAXWARNMSG		35
 #define MAXNOTEMSG		0
 #define MAXNOTEWARN		MAXWARNMSG+MAXNOTEMSG
 #define WARN_CPU_BOTTLENECK		0		
@@ -985,6 +987,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARN_MEM_IMBALANCE		31
 #define WARN_NODE_LOWMEM		32
 #define WARN_RUNQ_DELAYS		33
+#define WARN_LARGE_NUMA_NODE		34
 #define NOTE_NUM1		MAXWARNMSG+0
 
 /* warn flags passed to "foreach" functions for detection */
@@ -1021,6 +1024,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARNF_PCC_CPUFREQ		0x10ull
 #define WARNF_KVM_PAGEFAULT		0x20ull
 #define WARNF_ORACLE_COLSTATS		0x40ull
+#define WARNF_LARGE_NUMA_NODE		0x80ull
 
 /* warn flags specific to Windows */
 #define WARNF_TCPTIMEOUTS		0x01ull 
@@ -2216,6 +2220,7 @@ typedef struct server_info {
 	char *hostname;
 	char *os_vers;
 	char *model;
+	char *product;
 	pid_info_t **pid_hash;		/* perpid information */
 	cpu_info_t **cpu_hash;		/* per-lcpu information */
 	pcpu_info_t **pcpu_hash;	/* per-pcpu information */
@@ -2294,9 +2299,13 @@ typedef struct server_info {
 	int missed_events;
 	int next_sid;
 	int total_traces;
+	int nsockets;
 	int nldom;
 	int ncpu;
 	int nlcpu;	
+	int thr_per_core;
+	int cores_per_socket;
+	int nodes_per_socket;
 	int ndevs;
 	int futex_cnt;
 	uint32 cache_insert_cnt;

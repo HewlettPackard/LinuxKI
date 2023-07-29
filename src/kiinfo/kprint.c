@@ -158,15 +158,17 @@ kp_sys_summary ()
 	
 	HR;
 	ITALIC_U("basic system info"); NL;
+	if (globals->product)  { BOLD("Product         : %s", globals->product); NL; }
+	if (globals->model)    { BOLD("Model           : %s", globals->model); NL; }
 	if (globals->hostname) { BOLD("Hostname        : %s", globals->hostname); NL; }
-	if (globals->os_vers) { BOLD("OS version      : %s", globals->os_vers); NL; }
-	if (globals->model) { BOLD("Model           : %s", globals->model); NL; }
+	if (globals->os_vers)  { BOLD("OS version      : %s", globals->os_vers); NL; }
 
 	if (globals->VM_guest) { BOLD("Virtual Machine Guest"); NL; }
 
 	BOLD("Physical cores  : %d", globals->ncpu); NL;
-	if (globals->HT_enabled) { BOLD("Logical cores   : %d", globals->nlcpu); NL; }
-	if (globals->nldom > 0) { BOLD("Sockets         : %d", globals->nldom); NL; }
+	if (globals->HT_enabled)   { BOLD("Logical cores   : %d", globals->nlcpu); NL; }
+	if (globals->nsockets > 0) { BOLD("Sockets         : %d", globals->nsockets); NL; }
+	if (globals->nldom > 0)    { BOLD("NUMA Nodes      : %d", globals->nldom); NL; }
 
 	if (globals->memkb) { BOLD("Memory (GB)     : %d", globals->memkb / (1024*1024)); NL; }
 
@@ -1018,6 +1020,11 @@ kp_hc_kernfuncs()			/* Section 1.4.3 */
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SK_BUSY, _LNK_1_4_3);
 		kp_warning(globals->warnings, warn_indx, _LNK_1_4_3); NL;
 	}
+
+	if ((*print_pc_args.warnflagp) & WARNF_LARGE_NUMA_NODE) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_LARGE_NUMA_NODE, _LNK_1_4_3);
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_3); NL;
+	}
 }
 
 extern int pc_queued_spin_lock_slowpath;
@@ -1078,6 +1085,11 @@ kp_hc_stktraces()			/* Section 1.4.4 */
 		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_KVM_PAGEFAULT, _LNK_1_4_4);
 		kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); NL;
 	}
+
+        if ((*print_pc_args.warnflagp) & WARNF_MIGRATE_PAGES) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_MIGRATE_PAGES, _LNK_1_4_4);
+                kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); NL;
+        }
 }
 
 void
@@ -2775,7 +2787,7 @@ kp_dimm(void *arg1, void *arg2)		/* Section 6.1 */
 		return;
 	}
 
-	parse_dmidecode();
+	parse_dmidecode2();
 
 	BOLD("\n-- NUMA Node Memory--\n");
 	BOLD("\nNode   TotalMB   UsedMB   FreeMB\n");

@@ -83,7 +83,7 @@ map_elf(char *fname)
 	struct stat statbuf;
 	uint64 size;
 	int ret;
-	char do_printf=1;
+	char do_printf=0;
 
 	if (objdump_flag) do_printf=0;
 
@@ -497,7 +497,7 @@ int load_elf(char *fnamep, vtxt_preg_t *pregp)
 	/* for symlookup, the p_vaddr should be filled in.  But for the obfjile, it is not so let's fill it in */
 	if (pregp->p_vaddr == 0ull) pregp->p_vaddr = pregp->elf_vaddr;
 	
-	return 0;
+	return 1;
 }
 
 void *find_vtext_preg(void *arg1, uint64 pc)

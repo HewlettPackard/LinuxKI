@@ -429,6 +429,7 @@ live_init_func(void *v)
 
 	if (timestamp && !IS_WINKI) {
 		parse_mpsched();
+		parse_lscpu();
 		parse_proc_cgroup();
 		parse_pself();
 		parse_edus();
@@ -649,7 +650,7 @@ print_stktrc_info_live(void *arg1, void *arg2)
                         } else {
                                 sprintf (symname, "%p", globals->symtable[key].addr);
                         }
-                } else if (key == UNKNOWN_SYMIDX) {
+                } else if (UNKNOWN_SYMIDX(key)) {
                         sprintf (symname, "unknown");
                 } else if (stktrcp->pidp) {
                         pidp = stktrcp->pidp;
@@ -733,7 +734,7 @@ print_hc_stktrc_live(void *arg1, void *arg2)
                         } else {
                                 sprintf (symname, "%p", globals->symtable[key].addr);
                         }
-                } else if (key == UNKNOWN_SYMIDX) {
+                } else if (UNKNOWN_SYMIDX(key)) {
                         sprintf (symname, "unknown");
                 } else if (stktrcp->pidp) {
                         pidp = stktrcp->pidp;
@@ -791,7 +792,7 @@ print_slp_info_live (void *arg1, void *arg2)
 		}
 	} else {
 		idx = slpinfop->lle.key;
-		if (idx > globals->nsyms-1) idx = UNKNOWN_SYMIDX;
+		if (idx > globals->nsyms-1) idx = UNKNOWN_KERNEL_SYMIDX;
 	}
 
         mvprintw(lineno++, col, "%8d %11.6f %9.3f %9.3f  %s",
@@ -799,7 +800,7 @@ print_slp_info_live (void *arg1, void *arg2)
                         SECS(slpinfop->sleep_time),
                         MSECS(slpinfop->sleep_time / slpinfop->count),
                         MSECS(slpinfop->max_time),
-			IS_WINKI ? (sym ? sym : (symfile ? symfile : "unknown")) : (idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr));
+			IS_WINKI ? (sym ? sym : (symfile ? symfile : "unknown")) : (UNKNOWN_SYMIDX(idx) ? "unknown" : globals->symtable[idx].nameptr));
         return 0;
 }
 
@@ -822,14 +823,14 @@ print_slpinfo_scall_live (void *arg1, void *arg2)
 		}
 	} else {
 		idx = slpinfop->lle.key;
-		if (idx > globals->nsyms-1) idx = UNKNOWN_SYMIDX;
+		if (idx > globals->nsyms-1) idx = UNKNOWN_KERNEL_SYMIDX;
 	}
 
         mvprintw(lineno++, 0, "      Sleep Func             %9d          %11.6f %10.6f  %s",
                         slpinfop->count,
                         SECS(slpinfop->sleep_time),
                         SECS(slpinfop->sleep_time / slpinfop->count),
-			IS_WINKI ? (sym ? sym : (symfile ? symfile : "unknown")) : (idx == UNKNOWN_SYMIDX ? "unknown" : globals->symtable[idx].nameptr));
+			IS_WINKI ? (sym ? sym : (symfile ? symfile : "unknown")) : (UNKNOWN_SYMIDX(idx) ? "unknown" : globals->symtable[idx].nameptr));
         return 0;
 }
 
@@ -1277,9 +1278,8 @@ print_fdata_live(void *arg1, void *arg2)
 	}
 
         mvprintw (lineno++, 0, "File: %s", fdatap->fnameptr ? fdatap->fnameptr : "unknown");
-	printw ("   dev/ino: %d:%d/%u",
-		(fdatap->dev < 0xffffffffull) ? dev_major(fdatap->dev) : 0,
-		(fdatap->dev < 0xffffffffull) ? lun(fdatap->dev) : 0,
+	printw ("   dev/ino: 0x%llx/%u",
+        	fdatap->dev,
 		(fdatap->node >= 0) ? fdatap->node : 0);
 
 	if (fdatap->stats.last_pid > 0) {
@@ -1747,7 +1747,7 @@ print_pidcoop_window()
 			coopinfo.which = WAKER;
 			coopinfo.cnt = schedp->sched_stats.C_wakeup_cnt;
 			foreach_hash_entry((void **)schedp->setrq_tgt_hash, WPID_HSIZE,
-                             	 	live_print_setrq_pids, setrq_sort_by_sleep_time, nlines-2, (void *)&coopinfo);
+                             	 	live_print_setrq_pids, setrq_sort_by_cnt, nlines-2, (void *)&coopinfo);
 		}
 
 	

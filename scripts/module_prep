@@ -18,7 +18,7 @@ PATH=$PATH:/usr/sbin:/sbin:/usr/bin
 #
 # Liki DLKM tracing module cannot be used with SecureBoot.
 #
-if [ "`mokutil --sb-state >/dev/null 2>&1`" == "SecureBoot enabled" ]; then
+if [ "`mokutil --sb-state 2>&1`" == "SecureBoot enabled" ]; then
         echo
         echo "ERROR: SecureBoot enabled! Liki DLKM tracing module cannot be used with SecureBoot"
         echo You may still be able to use LinuxKI with ftrace mode:

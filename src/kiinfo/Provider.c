@@ -47,7 +47,7 @@ print_pdb_image(void *a)
 	for (i = 0; i < 4; i++) {
 		printf ("%02hhx", p->guid5[i]);
 	}
-	printf ("-%d", p->guid6);
+	printf ("-%d\n", p->guid6);
 }
 	
 int

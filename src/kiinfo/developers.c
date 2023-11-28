@@ -486,6 +486,7 @@ get_next_event(int count)
 		eventp = (event_t *)trcinfop->cur_event;
 		elen = _get_event_len(eventp);
 		trcinfop->next_event = (char *)eventp + elen;
+
 		if (debug) { 
 				fprintf (stderr, "cur event - CPU %d, map_addr 0x%llx, header 0x%llx (0x%llx), cur_event 0x%llx (0x%llx) cur_time 0x%llx elen 0x%x  next_event 0x%llx (0x%llx)\n",
 					trcinfop->cpu, trcinfop->mmap_addr, 
@@ -501,6 +502,13 @@ get_next_event(int count)
 
 		if (trcinfop->next_event >= ((char *)trcinfop->header + (IS_WINKI ? 0 : HEADER_SIZE(trcinfop->header)) + trcinfop->header->commit)) {
 			trcinfop->next_event = (char *)GETNEWBUF;
+		} else if ((char *)trcinfop->next_event  >= (trcinfop->mmap_addr + trcinfop->size)) {
+			/* this is a failsafe for truncated binary files
+		 	* We will stop the trace at this point so we have consistency across the CPUs.
+ 			*/
+			fprintf (stderr, "Warning: Truncated KI binary detected for cpu %d\n", trcinfop->cpu);
+                       	fprintf (stderr, "Proceeding as if end of trace collection was found\n");
+			return NULL;
 		} else if (_get_event_len((event_t *)trcinfop->next_event) == 0) {
 			trcinfop->next_event = (char *)GETNEWBUF;
 		} else {

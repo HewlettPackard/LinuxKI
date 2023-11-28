@@ -429,6 +429,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define GFP_NRBIT	32  
 #define IRQ_NRBIT	16
 
+#define UVM_IOCTL_MAGIC		0
+#define UVM_NRCTLS		0x50
+
+#define DRM_IOCTL_MAGIC		'd'
+#define DRM_NRCTLS		0xd0
+
+#define NVIDIA_IOCTL_MAGIC	'F'
+#define NVIDIA_NRCTLS		0xe0
+
 /* special node numbers for sockets */
 #define TCP_NODE	1
 #define UDP_NODE	2
@@ -943,7 +952,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define IPC_CALL	14
 #define FUTEX_VAL3	15
 #define SEMCTL_CMD	16
-#define MAXARG_ACTIONS 	17
+#define IOCTL_REQ	17
+#define MAXARG_ACTIONS 	18
 
 #define NUM_RQHIST_BUCKETS 10
 #define MAX_RQHIST_PROCS   256
@@ -1819,6 +1829,12 @@ typedef struct pcpu_info {
 	uint64 ldom_DBDI_hist[IDLE_TIME_NBUCKETS];
 } pcpu_info_t;
 
+typedef struct cstate_info {
+	int cstate;
+	char *name;
+	int latency;
+} cstate_info_t;
+
 typedef struct power_info {
 	uint64	freq_hi;
 	uint64	freq_low;
@@ -2315,6 +2331,8 @@ typedef struct server_info {
 	char VM_guest;
 	char MSR_enabled;
 	float clk_mhz;
+	uint64 WinStartTime;
+	uint64 WinBootTime;
 
 	/* Kernel Side Channel Attacks (Spectre/Meltdown) fixes */
 	int scavuln;
@@ -2409,6 +2427,7 @@ extern clip_info_t **cllip_hash;
 extern clsdata_info_t **clsdata_hash;
 extern int 	nservers;
 extern int	max_cstate;
+extern int	cstate_names;
 extern char	collapse_on;
 extern uint64   gbl_irq_time;
 extern int 	mapper_major;
@@ -2420,6 +2439,7 @@ extern server_info_t   *curr_int_serverp;
 extern runq_info_t ldrq[];
 extern runq_info_t     prev_int_ldrq[];        /* Two runq_info_t's to track delta stats */
 extern runq_info_t     curr_int_ldrq[];        /* for 100ms interval CPU summary.  See   */
+extern cstate_info_t	cstates[];
 
 extern sid_info_t sid_table[];
 extern uint64 dsk_io_sizes[];
@@ -2525,6 +2545,9 @@ extern char *win_thread_state[];
 extern char *win_thread_mode[];
 extern char *win_thread_wait_reason[];
 extern char *win_irq_flags[];
+extern char *uvm_ioctl[];
+extern char *nvidiactl_ioctl[];
+extern char *drm_ioctl[];
 
 extern void hex_dump(void *, int);
 extern int incr_trc_stats(void *, void *);

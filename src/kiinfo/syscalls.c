@@ -1463,6 +1463,31 @@ print_fd_set(char *label, char *varptr, int fds_bytes)
 	}
 }
 
+static int
+print_ioctl_request(char *label, uint64 argval)
+{
+	unsigned char type = (argval & 0xff00) >> 8;
+	unsigned char nr   = (argval & 0x00ff);
+
+
+	switch (type) {
+	case NVIDIA_IOCTL_MAGIC : 
+		printf ("%c%s=%s/0x%x", fsep, label, (nr < NVIDIA_NRCTLS) ? nvidiactl_ioctl[nr]:"NVIDIA_IOCTL?", argval);
+		break;
+	case DRM_IOCTL_MAGIC : 
+		printf ("%c%s=%s/0x%x", fsep, label, (nr < DRM_NRCTLS) ? drm_ioctl[nr]:"DRM_IOCTL?", argval);
+		break;
+	case UVM_IOCTL_MAGIC : 
+		/* Other drivers could use a NULL type, so this is not guaranteed to be nvidia-uvm */
+		printf ("%c%s=%s/0x%x", fsep, label, (nr < UVM_NRCTLS) ? uvm_ioctl[nr]:"UVM_IOCTL?", argval);
+		break;
+	default:
+		printf ("%c%s=0x%x", fsep, label, argval);
+	}
+	
+
+}
+
 static inline int 
 print_varargs_enter(syscall_enter_t *rec_ptr)
 {
@@ -1667,6 +1692,8 @@ print_syscall_args(pid_info_t *pidp, int syscallno, uint64 *args)
 							if ((args[1] == FUTEX_WAKE_OP) || (args[1] == FUTEX_WAKE_OP_PRIVATE)) 
 								arg_actions[format].func(argval);
 							break;
+				case IOCTL_REQ:	
+							print_ioctl_request(label, argval); break;
 				default:
 					printf ("%c%s=%s", fsep, label, arg_actions[format].func(argval)); 
 					break;

@@ -1524,6 +1524,8 @@ trace_winki_header_func (void *a, void *v)
 	/* this should be identified by the corelist file processed earlier, but just in case... */
 	if (globals->ncpu == 0) globals->ncpu = p->NumberOfProcessors;
 	if (globals->nlcpu == 0) globals->nlcpu = p->NumberOfProcessors;
+	if (globals->WinStartTime == 0) globals->WinStartTime = p->StartTime;
+	if (globals->WinBootTime == 0) globals->WinBootTime = p->StartTime;
 
 	if (debug) hex_dump(p, 4);
 }

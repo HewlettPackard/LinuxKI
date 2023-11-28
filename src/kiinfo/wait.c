@@ -108,6 +108,7 @@ wait_init_func(void *v)
 	if (is_alive) parse_cpumaps();
 	parse_kallsyms();
 	parse_docker_ps();
+	parse_pods();
 
 	if (timestamp) {
 		parse_mpsched(); 

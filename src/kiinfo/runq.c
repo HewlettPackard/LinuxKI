@@ -2737,6 +2737,15 @@ print_cstate_stats(uint64 *warnflagp)
 	}
 	BOLD (" freq_changes    freq_hi   freq_low"); NL;
 
+	if (cstate_names) {
+		BOLD("                             ");
+		for (j=0; j<=max_cstate; j++) {
+			if (cstates[j].name) BOLD("%10s", cstates[j].name);
+			else if (j==0) BOLD("%10s", "POLL"); 
+			else BOLD("%10s", " ");
+		}; NL;
+	}
+
 	for (i=0;i<MAXCPUS;i++) {
 		if (cpuinfop = FIND_CPUP(globals->cpu_hash, i)) {
 			if (powerp = cpuinfop->powerp) {

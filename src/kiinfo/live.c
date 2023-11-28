@@ -408,6 +408,7 @@ live_init_func(void *v)
 		parse_kallsyms();
 		parse_devices();
 		parse_docker_ps();
+		parse_pods();
         	parse_ll_R();
 	}
 
@@ -562,6 +563,7 @@ live_report_func(void *v)
 			load_symbols();
 			parse_edus();
 			parse_docker_ps();
+			parse_pods();
 		}
         }
 
@@ -710,6 +712,7 @@ print_hc_stktrc_live(void *arg1, void *arg2)
 	col=15;
         for (i=0;i<stktrcp->stklen; i++) {
 		if (LINES_AVAIL <= 0) break;
+		sym=NULL;
                 key = stktrcp->stklle.key[i];
 
 		if (IS_WINKI) {
@@ -2727,7 +2730,7 @@ print_select_docker_window()
 	lineno++;
 
 	if (globals->docker_hash == NULL) {
-		mvprintw(lineno++, 0, "*** Dockers not in use on this System ***");
+		mvprintw(lineno++, 0, "*** Containers not in use on this System ***");
 		return 0;
 	}
 
@@ -3498,7 +3501,7 @@ print_docker_window()
 	lineno++;
 
 	if (globals->docker_hash == NULL) {
-		mvprintw(lineno++, 0, "*** Dockers not in use on this System ***");
+		mvprintw(lineno++, 0, "*** Containers not in use on this System ***");
 		return 0;
 	}
 
@@ -3692,7 +3695,7 @@ print_help_window()
 	mvprintw (lineno++, col, "w - Global Wait Stats");
 	mvprintw (lineno++, col, "u - Global Futex Stats");
 	mvprintw (lineno++, col, "n - Global Socket Stats"); 
-	mvprintw (lineno++, col, "k - Global Docker Stats");
+	mvprintw (lineno++, col, "k - Global Container Stats");
 
 	lineno=2; col=26;
 	mvprintw (lineno++, col, "G - Task Main Stats");
@@ -3708,7 +3711,7 @@ print_help_window()
 	mvprintw (lineno++, col, "C - Select CPU Stats");
 	mvprintw (lineno++, col, "T - Select Disk Stats");
 	mvprintw (lineno++, col, "I - Select IRQ Stats");
-	mvprintw (lineno++, col, "K - Select Docker Stats");
+	mvprintw (lineno++, col, "K - Select Container Stats");
 	mvprintw (lineno++, col, "X - Select Futex Stats");
 
 	lineno=2; col=52;

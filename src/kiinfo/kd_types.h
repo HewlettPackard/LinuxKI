@@ -103,44 +103,67 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 	}
 	
 #define PRINT_TIME(hrtime) { \
-	if (IS_WINKI) {															\
-		if (abstime_flag) {													\
-			printf ("%12.06f", (hrtime*1.0)/winki_hdr->PerfFreq);								\
-		} else if (fmttime_flag || epoch_flag) {										\
-			/* TBD Just use abstime for now */										\
-			printf ("%12.09f", (hrtime*1.0)/winki_hdr->PerfFreq);								\
-		} else {														\
-			printf ("%12.06f", ((hrtime - winki_start_time)*1.0)/winki_hdr->PerfFreq);						\
-		} 															\
-	} else {															\
-		if (abstime_flag) {													\
-			printf ("%12.09f", hrtime / 1000000000.0);									\
-		} else if ((fmttime_flag || epoch_flag) && (IS_LIKI_V3_PLUS || is_alive)) {						\
-			struct timespec curtime, delta_ts;										\
-			uint64 delta, dnsecs, dsecs;											\
-			char timebuf[30];												\
-																	\
-			delta = hrtime - start_time;											\
-			dnsecs = delta % 1000000000;											\
-			dsecs = delta / 1000000000;											\
-			if ((begin_time.tv_nsec + dnsecs) > 1000000000) {								\
-				curtime.tv_sec = begin_time.tv_sec + dsecs + 1;								\
-				curtime.tv_nsec = begin_time.tv_nsec + dnsecs - 1000000000;						\
-			} else {													\
-				curtime.tv_nsec = (begin_time.tv_nsec + dnsecs);							\
-				curtime.tv_sec = begin_time.tv_sec + dsecs;								\
-			}														\
-			if (fmttime_flag) {												\
-				ctime_r(&curtime.tv_sec, timebuf);									\
-				timebuf[19] = 0;											\
-				printf ("%s.%06lld", timebuf, curtime.tv_nsec / 1000);							\
-			} else {													\
-				printf ("%lld.%09lld", curtime.tv_sec, curtime.tv_nsec / 1000);						\
-			}														\
-		} else {														\
-			printf ("%12.06f", (hrtime - start_time) / 1000000000.0);							\
-		}															\
-	}																\
+	if (IS_WINKI) {														\
+		if (abstime_flag) {												\
+			printf ("%12.06f", (hrtime*1.0)/winki_hdr->PerfFreq);							\
+		} else if (fmttime_flag || epoch_flag) {									\
+			struct timespec begin_time, curtime;									\
+			float delta;												\
+			uint64 dnsecs, dsecs;											\
+			char timebuf[30];											\
+																\
+			begin_time.tv_sec = (globals->WinStartTime - UNIX_TIME_START) / TICKS_PER_SECOND;			\
+			begin_time.tv_nsec = ((globals->WinStartTime - UNIX_TIME_START) % TICKS_PER_SECOND) * 100;		\
+																\
+			delta = ((hrtime - winki_start_time)*1000000000.0)/winki_hdr->PerfFreq;					\
+			dnsecs = (uint64)delta % 1000000000;									\
+			dsecs = (uint64)delta / 1000000000;									\
+			if ((begin_time.tv_nsec + dnsecs) > 1000000000) {							\
+				curtime.tv_sec = begin_time.tv_sec + dsecs + 1;							\
+				curtime.tv_nsec = begin_time.tv_nsec + dnsecs - 1000000000;					\
+			} else {												\
+				curtime.tv_nsec = (begin_time.tv_nsec + dnsecs);						\
+				curtime.tv_sec = begin_time.tv_sec + dsecs;							\
+			}													\
+			if (fmttime_flag) {											\
+				ctime_r(&curtime.tv_sec, timebuf);								\
+				timebuf[19] = 0;										\
+				printf ("%s.%06lld", timebuf, curtime.tv_nsec / 1000);						\
+			} else {												\
+				printf ("%lld.%06lld", curtime.tv_sec, curtime.tv_nsec / 1000);					\
+			}													\
+		} else {													\
+			printf ("%12.06f", ((hrtime - winki_start_time)*1.0)/winki_hdr->PerfFreq);				\
+		} 														\
+	} else {														\
+		if (abstime_flag) {												\
+			printf ("%12.09f", hrtime / 1000000000.0);								\
+		} else if ((fmttime_flag || epoch_flag) && (IS_LIKI_V3_PLUS || is_alive)) {					\
+			struct timespec curtime, delta_ts;									\
+			uint64 delta, dnsecs, dsecs;										\
+			char timebuf[30];											\
+																\
+			delta = hrtime - start_time;										\
+			dnsecs = delta % 1000000000;										\
+			dsecs = delta / 1000000000;										\
+			if ((begin_time.tv_nsec + dnsecs) > 1000000000) {							\
+				curtime.tv_sec = begin_time.tv_sec + dsecs + 1;							\
+				curtime.tv_nsec = begin_time.tv_nsec + dnsecs - 1000000000;					\
+			} else {												\
+				curtime.tv_nsec = (begin_time.tv_nsec + dnsecs);						\
+				curtime.tv_sec = begin_time.tv_sec + dsecs;							\
+			}													\
+			if (fmttime_flag) {											\
+				ctime_r(&curtime.tv_sec, timebuf);								\
+				timebuf[19] = 0;										\
+				printf ("%s.%06lld", timebuf, curtime.tv_nsec / 1000);						\
+			} else {												\
+				printf ("%lld.%09lld", curtime.tv_sec, curtime.tv_nsec / 1000);					\
+			}													\
+		} else {													\
+			printf ("%12.06f", (hrtime - start_time) / 1000000000.0);						\
+		}														\
+	}															\
 }
 
 #define PRINT_COMMON_FIELDS(rec_ptr)  {													\

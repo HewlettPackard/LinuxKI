@@ -83,9 +83,6 @@ endif
 # Currently, RL300 only support Ubuntu and RHEL.  May need to adjust if more OS versions are supported
 hostarch:=$(shell uname -p)
 hcskip:=8
-ifeq ($(hostarch),aarch64)  # ARM
-        hcskip:=11
-endif
 
 $(info hostkernel=${hostkernel})
 $(info hostdistro=${hostdistro})

@@ -134,6 +134,7 @@ clparse_init_func(void *v)
 
 	parse_dmidecode1();
 	parse_docker_ps();
+	parse_pods();
 	parse_proc_cgroup();
         parse_lsof();
         parse_pself();

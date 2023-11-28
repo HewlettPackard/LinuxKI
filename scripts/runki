@@ -19,11 +19,12 @@ TOOLDIR=/opt/linuxki
 
 # need to make sure /usr/sbin and /sbin are in the path 
 PATH=$TOOLDIR:$PATH:/usr/sbin:/sbin
-version="runki for Linux version 7.7"
+version="runki for Linux version 7.8"
 tag=`date +%m%d_%H%M`
 HOSTNAME=`hostname -s`
 KIDIR=`pwd`
 ARCH=`uname -i`
+SCHED_FEATURES="sched_features"
 MaxCmdRuntime=120
 Event="nop"
 Subsys="nop"
@@ -192,7 +193,7 @@ runki_cleanup()
 	if [ $RESET_TTWU_QUEUE -eq 1 ] ; 
 	then
 		echo "=== Enabling TTWU_QUEUE scheduling feature ===" | tee -a ki.err.$tag
-		echo "TTWU_QUEUE" > $debugfs_mount_point/sched_features    2>/dev/null
+		echo "TTWU_QUEUE" > $debugfs_mount_point/$SCHED_FEATURES    2>/dev/null
 	fi
 
 	if [ $debugfs_was_mounted -eq 0 ] ; then
@@ -215,11 +216,16 @@ kitrace_data()
 	trap runki_cleanup SIGHUP SIGINT SIGQUIT SIGTERM
 
 	RESET_TTWU_QUEUE=0
-	cat $debugfs_mount_point/sched_features 2>/dev/null | grep  " TTWU_QUEUE "  > /dev/null 2>&1
+	if [ -f $debugfs_mount_point/sched/features ] ; 
+	then
+		SCHED_FEATURES="sched/features"
+	fi
+
+	cat $debugfs_mount_point/$SCHED_FEATURES 2>/dev/null | grep  " TTWU_QUEUE "  > /dev/null 2>&1
 	if [ $? -eq 0 ];
 	then
 		echo "=== Disabling TTWU_QUEUE scheduling feature ===" | tee -a ki.err.$tag
-		echo "NO_TTWU_QUEUE" > /sys/kernel/debug/sched_features
+		echo "NO_TTWU_QUEUE" > /sys/kernel/debug/$SCHED_FEATURES
 		RESET_TTWU_QUEUE=1
 	fi
 
@@ -231,15 +237,25 @@ kitrace_data()
 	fi
 
 	if [ $do_liki -eq 1 ]; then
-            if [ ! -f /lib/modules/`uname -r`/misc/likit.ko ]; then
+	    LIKIT_KO=/lib/modules/`uname -r`/misc/likit.ko
+            if [ ! -f $LIKIT_KO ]; then
 	         echo "=== Missing /lib/modules/`uname -r`/misc/likit.ko module, will try to recompile ===" | tee -a ki.err.$tag
 		 rm -f $TOOLDIR/modules/likit.ko.* >/dev/null 2>&1
 		 $TOOLDIR/module_prep >/dev/null
 	    fi
 
-            if [ -f /lib/modules/`uname -r`/misc/likit.ko ]; then
+            # For OpenShift, the /usr and /lib directory are read-only.  You can compile the likit.ko DLKM on another server with the exact
+            # same kernel version (uname -r) and place it in /opt/linuxki/likit.ko
+            if [ ! -f $LIKIT_KO ]; then
+                if [ -f /opt/linuxki/likit.ko ]; then
+                        LIKIT_KO=/opt/linuxki/likit.ko
+                        echo "=== module_prep failed.   Using /opt/linuxki/likit.ko..."
+                fi
+            fi
+
+            if [ -f $LIKIT_KO ]; then
 	    	echo "=== Installing Linux KI trace points ===" | tee -a ki.err.$tag
-            	/sbin/insmod /lib/modules/`uname -r`/misc/likit.ko 2>&1 >>ki.err.$tag
+            	/sbin/insmod $LIKIT_KO 2>&1 >>ki.err.$tag
 	    	if [ $? -eq 0 ]; then
 	            echo "=== Starting: Linux KI LiKI trace dump for $duration seconds ===" | tee -a ki.err.$tag
 		    echo "=== "$Comment  | tee -a comment.$tag
@@ -319,7 +335,7 @@ kitrace_data()
 	if [ $RESET_TTWU_QUEUE -eq 1 ]
 	then
 		echo "=== Enabling TTWU_QUEUE scheduling feature ===" | tee -a ki.err.$tag
-		echo "TTWU_QUEUE" > $debugfs_mount_point/sched_features    2>/dev/null
+		echo "TTWU_QUEUE" > $debugfs_mount_point/$SCHED_FEATURES    2>/dev/null
 	fi
 
 	cat $debugfs_mount_point/sched_features 2>/dev/null | grep  " NO_TTWU_QUEUE "  > /dev/null 2>&1
@@ -355,6 +371,10 @@ kitrace_data()
 		/usr/bin/pstree -p > pstree.$tag
 	fi
 
+	# capture task cgroup
+	echo "=== Collecting task cgroups from /proc ..."
+	for fname in `find /proc/*/cgroup 2>/dev/null`; do echo $fname >>proc_cgroup.$tag 2>/dev/null; cat $fname >>proc_cgroup.$tag 2>/dev/null; done
+
 	# if this is a Dockers implementation...
 	if [[ -x /usr/bin/docker ]] ; then
 		echo "=== Collecting docker container details..."
@@ -364,10 +384,11 @@ kitrace_data()
 
 		# capture docker container inspect data
 		for ID in `docker ps | grep -v "^CONTAINER ID" | awk '{print $1}'`; do echo "ContainerID: $ID" >>docker_inspect.$tag; docker container inspect $ID >>docker_inspect.$tag; done
+	fi
 
-		# capture task cgroup
-		echo "=== Collecting task cgroups from /proc ..."
-		for fname in `find /proc/*/cgroup 2>/dev/null`; do echo $fname >>proc_cgroup.$tag 2>/dev/null; cat $fname >>proc_cgroup.$tag 2>/dev/null; done
+	if [[ -d /var/log/pods ]] ; then
+		echo "=== Collecting pod container details..."
+		ls /var/log/pods >pods.$tag 2>/dev/null
 	fi
 
 	# find the binary executable and library names from the /proc/*/maps file 

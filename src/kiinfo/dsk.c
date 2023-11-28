@@ -671,7 +671,12 @@ dsk_print_dev_iostats(void *arg1, void *arg2)
 	
 		mdevinfop = gdevinfop->mdevinfop;
 		if (mdevinfop && mdevinfop->devname) {
-			pid_printf (pidfile, "   (mpath device: /dev/mapper/%s)", mdevinfop->mapname);
+			if (mdevinfop->mapname) {
+				pid_printf (pidfile, "   (mpath device: /dev/mapper/%s)", mdevinfop->mapname);
+			} else {
+				pid_printf (pidfile, "   (mpath device: /dev/%s)", mdevinfop->devname);
+			}
+				
 		} else {
 			devpath_str[0] = 0;
 		}
@@ -913,6 +918,7 @@ dsk_init_func(void *v)
 
 		parse_devices();
 		parse_docker_ps();
+		parse_pods();
 		parse_ll_R();
 
 		if (timestamp) {

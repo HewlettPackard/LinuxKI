@@ -174,12 +174,13 @@ parse_lsof()
 	char *rtnptr;
 	int i, ret, nitems;
 	int pid, fd, major, minor, node, type, family;
+	char taskcmd = FALSE;
 	uint64 device;
 	pid_info_t *pidp;
 	fdata_info_t *fdatap;
 	sdata_info_t *sdatap;
 	fd_info_t *fdinfop;
-	char arg1[32], arg3[128], arg4[128], arg5[128], arg6[128], arg7[128], arg8[128], arg9[256], arg10[256];
+	char arg1[32], arg3[128], arg4[128], arg5[128], arg6[128], arg7[128], arg8[128], arg9[256], arg10[256], arg11[256];
 	char *userstr, *fdstr, *typestr, *devstr, *sizestr, *nodestr, *namestr;
 	int words;
 	char *tmp;
@@ -209,7 +210,7 @@ parse_lsof()
 
 		if (strstr(input_str, " unknown ")) continue;
 
-		sscanf(input_str, "%s %d %s %s %s %s %s %s %s %s\n", 
+		sscanf(input_str, "%s %d %s %s %s %s %s %s %s %s %s\n", 
 			arg1,
 			&pid,
 			arg3,
@@ -219,19 +220,30 @@ parse_lsof()
 			arg7,
 			arg8,
 			arg9, 
-			arg10);
+			arg10, 
+			arg11);
 
 		pidp = GET_PIDP(&globals->pid_hash, pid);
 
 		tid = 0; 
 		if (isdigit(arg3[0]))  {
-			tid = strtol(arg3, NULL, 10);
-			fdstr = arg5;
-			typestr = arg6;
-			devstr = arg7;
-			sizestr = arg8;
-			nodestr = arg9;
-			namestr = arg10;
+			if (taskcmd) {
+				tid = strtol(arg3, NULL, 10);
+				fdstr = arg6;
+				typestr = arg7;
+				devstr = arg8;
+				sizestr = arg9;
+				nodestr = arg10;
+				namestr = arg11;
+			} else {
+				tid = strtol(arg3, NULL, 10);
+				fdstr = arg5;
+				typestr = arg6;
+				devstr = arg7;
+				sizestr = arg8;
+				nodestr = arg9;
+				namestr = arg10;
+			}
 		} else {
 			fdstr = arg4;
 			typestr = arg5;
@@ -1040,7 +1052,7 @@ parse_pself()
 	char *lineptr;
 	size_t n, retval;
 	int i, ret;
-	pid_info_t *pidp;
+	pid_info_t *pidp, *tgidp;
 	char uid[20], stime[20], tty[20], time[20], cmd[80];
 	int pid, ppid, tgid;
 	int crit, nlwp;
@@ -1073,7 +1085,7 @@ parse_pself()
 			break;
 		}
 
-		sscanf (lineptr, "%s %lld %lld %lld %d %d %s %s %s %78s", uid, &tgid, &ppid, &pid, &crit, &nlwp, stime, tty, time, cmd);
+		sscanf (lineptr, "%s %d %d %d %d %d %s %s %s %78s", uid, &tgid, &ppid, &pid, &crit, &nlwp, stime, tty, time, cmd);
 
 		pidp = GET_PIDP(&globals->pid_hash, pid);
 		pidp->ppid = ppid;
@@ -1081,6 +1093,11 @@ parse_pself()
 		pidp->nlwp = nlwp;
 
 		add_command(&pidp->cmd, cmd);
+
+		if (tgid != pid) {
+			tgidp = GET_PIDP(&globals->pid_hash, tgid);
+			pidp->elf = tgidp->elf;
+		}
 
 		if (oracle) 
 			add_oracle_sid(pidp);
@@ -1317,7 +1334,7 @@ parse_mpath()
 	char fname[30];
         char *rtnptr;
 	char arg0[40], arg1[40], arg2[40], arg3[40];
-	char *mpathname, *wwid, *array_type, devname[30];
+	char *mpathname, *wwid, *array_type, *devnamep, devname[30];
 	int mpathnum;
 	int path1, path2, path3, path4;
 	int major, minor;
@@ -1337,25 +1354,32 @@ parse_mpath()
         rtnptr = fgets((char *)&input_str, 127, f);
         while (rtnptr != NULL) {
 		if (strstr(input_str, "dm-")) {
-			nargs = sscanf(input_str, "%s %s dm-%s %s", arg0, arg1, arg2, arg3);
+			nargs = sscanf(input_str, "%s %s %s %s", arg0, arg1, arg2, arg3);
 			/* sscanf(input_str, "%s %s dm-%d %s", mpathname, wwid, &minor, array_type); */
 
 			if (nargs == 4) {
 				mpathname = arg0;
 				wwid = arg1;
-				minor = atoi(arg2);
+				minor = atoi(&arg2[3]);
 				array_type = arg3;
+				devnamep=arg2;
 			} else {
-				mpathname = " ";
+				mpathname = NULL;
 				wwid = arg0;
-				minor = atoi(arg1);
-				array_type = arg3;
+				minor = atoi(&arg1[3]);
+				devnamep=arg1;
+				array_type = arg2;
 			}
 			if (debug) fprintf (stderr, "> %s %s dm-%d %s\n", mpathname, wwid, minor, array_type);
 		
 			dev = mkdev(mapper_major, minor);
 			mdevinfop = GET_DEVP(DEVHASHP(globals,dev), dev);
-			add_string(&mdevinfop->mapname, mpathname);
+			add_string(&mdevinfop->devname, devnamep);
+			if (mpathname) { 
+				add_string(&mdevinfop->mapname, mpathname);
+			} else {
+				mdevinfop->mapname = NULL;
+			}
 			mdevinfop->devlist = NULL;
 		}
 
@@ -1473,9 +1497,10 @@ parse_cstates()
 	power_info_t *powerp, *gpowerp;
 	int cpu, i;
 	int nscan, ncstates;
+	int cstate, latency;
+	char cstate_name[30];
 
 	gpowerp = GET_POWERP(globals->powerp);
-	if (gpowerp->power_start_cnt + gpowerp->power_end_cnt) return;
 
 	if (is_alive) return;
 
@@ -1484,11 +1509,31 @@ parse_cstates()
                 return;
         }
 
-	/* skip first line */
         rtnptr = fgets((char *)&input_str, 127, f);
 	while (rtnptr != NULL) {
+
+		if (strncmp(input_str, "cstate", 6) == 0) { 
+			rtnptr = fgets((char *)&input_str, 127, f);
+			continue;
+		}
+
 		if (strstr(input_str, " CPU ")) break;
+
+		nscan = sscanf (input_str, "%d %s %d ", &cstate, cstate_name, &latency);
+		if (nscan == 3) {
+			cstate_names++;
+			cstates[cstate].cstate = cstate;
+			add_command(&cstates[cstate].name, cstate_name);
+			cstates[cstate].latency = latency;
+		}
+
         	rtnptr = fgets((char *)&input_str, 127, f);
+	}
+
+	/* if we have power events for cstates in the trace, skip the rest of the cstate file */
+	if (gpowerp->power_start_cnt + gpowerp->power_end_cnt) {
+		fclose(f);
+		return;
 	}
 
         rtnptr = fgets((char *)&input_str, 127, f);
@@ -1982,6 +2027,127 @@ void load_objfile_and_shlibs()
 	}
 }
 
+void 
+print_pods()
+{
+	FILE *f = NULL;
+	char fname[30];
+	char *rtnptr;
+	char *strptr;
+	char *idptr;
+	uint64 offset;
+	uint64 id;
+	char name[512];
+	docker_info_t *dockerp;
+	int ret;
+
+	/* if (debug) fprintf (stderr, "parse_pods\n"); */
+	if (is_alive) {
+	        ret = system("ls /var/log/pods >/dev/shm/.pods  2>/dev/null");
+		sprintf (fname, "/dev/shm/.pods");
+	} else {
+		sprintf (fname, "pods.%s", timestamp);
+	}
+
+	if ( (f = fopen(fname,"r")) == NULL) {
+		return;
+	}
+
+	BOLD ("Container ID    Name\n");
+	rtnptr = fgets((char *)&input_str, 1024, f);
+	while (rtnptr != NULL) {
+		/* It should be a long name, so we'll check for filenames greater than 32 characters */
+		if (strlen(rtnptr) < 32) continue;
+		
+		/* the Container ID should be the last 12 hex characters in the string, add 1 for the null character at the end */
+		idptr = &rtnptr[strlen(rtnptr)-13];
+
+		/* for the Container name, we'll use the name string before the last underscore */
+		if (strptr = strrchr(rtnptr, '_')) {
+			offset = strptr - rtnptr;
+	                if (sscanf(idptr, "%llx\n", &id) && sscanf(rtnptr, "%s\n", name)) {
+				DOCKER_URL_FIELD(id);
+				name[offset] = 0;
+				printf ("    %s", name);
+				NL;
+			}
+                }
+
+                rtnptr = fgets((char *)&input_str, 1024, f);
+	}
+
+	if (!HTML) printf ("\n");
+	fclose(f);
+	if (is_alive) {
+		unlink(fname);	
+	}
+
+	return;
+}
+
+
+
+
+void 
+parse_pods()
+{
+	FILE *f = NULL;
+	char fname[30];
+	char *rtnptr;
+	char *strptr;
+	char *idptr;
+	uint64 offset;
+	uint64 id;
+	char name[512];
+	docker_info_t *dockerp;
+	int ret;
+
+	/* if (debug) fprintf (stderr, "parse_pods\n"); */
+	if (is_alive) {
+	        ret = system("ls /var/log/pods >/dev/shm/.pods  2>/dev/null");
+		sprintf (fname, "/dev/shm/.pods");
+	} else {
+		sprintf (fname, "pods.%s", timestamp);
+	}
+
+	if ( (f = fopen(fname,"r")) == NULL) {
+		return;
+	}
+
+	rtnptr = fgets((char *)&input_str, 1024, f);
+	while (rtnptr != NULL) {
+		/* It should be a long name, so we'll check for filenames greater than 32 characters */
+		if (strlen(rtnptr) < 32) continue;
+		
+		/* the Container ID should be the last 12 hex characters in the string, add 1 for the null character at the end */
+		idptr = &rtnptr[strlen(rtnptr)-13];
+
+
+		/* for the Container name, we'll use the name string before the last underscore */
+		if (strptr = strrchr(rtnptr, '_')) {
+			offset = strptr - rtnptr;
+	                if (sscanf(idptr, "%llx\n", &id) && sscanf(rtnptr, "%s\n", name)) {
+				dockerp = GET_DOCKERP(&globals->docker_hash, id);
+				name[offset] = 0;
+				add_command(&dockerp->name, name);
+			}
+                }
+
+                rtnptr = fgets((char *)&input_str, 1024, f);
+	}
+
+	fclose(f);
+	if (is_alive) {
+		unlink(fname);	
+	}
+
+	return;
+}
+
+
+
+
+
 void
 print_docker_ps()
 {
@@ -2202,19 +2368,27 @@ parse_scavuln(char print_flag)
 		fprintf (stderr, "Unable to open file %s, errno %d\n", fname, errno);
 		fprintf (stderr, "Continuing without memory info.\n");
 		*/
-		if (print_flag) printf ("runki from LinuxKI version 5.8 needed to capture Side-Channel Attack Mitigation information\n");
+		if (print_flag) printf ("runki from LinuxKI version 5.8 needed to capture Security Mitigation information\n");
 		return;
 	}
 
 	globals->scavuln = SCA_VULNERABLE;
 	rtnptr = fgets((char *)&input_str, 127, f);
 	if (rtnptr == NULL ) {
-		if (print_flag) printf ("Kernel does not support Side-Channel Attack Mitigations\n");
+		if (print_flag) printf ("Kernel does not support Security Mitigations\n");
 	} else {
 	    	while (rtnptr != NULL) {
-			if (print_flag) printf("%s", rtnptr);
 			if (strstr(input_str, "Mitigat")) {
 				globals->scavuln = SCA_MITIGATED;
+				RED_FONT;
+			}
+
+			if (print_flag) {
+				printf("%s", rtnptr);
+			}
+
+			if (strstr(input_str, "Mitigat")) {
+				BLACK_FONT;
 			}
 
 			rtnptr = fgets((char *)&input_str, 127, f);

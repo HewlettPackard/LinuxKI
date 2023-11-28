@@ -62,7 +62,7 @@ docker_init_func(void *v)
 	if (debug) printf ("docker_init_func()\n");
 
 	if (IS_WINKI) {
-		fprintf (stderr, "Docker Activity Report is not availble for Windows traces\n");
+		fprintf (stderr, "Container Activity Report is not availble for Windows traces\n");
 		return;
 	}	
 
@@ -158,6 +158,7 @@ docker_init_func(void *v)
 	parse_devices();
         parse_ll_R();
 	parse_docker_ps();
+	parse_pods();
 
 	if (objfile) {
 		load_elf(objfile, &objfile_preg);
@@ -170,9 +171,9 @@ docker_init_func(void *v)
 	if (is_alive) return;
 	parse_mpsched();
 	parse_proc_cgroup();
+	parse_lsof();
 	parse_pself();
 	parse_edus();
-	parse_lsof();
 	parse_maps();
         parse_mpath();
 	parse_jstack();
@@ -387,7 +388,7 @@ print_docker_detail(void *arg1, void *arg2)
         if (docktree) {
                 sprintf (dock_fname, "CIDS/%012llx", dockerp->ID);
                 if ((dockfile = fopen(dock_fname, "w")) == NULL) {
-                        fprintf (stderr, "Unable to open Docker file %s, errno %d\n", dock_fname, errno);
+                        fprintf (stderr, "Unable to open Container file %s, errno %d\n", dock_fname, errno);
                         fprintf (stderr, "  Continuing without CIDS output\n");
 			CLEAR(DOCKTREE_FLAG);
                 }
@@ -476,8 +477,9 @@ docker_print_report(void *v)
 		dockerp->name = "system";
 	}
 
-	BOLD ("Docker Containers\n\n");
+	BOLD ("Containers\n\n");
 	print_docker_ps();
+	print_pods();
 
 	BOLD ("CPU Statistics\n\n");
 	docker_print_cpu_report();

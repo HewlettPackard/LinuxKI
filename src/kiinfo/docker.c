@@ -70,7 +70,6 @@ docker_init_func(void *v)
         report_func = docker_report_func;
 
         bufmiss_func = pid_bufmiss_func;
-        /* bufswtch_func = pid_bufswtch_func; */
         alarm_func = pid_alarm_func;
 	filter_func = trace_filter_func;
 	report_func_arg  = filter_func_arg;
@@ -435,8 +434,8 @@ print_docker_detail(void *arg1, void *arg2)
 
 	dock_printf ("\nTop Tasks sorted by physical IO\n");
 	dock_printf ("     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process\n");
-	dock_printf ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-	dock_printf ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    PID    Process\n");
+	dock_printf ("---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------\n");
+	dock_printf ("   IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    PID    Process\n");
         foreach_hash_entry((void **)dockerp->dkpid_hash, PID_HASHSZ,
                            (int (*)(void *, void *))print_dkpid_iosum,
                            (int (*)()) dkpid_sort_by_iocnt,
@@ -459,8 +458,8 @@ docker_print_cpu_report()
 int
 docker_print_io_report()
 {
-	BOLD("              --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-        BOLD("Container        IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+	BOLD("              ---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------\n");
+        BOLD("Container        IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv\n");
 	foreach_hash_entry((void **)globals->docker_hash, DOCKER_HASHSZ, print_docker_iototals, docker_sort_by_iocnt, 0, NULL);
 }
 

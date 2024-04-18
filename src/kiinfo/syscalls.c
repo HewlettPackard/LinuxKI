@@ -463,6 +463,63 @@ track_submit_ios(syscall_enter_t *rec_ptr, pid_info_t *pidp)
 }
 
 int
+ki_ioctl(void *arg1, void *arg2, uint64 scalltime)
+{
+	syscall_exit_t *rec_ptr = (syscall_exit_t *)arg1;
+	pid_info_t *pidp = (pid_info_t *)arg2, *tgidp;
+	fd_info_t *fdinfop, *tfdinfop;
+	syscall_info_t *syscallp, *fsyscallp, *fdsyscallp;
+	ioctl_info_t *ioctlp, *fioctlp, *fdioctlp;
+	fdata_info_t *fdatap;
+	uint64 syscallno;
+	uint64 device=0, node=0, ftype=0;
+	uint64 fd, cmd;
+	uint64 retval;
+
+	retval = rec_ptr->ret;
+	syscallno = rec_ptr->syscallno;
+	fd = pidp->last_syscall_args[0];
+	cmd = pidp->last_syscall_args[1];
+
+	/* we need to increment the process FD stats and syscall stats.
+	 * we also need to increment the global file stats
+	 */
+	syscallp = GET_SYSCALLP(&pidp->scallhash, SYSCALL_KEY(pidp->elf, 0ul, syscallno));
+	ioctlp = GET_IOCTLP(&syscallp->ioctl_hash, cmd);
+	incr_syscall_stats(&ioctlp->stats, rec_ptr->ret, scalltime, 0);
+
+	if (perfd_stats && (fd < 65536) && (fd >= 0)) {
+		fdinfop = GET_FDINFOP(&pidp->fdhash, fd);
+		fsyscallp = GET_SYSCALLP(&fdinfop->syscallp, SYSCALL_KEY(pidp->elf, 0ul, syscallno));
+		fioctlp = GET_IOCTLP(&fsyscallp->ioctl_hash, cmd);
+		incr_syscall_stats(&fioctlp->stats, rec_ptr->ret, scalltime, 0);
+
+		device = fdinfop->dev;
+		node = fdinfop->node;
+		ftype = fdinfop->ftype;
+
+                if (pidp->tgid && node == 0) {
+                        /* inherit fdinfop from primary thread */
+                        tgidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
+                        tfdinfop = (fd_info_t *)find_entry((lle_t **)tgidp->fdhash, fdinfop->FD, FD_HASH(fdinfop->FD));
+                        if (tfdinfop) {
+                                device = tfdinfop->dev;
+                                node = tfdinfop->node;
+                                ftype = tfdinfop->ftype;
+                        }
+                }
+	
+                /* global per-file stats */
+        	if (global_stats && device && node) {
+                	fdatap = GET_FDATAP(&globals->fdata_hash, device, node);
+			fdsyscallp = GET_SYSCALLP(&fdatap->syscallp, SYSCALL_KEY(pidp->elf, 0ul, syscallno));
+			fdioctlp = GET_IOCTLP(&fdsyscallp->ioctl_hash, cmd);
+			incr_syscall_stats(&fdioctlp->stats, rec_ptr->ret, scalltime, 0);
+        	}
+	}
+}
+
+int
 ki_read(void *arg1, void *arg2, uint64 scalltime)
 { 
 	syscall_exit_t *rec_ptr = (syscall_exit_t *)arg1;
@@ -912,6 +969,7 @@ ki_io_submit(void *arg1, void *arg2, uint64 scalltime)
 { 
 	syscall_exit_t *rec_ptr = (syscall_exit_t *)arg1;
 }
+
 int
 ki_io_getevents(void *arg1, void *arg2, uint64 scalltime)
 { 
@@ -1463,29 +1521,73 @@ print_fd_set(char *label, char *varptr, int fds_bytes)
 	}
 }
 
-static int
-print_ioctl_request(char *label, uint64 argval)
+char *
+get_ioctl_name(uint64 cmd)
 {
-	unsigned char type = (argval & 0xff00) >> 8;
-	unsigned char nr   = (argval & 0x00ff);
-
+	unsigned char type = (cmd & 0xff00) >> 8;
+	unsigned char nr   = (cmd & 0x00ff);
 
 	switch (type) {
-	case NVIDIA_IOCTL_MAGIC : 
-		printf ("%c%s=%s/0x%x", fsep, label, (nr < NVIDIA_NRCTLS) ? nvidiactl_ioctl[nr]:"NVIDIA_IOCTL?", argval);
-		break;
-	case DRM_IOCTL_MAGIC : 
-		printf ("%c%s=%s/0x%x", fsep, label, (nr < DRM_NRCTLS) ? drm_ioctl[nr]:"DRM_IOCTL?", argval);
-		break;
-	case UVM_IOCTL_MAGIC : 
-		/* Other drivers could use a NULL type, so this is not guaranteed to be nvidia-uvm */
-		printf ("%c%s=%s/0x%x", fsep, label, (nr < UVM_NRCTLS) ? uvm_ioctl[nr]:"UVM_IOCTL?", argval);
-		break;
-	default:
-		printf ("%c%s=0x%x", fsep, label, argval);
+		case NVIDIA_IOCTL_MAGIC : 
+			if (nr < NVIDIA_NRCTLS) return nvidiactl_ioctl[nr];
+			break;
+		case DRM_IOCTL_MAGIC : 
+			if (nr < DRM_NRCTLS) return drm_ioctl[nr];
+			break;
+		case UVM_IOCTL_MAGIC : 
+			/* Other drivers could use a NULL type, so this is not guaranteed to be nvidia-uvm */
+			if (nr < UVM_NRCTLS) return uvm_ioctl[nr];
+			break;
+                case DM_IOCTL_MAGIC :
+                        if (nr < DM_NRCTLS) return dm_ioctl[nr];
+                        break;
+                case SG_IOCTL_MAGIC :
+                        if (nr < SG_NRCTLS) return sg_ioctl[nr];
+                        break;
+                case KVM_IOCTL_MAGIC :
+                        if (nr < KVM_NRCTLS) return kvm_ioctl[nr];
+                        break;
 	}
+
+	return NULL;
+}
 	
 
+static int
+print_ioctl_request(char *label, uint64 cmd)
+{
+	unsigned char type = (cmd & 0xff00) >> 8;
+	unsigned char nr   = (cmd & 0x00ff);
+	char *ioctl_name;
+
+	ioctl_name = get_ioctl_name(cmd);
+	if (ioctl_name == NULL) {
+		printf ("%c%s=0x%x", fsep, label, cmd);
+	} else {
+	    switch (type) {
+		case NVIDIA_IOCTL_MAGIC : 
+			printf ("%c%s=%s/0x%x", fsep, label, (nr < NVIDIA_NRCTLS) ? ioctl_name:"NVIDIA_IOCTL?", cmd);
+			break;
+		case DRM_IOCTL_MAGIC : 
+			printf ("%c%s=%s/0x%x", fsep, label, (nr < DRM_NRCTLS) ? ioctl_name:"DRM_IOCTL?", cmd);
+			break;
+		case UVM_IOCTL_MAGIC : 
+			/* Other drivers could use a NULL type, so this is not guaranteed to be nvidia-uvm */
+			printf ("%c%s=%s/0x%x", fsep, label, (nr < UVM_NRCTLS) ? ioctl_name:"UVM_IOCTL?", cmd);
+			break;
+                case DM_IOCTL_MAGIC :
+                        printf ("%c%s=%s/0x%x", fsep, label, (nr < DM_NRCTLS) ? ioctl_name:"DM_IOCTL?", cmd);
+                        break;
+                case KVM_IOCTL_MAGIC :
+                        printf ("%c%s=%s/0x%x", fsep, label, (nr < KVM_NRCTLS) ? ioctl_name:"KVM_IOCTL?", cmd);
+                        break;
+                case SG_IOCTL_MAGIC :
+                        printf ("%c%s=%s/0x%x", fsep, label, (nr < SG_NRCTLS) ? ioctl_name:"SG_IOCTL?", cmd);
+                        break;           
+		default:
+			printf ("%c%s=0x%x", fsep, label, cmd);
+	    }
+	}
 }
 
 static inline int 
@@ -1511,6 +1613,9 @@ print_varargs_enter(syscall_enter_t *rec_ptr)
 		case __NUM_unlinkat :
 		case __NUM_execve : 
 			printf ("%cfilename: %s", fsep, varptr);
+			break;
+		case __NUM_statfs :
+			printf ("%cpathname: %s", fsep, varptr);
 			break;
 		case __NUM_select :
 		case __NUM_pselect6 :

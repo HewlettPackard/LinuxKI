@@ -19,7 +19,7 @@ TOOLDIR=/opt/linuxki
 
 # need to make sure /usr/sbin and /sbin are in the path 
 PATH=$TOOLDIR:$PATH:/usr/sbin:/sbin
-version="runki for Linux version 7.8"
+version="runki for Linux version 7.9"
 tag=`date +%m%d_%H%M`
 HOSTNAME=`hostname -s`
 KIDIR=`pwd`
@@ -257,6 +257,7 @@ kitrace_data()
 	    	echo "=== Installing Linux KI trace points ===" | tee -a ki.err.$tag
             	/sbin/insmod $LIKIT_KO 2>&1 >>ki.err.$tag
 	    	if [ $? -eq 0 ]; then
+                    cat /proc/kallsyms      > kallsyms.$tag
 	            echo "=== Starting: Linux KI LiKI trace dump for $duration seconds ===" | tee -a ki.err.$tag
 		    echo "=== "$Comment  | tee -a comment.$tag
                     echo "=== Starting: kiinfo -likidump dur="$duration",$Varargs,$Event,$Subsys,$pid_filter,$tgid_filter,$cpu_filter,$dev_filter,$MSRARG,debug_dir="$debugfs_mount_point",sysignore=$sysignore -ts "$tag >>ki.err.$tag 
@@ -269,7 +270,6 @@ kitrace_data()
 		    else
 	        	echo "=== LinuxKI LiKI dump complete  ===" | tee -a ki.err.$tag
 		    fi
-                    cat /proc/kallsyms      > kallsyms.$tag
 		    /sbin/rmmod likit.ko
 		else 
 		    # if we cannot install the DLKM, then print error
@@ -306,7 +306,15 @@ kitrace_data()
 	    echo "=== pre-draining trace_pipe, please wait ...  ==="
 	    #   Let's be sure there is something to drain
 	    echo 1 >$debugfs_mount_point/tracing/tracing_on
+	    if [ -f $debugfs_mount_point/tracing/tracing_enabled ]; then
+		    echo 1 >$debugfs_mount_point/tracing/tracing_enabled 
+	    fi
+
 	    echo draining >$debugfs_mount_point/tracing/trace_marker
+
+	    if [ -f $debugfs_mount_point/tracing/tracing_enabled ]; then
+		    echo 0 >$debugfs_mount_point/tracing/tracing_enabled 
+	    fi
 	    echo 0 >$debugfs_mount_point/tracing/tracing_on
 	    cat $debugfs_mount_point/tracing/trace_pipe >/dev/null
 	    echo "=== pre-draining trace_pipe completed. ==="
@@ -365,7 +373,9 @@ kitrace_data()
 
 	# capture ps listing immediately after the kitrace is started
 	ps aux > ps-aux.$tag
-	ps -eo pid,ppid,tid,user,class,rtprio,ni,pri,psr,pcpu,time,vsz,rss,stat,lstart,etime,wchan:25,comm -m >ps-eo.$tag
+	# -m option for ps -eo can cause core dumps, so removing -m option for now
+	# ps -eo pid,ppid,tid,user,class,rtprio,ni,pri,psr,pcpu,time,vsz,rss,stat,lstart,etime,wchan:25,comm -m >ps-eo.$tag
+	ps -eo pid,ppid,tid,user,class,rtprio,ni,pri,psr,pcpu,time,vsz,rss,stat,lstart,etime,wchan:25,comm >ps-eo.$tag
 	ps -eLf > ps-eLf.$tag
 	if [[ -x /usr/bin/pstree ]] ; then
 		/usr/bin/pstree -p > pstree.$tag
@@ -383,7 +393,7 @@ kitrace_data()
 		/usr/bin/docker ps > docker_ps.$tag 2>/dev/null
 
 		# capture docker container inspect data
-		for ID in `docker ps | grep -v "^CONTAINER ID" | awk '{print $1}'`; do echo "ContainerID: $ID" >>docker_inspect.$tag; docker container inspect $ID >>docker_inspect.$tag; done
+		for ID in `docker ps 2>/dev/null | grep -v "^CONTAINER ID" | awk '{print $1}'`; do echo "ContainerID: $ID" >>docker_inspect.$tag; docker container inspect $ID >>docker_inspect.$tag; done
 	fi
 
 	if [[ -d /var/log/pods ]] ; then
@@ -406,13 +416,15 @@ userspace_data()
 	# collect perf sample
 	#
 
-	if [[ -x /usr/bin/perf && $do_userspace -eq 1 ]] ; then
+	if [[ -x /usr/bin/perf ]] ; then
 	        echo "=== Collecting $duration second perf sample ..." | tee -a ki.err.$tag
 	        perf record $PERF_PROFILE_OPTS -a -o perf_dat.$tag sleep $duration >> ki.err.$tag 2>&1
 	        perf report -i perf_dat.$tag -I -n > perf_func.txt.$tag 2>> ki.err.$tag
 	        [ $do_annotate -eq 1 ] && perf annotate -i perf_dat.$tag > perf_assem.txt.$tag 2>> ki.err.$tag
 		# The perf script can cause a very large output.
 	        # perf script -i perf_dat.$tag > perf_script.$tag 2>> ki.err.$tag
+	else
+		echo "=== WARNING: Cannot collect userspace profiling (perf) as /usr/bin/perf is not found ===" | tee -a ki.err.$tag
 	fi
 }
 
@@ -1240,7 +1252,9 @@ get_cstates_diff
 cpupower idle-info >cpupower.$tag 2>&1
 cpupower frequency-info >>cpupower.$tag 2>&1
 
-userspace_data
+if [[ $do_userspace -eq 1 ]] ; then
+	userspace_data
+fi
 
 if [[ ! -z "$SAR_OPTS" && -x /usr/bin/sar &&  $do_sar -eq 1 ]] ; then
 	echo "=== Collecting $duration second sar sample ..." | tee -a ki.err.$tag

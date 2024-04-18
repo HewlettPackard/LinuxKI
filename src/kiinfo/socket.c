@@ -68,7 +68,6 @@ socket_init_func(void *v)
 {
 	if (debug) printf ("socket_init_func()\n");
         process_func = NULL;
-        print_func = socket_print_func;
         report_func = socket_report_func;
 	filter_func = info_filter_func;   /* no filter func for kisock, use generic */
         bufmiss_func = pid_bufmiss_func;
@@ -577,20 +576,6 @@ socket_print_report(void *v)
 	}
 
 	if (is_alive) clear_all_stats();
-}
-
-int
-socket_print_func(void *v)
-{
-        struct timeval tod;
-
-        if ((print_flag) && (is_alive)) {
-                gettimeofday(&tod, NULL);
-                printf ("\n%s\n", ctime(&tod.tv_sec));
-                socket_print_report(v);
-                print_flag=0;
-        }
-        return 0;
 }
 
 int

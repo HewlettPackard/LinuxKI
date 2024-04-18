@@ -91,7 +91,6 @@ prof_init_func(void *v)
 	}
 
         process_func = NULL;
-        print_func = prof_print_func;
         report_func = prof_report_func;
         /* bufmiss_func = prof_bufmiss_func; */
         bufmiss_func =  NULL;
@@ -896,21 +895,6 @@ prof_print_report(int ptype)
 	}
 
 	return 0;
-}
-
-int
-prof_print_func(void *v)
-{
-        int i;
-        struct timeval tod;
-
-        if ((print_flag) && (is_alive)) {
-                gettimeofday(&tod, NULL);
-                printf ("\n%s\n", ctime(&tod.tv_sec));
-                prof_print_report(PER_PASS);
-                print_flag=0;
-        }
-        return 0;
 }
 
 int

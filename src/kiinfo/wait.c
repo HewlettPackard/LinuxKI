@@ -65,9 +65,7 @@ wait_init_func(void *v)
 	if (debug) printf ("wait_init_func()\n");
 
         process_func = NULL;
-        print_func = wait_print_func;
         report_func = wait_report_func;
-        bufmiss_func = pid_bufmiss_func;
         bufmiss_func =  NULL;
 	filter_func = info_filter_func;   /* no filter func for kiwait, use generic */
 
@@ -103,7 +101,8 @@ wait_init_func(void *v)
         	ki_actions[TRACE_PRINT].func = wait_ftrace_print_func;
         	ki_actions[TRACE_PRINT].execute = 1;
 	}
-	
+
+	parse_dmidecode1();	
 	parse_cpuinfo(); 
 	if (is_alive) parse_cpumaps();
 	parse_kallsyms();
@@ -181,7 +180,6 @@ int wait_ftrace_print_func(void *a, void *arg)
         	ki_actions[TRACE_SCHED_WAKEUP_NEW].execute = 1;
         	ki_actions[TRACE_SCHED_WAKEUP].execute = 1;
                 start_time = KD_CUR_TIME;
-		bufmiss_func = NULL;
         }
 
         if (strstr(buf, ts_end_marker)) {
@@ -192,7 +190,6 @@ int wait_ftrace_print_func(void *a, void *arg)
         	ki_actions[TRACE_SCHED_WAKEUP].execute = 0;
                 ki_actions[TRACE_PRINT].execute = 0;
                 end_time = KD_CUR_TIME;
-                bufmiss_func =  NULL;
         }
 
         if (debug)  {
@@ -415,21 +412,6 @@ wait_print_report(void *v)
 		clear_all_stats();
 	}
 	return 0;
-}
-
-int
-wait_print_func(void *v)
-{
-        int i;
-        struct timeval tod;
-
-        if ((print_flag) && (is_alive)) {
-                gettimeofday(&tod, NULL);
-                printf ("\n%s\n", ctime(&tod.tv_sec));
-                wait_print_report(v);
-                print_flag=0;
-        }
-        return 0;
 }
 
 int

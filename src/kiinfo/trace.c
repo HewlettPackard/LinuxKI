@@ -315,7 +315,6 @@ trace_init_func(void *v)
 
 	if (debug) printf ("trace_init_func()\n");
         process_func = NULL;
-        print_func = trace_print_func;
         report_func = trace_report_func;
         filter_func  = trace_filter_func;
 	alarm_func = trace_alarm_func;
@@ -325,6 +324,7 @@ trace_init_func(void *v)
 	if (IS_WINKI) { 
 		win_set_trace_funcs();
 		set_events_all(1);
+		parse_ntstatus();
 	} else {
 		set_trace_funcs();
 
@@ -545,12 +545,6 @@ trace_ftrace_print_func(void *a, void *v)
 		PRINT_EVENT(rec_ptr->KD_ID);
 		printf (" %s", buf);
 	}
-}
-
-int
-trace_print_func(void *v)
-{
-        return 0;
 }
 
 int

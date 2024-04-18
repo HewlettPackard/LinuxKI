@@ -105,6 +105,11 @@ static  char		*sqltses_pdb = "SqlTsEs.pdb";
 static	char 		*ntfs_pdb = "ntfs.pdb";
 static	char 		*fltmgr_pdb = "fltMgr.pdb";
 static  char		*msvcr120_pdb = "msvcr120.amd64.pdb";
+static  char		*msvcr110_pdb = "msvcr110.amd64.pdb";
+static  char		*classpnp_pdb = "classpnp.pdb";
+static  char		*ndis_pdb = "ndis.pdb";
+static  char		*netio_pdb = "netio.pdb";
+static  char		*netvsc_pdb = "netvsc.pdb";
 
 char *
 win_symlookup(vtxt_preg_t *pregp, uint64 ip, uint64 *symaddr)
@@ -146,7 +151,16 @@ win_symlookup(vtxt_preg_t *pregp, uint64 ip, uint64 *symaddr)
 			pdbname = fltmgr_pdb;
                 } else if (strncmp(pregp->filename, "msvcr120.dll", strlen("msvcr120.dll")) == 0) {
                         pdbname = msvcr120_pdb;
-
+                } else if (strncmp(pregp->filename, "msvcr110.dll", strlen("msvcr110.dll")) == 0) {
+                        pdbname = msvcr110_pdb;
+                } else if (strncmp(pregp->filename, "CLASSPNP.SYS", strlen("PNPCLASS.SYS")) == 0) {
+                        pdbname = classpnp_pdb;
+                } else if (strncmp(pregp->filename, "NDIS.SYS", strlen("NDIS.SYS")) == 0) {
+                        pdbname = ndis_pdb;
+                } else if (strncmp(pregp->filename, "NETIO.SYS", strlen("NETIO.SYS")) == 0) {
+                        pdbname = netio_pdb;
+                } else if (strncmp(pregp->filename, "NetVsc.sys", strlen("NetVsc.sys")) == 0) {
+                        pdbname = netvsc_pdb;
 		} else {
 			sprintf (util_str, pregp->filename);
 			pdbname = &util_str[0];
@@ -673,13 +687,16 @@ int filter_pdb(char *name)
 	else if (strcasestr(name, "stornvme.pdb") == name) return 1;
 	else if (strcasestr(name, "volmgrx.pdb") == name) return 1;
 	else if (strcasestr(name, "volmgr.pdb") == name) return 1;
+	else if (strcasestr(name, "volume.pdb") == name) return 1;
 	else if (strcasestr(name, "mpio.pdb") == name) return 1;
 	else if (strcasestr(name, "mswsock.pdb") == name) return 1;
 	else if (strcasestr(name, "wow64cpu.pdb") == name) return 1;
+	else if (strcasestr(name, "wow64win.pdb") == name) return 1;
 	else if (strcasestr(name, "qds.pdb") == name) return 1;
 	else if (strcasestr(name, "afd.pdb") == name) return 1;
 	else if (strcasestr(name, "clr.pdb") == name) return 1;
 	else if (strcasestr(name, "msvcr120.amd64.pdb") == name) return 1;
+	else if (strcasestr(name, "msvcr110.amd64.pdb") == name) return 1;
 	else if (strcasestr(name, "kernel32.pdb") == name) return 1;
         else if (strcasestr(name, "user32.pdb") == name) return 1;
         else if (strcasestr(name, "win32u.pdb") == name) return 1;
@@ -689,6 +706,16 @@ int filter_pdb(char *name)
         else if (strcasestr(name, "dwmredir.pdb") == name) return 1;
         else if (strcasestr(name, "dwmcore.pdb") == name) return 1;
 	else if (strcasestr(name, "intelppm.pdb") == name) return 1;
+	else if (strcasestr(name, "classpnp.pdb") == name) return 1;
+	else if (strcasestr(name, "ndis.pdb") == name) return 1;
+	else if (strcasestr(name, "netio.pdb") == name) return 1;
+	else if (strcasestr(name, "netvsc.pdb") == name) return 1;
+	else if (strcasestr(name, "condvr.pdb") == name) return 1;
+	else if (strcasestr(name, "WdFilter.pdb") == name) return 1;
+	else if (strcasestr(name, "dxgkrnl.pdb") == name) return 1;
+	else if (strcasestr(name, "vmbkmclr.pdb") == name) return 1;
+	else if (strcasestr(name, "vmswitch.pdb") == name) return 1;
+	else if (strcasestr(name, "vmbuser.pdb") == name) return 1;
 
 	if (pdbfiles == NULL) return 0;
 	

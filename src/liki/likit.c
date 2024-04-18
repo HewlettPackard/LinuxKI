@@ -1779,6 +1779,7 @@ startup_msr(void)
 	}
 
 	/* only allow Advanced CPU statistics on known CPUs */
+	/* see intel-family.h in kernel source */
 	switch (boot_cpu_data.x86_model) {
 		case 26: 	/* INTEL_FAM6_NEHALEM_EP - 45nm Nahalem-EP */
 		case 30:	/* INTEL_FAM6_NEHALEM - 45nm Nahalem */
@@ -3430,6 +3431,9 @@ syscall_enter_trace(RXUNUSED struct pt_regs *regs, long syscallno)
 #ifdef __NR_lstat
 	case	__NR_lstat:
 #endif
+#ifdef __NR_statfs
+	case	__NR_statfs:
+#endif
 #ifdef __NR_unlink
 	case	__NR_unlink:
 #endif
@@ -3991,12 +3995,14 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 
 	syscallno = syscall_get_nr(current, regs);
 
-	if (unlikely(IS_32BIT(regs))) {
-		if (unlikely(ignored_syscalls32[syscallno])) 
-			return;
-	} else {
-		if (unlikely(ignored_syscalls64[syscallno])) 
-			return;
+	if (syscallno >= 0) {
+		if (unlikely(IS_32BIT(regs))) {
+			if (unlikely(ignored_syscalls32[syscallno])) 
+				return;
+		} else {
+			if (unlikely(ignored_syscalls64[syscallno])) 
+				return;
+		}
 	}
 
 	if (IS_32BIT(regs)) goto scexit_skip_vldata;
@@ -6952,7 +6958,7 @@ liki_initialize(void)
 	int	i;
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,5,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,6,0)
 	printk(KERN_INFO "LiKI: unsupported kernel version\n");
 	return(-EINVAL);
 #else

@@ -16,6 +16,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define _LNK_WARN	"warncheck"
 #define _LNK_0_1_0	"cmdline"
 #define _LNK_0_2_0	"sca_vuln"
+#define _LNK_0_3_0      "clocksource"
 #define _LNK_1_0	"Section1"
 #define _LNK_1_1	"subsection1.1"
 #define _LNK_1_1_1	"subsection1.1.1"
@@ -142,6 +143,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define _HTTP_CACHE_BYPASS "cache_bypass.htm"
 #define _HTTP_RUNQ_DELAYS "runq_delays.htm"
 #define _HTTP_LARGE_NUMA_NODE "large_numa_node.htm"
+#define _HTTP_CLOCKSOURCE "clocksource.htm"
 #define _HTTP_4_5 "#subsection4.5"
 
 #define _MSG_LINK_INFO \

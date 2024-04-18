@@ -100,6 +100,7 @@ extern int futex_gblsort_by_cnt(const void *, const void *);
 extern int futexops_sort_by_op(const void *, const void *);
 extern int futexops_sort_by_time(const void *, const void *);
 extern int futexret_sort_by_time(const void *, const void *);
+extern int ioctl_sort_by_time(const void *, const void *);
 extern int syscall_sort_by_time(const void *, const void *);
 extern int syscall_sort_by_cnt(const void *, const void *);
 extern int rfsfunc_sort_by_key(const void *, const void *);

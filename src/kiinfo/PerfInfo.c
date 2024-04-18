@@ -294,6 +294,9 @@ perfinfo_isr_func (void *a, void *v)
 		if (irqnamep->name == NULL) {
 			if (symptr) {
 				add_command(&irqnamep->name, symptr);
+			} else if (pregp && pregp->filename) {
+				sprintf (util_str, "%s?0x%llx", pregp->filename, p->Routine);
+				add_command(&irqnamep->name, util_str);
 			} else {
 				sprintf (util_str, "0x%llx", p->Routine);	
 				add_command(&irqnamep->name, util_str);
@@ -361,6 +364,9 @@ perfinfo_dpc_func (void *a, void *v)
 		if (irqnamep->name == NULL) {
 			if (symptr) {
 				add_command(&irqnamep->name, symptr);
+			} else if (pregp && pregp->filename) {
+				sprintf (util_str, "%s?0x%llx", pregp->filename, p->Routine);
+				add_command(&irqnamep->name, util_str);
 			} else {
 				sprintf (util_str, "0x%llx", p->Routine);	
 				add_command(&irqnamep->name, util_str);
@@ -516,10 +522,15 @@ int
 print_perfinfo_sysclexit_func(trace_info_t *trcinfop, pid_info_t *pidp, uint64 addr, uint64 win_starttime)
 {
         SysClExit_t *p = (SysClExit_t *)trcinfop->cur_event;
+	ntstatus_info_t *ntstatus;
 
 	PRINT_COMMON_FIELDS_C011(p, trcinfop->pid, pidp->tgid);
 
 	printf (" ret=0x%x", p->SysCallNtStatus);
+	ntstatus = FIND_NTSTATUS(ntstatus_hash, p->SysCallNtStatus);
+	if (ntstatus && ntstatus->name) {
+		printf ("/%s", ntstatus->name);
+	}
 
 	if (addr && win_starttime) {
 		printf (" addr=");

@@ -1,4 +1,4 @@
-# LinuxKI Toolset v7.8
+# LinuxKI Toolset v7.9
 
 The LinuxKI Toolset (or LinuxKI for short) is an opensourced advanced mission critical performance troubleshooting tool for Linux.  It is designed to identify performance issues beyond the typical performance metrics and results in faster root cause for many performance issues. LinuxKI is a kernel tracing toolkit designed to answer two primary questions about the system:
 
@@ -78,7 +78,7 @@ Pre-packaged RPM and DEB files are available on the [Releases Page](https://gith
 
 ### Prerequisites
 
-There are no mandatory pre-requisites.   LinuxKI should install and run on most Linux systems from 2.6.32 through 6.4.3
+There are no mandatory pre-requisites.   LinuxKI should install and run on most Linux systems from 2.6.32 through 6.5.13
 
 However, if you would like to use the LiKI tracing mechanism (perferred method), you will need the following installed to compile the LiKI module from source code:
 
@@ -126,10 +126,10 @@ You can also use your favorite package manager, such as yum.
 You can verify the version of the LinuxKI toolset using rpm or dpkg as follows:
 
      $ rpm --query linuxki
-     linuxki-7.8-1.noarch
+     linuxki-7.9-1.noarch
 
      $ dpkg --status linuxki | grep Version
-     Version: 7.8-1
+     Version: 7.9-1
 
 ### Removing the LinuxKI toolset
 

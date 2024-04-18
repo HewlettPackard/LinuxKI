@@ -200,6 +200,7 @@ parse_lsof()
 
 	/* skip the first line */
 	rtnptr = fgets((char *)&input_str, 511, lsof);
+	if (strstr(input_str, " TASKCMD ")) taskcmd=TRUE;
 	while (rtnptr != NULL) {
 		lsock = NULL;
 		rsock = NULL;
@@ -739,7 +740,8 @@ parse_cpuinfo()
 			}
 		}
 
-		if (strstr(input_str, "model name")) { 
+		/* Base frequency should come from dmidecode, but if not try the Model Name */
+		if ((globals->clk_mhz == 0) && (strstr(input_str, "model name"))) { 
 			pos = strrchr(input_str, ' ');
 			if (pos && strstr(pos, "GHz")) {
 				 sscanf (pos+1, "%f\n", &ghz);
@@ -748,8 +750,8 @@ parse_cpuinfo()
 		}
 
 		/* for come CPUs, the GHz is not on the model name, so get the 
-		 * frequency from the cpu MHz field.   Hopefully, this is the Base Freq */
-		if (strstr(input_str, "cpu MHz") && (globals->clk_mhz == 0)) {
+		 * frequency from the cpu MHz field.   Hopefully, this is the Base Freq, but not always */
+		if ((globals->clk_mhz == 0) && (strstr(input_str, "cpu MHz"))) {
 			pos = strrchr(input_str, ' ');
 			sscanf (pos+1, "%f\n", &mhz);
 			globals->clk_mhz = mhz;
@@ -2509,6 +2511,22 @@ parse_corelist()
 	return 0;
 }
 
+char *strtok2(char *string, char const *delimiter)
+{
+	static char *source = NULL;
+	char *p, *riturn = NULL;
+
+	if(string != NULL)         source = string;
+	if(source == NULL)         return NULL;
+
+	if((p = strpbrk (source, delimiter)) != NULL) {
+		*p  = 0;
+		riturn = source;
+		source = ++p;
+	}
+	return riturn;
+}
+
 int
 parse_SQLThreadList() 
 {
@@ -2519,7 +2537,7 @@ parse_SQLThreadList()
 	char fname[32];
 	int pid, tid;
 	pid_info_t *pidp, *tgidp;
-	char instance[32], thrname[64];
+	char *instance, *thrname, *pidstr, *tidstr, *endptr;
 
         sprintf(fname, "SQLThreadList.%s", timestamp);
 
@@ -2569,16 +2587,22 @@ parse_SQLThreadList()
 
 		if (strncmp(util_str, "PID,INSTANCE", 12) == 0) continue;
 
-		sscanf(util_str, "%d,%[^,],%d,%[^\r]", &pid, instance, &tid, thrname); 
-		/* printf ("%d <%s> %d <%s>\n", pid, instance, tid, thrname); */
+		endptr = strstr(util_str,"  ");
+		endptr[0] = ',';
+		pidstr = strtok2(util_str,",");   pid=atoi(pidstr);
+		instance = strtok2(NULL,",");
+		tidstr = strtok2(NULL,",");	 tid = atoi(tidstr);
+		thrname = strtok2(NULL,",");
+
+		/* printf ("%d <%s:%d> %d <%s:%d>\n", pid, instance, strlen(instance), tid, thrname, strlen(thrname)); */
 
 		if (tid) {
 			pidp = GET_PIDP(&globals->pid_hash, tid);
-			add_command(&pidp->thread_cmd, thrname);
+			if (strlen(thrname)) add_command(&pidp->thread_cmd, thrname);
 			if (pid) {
 				tgidp = GET_PIDP(&globals->pid_hash, pid);
 				pidp->tgid = pid;
-				add_command (&tgidp->hcmd, instance);
+				if (strlen(instance)) add_command (&tgidp->hcmd, instance);
 			}
 		}
 	}
@@ -2749,23 +2773,31 @@ io_controllers(uint64 *warnflagp, char print_flag)
 		if (strstr(input_str, " Fibre Channel: ") ||
 		    strstr(input_str, " RAID bus controller: ") || 
 		    strstr(input_str, " Attached SCSI controller: ")) {
-			if (print_flag)  printf("%s", input_str);
 
-			/* Read next line to get subsystem */  
-			rtnptr = fgets((char *)&input_str, 511, f);
-			if (rtnptr == NULL) {
-				/* stop if at the end of the file */
-				break;
-			}
-
-			if ((max_sectors_kb > 1024) && 
-			    (strstr(input_str, " P4") || strstr(input_str, " P8"))) {
+			/* this is for SR932i-p controllers */
+			if ((max_sectors_kb > 1024) && strstr(input_str, "Adaptec Smart Storage PQI SAS")) {
 				(*warnflagp) |= WARNF_CACHE_BYPASS;
 				RED_FONT;
+				if (print_flag)  printf("%s", input_str);
+				BLACK_FONT;
+			} else {
+				/* Read next line to get subsystem */  
+				if (print_flag)  printf("%s", input_str);
+				rtnptr = fgets((char *)&input_str, 511, f);
+				if (rtnptr == NULL) {
+					/* stop if at the end of the file */
+					break;
+				}
+
+				if ((max_sectors_kb > 1024) &
+			   	    (strstr(input_str, " P4") || strstr(input_str, " P8"))) {
+					(*warnflagp) |= WARNF_CACHE_BYPASS;
+					RED_FONT;
+					if (print_flag)  printf("%s", input_str);
+					BLACK_FONT;
+				}
 			}
 
-			if (print_flag)  printf("%s", input_str);
-			BLACK_FONT;
 		}
 	}
 
@@ -2781,6 +2813,7 @@ parse_dmidecode1()
 	char fname[30];
 	char *rtnptr;
 	char *pos;
+	int mhz;
 
 	if (IS_WINKI) return;
 
@@ -2808,6 +2841,10 @@ parse_dmidecode1()
 			if (strstr(pos, "Phoenix Technoligies") || strstr(pos, "SeaBIOS")) {
 				globals->VM_guest = TRUE;
 			}
+		} else if (pos = strstr(input_str, "Current Speed: ")) {
+			pos = pos+15;
+			sscanf (pos, "%d", &mhz);
+			globals->clk_mhz = mhz*1.0;
 		}
 	}
 }
@@ -2893,8 +2930,8 @@ parse_irqlist()
         char *rtnptr;
 	uint32 irq;
 	uint32 node;
-	char cpu_list[512];
-	char affinity_mask[1024];
+	char cpu_list[4096];
+	char affinity_mask[4096];
         char name[512];
 	irq_name_t *irqnamep;
 	char found;
@@ -2940,3 +2977,35 @@ parse_irqlist()
 	return;
 }
 
+void
+parse_ntstatus()
+{
+        FILE *f = NULL;
+	char fname[30];
+        char *rtnptr;
+        char name[512];
+	uint32 retval;
+	ntstatus_info_t *ntstatus;
+
+
+	/* if (debug) fprintf (stderr, "parse_ntstatus\n");  */
+	if (is_alive) {
+		return;
+	} else {
+		sprintf (fname, "ntstatus.%s", timestamp);
+	}
+
+        if ( (f = fopen(fname,"r")) == NULL) {
+                return;
+        }
+	
+        rtnptr = fgets((char *)&input_str, 1024, f);
+	while (rtnptr != NULL) {
+                if (sscanf(rtnptr, "%x %s", &retval, name)) {
+			ntstatus = GET_NTSTATUS(&ntstatus_hash, retval);
+			add_command(&ntstatus->name, name);
+		}
+        	rtnptr = fgets((char *)&input_str, 1024, f);
+	}
+	return;
+}

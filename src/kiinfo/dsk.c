@@ -320,7 +320,7 @@ print_dev_iostats(void *arg1, char *devstr, char *devname, char *devpath, char *
 		case IO_TOTAL: pid_printf (pidfile, "%3s", "t"); csv_printf(csvfile,",Total"); break;
 		}			
 
-		pid_printf (pidfile, " %6.2f %7.2f %6.0f %6.0f %5ld %8.2f %8.2f %6d %6d %6d %6d %6d %7.1f %7.1f",
+		pid_printf (pidfile, " %6.2f %7.2f %6.0f %6.0f %5ld %9.3f %9.3f %6d %6d %6d %6d %6d %7.1f %7.1f",
 			avqlen,
 			avinflt,
 			statp[rw].compl_cnt / secs,
@@ -377,7 +377,7 @@ print_iostats_totals(void *arg1, void *arg2, void *arg3)
         	avserv = iostatsp->cum_ioserv/MAX(iostatsp->compl_cnt,1) / 1000000.0;
 		avinflt = (iostatsp->cum_async_inflight + iostatsp->cum_sync_inflight) / (MAX(iostatsp->issue_cnt,1) * 1.0);
 
-		dock_printf ("%7.0f %7.0f %7d %7.2f %8.2f ",
+		dock_printf ("%7.0f %7.0f %7d %7.2f %9.3f ",
                         iostatsp->compl_cnt/serverp->total_secs,
                         (iostatsp->sect_xfrd/2048)/serverp->total_secs,
                         (iostatsp->sect_xfrd/2)/MAX(iostatsp->compl_cnt,1),
@@ -389,7 +389,7 @@ print_iostats_totals(void *arg1, void *arg2, void *arg3)
 			(*warnflagp) |= WARNF_AVSERV;
 		}	
 
-                dock_printf ("%8.2f ", avserv);
+                dock_printf ("%9.3f ", avserv);
 		BLACK_FONT;
 
                 i--;
@@ -549,7 +549,7 @@ print_pid_iototals(void *arg1, void *arg2)
 	rstatp = &iostats[IO_READ];
 	wstatp = &iostats[IO_WRITE];
 
-	pid_printf (pidfile, "\n%s    device   rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+	pid_printf (pidfile, "\n%s    device   rw  avque avinflt   io/s   KB/s  avsz    avwait    avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
 	print_dev_iostats(rstatp, "All    ", NULL, NULL, NULL, 0, pidfile);
 
 	pid_printf (pidfile, "\n");
@@ -873,8 +873,7 @@ dsk_init_func(void *v)
 	int i;
 
 	if (debug) printf ("dsk_init_func\n");
-	process_func = dsk_process_func;
-	print_func = dsk_print_func;
+	process_func = NULL;
 	report_func = dsk_report_func;
 	/* bufmiss_func = dsk_bufmiss_func; */
 	alarm_func = dsk_alarm_func;
@@ -950,13 +949,6 @@ dsk_init_func(void *v)
 }
 
 int
-dsk_process_func(void *a, void *arg)
-{
-        trace_info_t *trcinfop = (trace_info_t *)a;
-        return 0;
-}
-
-int
 dsk_report_func(void *v)
 {
 	dsk_print_report();
@@ -991,8 +983,8 @@ dsk_print_report()
 	}
 
 	printf ("\nGlobal Device Statistics\n\n");
-	printf ("         --------------------  Total  -------------------- --------------------  Write  -------------------- ---------------------  Read  --------------------\n");
-	printf ("Devices     IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+	printf ("         ---------------------  Total  --------------------- ---------------------  Write  --------------------- ----------------------  Read  ---------------------\n");
+	printf ("Devices     IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv\n");
 	calc_io_totals(&globals->iostats[0], NULL);
 	printf ("%7d  ", globals->ndevs);
 	print_iostats_totals (globals, &globals->iostats[0], NULL);
@@ -1002,12 +994,12 @@ dsk_print_report()
         if (!IS_WINKI) foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, calc_dev_totals, NULL, 0, NULL);
 	if (!dsk_nodev_flag) {
 		printf ("\nPhysical Device Statistics\n");
-		printf ("\n%s      device rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+		printf ("\n%s      device rw  avque avinflt   io/s   KB/s  avsz    avwait    avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
 		foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, dsk_print_dev_iostats, dev_sort_by_mdev, 0, NULL);
 
 		if (!IS_WINKI) {
 			printf ("\nMapper Device Statistics\n");
-			printf ("\n%s      device rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+			printf ("\n%s      device rw  avque avinflt   io/s   KB/s  avsz    avwait    avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
 			foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, dsk_print_dev_iostats, dev_sort_by_dev, 0, NULL);
 		}
 	}
@@ -1020,21 +1012,21 @@ dsk_print_report()
 	    if (!kiall_flag) foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, calc_fc_totals, NULL, 0, NULL);
 	    if (globals->fchash && !IS_WINKI) {
 		printf ("\nMultipath FC HBA Statistics\n");
-		printf ("\n%s      HBA    rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+		printf ("\n%s      HBA    rw  avque avinflt   io/s   KB/s  avsz    avwait    avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
 		
 		foreach_hash_entry((void **)globals->fchash, FC_HSIZE, dsk_print_fc_iostats, fc_sort_by_path, 0, NULL); 
 	    }
 	
 	    if (!IS_WINKI && globals->wwnhash) {
 		printf ("\nTarget WWN Statistics\n");
-		printf ("\n%s    FC Target WWN    rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+		printf ("\n%s    FC Target WWN    rw  avque avinflt   io/s   KB/s  avsz    avwait    avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
 		
 		foreach_hash_entry((void **)globals->wwnhash, WWN_HSIZE, dsk_print_wwn_iostats, wwn_sort_by_wwn, 0, NULL); 
 	    }
 	
 	    if (percpu_stats) {
 		printf ("\nPer-CPU Statistics (for possible per-HBA statistics\n");
-		printf ("\n%s      device rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+		printf ("\n%s      device rw  avque avinflt   io/s   KB/s  avsz    avwait    avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
        		for (i = 0; i < MAXCPUS; i++) {
                     if (cpuinfop = FIND_CPUP(globals->cpu_hash, i)) {
                         sprintf(cpustr, "cpu=%d", i);
@@ -1060,8 +1052,8 @@ dsk_print_report()
 				printf ("\nTop %d Tasks sorted by Multipath I/O\n\n", npid);
 			}
 
-			BOLD ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-			BOLD ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv      %s  Process\n", tlabel);
+			BOLD ("---------------------  Total  ---------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------\n");
+			BOLD ("   IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv      %s  Process\n", tlabel);
 
 			foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_miosum,  pid_sort_by_miocnt, npid, NULL);
 		}
@@ -1072,8 +1064,8 @@ dsk_print_report()
 			printf ("\nTop %d Tasks sorted by physical I/O\n\n", npid);
 		}
 
-		BOLD ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------\n");
-		BOLD ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv      %s  Process\n", tlabel);
+		BOLD ("---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------\n");
+		BOLD ("   IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv      %s  Process\n", tlabel);
 
 		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_iosum,  pid_sort_by_iocnt, npid, NULL);
 	}
@@ -1084,16 +1076,6 @@ dsk_print_report()
 	if (is_alive) {
 		clear_all_stats();
 	}
-}
-
-int
-dsk_print_func(void *v)
-{
-	struct timeval tod;
-	if (debug) printf ("dsk_print_func\n");
-	
-	dsk_print_report();
-	return 0;	
 }
 
 int 

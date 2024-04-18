@@ -82,7 +82,7 @@ incr_insert_iostats (block_rq_insert_t *rec_ptr, iostats_t *statp, int *rndio_fl
 }
 
 static inline int
-incr_issue_iostats (block_rq_issue_t *rec_ptr, iostats_t *statp, int *rndio_flagp)
+incr_issue_iostats (block_rq_issue_t *rec_ptr, iostats_t *statp, char new_ioreq)
 {
 	if (statp->qlen > 0) {
 		statp->issue_cnt++;
@@ -95,6 +95,17 @@ incr_issue_iostats (block_rq_issue_t *rec_ptr, iostats_t *statp, int *rndio_flag
 
 	statp->cum_async_inflight += rec_ptr->async_in_flight;
 	statp->cum_sync_inflight += rec_ptr->sync_in_flight;
+
+	if (new_ioreq) {
+		/* calculate sequential/random IOs based on block_rq_issue since block_rq_insert was missing */
+		if (statp->next_sector == rec_ptr->sector) {
+			statp->seq_ios++;
+		} else {
+			statp->random_ios++;
+		}
+		statp->next_sector = rec_ptr->sector + rec_ptr->nr_sectors;
+	}
+
 
 	return 0;
 }
@@ -190,7 +201,7 @@ find_overlapping_ioreq(void **arg, uint64 sector, uint32 len)
 }
 
 static inline void *
-track_issued_ios(void *a)
+track_issued_ios(void *a, char *new_ioreqp)
 {
         block_rq_issue_t *rec_ptr = (block_rq_issue_t *)a;
         uint64 sector = rec_ptr->sector;
@@ -201,6 +212,9 @@ track_issued_ios(void *a)
 
         /* don't track these special sectors */
         if (INVALID_SECTOR(sector)) return NULL;
+
+	/* This is set to true to trace random/sequential IOs when block_rq_insert is not used */
+	*new_ioreqp = FALSE;
 
 	/* fprintf (stderr, "track_issued_ios() - dev 0x%x, sector %d, nr_sectors %d\n", dev, sector, rec_ptr->nr_sectors); */
         devinfop = GET_DEVP(DEVHASHP(globals,dev),dev);
@@ -229,9 +243,10 @@ track_issued_ios(void *a)
         	ioreqp->issue_time = rec_ptr->hrtime;
 		ioreqp->issue_pid = rec_ptr->pid;
 		ioreqp->insert_time = rec_ptr->hrtime;
-		ioreqp->insert_pid = rec_ptr->pid;   /* indicates that insert is missing */
+		ioreqp->insert_pid = rec_ptr->pid;	/* use issue PID for insert PID */
 		ioreqp->sector = sector;
 		ioreqp->nr_sector = rec_ptr->nr_sectors;
+		*new_ioreqp = TRUE;			/* indicates that insert is missing */
 		return ioreqp;
 	}
 }
@@ -473,7 +488,7 @@ block_dskblk_complete_stats(block_rq_complete_t *rec_ptr)
 }
 
 static inline void
-block_dev_issue_stats(block_rq_issue_t *rec_ptr) 
+block_dev_issue_stats(block_rq_issue_t *rec_ptr, char new_ioreq) 
 {
 	dev_info_t *devinfop;
 	uint32 rw;
@@ -483,7 +498,7 @@ block_dev_issue_stats(block_rq_issue_t *rec_ptr)
 	if ((rw > IO_WRITE) || INVALID_SECTOR(rec_ptr->sector)) return;
 
 	devinfop = GET_DEVP(DEVHASHP(globals, dev),dev);
-	incr_issue_iostats (rec_ptr, &devinfop->iostats[rw], NULL);		
+	incr_issue_iostats (rec_ptr, &devinfop->iostats[rw], new_ioreq);		
 }
 
 static inline void
@@ -493,11 +508,11 @@ block_global_issue_stats(block_rq_issue_t *rec_ptr)
 	rw = reqop(rec_ptr->cmd_flags); 
 	if ((rw > IO_WRITE) || INVALID_SECTOR(rec_ptr->sector)) return;
 
-	incr_issue_iostats (rec_ptr, &globals->iostats[rw], NULL);
+	incr_issue_iostats (rec_ptr, &globals->iostats[rw], 0);
 }
 
 static inline void
-block_perpid_issue_stats(block_rq_issue_t *rec_ptr, pid_info_t *insert_pidp, pid_info_t *issue_pidp) 
+block_perpid_issue_stats(block_rq_issue_t *rec_ptr, pid_info_t *insert_pidp, pid_info_t *issue_pidp, char new_ioreq) 
 {
 	dev_info_t *devinfop;
 	iostats_t *iostatsp;
@@ -523,10 +538,10 @@ block_perpid_issue_stats(block_rq_issue_t *rec_ptr, pid_info_t *insert_pidp, pid
 
         ioreqp = FIND_IOREQP(devinfop->ioq_hash, rec_ptr->sector);
 	if (ioreqp && ioreqp->insert_pid) {
-		incr_issue_iostats(rec_ptr, IOSTATSP(pidp, dev, rw), NULL);
+		incr_issue_iostats(rec_ptr, IOSTATSP(pidp, dev, rw), new_ioreq);
 
 		devinfop = GET_DEVP(DEVHASHP(pidp, dev), dev);
-		incr_issue_iostats (rec_ptr, &devinfop->iostats[rw], NULL);	
+		incr_issue_iostats (rec_ptr, &devinfop->iostats[rw], new_ioreq);	
 	}
 }
 
@@ -717,6 +732,7 @@ block_rq_issue_func(void *a, void *v)
 	io_req_t *ioreqp;
 	int issue_pid = 0, insert_pid = 0;
 	pid_info_t *insert_pidp = NULL;
+	char new_ioreq;
 
 	rec_ptr = conv_block_rq_issue(trcinfop, &tt_rec_ptr);
 
@@ -724,7 +740,7 @@ block_rq_issue_func(void *a, void *v)
 	if (perpid_stats) pidp = GET_PIDP(&globals->pid_hash, rec_ptr->pid);
 
 	if (pertrc_stats) incr_trc_stats(rec_ptr, pidp);
-	if (ioreqp = track_issued_ios(rec_ptr)) {
+	if (ioreqp = track_issued_ios(rec_ptr, &new_ioreq)) {
 		issue_pid = ioreqp->issue_pid;
 		insert_pid = ioreqp->insert_pid;
 		insert_pidp = GET_PIDP(&globals->pid_hash, insert_pid);
@@ -736,8 +752,8 @@ block_rq_issue_func(void *a, void *v)
                         return 0;
                 }
 
-		if (perdsk_stats) block_dev_issue_stats(rec_ptr); 
-		if (perpid_stats) block_perpid_issue_stats(rec_ptr, insert_pidp, pidp);
+		if (perdsk_stats) block_dev_issue_stats(rec_ptr, new_ioreq); 
+		if (perpid_stats) block_perpid_issue_stats(rec_ptr, insert_pidp, pidp, new_ioreq);
 		if (global_stats) block_global_issue_stats(rec_ptr);
 	} else if (filter_flag) {
 		/* if there are filters but no ioreqp, then just return */

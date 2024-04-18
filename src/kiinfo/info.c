@@ -40,13 +40,10 @@ info_init_func(void *v)
 	if (debug) printf ("info_init_func()\n");
 
 	/* default functions */
-        filter_func = NULL;
-        sort_func = NULL;
+        filter_func = info_filter_func;
         process_func = NULL;
-        print_func = info_print_func;
 	report_func = info_report_func;
 	bufmiss_func = NULL;
-	bufswtch_func = NULL;
 	alarm_func = info_alarm_func;
 
 	if (tool_init_func)
@@ -110,25 +107,6 @@ info_process_func(uint64 rec_ptr, void *v)
 **
 */
 int
-info_print_func(void *v)
-{
-	int i;
-	struct timeval tod;
-
-	if (print_flag) {
-		if (is_alive) {
-			gettimeofday(&tod, NULL);
-			printf ("\n%s\n", ctime(&tod.tv_sec));
-		}
-
-		print_flag = 0;
-	}
-
-	return 0;
-
-}
-
-int
 info_report_func(void *v)
 {
 
@@ -152,28 +130,6 @@ info_bufmiss_func(void *v, void *a)
 	 kd_rec_t *rec_ptr = a;
 
 	 /* printf ("Lost %d kitrace buffers\n", nmiss);  */
-	
-	return 0;
-}
-
-/* bufswtch_func() should contain code for the 
- * tool to do special processing at the end of
- * processing a set of KI buffers.
- * 
- * Typical globals that may be useful are:
- *
- * cur_buf_num
- * time_hwm      - highest cur_time found in set of buffers
- * time_lwm      - lowest cur_time found in set of buffers
- */
-
-int
-info_bufswtch_func(void *v)
-{
-int arg;
-	 arg = *(int *)v;
-
-	 /* printf ("Switching buffers\n";  */
 	
 	return 0;
 }

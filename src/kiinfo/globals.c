@@ -50,6 +50,8 @@ clipip_info_t	**clipip_hash;
 clip_info_t	**cllip_hash;
 clsdata_info_t	**clsdata_hash;
 
+ntstatus_info_t **ntstatus_hash;
+
 char 	collapse_on = FALSE;		/* Used in COLLASPE_ macros */
 int	mapper_major = 253;		/* default */
 
@@ -1436,7 +1438,7 @@ ks_action_t ks_actions[KI_MAXSYSCALLS] = {
 	{ 0, 0, 0, ki_nosys},		/*rt_sigaction*/
 	{ 0, 0, 0, ki_nosys},		/*rt_sigprocmask*/
 	{ 0, 0, 0, ki_nosys},		/*rt_sigreturn*/
-	{ 0, 0, 1, ki_nosys},		/*ioctl*/
+	{ 1, 0, 1, ki_ioctl},		/*ioctl*/
 	{ 1, 1, 1, ki_read},		/*pread64*/
 	{ 1, 1, 1, ki_write},		/*pwrite64*/
 	{ 1, 1, 1, ki_read},		/*readv*/
@@ -1881,8 +1883,8 @@ ks_action_t ks_actions[KI_MAXSYSCALLS] = {
 	{ 0, 0, 0, ki_nosys},		/*setfsuid32*/
 	{ 0, 0, 0, ki_nosys},		/*setfsgid32*/
 	{ 1, 0, 1, ki_fcntl},		/*fcntl64*/
-	{ 0, 0, 0, ki_nosys},		/*ukn-222*/
-	{ 0, 0, 0, ki_nosys},		/*ukn-223*/
+	{ 0, 0, 0, ki_nosys},		/*ukn-461*/
+	{ 0, 0, 0, ki_nosys},		/*ukn-462*/
 	{ 0, 0, 1, ki_nosys},		/*sendfile64*/
 	{ 0, 0, 0, ki_nosys},		/*sys_set_zone_reclaim*/
 	{ 0, 0, 0, ki_nosys},		/*statfs64*/
@@ -6774,7 +6776,8 @@ warnmsg_t warnmsg[MAXNOTEWARN] = {
 	{ "Warning: Memory is not balanced across NUMA nodes, check for missing/unconfigured memory DIMMS", NULL},
 	{ "Warning: Memory on one or more NUMA nodes is below 100 MB", NULL},
 	{ "Warning: Threads delayed on RunQ with max wait time more than 100 msecs", _HTTP_RUNQ_DELAYS},
-	{ "Warning: High System CPU utilization during memory allocations, deallocations, and page faults", _HTTP_LARGE_NUMA_NODE}
+	{ "Warning: High System CPU utilization during memory allocations, deallocations, and page faults", _HTTP_LARGE_NUMA_NODE},
+        { "Warning: System is using clocksource other than tsc", _HTTP_CLOCKSOURCE}
 };
 
 
@@ -7380,3 +7383,678 @@ char *drm_ioctl[DRM_NRCTLS] = {
 	"DRM_IOCTL_?",
 };
 
+char *dm_ioctl[DM_NRCTLS] = {
+       /* Top level cmds */
+       "DM_VERSION",               /* 0x0 */
+       "DM_REMOVE_ALL",               /* 0x1 */
+       "DM_LIST_DEVICES",               /* 0x2 */
+
+       /* device level cmds */
+       "DM_DEV_CREATE",               /* 0x3 */
+       "DM_DEV_REMOVE",               /* 0x4 */
+       "DM_DEV_RENAME",               /* 0x5 */
+       "DM_DEV_SUSPEND",               /* 0x6 */
+       "DM_DEV_STATUS",               /* 0x7 */
+       "DM_DEV_WAIT",               /* 0x8 */
+
+       /* Table level cmds */
+       "DM_TABLE_LOAD",               /* 0x9 */
+       "DM_TABLE_CLEAR",               /* 0xa */
+       "DM_TABLE_DEPS",               /* 0xb */
+       "DM_TABLE_STATUS",               /* 0xc */
+
+       /* Added later */
+       "DM_LIST_VERSIONS",               /* 0xd */
+       "DM_TARGET_MSG",               /* 0xe */
+       "DM_DEV_SET_GEOMETRY",               /* 0xf */
+       "DM_DEV_ARM_POLL",               /* 0x10 */
+       "DM_GET_TARGET_VERSION"               /* 0x11 */
+};
+
+/* KVM ioctls have some duplicates.   For now, we will print just the first one listed in the
+ * following URL:
+ *
+ * https://github.com/torvalds/linux/blob/master/include/uapi/linux/kvm.h
+ */
+
+char *kvm_ioctl[KVM_NRCTLS] = {
+/*
+ *  * ioctls for /dev/kvm fds:
+ *   */
+       "KVM_GET_API_VERSION",               /* 0x00 */
+       "KVM_CREATE_VM",               /* 0x01 */
+       "KVM_GET_MSR_INDEX_LIST",               /* 0x02 */
+       "KVM_CHECK_EXTENSION",               /* 0x03 */
+       "KVM_GET_VCPU_MMAP_SIZE",               /* 0x04 */
+       "KVM_GET_SUPPORTED_CPUID",               /* 0x05 */	   
+       "KVM_S390_ENABLE_SIE",               /* 0x06 */
+	   "KVM_?",								/* 0x07 */
+	   "KVM_?",								/* 0x08 */	   
+       "KVM_GET_EMULATED_CPUID",               /* 0x09 */
+       "KVM_GET_MSR_FEATURE_INDEX_LIST",       /* 0x0a */
+	   "KVM_?",								/* 0x0b */
+	   "KVM_?",								/* 0x0c */
+	   "KVM_?",								/* 0x0d */
+	   "KVM_?",								/* 0x0e */
+	   "KVM_?",								/* 0x0f */
+	   "KVM_?",								/* 0x10 */
+	   "KVM_?",								/* 0x11 */
+	   "KVM_?",								/* 0x12 */
+	   "KVM_?",								/* 0x13 */
+	   "KVM_?",								/* 0x14 */
+	   "KVM_?",								/* 0x15 */
+	   "KVM_?",								/* 0x16 */
+	   "KVM_?",								/* 0x17 */
+	   "KVM_?",								/* 0x18 */
+	   "KVM_?",								/* 0x19 */
+	   "KVM_?",								/* 0x1a */
+	   "KVM_?",								/* 0x1b */
+	   "KVM_?",								/* 0x1c */
+	   "KVM_?",								/* 0x1d */
+	   "KVM_?",								/* 0x1e */
+	   "KVM_?",								/* 0x1f */
+	   "KVM_?",								/* 0x20 */
+	   "KVM_?",								/* 0x21 */
+	   "KVM_?",								/* 0x22 */
+	   "KVM_?",								/* 0x23 */
+	   "KVM_?",								/* 0x24 */
+	   "KVM_?",								/* 0x25 */
+	   "KVM_?",								/* 0x26 */
+	   "KVM_?",								/* 0x27 */
+	   "KVM_?",								/* 0x28 */
+	   "KVM_?",								/* 0x29 */
+	   "KVM_?",								/* 0x2a */
+	   "KVM_?",								/* 0x2b */
+	   "KVM_?",								/* 0x2c */
+	   "KVM_?",								/* 0x2d */
+	   "KVM_?",								/* 0x2e */
+	   "KVM_?",								/* 0x2f */
+	   "KVM_?",								/* 0x30 */
+	   "KVM_?",								/* 0x31 */
+	   "KVM_?",								/* 0x32 */
+	   "KVM_?",								/* 0x33 */
+	   "KVM_?",								/* 0x34 */
+	   "KVM_?",								/* 0x35 */
+	   "KVM_?",								/* 0x36 */
+	   "KVM_?",								/* 0x37 */
+	   "KVM_?",								/* 0x38 */
+	   "KVM_?",								/* 0x39 */
+	   "KVM_?",								/* 0x3a */
+	   "KVM_?",								/* 0x3b */
+	   "KVM_?",								/* 0x3c */
+	   "KVM_?",								/* 0x3d */
+	   "KVM_?",								/* 0x3e */
+	   "KVM_?",								/* 0x3f */ 
+	   "KVM_?",								/* 0x40 */
+       "KVM_CREATE_VCPU",               /* 0x41 */
+       "KVM_GET_DIRTY_LOG",               /* 0x42 */
+	   "KVM_?",								/* 0x43 */
+       "KVM_SET_NR_MMU_PAGES",               /* 0x44 */
+       "KVM_GET_NR_MMU_PAGES",               /* 0x45 */
+       "KVM_SET_USER_MEMORY_REGION",               /* 0x46 */
+       "KVM_SET_TSS_ADDR",               /* 0x47 */
+       "KVM_SET_IDENTITY_MAP_ADDR",               /* 0x48 */
+       "KVM_SET_USER_MEMORY_REGION2",               /* 0x49 */
+	   "KVM_?",								/* 0x4a */
+	   "KVM_?",								/* 0x4b */
+	   "KVM_?",								/* 0x4c */
+	   "KVM_?",								/* 0x4d */
+	   "KVM_?",								/* 0x4e */
+	   "KVM_?",								/* 0x4f */
+       "KVM_S390_UCAS_MAP",               /* 0x50 */
+       "KVM_S390_UCAS_UNMAP",               /* 0x51 */
+       "KVM_S390_VCPU_FAULT",               /* 0x52 */
+	   "KVM_?",               /* 0x53 */
+	   "KVM_?",               /* 0x54 */
+	   "KVM_?",               /* 0x55 */
+	   "KVM_?",               /* 0x56 */
+	   "KVM_?",               /* 0x57 */
+	   "KVM_?",               /* 0x58 */
+	   "KVM_?",               /* 0x59 */
+	   "KVM_?",               /* 0x5a */
+	   "KVM_?",               /* 0x5b */
+	   "KVM_?",               /* 0x5c */
+	   "KVM_?",               /* 0x5d */
+	   "KVM_?",               /* 0x5e */
+	   "KVM_?",               /* 0x5f */
+       "KVM_CREATE_IRQCHIP",               /* 0x60 */
+       "KVM_IRQ_LINE",               /* 0x61 */
+       "KVM_GET_IRQCHIP",               /* 0x62 */
+       "KVM_SET_IRQCHIP",               /* 0x63 */
+       "KVM_CREATE_PIT",               /* 0x64 */
+       "KVM_GET_PIT",               /* 0x65 */
+       "KVM_SET_PIT",               /* 0x66 */
+       "KVM_IRQ_LINE_STATUSIO",               /* 0x67 */
+       "KVM_UNREGISTER_COALESCED_MMIO",               /* 0x68 */
+	   "KVM_?",               /* 0x69 */	   
+       "KVM_SET_GSI_ROUTING",               /* 0x6a */
+	   "KVM_?",               /* 0x6b */
+	   "KVM_?",               /* 0x6c */
+	   "KVM_?",               /* 0x6d */
+	   "KVM_?",               /* 0x6e */
+	   "KVM_?",               /* 0x6f */
+	   "KVM_?",               /* 0x70 */
+       "KVM_REINJECT_CONTROL",               /* 0x71 */
+	   "KVM_?",               /* 0x72 */
+	   "KVM_?",               /* 0x73 */
+	   "KVM_?",               /* 0x74 */
+	   "KVM_?",               /* 0x75 */
+       "KVM_IRQFD",               /* 0x76 */
+       "KVM_CREATE_PIT2",               /* 0x77 */
+       "KVM_SET_BOOT_CPU_ID",               /* 0x78 */
+       "KVM_IOEVENTFD",               /* 0x79 */
+       "KVM_XEN_HVM_CONFIG",               /* 0x7a */
+       "KVM_SET_CLOCK",               /* 0x7b */
+       "KVM_GET_CLOCK",               /* 0x7c */
+	   "KVM_?",               /* 0x7d */
+	   "KVM_?",               /* 0x7e */
+	   "KVM_?",               /* 0x7f */
+       "KVM_RUN",               /* 0x80 */
+       "KVM_GET_REGS",               /* 0x81 */
+       "KVM_SET_REGS",               /* 0x82 */
+       "KVM_GET_SREGS",               /* 0x83 */
+       "KVM_SET_SREGS",               /* 0x84 */
+       "KVM_TRANSLATE",               /* 0x85 */
+       "KVM_INTERRUPT",               /* 0x86 */
+	   "KVM_?",               /* 0x87 */
+       "KVM_GET_MSRS",               /* 0x88 */
+       "KVM_SET_MSRS",               /* 0x89 */
+       "KVM_SET_CPUID",               /* 0x8a */
+       "KVM_SET_SIGNAL_MASK",               /* 0x8b */
+       "KVM_GET_FPU",               /* 0x8c */
+       "KVM_SET_FPU",               /* 0x8d */
+       "KVM_GET_LAPIC",               /* 0x8e */
+       "KVM_SET_LAPIC",               /* 0x8f */
+       "KVM_SET_CPUID2",               /* 0x90 */
+       "KVM_GET_CPUID2",               /* 0x91 */
+       "KVM_TPR_ACCESS_REPORTING",               /* 0x92 */
+       "KVM_SET_VAPIC_ADDR",               /* 0x93 */
+       "KVM_S390_INTERRUPT",               /* 0x94 */
+       "KVM_S390_STORE_STATUS",               /* 0x95 */
+       "KVM_S390_SET_INITIAL_PSW",               /* 0x96 */
+       "KVM_S390_INITIAL_RESET",               /* 0x97 */
+       "KVM_GET_MP_STATE",               /* 0x98 */
+       "KVM_SET_MP_STATE",               /* 0x99 */
+       "KVM_NMI",               /* 0x9a */
+       "KVM_SET_GUEST_DEBUG",               /* 0x9b */
+       "KVM_X86_SETUP_MCE",               /* 0x9c */
+       "KVM_X86_GET_MCE_CAP_SUPPORTED",   /* 0x9d */
+       "KVM_X86_SET_MCE",               /* 0x9e */
+       "KVM_GET_PIT2",               /* 0x9f */
+       "KVM_SET_PIT2",               /* 0xa0 */
+       "KVM_PPC_GET_PVINFO",               /* 0xa1 */
+       "KVM_SET_TSC_KHZ",               /* 0xa2 */
+       "KVM_GET_TSC_KHZ",               /* 0xa3 */
+       "KVM_GET_XSAVE",               /* 0xa4 */
+       "KVM_SIGNAL_MSI",               /* 0xa5 */
+       "KVM_PPC_GET_SMMU_INFO",               /* 0xa6 */
+       "KVM_PPC_ALLOCATE_HTAB",               /* 0xa7 */
+       "KVM_CREATE_SPAPR_TCE",               /* 0xa8 */
+       "KVM_ALLOCATE_RMA",               /* 0xa9 */
+       "KVM_PPC_GET_HTAB_FD",               /* 0xaa */
+       "KVM_ARM_SET_DEVICE_ADDR",               /* 0xab */
+       "KVM_PPC_RTAS_DEFINE_TOKEN",               /* 0xac */
+       "KVM_PPC_RESIZE_HPT_PREPARE",               /* 0xad */
+       "KVM_PPC_RESIZE_HPT_COMMIT",               /* 0xae */
+       "KVM_PPC_CONFIGURE_V3_MMU",               /* 0xaf */
+       "KVM_PPC_GET_RMMU_INFO",               /* 0xb0 */
+       "KVM_PPC_GET_CPU_CHAR",               /* 0xb1 */
+       "KVM_SET_PMU_EVENT_FILTER",               /* 0xb2 */
+       "KVM_PPC_SVM_OFF",               /* 0xb3 */
+       "KVM_ARM_MTE_COPY_TAGS",               /* 0xb4 */
+       "KVM_ARM_SET_COUNTER_OFFSET",               /* 0xb5 */
+       "KVM_ARM_GET_REG_WRITABLE_MASKS",               /* 0xb6 */
+       "KVM_SMI",               /* 0xb7 */
+       "KVM_S390_GET_CMMA_BITS",               /* 0xb8 */
+       "KVM_S390_SET_CMMA_BITS",               /* 0xb9 */
+       "KVM_MEMORY_ENCRYPT_OP",               /* 0xba */
+       "KVM_MEMORY_ENCRYPT_REG_REGION",               /* 0xbb */
+       "KVM_MEMORY_ENCRYPT_UNREG_REGION",               /* 0xbc */
+       "KVM_HYPERV_EVENTFD",               /* 0xbd */
+       "KVM_GET_NESTED_STATE",               /* 0xbe */
+       "KVM_SET_NESTED_STATE",               /* 0xbf */
+       "KVM_CLEAR_DIRTY_LOG",               /* 0xc0 */
+       "KVM_GET_SUPPORTED_HV_CPUID",               /* 0xc1 */
+       "KVM_ARM_VCPU_FINALIZE",               /* 0xc2 */
+       "KVM_S390_NORMAL_RESET",               /* 0xc3 */
+       "KVM_S390_CLEAR_RESET",               /* 0xc4 */
+       "KVM_S390_PV_COMMAND",               /* 0xc5 */
+       "KVM_X86_SET_MSR_FILTER",               /* 0xc6 */
+       "KVM_RESET_DIRTY_RINGS",               /* 0xc7 */
+       "KVM_XEN_HVM_GET_ATTR",               /* 0xc8 */
+       "KVM_XEN_HVM_SET_ATTR",               /* 0xc9 */
+       "KVM_XEN_VCPU_GET_ATTR",               /* 0xca */
+       "KVM_XEN_VCPU_SET_ATTR",               /* 0xcb */
+	   "KVM_GET_SREGS2",               /* 0xcc */
+       "KVM_SET_SREGS2",               /* 0xcd */
+       "KVM_GET_STATS_FD",               /* 0xce */
+       "KVM_GET_XSAVE2",               /* 0xcf */
+       "KVM_XEN_HVM_EVTCHN_SEND",               /* 0xd0 */
+       "KVM_S390_ZPCI_OP",               /* 0xd1 */
+       "KVM_SET_MEMORY_ATTRIBUTES",               /* 0xd2 */
+	   "KVM_?",               /* 0xd3 */
+       "KVM_CREATE_GUEST_MEMFD"               /* 0xd4 */
+       "KVM_?"               /* 0xd5 */	   
+	   "KVM_?"               /* 0xd6 */
+	   "KVM_?"               /* 0xd7 */
+	   "KVM_?"               /* 0xd8 */
+	   "KVM_?"               /* 0xd9 */
+	   "KVM_?"               /* 0xda */
+	   "KVM_?"               /* 0xdb */
+	   "KVM_?"               /* 0xdc */
+	   "KVM_?"               /* 0xdd */
+	   "KVM_?"               /* 0xde */
+	   "KVM_?"               /* 0xdf */
+       "KVM_CREATE_DEVICE",               /* 0xe0 */
+       "KVM_SET_DEVICE_ATTR",               /* 0xe1 */
+       "KVM_GET_DEVICE_ATTR",               /* 0xe2 */
+       "KVM_HAS_DEVICE_ATTR",               /* 0xe3 */
+	   "KVM_?",               /* 0xe4 */
+	   "KVM_?",               /* 0xe5 */
+	   "KVM_?",               /* 0xe6 */
+	   "KVM_?",               /* 0xe7 */
+	   "KVM_?",               /* 0xe8 */
+	   "KVM_?",               /* 0xe9 */
+	   "KVM_?",               /* 0xea */
+	   "KVM_?",               /* 0xeb */
+	   "KVM_?",               /* 0xec */
+	   "KVM_?",               /* 0xed */
+	   "KVM_?",               /* 0xee */
+	   "KVM_?"               /* 0xef */
+};
+
+#if 0
+char *kvm_ioctl[KVM_NRCTLS] = {
+/*
+ *  * ioctls for /dev/kvm fds:
+ *   */
+       "KVM_GET_API_VERSION",               /* 0x00 */
+       "KVM_CREATE_VM",               /* 0x01 */
+       "KVM_GET_MSR_INDEX_LIST",               /* 0x02 */
+       "KVM_CHECK_EXTENSION",               /* 0x03 */
+       "KVM_GET_VCPU_MMAP_SIZE",               /* 0x04 */
+       "KVM_GET_SUPPORTED_CPUID",               /* 0x05 */	   
+       "KVM_S390_ENABLE_SIE",               /* 0x06 */
+	   "KVM_?",								/* 0x07 */
+	   "KVM_?",								/* 0x08 */	   
+       "KVM_GET_EMULATED_CPUID",               /* 0x09 */
+       "KVM_GET_MSR_FEATURE_INDEX_LIST",       /* 0x0a */
+	   "KVM_?",								/* 0x0b */
+	   "KVM_?",								/* 0x0c */
+	   "KVM_?",								/* 0x0d */
+	   "KVM_?",								/* 0x0e */
+	   "KVM_?",								/* 0x0f */
+	   "KVM_?",								/* 0x10 */
+	   "KVM_?",								/* 0x11 */
+	   "KVM_?",								/* 0x12 */
+	   "KVM_?",								/* 0x13 */
+	   "KVM_?",								/* 0x14 */
+	   "KVM_?",								/* 0x15 */
+	   "KVM_?",								/* 0x16 */
+	   "KVM_?",								/* 0x17 */
+	   "KVM_?",								/* 0x18 */
+	   "KVM_?",								/* 0x19 */
+	   "KVM_?",								/* 0x1a */
+	   "KVM_?",								/* 0x1b */
+	   "KVM_?",								/* 0x1c */
+	   "KVM_?",								/* 0x1d */
+	   "KVM_?",								/* 0x1e */
+	   "KVM_?",								/* 0x1f */
+	   "KVM_?",								/* 0x20 */
+	   "KVM_?",								/* 0x21 */
+	   "KVM_?",								/* 0x22 */
+	   "KVM_?",								/* 0x23 */
+	   "KVM_?",								/* 0x24 */
+	   "KVM_?",								/* 0x25 */
+	   "KVM_?",								/* 0x26 */
+	   "KVM_?",								/* 0x27 */
+	   "KVM_?",								/* 0x28 */
+	   "KVM_?",								/* 0x29 */
+	   "KVM_?",								/* 0x2a */
+	   "KVM_?",								/* 0x2b */
+	   "KVM_?",								/* 0x2c */
+	   "KVM_?",								/* 0x2d */
+	   "KVM_?",								/* 0x2e */
+	   "KVM_?",								/* 0x2f */
+	   "KVM_?",								/* 0x30 */
+	   "KVM_?",								/* 0x31 */
+	   "KVM_?",								/* 0x32 */
+	   "KVM_?",								/* 0x33 */
+	   "KVM_?",								/* 0x34 */
+	   "KVM_?",								/* 0x35 */
+	   "KVM_?",								/* 0x36 */
+	   "KVM_?",								/* 0x37 */
+	   "KVM_?",								/* 0x38 */
+	   "KVM_?",								/* 0x39 */
+	   "KVM_?",								/* 0x3a */
+	   "KVM_?",								/* 0x3b */
+	   "KVM_?",								/* 0x3c */
+	   "KVM_?",								/* 0x3d */
+	   "KVM_?",								/* 0x3e */
+	   "KVM_?",								/* 0x3f */ 
+	   "KVM_?",								/* 0x40 */
+       "KVM_CREATE_VCPU",               /* 0x41 */
+       "KVM_GET_DIRTY_LOG",               /* 0x42 */
+	   "KVM_?",								/* 0x43 */
+       "KVM_SET_NR_MMU_PAGES",               /* 0x44 */
+       "KVM_GET_NR_MMU_PAGES",               /* 0x45 */
+       "KVM_SET_USER_MEMORY_REGION",               /* 0x46 */
+       "KVM_SET_TSS_ADDR",               /* 0x47 */
+       "KVM_SET_IDENTITY_MAP_ADDR",               /* 0x48 */
+       "KVM_SET_USER_MEMORY_REGION2",               /* 0x49 */
+	   "KVM_?",								/* 0x4a */
+	   "KVM_?",								/* 0x4b */
+	   "KVM_?",								/* 0x4c */
+	   "KVM_?",								/* 0x4d */
+	   "KVM_?",								/* 0x4e */
+	   "KVM_?",								/* 0x4f */
+       "KVM_S390_UCAS_MAP",               /* 0x50 */
+       "KVM_S390_UCAS_UNMAP",               /* 0x51 */
+       "KVM_S390_VCPU_FAULT",               /* 0x52 */
+	   "KVM_?",               /* 0x53 */
+	   "KVM_?",               /* 0x54 */
+	   "KVM_?",               /* 0x55 */
+	   "KVM_?",               /* 0x56 */
+	   "KVM_?",               /* 0x57 */
+	   "KVM_?",               /* 0x58 */
+	   "KVM_?",               /* 0x59 */
+	   "KVM_?",               /* 0x5a */
+	   "KVM_?",               /* 0x5b */
+	   "KVM_?",               /* 0x5c */
+	   "KVM_?",               /* 0x5d */
+	   "KVM_?",               /* 0x5e */
+	   "KVM_?",               /* 0x5f */
+       "KVM_CREATE_IRQCHIP",               /* 0x60 */
+       "KVM_IRQ_LINE",               /* 0x61 */
+       "KVM_GET_IRQCHIP",               /* 0x62 */
+       "KVM_SET_IRQCHIP",               /* 0x63 */
+       "KVM_CREATE_PIT",               /* 0x64 */
+       "KVM_GET_PIT",               /* 0x65 */
+       "KVM_SET_PIT",               /* 0x66 */
+       "KVM_IRQ_LINE_STATUS/KVM_REGISTER_COALESCED_MMIO",               /* 0x67 */
+       "KVM_UNREGISTER_COALESCED_MMIO",               /* 0x68 */
+	   "KVM_?",               /* 0x69 */	   
+       "KVM_SET_GSI_ROUTING",               /* 0x6a */
+	   "KVM_?",               /* 0x6b */
+	   "KVM_?",               /* 0x6c */
+	   "KVM_?",               /* 0x6d */
+	   "KVM_?",               /* 0x6e */
+	   "KVM_?",               /* 0x6f */
+	   "KVM_?",               /* 0x70 */
+       "KVM_REINJECT_CONTROL",               /* 0x71 */
+	   "KVM_?",               /* 0x72 */
+	   "KVM_?",               /* 0x73 */
+	   "KVM_?",               /* 0x74 */
+	   "KVM_?",               /* 0x75 */
+       "KVM_IRQFD",               /* 0x76 */
+       "KVM_CREATE_PIT2",               /* 0x77 */
+       "KVM_SET_BOOT_CPU_ID",               /* 0x78 */
+       "KVM_IOEVENTFD",               /* 0x79 */
+       "KVM_XEN_HVM_CONFIG",               /* 0x7a */
+       "KVM_SET_CLOCK",               /* 0x7b */
+       "KVM_GET_CLOCK",               /* 0x7c */
+	   "KVM_?",               /* 0x7d */
+	   "KVM_?",               /* 0x7e */
+	   "KVM_?",               /* 0x7f */
+       "KVM_RUN",               /* 0x80 */
+       "KVM_GET_REGS",               /* 0x81 */
+       "KVM_SET_REGS",               /* 0x82 */
+       "KVM_GET_SREGS",               /* 0x83 */
+       "KVM_SET_SREGS",               /* 0x84 */
+       "KVM_TRANSLATE",               /* 0x85 */
+       "KVM_INTERRUPT",               /* 0x86 */
+	   "KVM_?",               /* 0x87 */
+       "KVM_GET_MSRS",               /* 0x88 */
+       "KVM_SET_MSRS",               /* 0x89 */
+       "KVM_SET_CPUID",               /* 0x8a */
+       "KVM_SET_SIGNAL_MASK",               /* 0x8b */
+       "KVM_GET_FPU",               /* 0x8c */
+       "KVM_SET_FPU",               /* 0x8d */
+       "KVM_GET_LAPIC",               /* 0x8e */
+       "KVM_SET_LAPIC",               /* 0x8f */
+       "KVM_SET_CPUID2",               /* 0x90 */
+       "KVM_GET_CPUID2",               /* 0x91 */
+       "KVM_TPR_ACCESS_REPORTING",               /* 0x92 */
+       "KVM_SET_VAPIC_ADDR",               /* 0x93 */
+       "KVM_S390_INTERRUPT",               /* 0x94 */
+       "KVM_S390_STORE_STATUS",               /* 0x95 */
+       "KVM_S390_SET_INITIAL_PSW",               /* 0x96 */
+       "KVM_S390_INITIAL_RESET",               /* 0x97 */
+       "KVM_GET_MP_STATE",               /* 0x98 */
+       "KVM_SET_MP_STATE",               /* 0x99 */
+       "KVM_NMI",               /* 0x9a */
+       "KVM_SET_GUEST_DEBUG",               /* 0x9b */
+       "KVM_X86_SETUP_MCE",               /* 0x9c */
+       "KVM_X86_GET_MCE_CAP_SUPPORTED",   /* 0x9d */
+       "KVM_X86_SET_MCE",               /* 0x9e */
+       "KVM_GET_VCPU_EVENTS",               /* 0x9f */
+       "KVM_SET_VCPU_EVENTS/KVM_SET_PIT2",               /* 0xa0 */
+       "KVM_GET_DEBUGREGS/KVM_PPC_GET_PVINFO",               /* 0xa1 */
+       "KVM_SET_DEBUGREGS/KVM_SET_TSC_KHZ",               /* 0xa2 */
+       "KVM_ENABLE_CAP/KVM_GET_TSC_KHZ",               /* 0xa3 */
+       "KVM_GET_XSAVE/KVM_?",               /* 0xa4 */
+       "KVM_SET_XSAVE/KVM_SIGNAL_MSI",               /* 0xa5 */
+       "KVM_GET_XCRS/KVM_PPC_GET_SMMU_INFO",               /* 0xa6 */
+       "KVM_SET_XCRS/KVM_PPC_ALLOCATE_HTAB",               /* 0xa7 */
+	   "KVM_?/KVM_CREATE_SPAPR_TCE",               /* 0xa8 */
+	   "KVM_?/KVM_ALLOCATE_RMA",               /* 0xa9 */
+       "KVM_DIRTY_TLB/KVM_PPC_GET_HTAB_FD",               /* 0xaa */
+       "KVM_GET_ONE_REG/KVM_ARM_SET_DEVICE_ADDR",               /* 0xab */
+       "KVM_SET_ONE_REG/KVM_PPC_RTAS_DEFINE_TOKEN",               /* 0xac */
+       "KVM_KVMCLOCK_CTRL/KVM_PPC_RESIZE_HPT_PREPARE",               /* 0xad */
+       "KVM_ARM_VCPU_INIT/KVM_PPC_RESIZE_HPT_COMMIT",               /* 0xae */
+       "KVM_ARM_PREFERRED_TARGET/KVM_PPC_CONFIGURE_V3_MMU",               /* 0xaf */
+       "KVM_PPC_GET_RMMU_INFO/KVM_GET_REG_LIST",               /* 0xb0 */
+       "KVM_PPC_GET_CPU_CHAR/KVM_S390_MEM_OP",               /* 0xb1 */
+       "KVM_SET_PMU_EVENT_FILTER/KVM_S390_GET_SKEYS",               /* 0xb2 */
+       "KVM_PPC_SVM_OFF/KVM_S390_SET_SKEYS",               /* 0xb3 */
+       "KVM_ARM_MTE_COPY_TAGS/KVM_S390_IRQ",               /* 0xb4 */
+       "KVM_ARM_SET_COUNTER_OFFSET/KVM_S390_SET_IRQ_STATE",               /* 0xb5 */
+       "KVM_ARM_GET_REG_WRITABLE_MASKS/KVM_S390_GET_IRQ_STATE",               /* 0xb6 */
+       "KVM_SMI",               /* 0xb7 */
+       "KVM_S390_GET_CMMA_BITS",               /* 0xb8 */
+       "KVM_S390_SET_CMMA_BITS",               /* 0xb9 */
+       "KVM_MEMORY_ENCRYPT_OP",               /* 0xba */
+       "KVM_MEMORY_ENCRYPT_REG_REGION",               /* 0xbb */
+       "KVM_MEMORY_ENCRYPT_UNREG_REGION",               /* 0xbc */
+       "KVM_HYPERV_EVENTFD",               /* 0xbd */
+       "KVM_GET_NESTED_STATE",               /* 0xbe */
+       "KVM_SET_NESTED_STATE",               /* 0xbf */
+       "KVM_CLEAR_DIRTY_LOG",               /* 0xc0 */
+       "KVM_GET_SUPPORTED_HV_CPUID",               /* 0xc1 */
+       "KVM_ARM_VCPU_FINALIZE",               /* 0xc2 */
+       "KVM_S390_NORMAL_RESET",               /* 0xc3 */
+       "KVM_S390_CLEAR_RESET",               /* 0xc4 */
+       "KVM_S390_PV_COMMAND",               /* 0xc5 */
+       "KVM_X86_SET_MSR_FILTER",               /* 0xc6 */
+       "KVM_RESET_DIRTY_RINGS",               /* 0xc7 */
+       "KVM_XEN_HVM_GET_ATTR",               /* 0xc8 */
+       "KVM_XEN_HVM_SET_ATTR",               /* 0xc9 */
+       "KVM_XEN_VCPU_GET_ATTR",               /* 0xca */
+       "KVM_XEN_VCPU_SET_ATTR",               /* 0xcb */
+	   "KVM_GET_SREGS2",               /* 0xcc */
+       "KVM_SET_SREGS2",               /* 0xcd */
+       "KVM_GET_STATS_FD",               /* 0xce */
+       "KVM_GET_XSAVE2",               /* 0xcf */
+       "KVM_S390_PV_CPU_COMMAND/KVM_XEN_HVM_EVTCHN_SEND",               /* 0xd0 */
+       "KVM_S390_ZPCI_OP",               /* 0xd1 */
+       "KVM_SET_MEMORY_ATTRIBUTES",               /* 0xd2 */
+	   "KVM_?",               /* 0xd3 */
+       "KVM_CREATE_GUEST_MEMFD"               /* 0xd4 */
+       "KVM_?"               /* 0xd5 */	   
+	   "KVM_?"               /* 0xd6 */
+	   "KVM_?"               /* 0xd7 */
+	   "KVM_?"               /* 0xd8 */
+	   "KVM_?"               /* 0xd9 */
+	   "KVM_?"               /* 0xda */
+	   "KVM_?"               /* 0xdb */
+	   "KVM_?"               /* 0xdc */
+	   "KVM_?"               /* 0xdd */
+	   "KVM_?"               /* 0xde */
+	   "KVM_?"               /* 0xdf */
+       "KVM_CREATE_DEVICE",               /* 0xe0 */
+       "KVM_SET_DEVICE_ATTR",               /* 0xe1 */
+       "KVM_GET_DEVICE_ATTR",               /* 0xe2 */
+       "KVM_HAS_DEVICE_ATTR",               /* 0xe3 */
+	   "KVM_?",               /* 0xe4 */
+	   "KVM_?",               /* 0xe5 */
+	   "KVM_?",               /* 0xe6 */
+	   "KVM_?",               /* 0xe7 */
+	   "KVM_?",               /* 0xe8 */
+	   "KVM_?",               /* 0xe9 */
+	   "KVM_?",               /* 0xea */
+	   "KVM_?",               /* 0xeb */
+	   "KVM_?",               /* 0xec */
+	   "KVM_?",               /* 0xed */
+	   "KVM_?",               /* 0xee */
+	   "KVM_?"               /* 0xef */
+};
+
+#endif
+
+char *sg_ioctl[SG_NRCTLS] = {
+          "SG_?",               /* 0x0 */
+       "SG_SET_TIMEOUT",               /* 0x01 */
+       "SG_GET_TIMEOUT",               /* 0x02 */	   
+       "SG_EMULATED_HOST",         /* 0x03 */
+       "SG_SET_TRANSFORM",          /* 0x04 */
+       "SG_GET_TRANSFORM",               /* 0x05 */
+	   "SG_?",               /* 0x06 */
+	   "SG_?",               /* 0x07 */
+	   "SG_?",               /* 0x08 */
+	   "SG_?",               /* 0x09 */
+	   "SG_?",               /* 0x0a */
+	   "SG_?",               /* 0x0b */
+	   "SG_?",               /* 0x0c */
+	   "SG_?",               /* 0x0d */
+	   "SG_?",               /* 0x0e */
+	   "SG_?",               /* 0x0f */
+	   "SG_?",               /* 0x10 */
+	   "SG_?",               /* 0x11 */
+	   "SG_?",               /* 0x12 */
+	   "SG_?",               /* 0x13 */
+	   "SG_?",               /* 0x14 */
+	   "SG_?",               /* 0x15 */
+	   "SG_?",               /* 0x16 */
+	   "SG_?",               /* 0x17 */
+	   "SG_?",               /* 0x18 */
+	   "SG_?",               /* 0x19 */
+	   "SG_?",               /* 0x1a */
+	   "SG_?",               /* 0x1b */
+	   "SG_?",               /* 0x1c */
+	   "SG_?",               /* 0x1d */
+	   "SG_?",               /* 0x1e */
+	   "SG_?",               /* 0x1f */
+	   "SG_?",               /* 0x20 */
+	   "SG_?",               /* 0x21 */
+	   "SG_?",               /* 0x22 */
+	   "SG_?",               /* 0x23 */
+	   "SG_?",               /* 0x24 */
+	   "SG_?",               /* 0x25 */
+	   "SG_?",               /* 0x26 */
+	   "SG_?",               /* 0x27 */
+	   "SG_?",               /* 0x28 */
+	   "SG_?",               /* 0x29 */
+	   "SG_?",               /* 0x2a */
+	   "SG_?",               /* 0x2b */
+	   "SG_?",               /* 0x2c */
+	   "SG_?",               /* 0x2d */
+	   "SG_?",               /* 0x2e */
+	   "SG_?",               /* 0x2f */
+	   "SG_?",               /* 0x30 */
+	   "SG_?",               /* 0x31 */
+	   "SG_?",               /* 0x32 */
+	   "SG_?",               /* 0x33 */
+	   "SG_?",               /* 0x34 */
+	   "SG_?",               /* 0x35 */
+	   "SG_?",               /* 0x36 */
+	   "SG_?",               /* 0x37 */
+	   "SG_?",               /* 0x38 */
+	   "SG_?",               /* 0x39 */
+	   "SG_?",               /* 0x3a */
+	   "SG_?",               /* 0x3b */
+	   "SG_?",               /* 0x3c */
+	   "SG_?",               /* 0x3d */
+	   "SG_?",               /* 0x3e */
+	   "SG_?",               /* 0x3f */
+	   "SG_?",               /* 0x40 */
+	   "SG_?",               /* 0x41 */
+	   "SG_?",               /* 0x42 */
+	   "SG_?",               /* 0x43 */
+	   "SG_?",               /* 0x44 */
+	   "SG_?",               /* 0x45 */
+	   "SG_?",               /* 0x46 */
+	   "SG_?",               /* 0x47 */
+	   "SG_?",               /* 0x48 */
+	   "SG_?",               /* 0x49 */
+	   "SG_?",               /* 0x4a */
+	   "SG_?",               /* 0x4b */
+	   "SG_?",               /* 0x4c */
+	   "SG_?",               /* 0x4d */
+	   "SG_?",               /* 0x4e */
+	   "SG_?",               /* 0x4f */
+	   "SG_?",               /* 0x50 */
+	   "SG_?",               /* 0x51 */
+	   "SG_?",               /* 0x52 */
+	   "SG_?",               /* 0x53 */
+	   "SG_?",               /* 0x54 */
+	   "SG_?",               /* 0x55 */
+	   "SG_?",               /* 0x56 */
+	   "SG_?",               /* 0x57 */
+	   "SG_?",               /* 0x58 */
+	   "SG_?",               /* 0x59 */
+	   "SG_?",               /* 0x5a */
+	   "SG_?",               /* 0x5b */
+	   "SG_?",               /* 0x5c */
+	   "SG_?",               /* 0x5d */
+	   "SG_?",               /* 0x5e */
+	   "SG_?",               /* 0x5f */
+	   "SG_?",               /* 0x60 */
+	   "SG_?",               /* 0x61 */
+	   "SG_?",               /* 0x62 */
+	   "SG_?",               /* 0x63 */
+	   "SG_?",               /* 0x64 */
+	   "SG_?",               /* 0x65 */
+	   "SG_?",               /* 0x66 */
+	   "SG_?",               /* 0x67 */
+	   "SG_?",               /* 0x68 */
+	   "SG_?",               /* 0x69 */
+	   "SG_?",               /* 0x6a */
+	   "SG_?",               /* 0x6b */
+	   "SG_?",               /* 0x6c */
+	   "SG_?",               /* 0x6d */
+	   "SG_?",               /* 0x6e */
+	   "SG_?",               /* 0x6f */	     
+       "SG_GET_COMMAND_Q",               /* 0x70 */
+       "SG_SET_COMMAND_Q",               /* 0x71 */
+       "SG_GET_RESERVED_SIZE",               /* 0x72 */
+	   "SG_?",               /* 0x73 */
+	   "SG_?",               /* 0x74 */
+       "SG_SET_RESERVED_SIZE",               /* 0x75 */
+       "SG_GET_SCSI_ID",                   /* 0x76  */
+	   "SG_?",               /* 0x77 */
+	   "SG_?",               /* 0x78 */
+       "SG_SET_FORCE_LOW_DMA",               /* 0x79 */
+       "SG_GET_LOW_DMA",               /* 0x7a */
+       "SG_SET_FORCE_PACK_ID",               /* 0x7b */
+       "SG_GET_PACK_ID",               /* 0x7c */
+       "SG_GET_NUM_WAITING",               /* 0x7d */
+	   "SG_SET_DEBUG",               /* 0x7e */
+       "SG_GET_SG_TABLESIZE",               /* 0x7F */
+	   "SG_?",               /* 0x80 */
+	   "SG_?",               /* 0x81 */
+       "SG_GET_VERSION_NUM",               /* 0x82 */
+       "SG_NEXT_CMD_LEN",               /* 0x83 */
+       "SG_SCSI_RESET",               /* 0x84 */
+       "SG_IO",               /* 0x85 */
+       "SG_GET_REQUEST_TABLE",               /* 0x86 */
+       "SG_SET_KEEP_ORPHAN",               /* 0x87 */
+       "SG_GET_KEEP_ORPHAN",               /* 0x88 */
+       "SG_GET_ACCESS_COUNT",               /* 0x89 */
+	   "SG_?",               /* 0x8a */
+	   "SG_?",               /* 0x8b */
+	   "SG_?",               /* 0x8c */
+	   "SG_?",               /* 0x8d */
+	   "SG_?",               /* 0x8e */
+	   "SG_?"               /* 0x8f */   
+};

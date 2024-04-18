@@ -64,14 +64,14 @@ extern struct utsname  utsname;
 
 #define LINES_AVAIL ((LINES-1)-lineno) 
 #define PRINT_IODETAIL_HDR(str)													\
-        if (COLS > (152+strlen(str))) {												\
-		mvprintw (lineno++, strlen(str)+2, "------------------- Total I/O -------------------- ------------------- Write I/O ------------------- -------------------- Read I/O -------------------");     \
+        if (COLS > (158+strlen(str))) {												\
+		mvprintw (lineno++, strlen(str)+2, "-------------------- Total I/O --------------------- -------------------- Write I/O -------------------- --------------------- Read I/O --------------------");     \
 		mvprintw (lineno, 0, "%s", str);										\
-                mvprintw (lineno++, strlen(str)+2, "    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv");	\
+                mvprintw (lineno++, strlen(str)+2, "    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv");	\
         } else {														\
-		mvprintw (lineno++, strlen(str)+2, "------------------- Total I/O --------------------");		\
+		mvprintw (lineno++, strlen(str)+2, "-------------------- Total I/O ---------------------");		\
 		mvprintw (lineno, 0, "%s", str);										\
-                mvprintw (lineno++, strlen(str)+2, "    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv");		\
+                mvprintw (lineno++, strlen(str)+2, "    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv");		\
         }
 
 static int 	next_step = FALSE;
@@ -402,6 +402,7 @@ live_init_func(void *v)
 		parse_corelist();
 		parse_SQLThreadList();
 	} else {
+		parse_dmidecode1();
 		parse_cpuinfo();
 		parse_mem_info();
 		parse_uname(0);
@@ -859,7 +860,7 @@ print_iostats_summary_live (void *arg1, void *arg2)
                 	case IO_TOTAL: label="Total"; break;
 		}
 
-		mvprintw (lineno++, 0, "%6s  %7.0f %7.0f %7d %7.2f %8.2f %8.2f ",
+		mvprintw (lineno++, 0, "%6s  %7.0f %7.0f %7d %7.2f %9.3f %9.3f ",
 			label,
                         iostatsp->compl_cnt / secs,
                         (iostatsp->sect_xfrd/2048) / secs,
@@ -920,7 +921,7 @@ print_iostats_totals_live(struct iostats *iostats)
         	avserv = iostatsp->cum_ioserv/MAX(iostatsp->compl_cnt,1) / 1000000.0;
 		avinflt = (iostatsp->cum_async_inflight + iostatsp->cum_sync_inflight) / (MAX(iostatsp->issue_cnt,1) * 1.0);
 
-		mvprintw (lineno, col+(j*50), "%7.0f %7.0f %7d %7.2f %8.2f %8.2f",
+		mvprintw (lineno, col+(j*52), "%7.0f %7.0f %7d %7.2f %9.3f %9.3f",
                         iostatsp->compl_cnt/secs,
                         (iostatsp->sect_xfrd/2048)/secs,
                         (iostatsp->sect_xfrd/2)/MAX(iostatsp->compl_cnt,1),
@@ -1060,6 +1061,32 @@ print_iostats_wwn_live(void *arg1, void *arg2)
 }
 
 int
+print_ioctl_info_live(void *arg1, void *arg2)
+{
+        ioctl_info_t *ioctlp = arg1;
+        syscall_stats_t  *statp = &ioctlp->stats;
+        char *ioctl_name;
+
+	if (LINES_AVAIL < 2) return 0;
+
+        ioctl_name = get_ioctl_name(ioctlp->lle.key);
+        if (ioctl_name) {
+		mvprintw (lineno, 3, "%s", ioctl_name);
+        } else {
+                mvprintw (lineno, 3, "0x%08x", ioctlp->lle.key);
+        }
+
+        mvprintw (lineno++, 34, "%8d %8.1f %11.6f %10.6f %10.6f %7d\n",
+                statp->count,
+                statp->count / secs,
+                SECS(statp->total_time),
+                SECS(statp->total_time / statp->count),
+                SECS(statp->max_time),
+                statp->errors);
+}
+
+
+int
 print_syscall_info_live(void *arg1, void *arg2)
 {
         syscall_info_t *syscallp = arg1;
@@ -1118,6 +1145,16 @@ print_syscall_info_live(void *arg1, void *arg2)
                         mvprintw (lineno++, 0, "   %-27s                  %11.6f", 
                                 "CPU",
                                 SECS(sstatp->T_run_time));
+
+
+                if ((LINES_AVAIL > 2) && syscallp->ioctl_hash) {
+			mvprintw (lineno++, 2, "cmd:");
+                        foreach_hash_entry((void **)syscallp->ioctl_hash,
+                                                IOCTL_HASHSZ,
+                                                print_ioctl_info_live,
+                                                ioctl_sort_by_time, 0, NULL);
+                }
+
 
         	if ((LINES_AVAIL > 2) && syscallp->iov_stats) {
                		iovstatp = syscallp->iov_stats;

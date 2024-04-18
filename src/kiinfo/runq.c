@@ -158,6 +158,7 @@ runq_init_func(void *v)
         		ki_actions[TRACE_PRINT].execute = 1;
 		}
 
+		parse_dmidecode1();
 		parse_cpuinfo();
 		parse_scavuln(0);
 		if (is_alive) parse_cpumaps();
@@ -1400,6 +1401,36 @@ sched_print_setrq_pids(void *arg1, void *arg2)
 }
 
 int
+sched_print_setrq_stktrc(void *arg1, void *arg2)
+{
+        setrq_info_t *setrq_infop = (setrq_info_t *)arg1;
+	var_arg_t *vararg = (var_arg_t *)arg2;
+	FILE *pidfile = (FILE *)vararg->arg1;
+        pid_info_t *pidp;
+        sched_info_t *schedp;
+        sched_stats_t *statp;
+
+	if (setrq_infop->win_stktrc_hash == NULL) return 0;
+
+	pidp = GET_PIDP(&globals->pid_hash, setrq_infop->PID);
+        schedp = (sched_info_t *)find_sched_info(pidp);
+        statp = &schedp->sched_stats;
+
+	pid_printf (pidfile, "%sTID: %8d", tab, pidp->PID);
+        if ((setrq_infop->PID == 0) || ((uint64)setrq_infop->PID == -1)) {
+                pid_printf (pidfile, "  %s", " ICS ");
+        } else {
+        	if (pidp->cmd) pid_printf (pidfile, "  %s", pidp->cmd);
+		if (pidp->hcmd) pid_printf (pidfile, "  {%s}", pidp->hcmd);
+		if (pidp->thread_cmd) pid_printf (pidfile, "  (%s)", pidp->thread_cmd);
+		if (pidp->dockerp) pid_printf (pidfile, HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
+        }
+        PNL;
+
+	foreach_hash_entry((void **)setrq_infop->win_stktrc_hash, STKTRC_HSIZE, print_stktrc_info, stktrc_sort_by_slptime, nsym, arg2);
+}
+
+int
 print_scd_slp_info(void *arg1,void *arg2)
 {
         scd_waker_info_t *scdwinfop = (scd_waker_info_t *)arg1;
@@ -2527,6 +2558,7 @@ sched_report(void *arg1, FILE *pidfile, FILE *pid_jsonfile, FILE *pid_wtree_json
         char detail[8192];
         char json_pidname[128];
 	var_arg_t vararg;
+	print_stktrc_args_t print_stktrc_args;
 
         coop_info_t coopinfo;
         if ((schedp == NULL) || (schedp && (schedp->cpu == -1))) {
@@ -2692,10 +2724,30 @@ sched_report(void *arg1, FILE *pidfile, FILE *pid_jsonfile, FILE *pid_wtree_json
 			vararg.arg1 = pidfile;
 			vararg.arg2 = &coopinfo;
                         foreach_hash_entry((void **)schedp->setrq_src_hash, WPID_HSIZE,
-                                        sched_print_setrq_pids, setrq_sort_by_sleep_time, npid, (void *)&vararg);
+				sched_print_setrq_pids, setrq_sort_by_sleep_time, npid, (void *)&vararg);
                 } else {
                         pid_printf (pidfile, "%s    None\n", tab);
                 }
+
+		/* Print ReadyThread stack traces for Top threads what wokeup this task
+		   for WinKI traces, this helps identify what the thread was waiting on */
+
+		if (IS_WINKI) {
+			PNL;
+			pid_printf(pidfile, "%sReadyThread Stack Traces of top threads waking this thread", tab); PNL
+        		pid_printf(pidfile, "%s   count%s  Stack trace", tab, schedp ? "    wpct      avg " : " "); PNL;
+			pid_printf(pidfile, "%s              %%     msecs", tab); PNL;
+			pid_printf(pidfile, "%s===============================================================",tab); PNL;
+
+			print_stktrc_args.schedp = schedp;
+			print_stktrc_args.pidp = pidp;
+			print_stktrc_args.warnflag = 0;
+
+			vararg.arg1 = pidfile;
+			vararg.arg2 = &print_stktrc_args;
+                        foreach_hash_entry((void **)schedp->setrq_src_hash, WPID_HSIZE,
+				sched_print_setrq_stktrc, setrq_sort_by_sleep_time, npid, &vararg);
+		}
         }
 
         if (pidp->slp_hash) {
@@ -3317,21 +3369,6 @@ runq_print_report(void *v)
 
 	return 0;
 } 
-
-int
-runq_print_func(void *v)
-{
-	struct timeval tod;
-	if (debug) printf ("runq_print_func()\n");
-
-	if ((print_flag) && (is_alive)) {
-		gettimeofday(&tod, NULL);
-		printf ("\n%s\n", ctime(&tod.tv_sec));
-		runq_print_report(v);
-		print_flag = 0;
-	}
-	return 0;
-}
 
 int
 runq_ftrace_print_func(void *a, void *arg)

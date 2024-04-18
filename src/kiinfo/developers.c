@@ -33,20 +33,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 void *filter_func_arg;
 void *process_func_arg;
-void *print_func_arg;
 void *report_func_arg;
 void *bufmiss_func_arg;
-void *bufswtch_func_arg;
 void *alarm_func_arg;
 
 void * (*filter_func)(void *, void *);
 int (*preprocess_func)(void *, void *);
 int (*process_func)(void *, void *);
-int (*sort_func)(const void *, const void *);
-int (*print_func)(void *);
+/* int (*sort_func)(const void *, const void *); */
 int (*report_func)(void *);
 int (*bufmiss_func)(void *, void *);
-int (*bufswtch_func)(void *);
 int (*alarm_func)(void *);
 
 filter_t trace_filter;
@@ -660,10 +656,6 @@ developers_call(int ncpus)
 {
 	trace_info_t *trcinfop;
 	event_t		*eventp;
-	int		num=0;
-	char 		*cur_rec;
-	common_t	tt_rec_ptr;
-	common_t	*rec_ptr;
 	uint64		elapsed_time;
 
 	if (debug) fprintf (stderr, "developers_call() - ncpus = %d\n", ncpus);
@@ -674,7 +666,6 @@ developers_call(int ncpus)
 
 	while (trcinfop = get_next_event(ncpus)) {
 		eventp = (event_t *)trcinfop->cur_event;
-		rec_ptr = conv_common_rec(trcinfop, &tt_rec_ptr);
 
 		trcinfop->events++;
 		last_time = trcinfop->cur_time;
@@ -694,7 +685,6 @@ developers_call(int ncpus)
 
 	secs = globals->total_secs = SECS(elapsed_time);
 
-	/* print(num, print_func, print_func_arg); */
 }
 
 /*

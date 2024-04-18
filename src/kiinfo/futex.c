@@ -45,7 +45,6 @@ futex_init_func(void *v)
 {
 	if (debug) printf ("futex_init_func()\n");
 	process_func = NULL;
-	print_func = futex_print_func;
 	report_func = futex_report_func;
 	bufmiss_func = pid_bufmiss_func;
 	bufmiss_func = NULL;
@@ -438,20 +437,6 @@ futex_print_report()
 	}
 
 	return;
-}
-
-int 
-futex_print_func(void *v)
-{
-	struct timeval tod;
-	
-	if ((print_flag) && (is_alive)) {
-		gettimeofday(&tod, NULL);
-		printf ("\n%s\n", ctime(&tod.tv_sec));
-		futex_print_report();
-		print_flag=0;
-	}
-	return 0;
 }
 
 int

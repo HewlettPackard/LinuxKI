@@ -119,7 +119,6 @@ pid_init_func(void *v)
         report_func = pid_report_func;
 
         bufmiss_func = pid_bufmiss_func;
-        /* bufswtch_func = pid_bufswtch_func; */
         alarm_func = pid_alarm_func;
 	filter_func = trace_filter_func;
 	report_func_arg  = filter_func_arg;
@@ -472,7 +471,7 @@ pid_futex_report(pid_info_t *pidp, FILE *pidfile) {
         foreach_hash_entry((void **)pidp->futex_hash, FUTEX_HSIZE, hash_count_entries, NULL, 0, &futex_cnt);
 
 	if (futex_cnt) {
-		pid_printf (pidfile, "\n\n%s******** FUTEX REPORT ********\n", tab);
+		pid_printf (pidfile, "\n%s******** FUTEX REPORT ********\n", tab);
 		pid_printf (pidfile, "%sTop Futex Addrs by elapsed time\n", tab, nfutex);
 		pid_printf (pidfile, "%sTotal Futex count = %d (Top %d listed)\n", tab, futex_cnt, MIN(futex_cnt, nfutex));
 
@@ -482,6 +481,32 @@ pid_futex_report(pid_info_t *pidp, FILE *pidfile) {
 	}
         return;
 }
+
+int 
+print_ioctl_info(void *arg1, void *arg2)
+{
+	ioctl_info_t *ioctlp = arg1;
+	FILE *pidfile = (FILE *)arg2;
+	syscall_stats_t  *statp = &ioctlp->stats;
+	char *ioctl_name;
+	
+	ioctl_name = get_ioctl_name(ioctlp->lle.key);
+	if (ioctl_name) {
+		pid_printf (pidfile, "%s   %-27s", tab, ioctl_name);
+	} else {
+		pid_printf (pidfile, "%s   0x%08x%                 ", tab, ioctlp->lle.key);
+	}
+
+	/* pid_printf (pidfile, "%s %-29s%8d %8.1f %11.6f %10.6f %10.6f %7d\n", tab, */
+	pid_printf (pidfile, "%8d %8.1f %11.6f %10.6f %10.6f %7d\n",
+		statp->count,
+		statp->count / secs,
+		SECS(statp->total_time),
+		SECS(statp->total_time / statp->count),
+		SECS(statp->max_time),
+		statp->errors);
+}
+
 
 int
 print_syscall_info(void *arg1, void *arg2)
@@ -548,13 +573,20 @@ print_syscall_info(void *arg1, void *arg2)
 			pid_printf (pidfile, "%s   %-27s                  %11.6f\n",  tab,
 				"CPU",
 				SECS(sstatp->T_run_time));
-	}
 
-	if (syscallp->iov_stats) {
-		iovstatp = syscallp->iov_stats;
-		tot_cnt = iovstatp->rd_cnt + iovstatp->wr_cnt;
-		if (iovstatp->rd_cnt) 
-			pid_printf (pidfile, "%s   %-27s%8d %8.1f %11s %10.6f %10.6f %7s %7lld %8.1f\n", tab,
+		if (syscallp->ioctl_hash) {
+			pid_printf (pidfile, "%s  cmd:\n",tab);
+			foreach_hash_entry((void **)syscallp->ioctl_hash,
+						IOCTL_HASHSZ,
+						print_ioctl_info,
+						ioctl_sort_by_time, 0, pidfile);
+		} 
+
+		if (syscallp->iov_stats) {
+			iovstatp = syscallp->iov_stats;
+			tot_cnt = iovstatp->rd_cnt + iovstatp->wr_cnt;
+			if (iovstatp->rd_cnt) 
+				pid_printf (pidfile, "%s   %-27s%8d %8.1f %11s %10.6f %10.6f %7s %7lld %8.1f\n", tab,
 					"AIO Reads",
 					iovstatp->rd_cnt,
 					iovstatp->rd_cnt/secs,
@@ -564,8 +596,8 @@ print_syscall_info(void *arg1, void *arg2)
 					" ",
 					iovstatp->rd_bytes / iovstatp->rd_cnt,
 					(iovstatp->rd_bytes) / (secs * 1024.0));
-		if (iovstatp->wr_cnt) 
-			pid_printf (pidfile, "%s   %-27s%8d %8.1f %11s %10.6f %10.6f %7s %7lld %8.1f\n", tab,
+			if (iovstatp->wr_cnt) 
+				pid_printf (pidfile, "%s   %-27s%8d %8.1f %11s %10.6f %10.6f %7s %7lld %8.1f\n", tab,
 					"AIO Writes",
 					iovstatp->wr_cnt,
 					iovstatp->wr_cnt/secs,
@@ -576,6 +608,7 @@ print_syscall_info(void *arg1, void *arg2)
 					iovstatp->wr_bytes / iovstatp->wr_cnt,
 					(iovstatp->wr_bytes) / (secs * 1024.0));
 		}
+	}
 	
 	return 0;	
 }
@@ -875,7 +908,7 @@ pid_dsk_report(pid_info_t *pidp, FILE *pidfile)
 
 	if (pidp->iostats[IO_TOTAL].compl_cnt) {
 		pid_printf (pidfile, "\n    ******** PHYSICAL DEVICE REPORT ********\n");
-		pid_printf (pidfile, "%s    device   rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+		pid_printf (pidfile, "%s    device   rw  avque avinflt   io/s   KB/s  avsz    avwait    avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
 		foreach_hash_entry((void **)pidp->devhash, DEV_HSIZE, calc_dev_totals, NULL, 0, NULL);
 		foreach_hash_entry((void **)pidp->devhash, DEV_HSIZE, dsk_print_dev_iostats, dev_sort_by_dev, 0, pidfile);
 
@@ -884,7 +917,7 @@ pid_dsk_report(pid_info_t *pidp, FILE *pidfile)
 
 	if (pidp->miostats[IO_TOTAL].compl_cnt) {
 		pid_printf (pidfile, "\n    ******** DEVICE-MAPPER REPORT ********\n");
-		pid_printf (pidfile, "%s    device   rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
+		pid_printf (pidfile, "%s    device   rw  avque avinflt   io/s   KB/s  avsz    avwait    avserv    tot    seq    rnd  reque  flush maxwait maxserv\n", tab);
 		foreach_hash_entry((void **)pidp->mdevhash, DEV_HSIZE, calc_dev_totals, NULL, 0, NULL);
 		foreach_hash_entry((void **)pidp->mdevhash, DEV_HSIZE, dsk_print_dev_iostats, dev_sort_by_dev, 0, pidfile);
 
@@ -1193,23 +1226,6 @@ pid_print_report(void *v)
 
 	return 0;
 }
-
-int
-pid_print_func(void *v)
-{
-        struct timeval tod;
-        if (debug) printf ("pid_print_func\n");
-        printf ("pid_print_func\n");
-
-        if ((print_flag) && (is_alive)) {
-                gettimeofday(&tod, NULL);
-                printf ("\n%s\n", ctime(&tod.tv_sec));
-                pid_print_report(v);
-                print_flag = 0;
-        }
-        return 0;
-}
-
 
 int
 pid_ftrace_print_func(void *a, void *arg)

@@ -72,7 +72,6 @@ firstpass_init_func(void *v)
 
 	if (debug) printf ("firstpass_init_func()\n");
         process_func = NULL;
-        print_func = NULL;
         report_func = NULL;
         filter_func  = NULL;
 	alarm_func = NULL;

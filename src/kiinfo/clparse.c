@@ -38,7 +38,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "clprint.h"
 
 int clparse_report_func(void *v);
-int clparse_print_func(void *v);
 /*
  ** The initialisation function
  */
@@ -49,7 +48,6 @@ clparse_init_func(void *v)
 
 	if (debug) printf ("clparse_init_func()\n");
         process_func = NULL;
-        print_func = clparse_print_func;
         report_func = clparse_report_func;
 	bufmiss_func = pid_bufmiss_func;
 	filter_func = info_filter_func;   /* no filter func for kirunq, use generic */
@@ -125,6 +123,7 @@ clparse_init_func(void *v)
         dsk_io_sizes[7]= 500;
         dsk_io_sizes[8]= 1000;
 
+	parse_dmidecode1();
 	parse_cpuinfo();
 	parse_mpsched();
 	parse_lscpu();
@@ -132,7 +131,6 @@ clparse_init_func(void *v)
 	parse_devices();
         parse_ll_R();
 
-	parse_dmidecode1();
 	parse_docker_ps();
 	parse_pods();
 	parse_proc_cgroup();
@@ -439,21 +437,6 @@ clparse_print_report(void *v)
 		cl_network_csv();
 	}
 	return 0;
-}
-
-int
-clparse_print_func(void *v)
-{
-        int i;
-        struct timeval tod;
-
-        if ((print_flag) && (is_alive)) {
-                gettimeofday(&tod, NULL);
-                printf ("\n%s\n", ctime(&tod.tv_sec));
-                kparse_print_report(v);
-                print_flag=0;
-        }
-        return 0;
 }
 
 int

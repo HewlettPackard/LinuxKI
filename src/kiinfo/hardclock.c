@@ -178,8 +178,15 @@ collect_hc_stktrc(hardclock_t *rec_ptr, hc_info_t *hcinfop, pid_info_t *pidp)
 void 
 hc_update_sched_state(sched_info_t *schedp, int state, uint64 cur_time)
 {
+
+	/* clear IRQ sched bits */
+	if (state != HC_INTR) {
+		schedp->sched_stats.state = schedp->sched_stats.state & 0x7;
+	}
+
 	if (schedp->sched_stats.state==UNKNOWN) {
-		schedp->sched_stats.last_cur_time = cur_time;
+		/* I would use start_time here, but PIDs can go into UNKNOWN state if events are missed */
+		schedp->sched_stats.last_cur_time = cur_time; 
 	}
 
 	if ((schedp->sched_stats.state==RUNNING) || (schedp->sched_stats.state==UNKNOWN)) {

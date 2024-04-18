@@ -98,7 +98,6 @@ kiall_init_func(void *v)
         process_func = kiall_process_func;
 	preprocess_func = NULL;
 	if (vis) preprocess_func = kiall_preprocess_func;
-        print_func = kiall_print_func;
         report_func = kiall_report_func;
 	report_func_arg = filter_func_arg;
 	filter_func = info_filter_func;   /* no filter func for kiall, use generic */
@@ -239,7 +238,6 @@ kiall_init_func(void *v)
                 	ki_actions[TRACE_WALLTIME].func = trace_walltime_func;
 
 		SET_KIACTION_EXECUTE(TRACE_WALLTIME, 1);
-        	/* bufmiss_func = kparse_bufmiss_func; */
 	} else {
 		SET_KIACTION_FUNCTION(TRACE_PRINT, kiall_ftrace_print_func);
 		SET_KIACTION_EXECUTE(TRACE_PRINT, 1);
@@ -471,7 +469,6 @@ kiall_ftrace_print_func(void *a, void *arg)
 		SET_KIACTION_EXECUTE(TRACE_CACHE_INSERT, 1);
 		SET_KIACTION_EXECUTE(TRACE_CACHE_EVICT, 1);
                 start_time = KD_CUR_TIME;
-		/* bufmiss_func = kparse_bufmiss_func; */
         }
         if (strstr(buf, ts_end_marker)) {
                 ki_actions[TRACE_BLOCK_RQ_ISSUE].execute = 0;
@@ -743,21 +740,6 @@ kiall_print_report(void *v)
 	}
 
 	return 0;
-}
-
-int
-kiall_print_func(void *v)
-{
-        int i;
-        struct timeval tod;
-
-        if ((print_flag) && (is_alive)) {
-                gettimeofday(&tod, NULL);
-                printf ("\n%s\n", ctime(&tod.tv_sec));
-                kiall_print_report(v);
-                print_flag=0;
-        }
-        return 0;
 }
 
 int

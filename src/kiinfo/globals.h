@@ -438,6 +438,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define NVIDIA_IOCTL_MAGIC	'F'
 #define NVIDIA_NRCTLS		0xe0
 
+#define DM_IOCTL_MAGIC		0xfd
+#define DM_NRCTLS		0x20
+
+#define SG_IOCTL_MAGIC          0x22
+#define SG_NRCTLS               0x90
+
+#define KVM_IOCTL_MAGIC          0xae
+#define KVM_NRCTLS               0xef
+
 /* special node numbers for sockets */
 #define TCP_NODE	1
 #define UDP_NODE	2
@@ -541,6 +550,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define GET_RQINFOP(hashp, key)  (runq_info_t *)find_add_hash_entry((lle_t ***)hashp, CPU_HASHSZ, key, CPU_HASH(key), sizeof(runq_info_t))
 #define GET_RQINFOP(hashp, key)  (runq_info_t *)find_add_hash_entry((lle_t ***)hashp, CPU_HASHSZ, key, CPU_HASH(key), sizeof(runq_info_t))
 #define GET_SETRQP(hashp, key)  (setrq_info_t *)find_add_hash_entry((lle_t ***)hashp, WPID_HSIZE, key, WPID_HASH(key), sizeof(setrq_info_t))
+#define GET_NTSTATUS(hashp, key)   (ntstatus_info_t *)find_add_hash_entry((lle_t ***)hashp, NTSTATUS_HASHSZ, key, NTSTATUS_HASH(key), sizeof(ntstatus_info_t))
+#define GET_IOCTLP(hashp, key)   (ioctl_info_t *)find_add_hash_entry((lle_t ***)hashp, IOCTL_HASHSZ, key, IOCTL_HASH(key), sizeof(ioctl_info_t))
+
 #define GET_PGCACHEP(hashp, dev, node) (pgcache_t *)find_add_hash_entry((lle_t ***)hashp, PGCACHE_HASHSZ, PGCACHE_KEY(dev,node),		\
 								PGCACHE_HASH(dev, node), sizeof(pgcache_t))
 #define GET_FDATAP(hashp, dev, node) (fdata_info_t *)find_add_hash_entry((lle_t ***)hashp, 							\
@@ -589,6 +601,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 								SDATA_HASH(ip1, port1, ip2, port2), sizeof(clsdata_info_t))
 
 #define FIND_DOCKERP(hash, key) (docker_info_t *)find_entry((lle_t **)hash, key, DOCKER_HASH(key))
+#define FIND_NTSTATUS(hash, key)  (ntstatus_info_t *)find_entry((lle_t **)hash, key, NTSTATUS_HASH(key))
+#define FIND_IOCTL(hash, key)  (ioctl_info_t *)find_entry((lle_t **)hash, key, IOCTL_HASH(key))
 #define FIND_PIDP(hash, key)  (pid_info_t *)find_entry((lle_t **)hash, key, PID_HASH(key))
 #define FIND_CPUP(hash, key)  (cpu_info_t *)find_entry((lle_t **)hash, key, CPU_HASH(key))
 #define FIND_PCPUP(hash, key)  (pcpu_info_t *)find_entry((lle_t **)hash, key, CPU_HASH(key))
@@ -637,9 +651,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define FUTEX_KEY(tgid, uaddr) ((uaddr & 0xffffffffff) | ((uint64)tgid << 40))
 #define FUTEX_TGID(key) ((key & 0xffffff0000000000) >> 40)
 #define FUTEX_HSIZE 0x1000
-#define FUTEX_HASH(key)  (((key >> 8) & (key >> 40)) % FUTEX_HSIZE)
+#define FUTEX_HASH(key)  (((key >> 16) + (key >> 40)) % FUTEX_HSIZE)
 #define GFUTEX_HSIZE 0x4000
-#define GFUTEX_HASH(key)  (((key >> 8) & (key >> 40)) % GFUTEX_HSIZE)
+#define GFUTEX_HASH(key)  (((key >> 16) + (key >> 40)) % GFUTEX_HSIZE)
 #define FUTEXOP_HSIZE 0x8
 #define FUTEXOP_HASH(key) (key %  FUTEXOP_HSIZE)
 #define FUTEXPID_HSIZE 0x40
@@ -784,6 +798,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #define CPU_HASHSZ 0x200
 #define CPU_HASH(cpu) ((cpu) % CPU_HASHSZ)
+
+#define NTSTATUS_HASHSZ 0x4000
+#define NTSTATUS_HASH(status) ((((status & 0xc0000000) >> 18) + (status & 0xffff) + ((status & 0x7f0000) >> 9)) % NTSTATUS_HASHSZ)
+
+#define IOCTL_HASHSZ 0x10
+#define IOCTL_HASH(cmd) ((cmd) % IOCTL_HASHSZ)
 
 #define LDOM_HASHSZ 0x10
 #define LDOM_HASH(ldom) ((ldom) % LDOM_HASHSZ)
@@ -960,7 +980,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 /* macros for managing the Notes and Warnings messages and links.  */
 /* update with warnmsg[] definitions in globals.c */
-#define MAXWARNMSG		35
+#define MAXWARNMSG		36
 #define MAXNOTEMSG		0
 #define MAXNOTEWARN		MAXWARNMSG+MAXNOTEMSG
 #define WARN_CPU_BOTTLENECK		0		
@@ -998,6 +1018,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARN_NODE_LOWMEM		32
 #define WARN_RUNQ_DELAYS		33
 #define WARN_LARGE_NUMA_NODE		34
+#define WARN_CLOCKSOURCE		35
 #define NOTE_NUM1		MAXWARNMSG+0
 
 /* warn flags passed to "foreach" functions for detection */
@@ -1716,6 +1737,7 @@ typedef struct wtree_node {
 typedef struct setrq_info {
         lle_t           lle;            /* key is pid */
         struct coop_scall    **coop_scall_hash;   /* syscalls waker/sleeper were in when woken */
+	stktrc_info_t	**win_stktrc_hash;	/* for Windows ReadyThread events */
         uint64          sleep_time;
         uint64          unknown_time;
         int             cnt;
@@ -1812,6 +1834,11 @@ typedef struct idle_info {
 	uint32 prev_resume_cnt;
 	uint32 prev_time;
 } idle_info_t;
+
+typedef struct ntstatus_info {
+	lle_t		lle;
+	char		*name;
+} ntstatus_info_t;
 
 typedef struct pcpu_info {
 	lle_t		lle;
@@ -2076,12 +2103,18 @@ struct logio_info {
 	struct logio_stats 	stats;
 };
 
+typedef struct ioctl_info {		/* lle is ioctl arg0 */
+	lle_t		lle;
+	struct syscall_stats 	stats;
+} ioctl_info_t;
+
 struct syscall_info {
 	lle_t			lle;
 	struct syscall_stats	stats;
 	struct sched_stats	sched_stats;
 	void			**slp_hash;
 	struct iov_stats	*iov_stats;
+	struct ioctl_info	**ioctl_hash;
 };
 
 struct win_syscall_save_entry {
@@ -2264,6 +2297,7 @@ typedef struct server_info {
 	void *iotimes;			/* struct iotimes */
 	void **elfmap_hash;		/* struct elfmap_info_t */
 	void **pdbmap_hash;   		/* Windows PDB Hash Table */
+	void **ntstatus_hash;		/* Windows NTSTATUS Hash Table */
 	void *vtxt_pregp;
 	struct iostats	iostats[3];     /* TOTAL=0/READ=1/WRITE=2 */
 	struct sd_stats netstats;	/* network stats */
@@ -2425,6 +2459,7 @@ extern clfutex_info_t **clfutex_hash;
 extern clipip_info_t **clipip_hash;
 extern clip_info_t **cllip_hash;
 extern clsdata_info_t **clsdata_hash;
+extern ntstatus_info_t **ntstatus_hash;
 extern int 	nservers;
 extern int	max_cstate;
 extern int	cstate_names;
@@ -2548,6 +2583,9 @@ extern char *win_irq_flags[];
 extern char *uvm_ioctl[];
 extern char *nvidiactl_ioctl[];
 extern char *drm_ioctl[];
+extern char *dm_ioctl[];
+extern char *kvm_ioctl[];
+extern char *sg_ioctl[];
 
 extern void hex_dump(void *, int);
 extern int incr_trc_stats(void *, void *);
@@ -2584,3 +2622,4 @@ extern char util_str[];
 #define __NUM_vmsplice 278
 #define __NUM_write 1
 #define __NUM_writev 20
+#define __NUM_statfs 137

@@ -216,7 +216,7 @@ extern void *report_func_arg;
 extern void *(*filter_func)(void *, void *);
 extern int (*preprocess_func)(void *, void *);
 extern int (*process_func)(void *, void *);
-extern int (*sort_func)(const void *, const void *);
+/* extern int (*sort_func)(const void *, const void *); */
 extern int (*print_func)(void *);
 extern int (*report_func)(void *);
 extern int (*bufmiss_func)(void *, void *);

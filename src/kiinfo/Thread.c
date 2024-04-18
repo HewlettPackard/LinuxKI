@@ -74,8 +74,11 @@ winki_update_slp_info(pid_info_t *pidp, void *arg2, winki_stack_info_t *stkinfop
 	waitinfop->max_time = MAX(waitinfop->max_time, pidp->last_sleep_delta);
 }
 
+/* function can be used for ReadyThread stack traces or Cswitch stack traces.   For 
+   Cswitch stack traces, the spid and tpid will be the same */
+
 void
-winki_update_stktrc_info(pid_info_t *pidp, void *arg1,  winki_stack_info_t *stkinfop, uint64 delta, int sys_only)
+winki_update_stktrc_info(pid_info_t *spidp, pid_info_t *tpidp, void *arg1,  winki_stack_info_t *stkinfop, uint64 delta, int sys_only)
 {
         stktrc_info_t ***stktrc_hash = arg1;
         stktrc_info_t *stktrcp;
@@ -86,14 +89,14 @@ winki_update_stktrc_info(pid_info_t *pidp, void *arg1,  winki_stack_info_t *stki
 	vtxt_preg_t *pregp = NULL;
 	uint64 stktrc[LEGACY_STACK_DEPTH];
 
-	if (pidp->last_sleep_delta == 0) return;
+	if (tpidp->last_sleep_delta == 0) return;
         if (stkinfop->depth == 0) return;
 	if (cluster_flag) return;
 
         for (i = 0, j = 0; i < stkinfop->depth && j < LEGACY_STACK_DEPTH; i++) {
 		key = ip = stkinfop->Stack[i];
 		if (sys_only && !WINKERN_ADDR(ip)) break;
-                if (pregp = get_win_pregp(ip, pidp)) {
+                if (pregp = get_win_pregp(ip, spidp)) {
 			if (symptr = win_symlookup(pregp, ip, &symaddr)) {
 				if (strncmp(symptr, "SwapContext", 11) == 0) continue;
 				else if (strncmp(symptr, "KiSwapContext", 13) == 0) continue;
@@ -118,9 +121,9 @@ winki_update_stktrc_info(pid_info_t *pidp, void *arg1,  winki_stack_info_t *stki
 					&stktrc[0],
 					depth);
 
-	stktrcp->pidp = pidp;
+	stktrcp->pidp = spidp;
 	stktrcp->cnt++;
-	stktrcp->slptime += pidp->last_sleep_delta;
+	stktrcp->slptime += tpidp->last_sleep_delta;
 	stktrcp->stklen = depth; 
 }
 
@@ -298,7 +301,7 @@ perpid_target_cswitch_stats(int cpu, Cswitch_t *p, pid_info_t *pidp, winki_stack
 	if (pidp->last_sleep_delta) { 
 		/* if the PID was sleeping previously, the last_sleep_delta should have a value */
 		if (sleep_stats) winki_update_slp_info(pidp, &pidp->slp_hash, stkinfop, delta, statp->LastWaitReason);
-		if (stktrc_stats) winki_update_stktrc_info(pidp, &pidp->stktrc_hash, stkinfop, delta, 0);
+		if (stktrc_stats) winki_update_stktrc_info(pidp, pidp, &pidp->stktrc_hash, stkinfop, delta, 0);
 	}
 
 	entry = (win_syscall_save_t *)pidp->win_active_syscalls;
@@ -318,7 +321,7 @@ perpid_target_cswitch_stats(int cpu, Cswitch_t *p, pid_info_t *pidp, winki_stack
 	if (global_stats && pidp->last_sleep_delta) {
 		gschedp = GET_ADD_SCHEDP(&globals->schedp);
 		if (sleep_stats) winki_update_slp_info(pidp, &globals->slp_hash, stkinfop, delta, statp->LastWaitReason);
-		if (stktrc_stats) winki_update_stktrc_info(pidp, &globals->stktrc_hash, stkinfop, delta, 1);
+		if (stktrc_stats) winki_update_stktrc_info(pidp, pidp, &globals->stktrc_hash, stkinfop, delta, 1);
 	}
 
 	/* reset for the next sleep */
@@ -595,7 +598,7 @@ thread_readythread_func (void *a, void *v)
         trace_info_t *trcinfop = (trace_info_t *)a;
         ReadyThread_t *p = (ReadyThread_t *)trcinfop->cur_event;
         pid_info_t *pidp = NULL, *tpidp = NULL, *tgidp = NULL, *syspidp; 
-        sched_info_t *schedp, *tschedp, *gschedp;
+        sched_info_t *schedp = NULL, *tschedp = NULL, *gschedp = NULL;
         sched_stats_t *statp, *tstatp, *sstatp, *fd_sstatp;
         syscall_info_t *tsyscallp;
 	win_syscall_save_t *entry;
@@ -609,6 +612,7 @@ thread_readythread_func (void *a, void *v)
 	short syscall_id;
 	winki_stack_info_t stkinfo, *stkinfop;
 	vtxt_preg_t *pregp = NULL;
+	setrq_info_t *setrq_infop;
 
         /* we have to peak to see if the next event for the buffer it a StackWalk event */
         /* However, if we are at the end of the buffer, we need to move to the next one */
@@ -647,8 +651,8 @@ thread_readythread_func (void *a, void *v)
         }
 
         pidp = GET_PIDP(&globals->pid_hash, tid);
-
         tpidp = GET_PIDP(&globals->pid_hash, p->TThreadId);
+
 	tschedp = (sched_info_t *)find_sched_info(tpidp);
 	tstatp = &tschedp->sched_stats;
 	old_state = coop_old_state = tstatp->state;
@@ -691,7 +695,7 @@ thread_readythread_func (void *a, void *v)
 		}
 	}
 
-	if (coop_stats && (p->TThreadId != tid)) {
+	if (perpid_stats && (p->TThreadId != tid)) {
 		if (schedp && p->TThreadId) {
 			incr_setrq_stats((setrq_info_t ***)&schedp->setrq_tgt_hash, p->TThreadId, 
 					coop_old_state, coop_delta);
@@ -700,7 +704,13 @@ thread_readythread_func (void *a, void *v)
 		if (tschedp)  {
 			incr_setrq_stats((setrq_info_t ***)&tschedp->setrq_src_hash, tid,
 					coop_old_state, coop_delta);
+
 			/* update_coop_stats(schedp, tschedp, pidp, tpidp, coop_delta, coop_old_state, SLEEPER); */
+		}
+
+		if (schedp && tschedp && stktrc_stats) {
+			setrq_infop = GET_SETRQP(&tschedp->setrq_src_hash, tid);
+			winki_update_stktrc_info(pidp, tpidp, &setrq_infop->win_stktrc_hash, stkinfop, coop_delta, 0);
 		}
 	}
 

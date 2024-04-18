@@ -1250,8 +1250,8 @@ cl_device_globals()                     /* Section 4.1 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD("                 --------------------  Total  -------------------- --------------------  Write  -------------------- ---------------------  Read  --------------------\n");
-	BOLD("Server              IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv\n");
+	BOLD("                 ---------------------  Total  --------------------- ---------------------  Write  --------------------- ----------------------  Read  ---------------------\n");
+	BOLD("Server              IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv\n");
 	foreach_server(cl_print_global_disk_stats, server_sort_by_iops, top, NULL);
 }
 
@@ -1326,8 +1326,8 @@ cl_active_mdevs()                       /* Section 4.3.1 */
         _TABLE;
 
 	lineno=1;
-	BOLD("--------------------  Total  -------------------- --------------------  Write  -------------------- ---------------------  Read  --------------------\n");
-	BOLD("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv  Device\n");
+	BOLD("---------------------  Total  --------------------- ---------------------  Write  --------------------- ----------------------  Read  ---------------------\n");
+	BOLD("   IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv  Device\n");
 	foreach_hash_entry((void **)clmdev_hash, CLDEV_HSIZE, cl_print_dev_iostats, cldev_sort_by_iops, top, &warnflag);
 }
  
@@ -1351,8 +1351,8 @@ cl_active_disks()                       /* Section 4.2.1 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD("--------------------  Total  -------------------- --------------------  Write  -------------------- ---------------------  Read  --------------------\n");
-	BOLD("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv  Device\n");
+	BOLD("---------------------  Total  --------------------- ---------------------  Write  --------------------- ----------------------  Read  ---------------------\n");
+	BOLD("   IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv  Device\n");
 	foreach_hash_entry((void **)cldev_hash, CLDEV_HSIZE, cl_print_dev_iostats, cldev_sort_by_iops, top, &warnflag);
 
         if (warnflag & WARNF_AVSERV) {
@@ -1397,8 +1397,8 @@ cl_perpid_mdev_totals()                  /* Section 4.4.0 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD("         --------------------  Total  -------------------- --------------------  Write  -------------------- ---------------------  Read  --------------------\n");
-	BOLD("PID         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv  Command\n");
+	BOLD("         ---------------------  Total  --------------------- ---------------------  Write  --------------------- ----------------------  Read  ---------------------\n");
+	BOLD("PID         IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv  Command\n");
 	foreach_hash_entry((void **)clpid_hash, CLPID_HASHSZ, clpid_print_miostats, clpid_sort_by_miops, top, NULL);
 }
  
@@ -1438,8 +1438,8 @@ cl_perpid_dev_totals()                  /* Section 4.4.0 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD("         --------------------  Total  -------------------- --------------------  Write  -------------------- ---------------------  Read  --------------------\n");
-	BOLD("PID         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv  Command\n");
+	BOLD("         ---------------------  Total  --------------------- ---------------------  Write  --------------------- ----------------------  Read  ---------------------\n");
+	BOLD("PID         IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv  Command\n");
 	foreach_hash_entry((void **)clpid_hash, CLPID_HASHSZ, clpid_print_iostats, clpid_sort_by_iops, top, NULL);
 }
  

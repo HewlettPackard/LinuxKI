@@ -99,6 +99,38 @@ print_cmdline()
 	fclose(f);
 }
 
+
+void
+print_clocksource()
+{
+        FILE *f = NULL;
+        char fname[30];
+	char line[MAX_STR_LEN];
+        int warn_indx;
+        sprintf (fname, "clocksource.%s", timestamp);
+        if ( (f = fopen(fname, "r")) == NULL) {
+		return;
+        }
+
+	ANM(_LNK_0_3_0);
+
+	// Read the first line from the file
+        if (fgets(line, sizeof(line), f) != NULL) {
+	// Remove the newline character at the en
+		line[strcspn(line, "\n")] = '\0';
+	}
+
+	// Check if the first line is not equal to "tsc"
+	printf ("clocksource: %s\n", line);
+        if (strcmp(line, "tsc") != 0) {
+             warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_CLOCKSOURCE, _LNK_0_3_0);
+             kp_warning(globals->warnings, warn_indx, _LNK_0_3_0); NL;			
+        }
+
+        fclose(f);
+}
+		
+
 void
 print_mem_info()
 {
@@ -177,6 +209,7 @@ kp_sys_summary ()
 	if (!IS_WINKI) {
 		NL;
 		print_cmdline(); NL;
+		print_clocksource(); NL;
 		print_mem_info(); NL;
 
 		ANM(_LNK_0_2_0);
@@ -1907,8 +1940,8 @@ kp_device_globals()			/* Section 4.1 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD("         --------------------  Total  -------------------- --------------------  Write  -------------------- ---------------------  Read  --------------------"); NL;
-	BOLD("Devices     IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
+	BOLD("         ---------------------  Total  --------------------- ---------------------  Write  --------------------- ----------------------  Read  ---------------------"); NL;
+	BOLD("Devices     IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv"); NL;
         printf ("%7d  ", globals->ndevs);
 	print_iostats_totals(globals, &globals->iostats[0], NULL);
 	return;
@@ -1985,8 +2018,8 @@ kp_active_disks()			/* Section 4.2.1 */
         tab=tab0;
         lineno=1;
 
-	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
-	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
+	BOLD("            ---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------"); NL;
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv"); NL;
         foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, kp_dev_entries, dev_sort_by_count, 10, &warnflag);
 	CSV_FIELD("kidsk", "[CSV]");
 
@@ -2016,8 +2049,8 @@ kp_highserv1_disks()			/* Section 4.2.2 */
 
         tab=tab0;
         lineno=1;
-	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
-	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
+	BOLD("            ---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------"); NL;
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv"); NL;
         foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, kp_dev_entries_over5, dev_sort_by_avserv_over5, 10, &warnflag);
 	CSV_FIELD("kidsk", "[CSV]");
 
@@ -2047,8 +2080,8 @@ kp_highserv2_disks()			/* Section 4.2.3 */
 
         tab=tab0;
         lineno=1;
-	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
-	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
+	BOLD("            ---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------"); NL;
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv"); NL;
         foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, kp_dev_entries_less5, dev_sort_by_avserv_less5, 10, &warnflag);
 	CSV_FIELD("kidsk", "[CSV]");
 }
@@ -2070,8 +2103,8 @@ kp_highwait_disks()			/* Section 4.2.4 */
 
         tab=tab0;
         lineno=1;
-	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
-	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
+	BOLD("            ---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------"); NL;
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv"); NL;
         foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, kp_dev_entries, dev_sort_by_avwait, 10, NULL);
 	CSV_FIELD("kidsk", "[CSV]");
 }
@@ -2094,8 +2127,8 @@ kp_requeue_disks()			/* Section 4.2.5 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
-	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
+	BOLD("            ---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------"); NL;
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv"); NL;
         foreach_hash_entry((void **)globals->devhash, DEV_HSIZE, kp_dev_requeue_entries, dev_sort_by_requeue, 0, &warnflag);
         if (warnflag & WARNF_REQUEUES) {
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_REQUEUES, _LNK_4_2_5);
@@ -2168,8 +2201,8 @@ kp_active_mapper_devs()			/* Section 4.3.1 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
-	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
+	BOLD("            ---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------"); NL;
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv"); NL;
         foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, kp_dev_entries, dev_sort_by_count, 10, &warnflag);
 
         if (warnflag & WARNF_MULTIPATH_BUG) {
@@ -2199,8 +2232,8 @@ kp_hiserv_mapper_devs()			/* Section 4.3.2 */
 
         tab=tab0;
         lineno=1;
-	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
-	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
+	BOLD("            ---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------"); NL;
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv"); NL;
         foreach_hash_entry((void **)globals->mdevhash, DEV_HSIZE, kp_dev_entries_over5, dev_sort_by_avserv_over5, 10, NULL);
 	CSV_FIELD("kidsk", "[CSV]");
 }
@@ -2257,8 +2290,8 @@ kp_fc_totals()				/* Section 4.4 */
 
         tab=tab0;
         lineno=1;
-	BOLD("            --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
-	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
+	BOLD("            ---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------"); NL;
+	BOLD("Device         IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv"); NL;
         foreach_hash_entry((void **)globals->fchash, FC_HSIZE, kp_fc_entries, NULL, 0, NULL);
 }
 
@@ -2314,8 +2347,8 @@ kp_wwn_totals()				/* Section 4.5 */
 
         tab=tab0;
         lineno=1;
-	BOLD("                    --------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
-	BOLD("Target WWN             IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv"); NL;
+	BOLD("                    ---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------"); NL;
+	BOLD("Target WWN             IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv"); NL;
         foreach_hash_entry((void **)globals->wwnhash, WWN_HSIZE, kp_wwn_entries, wwn_sort_by_wwn, 0, NULL);
 }
 
@@ -2335,8 +2368,8 @@ kp_perpid_mdev_totals()			/* Section 4.6 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
-	BOLD ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv      %s  Process", tlabel); NL;
+	BOLD ("---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------"); NL;
+	BOLD ("   IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv      %s  Process", tlabel); NL;
 
         foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_miosum,  pid_sort_by_miocnt, 10, NULL);
 	CSV_FIELD("kipid", "[CSV]");
@@ -2361,8 +2394,8 @@ kp_perpid_dev_totals()			/* Section 4.7 */
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 
-	BOLD ("--------------------  Total  -------------------- ---------------------  Write  ------------------- ---------------------  Read  --------------------"); NL;
-	BOLD ("   IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv    IO/s    MB/s  AvIOsz AvInFlt   Avwait   Avserv      %s  Process", tlabel); NL;
+	BOLD ("---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------"); NL;
+	BOLD ("   IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv      %s  Process", tlabel); NL;
 
         foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, print_pid_iosum,  pid_sort_by_iocnt, 10, NULL);
 	CSV_FIELD("kipid", "[CSV]");

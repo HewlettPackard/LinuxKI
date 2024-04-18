@@ -83,7 +83,6 @@ file_init_func(void *v)
 {
 	if (debug) printf ("file_init_func()\n");
         process_func = NULL;
-        print_func = file_print_func;
         report_func = file_report_func;
 	filter_func = info_filter_func;   /* no filter func for kifile, use generic */
         bufmiss_func = pid_bufmiss_func;
@@ -265,7 +264,7 @@ file_print_fobj_physio(void *arg1, void *arg2)
 	NLt;
 	_CAPTION;
 
-	BOLD ("      device rw  avque avinflt   io/s   KB/s  avsz   avwait   avserv    tot    seq    rnd  reque  flush maxwait maxserv" ); NL;
+	BOLD ("      device rw  avque avinflt   io/s   KB/s  avsz    avwait    avserv    tot    seq    rnd  reque  flush maxwait maxserv" ); NL;
 #if 0 
 	/* Skip the totals unless we see mulitple devices for a file */
 	printf ("Totals:     ");
@@ -526,20 +525,6 @@ file_print_report(void *v)
 	foreach_hash_entry((void **)globals->fdata_hash, FDATA_HASHSZ, clear_fdata_stats, NULL, 0, NULL);
 
 	printf ("\n");
-}
-
-int
-file_print_func(void *v)
-{
-        struct timeval tod;
-
-        if ((print_flag) && (is_alive)) {
-                gettimeofday(&tod, NULL);
-                printf ("\n%s\n", ctime(&tod.tv_sec));
-                file_print_report(v);
-                print_flag=0;
-        }
-        return 0;
 }
 
 int

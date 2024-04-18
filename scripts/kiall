@@ -51,6 +51,7 @@ shopt -s extglob
 # version 7.6   02/22/2023   Made Visulation option hidden again
 # version 7.7   07/28/2023   change egrep to grep -E                
 # version 7.8   11/09/2023   Add -f to the "rm" commands to prevent being prompted in script.
+# version 7.9   04/19/2024   Added ntstatus processing for WinKI
 # 
 # DESCRIPTION:
 #  
@@ -261,6 +262,7 @@ process_mw()
 
 process_winki()
 {
+    cp $DIR/winki/ntstatus.txt ntstatus.$tag >/dev/null 2>&1
     echo $DIR/kiinfo -kitrace -ts $tag 
     $DIR/kiinfo -kitrace -ts $tag >ki.$tag
 	    

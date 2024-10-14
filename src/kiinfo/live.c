@@ -964,11 +964,11 @@ print_iostats_dev_live(void *arg1, void *arg2)
 
 	if (COLS > col+191) {
         	if (statsp[IOTOT].requeue_cnt) {
-                	mvprintw (lineno, col+151, "requeue: %d", statsp[IOTOT].requeue_cnt);
+                	mvprintw (lineno, col+157, "requeue: %d", statsp[IOTOT].requeue_cnt);
         	}
 
         	if (statsp[IOTOT].barrier_cnt) {
-                	mvprintw (lineno, col+171, "barriers: %d", statsp[IOTOT].barrier_cnt);
+                	mvprintw (lineno, col+177, "barriers: %d", statsp[IOTOT].barrier_cnt);
         	}
 	}
 
@@ -1006,12 +1006,12 @@ print_iostats_fc_live(void *arg1, void *arg2)
 
 	if (COLS > 191) {
         	if (statsp[IOTOT].requeue_cnt) {
-                	mvprintw (lineno, col+151, "requeue: %d", statsp[IOTOT].requeue_cnt);
+                	mvprintw (lineno, col+157, "requeue: %d", statsp[IOTOT].requeue_cnt);
         	}
 
         	if (statsp[IOTOT].barrier_cnt) {
 			col=171;
-                	mvprintw (lineno, col+171, "barriers: %d", statsp[IOTOT].barrier_cnt);
+                	mvprintw (lineno, col+177, "barriers: %d", statsp[IOTOT].barrier_cnt);
         	}
 	}
 
@@ -1049,11 +1049,11 @@ print_iostats_wwn_live(void *arg1, void *arg2)
 
 	if (COLS > col+191) {
         	if (statsp[IOTOT].requeue_cnt) {
-                	mvprintw (lineno, col+151, "requeue: %d", statsp[IOTOT].requeue_cnt);
+                	mvprintw (lineno, col+157, "requeue: %d", statsp[IOTOT].requeue_cnt);
         	}
 
         	if (statsp[IOTOT].barrier_cnt) {
-                	mvprintw (lineno, col+171, "barriers: %d", statsp[IOTOT].barrier_cnt);
+                	mvprintw (lineno, col+177, "barriers: %d", statsp[IOTOT].barrier_cnt);
         	}
 	}
 

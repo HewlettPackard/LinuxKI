@@ -63,11 +63,10 @@ vflag=0
 
 help()
 {
-    printf "Usage: %s: [-r] [-f] [-p] [-v]\n" "$0"
+    printf "Usage: %s: [-r] [-f] [-p]\n" "$0"
         printf "            -h               Help\n"
         printf "            -r               Recursively traverse subdirs looking for KI data to archive\n"
 	printf "	    -p		     Remove PIDS and CIDS subdirectories\n"
-	printf "	    -v		     Remove VIS  subdirectory & related sh/php/html files\n"
         printf "            -f               Force remove misc/tmp files\n"
 }
 

@@ -250,6 +250,8 @@ extern int  load_liki_module();
 extern int  unload_liki_module();
 extern void init_liki_tracing();
 extern int  likidump();
+extern int  likistart();
+extern int  likiend();
 extern int  etldump();
 extern void  kitracedump();
 extern int  merge();

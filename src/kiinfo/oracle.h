@@ -12,6 +12,16 @@ with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 ***************************************************************************/
 
+extern int oracle_pid_stats(void *, void *);
+extern int get_oracle_wait_event(void *, unsigned long *, unsigned int);
+extern void update_oracle_wait_event(void *, uint64);
+extern void ora_wait_report(void *, void *);
+extern void sid_wait_report(void *, void *);
+
+extern char *oracle_proc[];
+extern char *oracle_procname[];
+extern char *oracle_wait_event[];
+
 #define LGWR            0
 #define ARCHIVE         1
 #define DBWRITER        2
@@ -28,43 +38,18 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define ORACLE          15
 #define NORACLE         16
 
-extern int oracle_pid_stats(void *, void *);
-
-static char *oracle_proc[NORACLE] = {
-   "ora_lg",
-   "ora_arc",
-   "ora_dbw",
-   "ora_i",
-   "ora_p",
-   "ora_s",
-   "ora_j",
-   "ora_d0",
-   "ora_ckpt",
-   "ora_pmon",
-   "ora_smon",
-   "ora_reco",
-   "ora_ukn",
-   "ora_ukn",
-   "other",
-   "oracle"
-};
-
-static char *oracle_procname[NORACLE] = {
-    "Oracle Log Writer",
-    "Oracle Archive Processes",
-    "Oracle DB Writers",
-    "Oracle Parallel Writers",
-    "Oracle Parallel Query Processes",
-    "Oracle Shared Server Processes",
-    "Oracle Job Queue Processes",
-    "Oracle Dispatcher Processes",
-    "Oracle Checkpoint Process",
-    "Oracle Process Monitor Process",
-    "Oracle System Monitor Process",
-    "Oracle Recoverer Process",
-    "Oracle Unknown Processes",
-    "Oracle Unknown Processes",
-    "Other Oracle Processes",
-    "Oracle Shadow Processes"
-};
-
+#define ORA_NONE			0
+#define ORA_DB_FILE_SEQ_READ		1
+#define ORA_LOG_FILE_SYNC_PWWAIT 	2
+#define ORA_LOG_FILE_SYNC_POLLING 	3
+#define ORA_CURSOR_PIN_S 		4
+#define ORA_NET_FROM_CLIENT  		5
+#define ORA_NET_FROM_DBLINK		6
+#define ORA_ENQ_TX_ROW_LOCK		7
+#define ORA_DB_ASYNC_IO			8
+#define ORA_LOG_FILE_SWITCH		9
+#define ORA_BUFFER_BUSY_WAIT		10
+#define ORA_GC_CUR_READ			11
+#define ORA_GC_CUR_MB_READ		12
+#define ORA_LATCH_CACHE_BUF		13
+#define ORA_NEVENTS			14	

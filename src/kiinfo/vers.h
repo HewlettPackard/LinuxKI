@@ -11,5 +11,5 @@ should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 ***************************************************************************/
-char *tool_version="7.9";
+char *tool_version="7.10";
 char *tool_name="kiinfo";

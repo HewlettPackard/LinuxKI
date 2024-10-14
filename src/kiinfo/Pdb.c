@@ -938,7 +938,7 @@ int get_pdb(PdbImage_t *p)
 	struct stat statbuf;
 	int result, ret;
 
-	if (wget_fail_cnt > 0) return 0;
+	if (wget_fail_cnt > 5) return 0;
 
         name = &p->Name[0];
 	

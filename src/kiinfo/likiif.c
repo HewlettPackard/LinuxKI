@@ -158,8 +158,6 @@ init_debug_mountpoint(char * user_debug_dir)
 	return 0;
 }
 
-
-
 int
 liki_init(char *user_debug_dir)
 {
@@ -208,6 +206,38 @@ liki_init(char *user_debug_dir)
 		return(res);
 
 	liki_enabled = TRUE;
+
+	return(0);
+}
+
+int
+likiend_init(char *user_debug_dir)
+{
+	char		name[PATHLEN];
+	int		res;
+
+	if (liki_dir == NULL) init_debug_mountpoint(user_debug_dir) ;
+
+	/* Open the sync file */
+	sprintf(name, "%s/%s/%s", liki_debug_mountpoint, DEBUGFS_DIR_NAME, SYNC_FILE);
+	if ((liki_sf = open(name, O_RDWR)) < 0) {
+		fprintf (stderr, "Cannot open %s\n", name);
+		return -ENOENT;
+	}
+
+	/* Open the traced resources file */
+	sprintf(name, "%s/%s/%s", liki_debug_mountpoint, DEBUGFS_DIR_NAME, TRACED_RESOURCES_FILE);
+	if ((liki_trf = open(name, O_RDWR)) < 0) {
+		fprintf (stderr, "Cannot open %s\n", name); 
+		return -ENOENT;
+	}
+
+	/* Open trace enable file */
+	sprintf(name, "%s/%s/%s", liki_debug_mountpoint, DEBUGFS_DIR_NAME, TRACE_ENABLE_FILE);
+	if ((liki_tef = open(name, O_RDWR)) < 0) {
+		fprintf (stderr, "Cannot open %s\n", name); 
+		return(-ENOENT);
+	}
 
 	return(0);
 }
@@ -291,7 +321,7 @@ liki_get_tracemask()
 	unsigned long	mask;
 
 	if (read(liki_tef, &mask, sizeof(long)) != sizeof(long))  {
-		return(-1);
+		return(0ULL);
 	}
 
 	return(mask);

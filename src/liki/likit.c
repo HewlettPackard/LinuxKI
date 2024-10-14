@@ -18,7 +18,7 @@
  *
  * likit.c	LInux Kernel Instrumentation
  *
- *		v7.8
+ *		v7.10
  *		colin.honess@gmail.com
  *		mark.ray@hpe.com
  *		pokilfoyle@gmail.com
@@ -285,7 +285,15 @@ static struct socket *(*sockfd_lookup_light_fp)(int, int *, int *);
 static int (*vfs_fstat_fp)(int, struct kstat *);
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
-/* Do nothing, we will call stack_trace_save() later */
+struct stack_trace {
+	unsigned int nr_entries, max_entries;
+	unsigned long *entries;
+	int skip;	/* input argument: How many entries to skip */
+};
+
+void save_stack_trace_regs(struct stack_trace*, struct pt_regs*);
+int init_trace_state(void);
+
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(4,18,0) && (defined RHEL82 || defined RHEL86)
 unsigned int (*stack_trace_save_regs_fp)(struct pt_regs*, unsigned long *, unsigned int, unsigned int);
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
@@ -482,12 +490,6 @@ struct tp_struct tp_table[];
 #ifdef CONFIG_X86_64
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
-struct stack_trace {
-	unsigned int nr_entries, max_entries;
-	unsigned long *entries;
-	int skip;	/* input argument: How many entries to skip */
-};
-
 void save_stack_trace_regs(struct stack_trace *st, struct pt_regs *regs)
 {
 	st->nr_entries = stack_trace_save(st->entries, st->max_entries, st->skip);
@@ -1507,8 +1509,7 @@ fork_hook(struct task_struct *this, struct task_struct *new)
 #define	CHUNKS_PER_BUFFER	16
 #define BUFFER_SIZE		(CHUNK_SIZE * CHUNKS_PER_BUFFER)
 
-int
-init_trace_state(void)
+int init_trace_state(void)
 {
 	int 	cpu = 0;
 	int	set_main_man = 0;
@@ -1779,7 +1780,7 @@ startup_msr(void)
 	}
 
 	/* only allow Advanced CPU statistics on known CPUs */
-	/* see intel-family.h in kernel source */
+	/* see intel-family.h in kernel source.   See include/asm/intel-family.h */
 	switch (boot_cpu_data.x86_model) {
 		case 26: 	/* INTEL_FAM6_NEHALEM_EP - 45nm Nahalem-EP */
 		case 30:	/* INTEL_FAM6_NEHALEM - 45nm Nahalem */
@@ -1814,6 +1815,7 @@ startup_msr(void)
 		case 0x9d:      /* Ice Lake NNPI */
 
 		case 0x8f:      /* SapphireRapids */
+		case 0xcf:      /* EmeraldRapids */
 
 			break;
 		case 87:	/* Knights Landing - needs testing!!! */
@@ -4410,6 +4412,9 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 			}
 
 		} else {
+			/* if target if NFS file, we have issues which can cause softlockups, so skip this!! */
+			goto scexit_skip_vldata;
+
 
  			if (vfs_fstat_fp(fd, &stat_struct) != 0) 
  				goto scexit_skip_vldata;
@@ -6958,7 +6963,7 @@ liki_initialize(void)
 	int	i;
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,6,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,9,0)
 	printk(KERN_INFO "LiKI: unsupported kernel version\n");
 	return(-EINVAL);
 #else

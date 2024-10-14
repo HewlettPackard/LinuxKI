@@ -164,6 +164,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define DOCKTREE_FLAG		0x4000000000000ull
 #define ETLDUMP_FLAG		0x8000000000000ull
 #define SYSCONFIG_FLAG		0x10000000000000ull
+#define LIKISTART_FLAG		0x20000000000000ull
+#define LIKIEND_FLAG		0x40000000000000ull
 
 #define SET_STAT(flag) (kiinfo_stats |= flag)
 #define CLEAR_STAT(flag) (kiinfo_stats &= ~flag)
@@ -220,6 +222,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define kitracedump_flag	(ISSET(KITRACEDUMP_FLAG))
 #define etldump_flag		(ISSET(ETLDUMP_FLAG))
 #define likidump_flag		(ISSET(LIKIDUMP_FLAG))
+#define likistart_flag		(ISSET(LIKISTART_FLAG))
+#define likiend_flag		(ISSET(LIKIEND_FLAG))
 #define likimerge_flag		(ISSET(LIKIMERGE_FLAG))
 #define objdump_flag		(ISSET(OBJDUMP_FLAG))
 #define dsk_detail_flag		(ISSET(DSK_DETAIL_FLAG))
@@ -552,6 +556,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define GET_SETRQP(hashp, key)  (setrq_info_t *)find_add_hash_entry((lle_t ***)hashp, WPID_HSIZE, key, WPID_HASH(key), sizeof(setrq_info_t))
 #define GET_NTSTATUS(hashp, key)   (ntstatus_info_t *)find_add_hash_entry((lle_t ***)hashp, NTSTATUS_HASHSZ, key, NTSTATUS_HASH(key), sizeof(ntstatus_info_t))
 #define GET_IOCTLP(hashp, key)   (ioctl_info_t *)find_add_hash_entry((lle_t ***)hashp, IOCTL_HASHSZ, key, IOCTL_HASH(key), sizeof(ioctl_info_t))
+#define GET_ORA_WAITINFOP(hashp, key)  (ora_wait_info_t *)find_add_hash_entry((lle_t ***)hashp, ORA_WAIT_HSIZE, key, ORA_WAIT_HASH(key), sizeof(ora_wait_info_t))
 
 #define GET_PGCACHEP(hashp, dev, node) (pgcache_t *)find_add_hash_entry((lle_t ***)hashp, PGCACHE_HASHSZ, PGCACHE_KEY(dev,node),		\
 								PGCACHE_HASH(dev, node), sizeof(pgcache_t))
@@ -700,7 +705,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define SLP_HASH(key)  ((key >> 9) & (SLP_HSIZE-1))
 
 #define WAIT_HSIZE 0x20
-#define WAIT_HASH(key)  (SLP_HSIZE-1)
+#define WAIT_HASH(key)  (WAIT_HSIZE-1)
+
+#define ORA_WAIT_HSIZE 0x20
+#define ORA_WAIT_HASH(key)  (ORA_WAIT_HSIZE-1)
 
 #define PDB_HSIZE 0x400
 #define PDB_HASH(key) (key & (PDB_HSIZE-1))
@@ -1460,6 +1468,7 @@ typedef struct pid_info {
 	void *mapinfop;			/* struct vtxt_preg */	
 	void **pgcache_hash;		/* struct pgcache */
 	void *win_services;		/* struct win_service */
+	void **ora_wait_hash;		/* struct ora_wait_info */
 
 	/* information saved on sys_enter */
 	short 		*syscall_index;
@@ -1491,7 +1500,8 @@ typedef struct pid_info {
 	int 		nlwp;
 	int		ora_sid;	/* Index into the sid_table */
 	int		ora_proc;       /* Index into the sid_table[].sid_pid[] array */
-	short		binding;  	 /* BIND_NONE = 0; BIND_LDOM=1 */
+	uint32		last_ora_wait;	/* Last Oracle Wait Event */
+	short		binding;  	/* BIND_NONE = 0; BIND_LDOM=1 */
 	short		binding_num;
 	uint64 		rss;
 	uint64 		vss;
@@ -1579,6 +1589,13 @@ typedef struct wait_info {
 	uint32		count;
 } wait_info_t;
 
+typedef struct ora_wait_info {
+	lle_t   	lle;			/* key = oracle wait func index (see oracle.h)  */
+	uint64 		sleep_time;
+	uint64		max_time;
+	uint32		count;
+} ora_wait_info_t;
+
 
 #define LLC_REF		0
 #define LLC_MISSES	1
@@ -1650,7 +1667,8 @@ typedef struct wait_info {
 #define RUNQ_PRI_CNT		9
 #define RUNQ_USRPRI_CNT		10
 #define UFLT_SLEEP_CNT		11
-#define N_CNT_STATS		12
+#define TERMINATED_CNT		12
+#define N_CNT_STATS		13
 
 #define C_softirq_cnt		cnt[SOFTIRQ_CNT]
 #define C_hardirq_cnt		cnt[HARDIRQ_CNT]
@@ -1664,6 +1682,7 @@ typedef struct wait_info {
 #define C_runq_pri_cnt		cnt[RUNQ_PRI_CNT]
 #define C_runq_usrpri_cnt	cnt[RUNQ_USRPRI_CNT]
 #define C_uflt_sleep_cnt	cnt[UFLT_SLEEP_CNT]
+#define C_terminated_cnt	cnt[TERMINATED_CNT]
 
 typedef struct sched_stats {
 	uint64  	last_cur_time;  
@@ -2227,6 +2246,7 @@ struct ora_stats {
 struct sid_info {
 	char		sid_name[20];
 	struct sid_pid	*sid_pid[16];
+	void **ora_wait_hash;		/* struct ora_wait_info */
 	struct ora_stats stats;
 	int		phys_cnt;
 };

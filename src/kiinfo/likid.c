@@ -35,6 +35,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "info.h"
 
 extern int liki_enable_msr_data();
+extern int likiend_init();
 
 struct	trace_stream {
 	int		rb_file;
@@ -103,6 +104,7 @@ run_dumper_thread(void * mystream)
 	char		buf[CHUNK_SIZE];
 	int		ret;
 	int		sz;
+	unsigned long	mask;
 	cpu_set_t	*cpusetp;
 	size_t		cpusetsz;
 #ifdef __LIKI_REALTIME_PCPU_THREADS
@@ -151,6 +153,15 @@ run_dumper_thread(void * mystream)
 
 		CPU_FREE(cpusetp);
 	} 
+
+	if (likistart_flag) {
+		/* loop until tracing has been stopped */
+		while (1) {
+			sleep(1);
+        		mask = liki_get_tracemask();
+			if (mask == TT_BITMASK_NO_TRACES) break;
+		}
+	}
 
 	while ((ret = read(msp->rb_file, buf, CHUNK_SIZE)) != 0) { /* ! EOF */
 
@@ -320,38 +331,36 @@ likidump()
 
 	printf("%s: spooling trace data to disk...\n", tool_name);
 
+	if (likidump_flag) {
+		/* Sleep while traces are collected 
+	 	*/
+		sleep(trace_duration);
 
-	/* Sleep while traces are collected 
-	 */
-	sleep(trace_duration);
-
-
-	/* Disable tracing, and cause trailing trace data to be flushed
-	 */
-	if ((error = liki_set_tracemask(TT_BITMASK_NO_TRACES)) < 0) {
-                FATAL(-error, "Failed to halt tracing", NULL, -1);
-	}
-
-
-	/* Flush out trailing traces in partial chunks */
-	if ((error = liki_sync(ALL_CPUS)) < 0) {
-                FATAL(-error, "Failed to sync trace files", NULL, -1);
-	}
-
-
-	/* Remove our target task from the traced tasks list
-	 */
-	if (tgt_pid != (pid_t)-1) {
-		if (liki_disable_tracing_for_task(tgt_pid) < 0) {
-                	FATAL(-error, "Failed to remove target_ task", "PID:", tgt_pid);
+		/* Disable tracing, and cause trailing trace data to be flushed
+	 	*/
+		if ((error = liki_set_tracemask(TT_BITMASK_NO_TRACES)) < 0) {
+                	FATAL(-error, "Failed to halt tracing", NULL, -1);
 		}
-	}
 
-	/* Remove our target task group from the traced tasks list
-	 */
-	if (tgt_pgid != (pid_t)-1) {
-		if (liki_disable_tracing_for_task_group(tgt_pgid) < 0) {
-                	FATAL(-error, "Failed to remove target task group", "TGID:", tgt_pgid);
+		/* Flush out trailing traces in partial chunks */
+		if ((error = liki_sync(ALL_CPUS)) < 0) {
+                	FATAL(-error, "Failed to sync trace files", NULL, -1);
+		}
+	
+		/* Remove our target task from the traced tasks list
+	 	*/
+		if (tgt_pid != (pid_t)-1) {
+			if (liki_disable_tracing_for_task(tgt_pid) < 0) {
+                		FATAL(-error, "Failed to remove target_ task", "PID:", tgt_pid);
+			}
+		}
+
+		/* Remove our target task group from the traced tasks list
+	 	*/
+		if (tgt_pgid != (pid_t)-1) {
+			if (liki_disable_tracing_for_task_group(tgt_pgid) < 0) {
+                		FATAL(-error, "Failed to remove target task group", "TGID:", tgt_pgid);
+			}
 		}
 	}
 
@@ -383,4 +392,26 @@ likidump()
 	printf("%s: Tracing complete\n", tool_name);
 
 	return(0);
+}
+
+int
+likiend()
+{
+	int error;
+
+	/* open liki trace files */
+	if (error = likiend_init(debug_dir)) {
+		FATAL(-error, "Failed to initialize liki tracing module", NULL, -1);
+	}
+
+	/* Disable tracing, and cause trailing trace data to be flushed
+ 	*/
+	if ((error = liki_set_tracemask(TT_BITMASK_NO_TRACES)) < 0) {
+               	FATAL(-error, "Failed to halt tracing", NULL, -1);
+	}
+
+	/* Flush out trailing traces in partial chunks */
+	if ((error = liki_sync(ALL_CPUS)) < 0) {
+               	FATAL(-error, "Failed to sync trace files", NULL, -1);
+	}
 }

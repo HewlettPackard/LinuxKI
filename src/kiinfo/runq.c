@@ -29,6 +29,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "syscalls.h"
 #include "power.h"
 #include "irq.h"
+#include "oracle.h"
 #include "sort.h"
 #include "hash.h"
 #include "html.h"
@@ -2598,6 +2599,8 @@ sched_report(void *arg1, FILE *pidfile, FILE *pid_jsonfile, FILE *pid_wtree_json
                 SECS(statp->T_sleep_time),
                 statp->C_sleep_cnt,
                 statp->C_wakeup_cnt);
+	if (statp->C_terminated_cnt) 
+		pid_printf (pidfile, "   TerminatedCnt: %9d", statp->C_terminated_cnt);
 	PNL;
         pid_printf (pidfile, "%sRunQTime   : %9.6f  Switch Cnt: %9d   PreemptCnt : %9d",  tab,
                 SECS(statp->T_runq_time),
@@ -2753,6 +2756,7 @@ sched_report(void *arg1, FILE *pidfile, FILE *pid_jsonfile, FILE *pid_wtree_json
         if (pidp->slp_hash) {
         	pid_printf (pidfile, "\n%s******** SLEEP REPORT ********\n\n", tab);
         	sleep_report(pidp->slp_hash, schedp, slp_sort_by_time, pidfile);
+
         	if (pidp->stktrc_hash) stktrc_report(pidp->stktrc_hash, schedp, pidp, stktrc_sort_by_slptime, pidfile);
         	if (pidp->runq_stktrc_hash) stktrc_report(pidp->runq_stktrc_hash, NULL, pidp, stktrc_sort_by_cnt, pidfile);
 	}

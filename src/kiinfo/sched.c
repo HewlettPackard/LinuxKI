@@ -35,6 +35,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "html.h"
 #include "futex.h"
 #include "conv.h"
+#include "oracle.h"
 #include <ncurses.h>
 #include <curses.h>
 
@@ -187,7 +188,10 @@ update_sched_time(void *arg, uint64 curtime)
 
 	/* fprintf (stderr, "update_sched_time() statp: %p  curtime: %lld  last_cur_time: %lld\n", statp, curtime, statp->last_cur_time);  */
 
-	if (statp->state & ZOMBIE) return 0;
+	if (statp->state & ZOMBIE) {
+		statp->last_cur_time = curtime;
+		return 0;
+	}
 
 	if (statp->last_cur_time) {
 		delta = curtime - statp->last_cur_time;
@@ -914,6 +918,7 @@ sched_wakeup_func(void *a, void *v)
 
 		    if (sleep_stats) update_slp_info(tpidp, &tpidp->slp_hash, delta, 0);
 		    if (stktrc_stats) update_stktrc_info(&tpidp->last_stktrc[0], tpidp->last_stack_depth, &tpidp->stktrc_hash, delta, tpidp);
+		    if (tpidp->last_ora_wait) update_oracle_wait_event(tpidp, delta);
 		    if (global_stats) {
 			gschedp = GET_ADD_SCHEDP(&globals->schedp);
 			if (sleep_stats) update_slp_info(tpidp, &globals->slp_hash, delta, 0);
@@ -1577,6 +1582,7 @@ sched_switch_func(void *a, void *v)
 				uint64 start;
 				start = find_switch_start(&rec_ptr->ips[0], rec_ptr->stack_depth);
 				pidp->last_stack_depth = save_entire_stack(&pidp->last_stktrc[0], &rec_ptr->ips[start], rec_ptr->stack_depth-start);
+				pidp->last_ora_wait = get_oracle_wait_event(pidp, &rec_ptr->ips[start], rec_ptr->stack_depth-start);
 			}
 		} else if ((statp->state & RUNQ) && (stktrc_stats || sleep_stats) && rec_ptr->stack_depth) {
 				uint64 start;
@@ -1664,6 +1670,7 @@ sched_switch_func(void *a, void *v)
 		/* special case for zombie processes, this is done AFTER update_sched_time() */
 		if (rec_ptr->prev_state & (EXIT_ZOMBIE | EXIT_DEAD | TASK_DEAD)) {
 			statp->state = ZOMBIE;
+			statp->C_terminated_cnt++;
 		} 
 
 	} else {

@@ -19,7 +19,7 @@ TOOLDIR=/opt/linuxki
 
 # need to make sure /usr/sbin and /sbin are in the path 
 PATH=$TOOLDIR:$PATH:/usr/sbin:/sbin
-version="runki for Linux version 7.9"
+version="runki for Linux version 7.10"
 tag=`date +%m%d_%H%M`
 HOSTNAME=`hostname -s`
 KIDIR=`pwd`
@@ -59,18 +59,18 @@ MSRARG="nop"
 help()
 {
 	printf "Usage: %s: [-h help] [-L] [-M] [-U] [-X] [-a] [-j] [-J path] [-f | -p] [-n interface] [-v] [-d duration] [-t maxrun] [-P pid] [-G tgid] [-C cpu] [-D dev] [-M] [-e event] [-s subsys] [-I sysignore] [-T timestamp] [-c \"comment\"]\n" "$0"
-	printf "		-h              Help\n"
-        printf "		-L              Gather minimal data for local analysis...no gzip/tar\n"
-	printf "		-M              Include Collectl/MeasureWare data collection\n"
+	printf "                -h              Help\n"
+        printf "                -L              Gather minimal data for local analysis...no gzip/tar\n"
+	printf "                -M              Include Collectl/MeasureWare data collection\n"
         printf "                -U              Include userspace profile (perf) data collection\n"
         printf "                -X              Include sar data collection\n"
         printf "                -a              Execute 'perf annotate' on userspace profile (perf) data\n"
         printf "                -j              Collect Java stacks\n"
         printf "                -J <path>       Location of Java jstack command\n"
-	printf "		-n <interface>  Gather tcpdump trace data\n"
-	printf "		-v              Skip vxfs, misc disc data collection\n"
-	printf "		-d <secs>       Duration of KI data collection. Defaults to 20 secs if not specified.\n"
-	printf "		-t <secs>       Maximum time for data collection tools to run. Defaults to 120 secs if not specified.\n"
+	printf "                -n <interface>  Gather tcpdump trace data\n"
+	printf "                -v              Skip vxfs, misc disc data collection\n"
+	printf "                -d <secs>       Duration of KI data collection. Defaults to 20 secs if not specified. Use -d 0 for continually tracing\n"
+	printf "                -t <secs>       Maximum time for data collection tools to run. Defaults to 120 secs if not specified.\n"
 	printf "                -p              Skip Per-PID data (lsof, stacks, numa_maps, maps)\n"
 	printf "                -f              Use ftrace tracing instead of LiKI DLKM tracing to dump trace data.\n"
 	printf "                -P <pid>        Filter collection on Task ID or PID (liki only)\n"
@@ -81,7 +81,7 @@ help()
 	printf "                -e <event>      Identify events to dump. Possible values are: default | all | <event>\n"
 	printf "                -s <subsys>     Identify subsys to dump. For example: irq, scsi, block, etc.\n"
 	printf "                -I <sysignore>  File to specify ignored system call (liki only)\n"
-	printf "		-T <timestamp>  Should be of the form MMDD_HHMM \n"
+	printf "                -T <timestamp>  Should be of the form MMDD_HHMM \n"
 	printf "                -V \"<varargs>\"  Specify multiple filters and flags to pass to kiinfo -likidump\n"
 	printf "                -c \"comment\"    echo comment into comment.\$tag file\n"
 }
@@ -258,10 +258,19 @@ kitrace_data()
             	/sbin/insmod $LIKIT_KO 2>&1 >>ki.err.$tag
 	    	if [ $? -eq 0 ]; then
                     cat /proc/kallsyms      > kallsyms.$tag
-	            echo "=== Starting: Linux KI LiKI trace dump for $duration seconds ===" | tee -a ki.err.$tag
-		    echo "=== "$Comment  | tee -a comment.$tag
-                    echo "=== Starting: kiinfo -likidump dur="$duration",$Varargs,$Event,$Subsys,$pid_filter,$tgid_filter,$cpu_filter,$dev_filter,$MSRARG,debug_dir="$debugfs_mount_point",sysignore=$sysignore -ts "$tag >>ki.err.$tag 
-                    $TOOLDIR/kiinfo -likidump dur="$duration",$Varargs,$Event,$Subsys,$pid_filter,$tgid_filter,$cpu_filter,$dev_filter,$MSRARG,debug_dir="$debugfs_mount_point",sysignore=$sysignore -ts $tag 2>>ki.err.$tag 
+		    if [ $duration -eq 0 ]; then
+			echo "=== Starting: Continuous Linux KI LiKI trace dump.  Use kiinfo -likiend to stop  ===" | tee -a ki.err.$tag
+			echo "=== "$Comment  | tee -a comment.$tag
+                	echo "=== Starting: kiinfo -likistart dur="$duration",$Varargs,$Event,$Subsys,$pid_filter,$tgid_filter,$cpu_filter,$dev_filter,$MSRARG,debug_dir="$debugfs_mount_point",sysignore=$sysignore -ts "$tag >>ki.err.$tag 
+               		$TOOLDIR/kiinfo -likistart dur="$duration",$Varargs,$Event,$Subsys,$pid_filter,$tgid_filter,$cpu_filter,$dev_filter,$MSRARG,debug_dir="$debugfs_mount_point",sysignore=$sysignore -ts $tag 2>>ki.err.$tag 
+
+		    else
+	                echo "=== Starting: Linux KI LiKI trace dump for $duration seconds ===" | tee -a ki.err.$tag
+		        echo "=== "$Comment  | tee -a comment.$tag
+                        echo "=== Starting: kiinfo -likidump dur="$duration",$Varargs,$Event,$Subsys,$pid_filter,$tgid_filter,$cpu_filter,$dev_filter,$MSRARG,debug_dir="$debugfs_mount_point",sysignore=$sysignore -ts "$tag >>ki.err.$tag 
+                        $TOOLDIR/kiinfo -likidump dur="$duration",$Varargs,$Event,$Subsys,$pid_filter,$tgid_filter,$cpu_filter,$dev_filter,$MSRARG,debug_dir="$debugfs_mount_point",sysignore=$sysignore -ts $tag 2>>ki.err.$tag 
+		    fi
+
 		    if [ $? -ne 0 ] ; then
 			echo "=== ERROR: likidump failed ===" 
 			tail -1 ki.err.$tag

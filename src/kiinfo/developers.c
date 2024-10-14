@@ -537,7 +537,10 @@ get_next_event(int count)
 		}
 
 		/* this is a bit of a kludge to skip records until the startup record is found.
-		 ** This should not occur, but we have seen it once. */
+		 ** This should not occur, but we have seen it once. 
+
+		 ** 08/05/24 - removing as TT_STARTUP may be missing due to missed buffers or continuous tracing!!
+		 **
                 if ((start_filter == 0) && IS_LIKI_V4_PLUS) {
                         liki_rec = (common_t *)rec_ptr;
 
@@ -548,6 +551,7 @@ get_next_event(int count)
 				continue;
 			}
                 }
+		*/
 			
 		if (filter_func) { 
 			if (filter_func(trcinfop, filter_func_arg)) {

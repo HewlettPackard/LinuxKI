@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad
-.TH runki 1 "7.9 - April 19, 2024" version "7.9"
+.TH runki 1 ”7.10 - October 11, 2024" version "7.10"
 .SH NAME
 runki  -  LinuxKI trace dump collection script
 
@@ -26,6 +26,7 @@ Script to collect a LinuxKI trace dump using the LiKI kernel tracking module (de
  -n <interface>  Gather tcpdump trace data
  -v              Skip vxfs, misc disc data collection
  -d <secs>       Duration of KI data collection. Defaults to 20 secs if not specified.
+ -d 0            Initially continuous logging.  Collect LinuxKI dump with kiinfo -likiend
  -t <secs>       Maximum time for data collection tools to run. Defaults to 120 secs if not specified
  -p              Skip Per-PID data (lsof, stacks, numa_maps, maps)
  -f              Use ftrace tracing instead of LiKI DLKM tracing to dump trace data

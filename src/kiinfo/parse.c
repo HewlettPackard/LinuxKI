@@ -507,7 +507,7 @@ parse_lscpu()
 	FILE *f = NULL;
 	char fname[32];
 	char *rtnptr;
-	char *pos, *dash, *comma;
+	char *pos, *dash, *comma, *colon;
 	int Ampere = 0;
 	int cpu1, cpu2, ldom, i;
 	cpu_info_t *cpuinfop;
@@ -582,8 +582,11 @@ parse_lscpu()
 			pos = input_str+9;
 			sscanf(pos, "%d", &ldom);
 			ldom = atoi(pos);
-			pos = strchr(pos, ':') + 1;
-			pos++;
+
+			colon = strchr(pos, ':');
+			if (colon == NULL) return;
+			pos = ++colon; 
+
 			do {
 				cpu1 = atoi(pos);
 				cpuinfop = GET_CPUP(&globals->cpu_hash, cpu1);

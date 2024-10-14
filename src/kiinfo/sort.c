@@ -798,6 +798,46 @@ wait_sort_by_count(const void *v1, const void *v2)
 }
 
 int
+ora_wait_sort_by_time(const void *v1, const void *v2)
+{
+	const uint64 *p1=v1;
+	const uint64 *p2=v2;
+	ora_wait_info_t *a1 = (ora_wait_info_t *)*p1;
+	ora_wait_info_t *a2 = (ora_wait_info_t *)*p2;
+	int64 diff;
+
+	diff = a1->sleep_time - a2->sleep_time;
+
+	if (diff < 0) {
+		return 1;
+	} else if (diff > 0) {
+		return -1;
+	} else {
+		return 0;
+	}
+}
+
+int
+ora_wait_sort_by_count(const void *v1, const void *v2)
+{
+	const uint64 *p1=v1;
+	const uint64 *p2=v2;
+	ora_wait_info_t *a1 = (ora_wait_info_t *)*p1;
+	ora_wait_info_t *a2 = (ora_wait_info_t *)*p2;
+	int64 diff;
+
+	diff = a1->count - a2->count;
+
+	if (diff < 0) {
+		return 1;
+	} else if (diff > 0) {
+		return -1;
+	} else {
+		return 0;
+	}
+}
+
+int
 fd_sort_by_type(const void *v1, const void *v2)
 {
 	const uint64 *p1=v1;

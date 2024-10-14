@@ -138,7 +138,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 	} else {														\
 		if (abstime_flag) {												\
 			printf ("%12.09f", hrtime / 1000000000.0);								\
-		} else if ((fmttime_flag || epoch_flag) && (IS_LIKI_V3_PLUS || is_alive)) {					\
+		} else if (begin_time.tv_sec && (fmttime_flag || epoch_flag) && (IS_LIKI_V3_PLUS || is_alive)) {		\
+			/* if walltime rec is missed, then begin_time is zero */						\
 			struct timespec curtime, delta_ts;									\
 			uint64 delta, dnsecs, dsecs;										\
 			char timebuf[30];											\

@@ -256,6 +256,7 @@ perpid_source_cswitch_stats(int cpu, Cswitch_t *p, pid_info_t *pidp)
 
 	if (p->OldThreadState==Terminated) {
 		statp->state = ZOMBIE;
+		statp->C_terminated_cnt++;
 	}
 }
 

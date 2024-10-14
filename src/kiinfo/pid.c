@@ -36,6 +36,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "block.h"
 #include "syscalls.h"
 #include "sched.h"
+#include "oracle.h"
 #include "irq.h"
 #include "hardclock.h"
 #include "cache.h"
@@ -1081,6 +1082,7 @@ pid_report(void *arg1, void *v)
 
 	tab=tab4;
 	if (sched_flag) sched_report(pidp, pidfile, pid_jsonfile, pid_wtree_jsonfile);
+	if (pidp->ora_wait_hash) ora_wait_report(pidp, pidfile);
 	if (hc_flag) cpu_report(pidp, pidfile);
 	if (hc_flag) pid_spin_report(pidp, pidfile);
 	if (scall_flag) pid_syscall_report(pidp, pidfile);
@@ -1142,6 +1144,8 @@ sid_report(void *v)
                 printf ("\n*********************************************************\n");
                 printf ("**            Oracle Instance: %-20s    **\n", sid_table[i].sid_name);
                 printf ("*********************************************************\n");
+
+		sid_wait_report(&sid_table[i], NULL);
 
                 for (oraproc_idx=0; oraproc_idx <= ORACLE; oraproc_idx++) {
                         sidpidp = sid_table[i].sid_pid[oraproc_idx];

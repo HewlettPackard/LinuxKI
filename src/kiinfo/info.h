@@ -583,6 +583,8 @@ extern char * elf_syms64_str(void *, uint64, uint64 *);
 extern int txt_syms_type(char *);
 extern char *symlookup(void *,  uint64, uint64 *);
 extern char *maplookup(void *,  uint64, uint64 *);
+extern char *get_user_sym(uint64, void *);
+extern char *get_kernel_sym(unsigned long);
 extern int print_user_sym(uint64, uint64, char);
 extern void print_kernel_sym(unsigned long, char);
 extern void print_stacktrace(unsigned long *, unsigned long, int, uint64);

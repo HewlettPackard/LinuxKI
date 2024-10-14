@@ -199,6 +199,67 @@ Likidump(init_t *init, arg_t *arg)
 }
 
 static void
+Likistart(init_t *init, arg_t *arg)
+{
+	prop_t *prop;
+
+	SET(LIKISTART_FLAG);
+	is_alive = 0;
+	debug_dir = NULL;
+
+	if (arg) {
+            for (prop = arg->a_props; prop; prop = prop->p_nextp) {
+                if (strcmp("debug_dir", prop->p_name) == 0) {
+                        debug_dir = prop->p_value.s;
+                } else if (strcmp("dur", prop->p_name) == 0) {
+        		trace_duration = (uint32)prop->p_value.i;
+                } else if (strcmp("pid", prop->p_name) == 0) {
+                        if ((int)prop->p_value.i >= 0) add_filter_item(&trace_filter.f_P_pid, (int)prop->p_value.i);
+                } else if (strcmp("tgid", prop->p_name) == 0) {
+                        if ((int)prop->p_value.i >= 0) add_filter_item(&trace_filter.f_P_tgid, (int)prop->p_value.i);
+                } else if (strcmp("dev", prop->p_name) == 0) {
+                        if (prop->p_value.i >= 0) add_filter_item(&trace_filter.f_dev, (int)prop->p_value.i);
+                } else if (strcmp("cpu", prop->p_name) == 0) {
+                        if ((int)prop->p_value.i >= 0) add_filter_item(&trace_filter.f_P_cpu, (int)prop->p_value.i);
+                } else if (strcmp("events", prop->p_name) == 0) {
+                        add_filter_item_str(&trace_filter.f_events, prop->p_value.s);
+                } else if (strcmp("subsys", prop->p_name) == 0) {
+                        add_filter_item_str(&trace_filter.f_subsys, prop->p_value.s);
+                } else if (strcmp("sysignore", prop->p_name) == 0) {
+                        sysignore = prop->p_value.s;
+                } else if (strcmp("msr", prop->p_name) == 0) {
+                        SET(MSR_FLAG);
+		} else if (strcmp("help", prop->p_name) == 0) {
+			option_usage(init, NULL, "likistart");
+		}
+	    }
+	}
+
+	filter_func_arg = &trace_filter;
+}
+
+static void
+Likiend(init_t *init, arg_t *arg)
+{
+	prop_t *prop;
+
+	SET(LIKIEND_FLAG);
+	is_alive = 0;
+	debug_dir = NULL;
+
+	if (arg) {
+            for (prop = arg->a_props; prop; prop = prop->p_nextp) {
+                if (strcmp("debug_dir", prop->p_name) == 0) {
+                        debug_dir = prop->p_value.s;
+		} else if (strcmp("help", prop->p_name) == 0) {
+			option_usage(init, NULL, "likiend");
+		}
+	    }
+	}
+}
+
+
+static void
 Kparse(init_t *init, arg_t *arg)
 {
 	prop_t *prop;
@@ -1146,6 +1207,12 @@ flag_t likid_flags[] = {
   { 0,0,0,0,0 }
 };
 
+flag_t likiend_flags[] = {
+  { "debug_dir",	"path", FA_ALL, FT_REG, "s"},
+  { "help",        	NULL,   FA_ALL, FT_OPT, NULL },
+  { 0,0,0,0,0 }
+};
+
 flag_t likim_flags[] = {
   { "help",        NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
@@ -1418,6 +1485,8 @@ option_t otab[] =
   { "kitracedump", "dump",  NULL,    dump_flags, OT_CONF,    0, NULL, Kitracedump    },
   { "etldump", "etl",  NULL,    etldump_flags, OT_CONF,    0, NULL, Etldump    },
   { "likidump", "likid",  NULL,    likid_flags, OT_CONF,    0, NULL, Likidump    },
+  { "likistart", NULL,  NULL,    likid_flags, OT_CONF,    0, NULL, Likistart    },
+  { "likiend", NULL,  NULL,    likiend_flags, OT_CONF,    0, NULL, Likiend    },
   { "likimerge", "likim", NULL,   likim_flags, OT_CONF, 0, NULL, Likimerge },
   { "kparse",    "kp",  NULL,    kparse_flags, OT_CONF,    0, NULL, Kparse    }, 
   { "kitrace",   NULL,  NULL,   trace_flags, OT_CONF,    0, NULL, Kitrace     },

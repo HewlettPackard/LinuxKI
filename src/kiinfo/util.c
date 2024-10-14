@@ -1536,6 +1536,21 @@ print_sym_offset(uint64 addr) {
 }
 
 
+char *
+get_kernel_sym(unsigned long addr)
+{
+	int idx = 0;
+	char *sym = NULL;
+
+	if (globals->nsyms) {
+		idx = findsym_idx(addr);
+		if ((idx > 0) && (idx < globals->nsyms-1)) {
+			sym = globals->symtable[idx].nameptr;
+		}
+	}
+	return sym;
+}
+
 void
 print_kernel_sym(unsigned long addr, char print_offset)
 {
@@ -1655,6 +1670,39 @@ dmangle(char *sym)
 	/* we should not get here, but if we do just return what was passed in */
 
 }	
+
+char *
+get_user_sym(uint64 ip, void *arg)
+{
+	pid_info_t *pidp = (pid_info_t *)arg;
+	uint64 offset;
+	vtxt_preg_t *pregp;
+	char *sym = NULL;
+
+	if (ip == 0x0) return 0;
+
+	if (objfile_preg.elfp && (ip < 0x10000000)) { 
+		if (sym = symlookup(&objfile_preg, ip, &offset)) {
+			return (sym);
+		}
+	} else {
+		/* if mulithreaded, then we must use the tgid pid */
+		if (pidp->tgid && (pidp->PID != pidp->tgid)) {
+			pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
+		}
+
+		if (pregp = find_vtext_preg(pidp->vtxt_pregp, ip)) {
+			if (sym = symlookup(pregp, ip, &offset)) {
+				return sym;
+			} else if (sym = maplookup(pidp->mapinfop, ip, &offset)) {
+				return sym;
+			}
+		} else if (sym = maplookup(pidp->mapinfop, ip, &offset)) {
+			return sym;
+		}
+	}
+	return NULL;
+}
 
 /* we only return a value of 1 if maplookup is called
  * the .map stacks don't follow normal procedure calling

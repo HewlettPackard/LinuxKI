@@ -165,7 +165,7 @@ main(int argc, char *argv[])
 	HR; BR;
 	PRE;
 
-	if (likidump_flag) {
+	if (likidump_flag || likistart_flag) {
 		if (geteuid() != 0) { 
 			fprintf (stderr, "You must run kinfo as root to collect a trace dump\n");
 			_exit(-1);
@@ -180,6 +180,15 @@ main(int argc, char *argv[])
 
 		likidump();
 		if (kgdboc_str) reset_kgdboc();
+		_exit(0);
+	} else if (likiend_flag) {
+		if (geteuid() != 0) { 
+			fprintf (stderr, "You must run kinfo as root to collect a trace dump\n");
+			_exit(-1);
+		}
+		
+		likiend();
+
 		_exit(0);
 	} else if (kitracedump_flag) {
 		if (geteuid() != 0) { 

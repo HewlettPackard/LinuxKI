@@ -336,6 +336,7 @@ read_liki_traces()
 			}
 			if (!done && IS_SYNC_CHUNK(buf))  {
 				/* check to see if we exceeded the alarm time */
+				if (start_time == 0) start_time = hdr->sync_time;
 				rel_time = hdr->sync_time - start_time;
 				if (rel_time > (pass * alarm_secs * 1000000000ull)) {
 					end_time = start_time + (pass * alarm_secs *1000000000ull);

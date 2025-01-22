@@ -1264,7 +1264,7 @@ flag_t pid_flags[] = {
   { "objfile",     "filename",    FA_ALL, FT_REG, "s" },
   { "events",		"default | all | tool | event", FA_ALL, FT_REG, "s"},
   { "subsys", 		"subsys", FA_ALL, FT_REG, "s"},
-  { "report",	   "[-]asxhfopnm\n\t\t\t\t- - Omit Reports\n\t\t\t\ta - Scheduler Activity Report\n\t\t\t\ts - System Call Report\n\t\t\t\tx - Futex Report\n\t\t\t\th - CPU Activity Report\n\t\t\t\tf - File Activity Report\n\t\t\t\to - Network/Socket Activity Report\n\t\t\t\tp - Physical Volume Report\n\t\t\t\tm - Memory Report\n ", FA_ALL, FT_REG, "s"}, 
+  { "report",	   "[-]asxhfopnm\n\t\t\t\t- - Omit Reports\n\t\t\t\ta - Scheduler Activity Report\n\t\t\t\ts - System Call Report\n\t\t\t\tx - Futex Report\n\t\t\t\th - CPU Activity Report\n\t\t\t\tf - File Activity Report\n\t\t\t\to - Network/Socket Activity Report\n\t\t\t\tp - Physical Volume Report\n\t\t\t\tm - Memory Report", FA_ALL, FT_REG, "s"},
 /*
   { "rqdetail",    "usecs",    FA_ALL, FT_OPT, "i" },
 */

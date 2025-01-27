@@ -29,7 +29,7 @@
 # 
 #   Clean the current working directory where KI files are extracted from a ki_all.*.tar.gz 
 #   file. The script will keep the *.txt file and the kp.*.html file, and the ki_all.*.tar.gz
-#   KI tar ball for achive purposes.
+#   KI tar ball for archive purposes.
 # 
 # USAGE:
 # 
@@ -42,7 +42,7 @@
 #            will be printed and kiclean -f can be run 
 #            to remove the misc files as well.
 #
-#   -r       Traverse subdirs recursivelly looking for KI subdirs to clean
+#   -r       Traverse subdirs recursively looking for KI subdirs to clean
 #
 #   -p	     Remove the PIDS subdirectory
 #

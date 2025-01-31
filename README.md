@@ -56,9 +56,9 @@ LinuxKI can collect its trace data from either of two sources: the Linux ftrace 
 
   - LiKI is an opensource kernel tracing facility written by HPE specifically for large mission-critical servers. It collects significantly more detail than ftrace allowing more precise analysis, while imposing less overhead. However LiKI is a kernel module that is loaded into the kernel when collection begins, and removed immediately afterwards. Installation of the LiKI DLKM may taint some Linux kernels and is not supported by the Linux providers.
 
-  - ftrace is a Linux kernel tracing facility that is built into most versions of the Linux kernels (2.6.32 and later), such as RHEL 6 and SLES 11 SP2.  The runki script  will use the ftrace data source if the LiKI DLKM fails to load or if the "-f" option is passed to the runki script.  Only a select set of tracepoints are enabled, keeping the overhead reasonably low. The LinuxKI Toolset will do all the work of enabling the trace points and collecting the data from its in-kernel ring buffers. While the ftrace code is included in more recent Linux kernels, it is generally disabled, so HPE cannot comment on how well it has been tested by the Linux vendor (RedHat, Novel).
+  - ftrace is a Linux kernel tracing facility that is built into most versions of the Linux kernels (2.6.32 and later), such as RHEL 6 and SLES 11 SP2.  The runki script will use the ftrace data source if the LiKI DLKM fails to load or if the "-f" option is passed to the runki script.  Only a select set of tracepoints are enabled, keeping the overhead reasonably low. The LinuxKI Toolset will do all the work of enabling the trace points and collecting the data from its in-kernel ring buffers. While the ftrace code is included in more recent Linux kernels, it is generally disabled, so HPE cannot comment on how well it has been tested by the Linux vendor (RedHat, Novel).
 
-Using the LiKI tracing module is the preferred method, but ftrace may be used in cases where where the LiKI DLKM cannot be installed, either due to missing dependencies, or inherent risks of installing a DLKM.
+Using the LiKI tracing module is the preferred method, but ftrace may be used in cases where the LiKI DLKM cannot be installed, either due to missing dependencies, or inherent risks of installing a DLKM.
 
 ### Disclaimer of Warranty and Limitation of Liability Notices
 
@@ -80,7 +80,7 @@ Pre-packaged RPM and DEB files are available on the [Releases Page](https://gith
 
 There are no mandatory pre-requisites.   LinuxKI should install and run on most Linux systems from 2.6.32 through 6.8.13
 
-However, if you would like to use the LiKI tracing mechanism (perferred method), you will need the following installed to compile the LiKI module from source code:
+However, if you would like to use the LiKI tracing mechanism (preferred method), you will need the following installed to compile the LiKI module from source code:
 
 * linux headers
 * gcc

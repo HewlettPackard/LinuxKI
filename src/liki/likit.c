@@ -141,14 +141,19 @@ Confused about platform!
 
 #endif	// LINUX_VERSION_CODE >= KERNEL_VERSION(3,0,0)
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,13,0)
+#define fput_compat(file, needed) fput(file)
+#else
+#define fput_compat(file, needed) fput_light(file, needed)
+#endif
 
 /* The following pertain to stack unwinding (see below) */
-#define HARDCLOCK_INTERVAL		10	/* profile timer ticks every 1ms, but we
-						 * only collect hardclock traces every
-						 * this many millieconds. If you don't
-						 * want this throttling, do not define
-						 * HARDCLOCK_INTERVAL.
+#define DEFAULT_HARDCLOCK_PER_SECOND	100	/* profile timer ticks every 1ms or 
+						 * 1000 times per sec, but we
+						 * only collect 100 hardclock traces per
+						 * second, by default, or every 10 msecs
 						 */
+#define MAX_HARDCLOCK_PER_SECOND	10000	/* every 100 usec max */
 
 
 /* Global data declarations
@@ -210,7 +215,7 @@ STATIC struct tbuf {
 
 #ifdef CONFIG_X86_64
 
-struct MsrList msr_init[] = {
+struct MsrList intel_msr_init[] = {
         { MSR_WRITE, MSR_PERF_GLBL_CTRL, 0x00, 0x00, 0x00},     // ia32_perf_global_ctrl: disable 4 PMCs & 3 FFCs
         { MSR_WRITE, MSR_PERF_FIXED_CTRL, 0x00, 0x00, 0x00},    // ia32_perf_fixed_ctr_ctrl: clean up FFC ctrls
         { MSR_WRITE, MSR_PMC0, 0x00, 0x00, 0x00},               // ia32_pmc0: zero value (35-5)
@@ -226,11 +231,27 @@ struct MsrList msr_init[] = {
         { MSR_STOP, 0x00, 0x00, 0x00 }
 };
 
-struct MsrList msr_stop[] = {
+struct MsrList intel_msr_stop[] = {
         { MSR_WRITE, MSR_PERF_GLBL_CTRL, 0x00, 0x00, 0x00},     // ia32_perf_global_ctrl: disable 4 PMCs & 3 FFCs
         { MSR_WRITE, MSR_PERF_FIXED_CTRL, 0x00, 0x00, 0x00},    // ia32_perf_fixed_ctr_ctrl: clean up FFC ctrls
         { MSR_STOP, 0x00, 0x00, 0x00}
 };
+
+struct MsrList amd_msr_init[] = {
+        { MSR_WRITE, MSR_FIXED_CLKFREQ, 0x00, 0x00, 0x00},      // ia32_MPERF: zero value
+        { MSR_WRITE, MSR_ACTUAL_CLKFREQ, 0x00, 0x00, 0x00},     // ia32_APERF: zero value
+        { MSR_STOP, 0x00, 0x00, 0x00 }
+};
+
+struct MsrList amd_msr_stop[] = {
+        { MSR_STOP, 0x00, 0x00, 0x00}
+};
+
+
+struct MsrList *msr_init;
+struct MsrList *msr_stop;
+void (*enable_msr)(void *);
+void (*disable_msr)(void *);
 
 /*
  * The above two structs occupy 6 - 64 byte cachelines. The following aligned
@@ -311,6 +332,7 @@ static unsigned long (*copy_from_user_nmi_fp)(void *, const void __user *, unsig
  * traces are installed, and isn't referenced in every trace.
  */
 STATIC volatile unsigned long 	installed_traces = TT_BITMASK_READS_BLOCK;
+STATIC volatile unsigned long 	hc_per_sec = DEFAULT_HARDCLOCK_PER_SECOND;
 
 
 /* state_mutex is used when manipulating the set of installed traces,
@@ -1725,14 +1747,27 @@ startup_timer_list_failed:
 STATIC INLINE long read_msr(unsigned int ecx) {
     unsigned int edx = 0, eax = 0;
     unsigned long result = 0;
+
     __asm__ __volatile__("rdmsr" : "=a"(eax), "=d"(edx) : "c"(ecx));
     result = eax | (unsigned long)edx << 0x20;
     return result;
 }
 
-STATIC INLINE void write_msr(int ecx, unsigned int eax, unsigned int edx) {
+STATIC INLINE long write_msr(int ecx, unsigned int eax, unsigned int edx) {
+    unsigned long result = 0;
+
     __asm__ __volatile__("wrmsr" : : "c"(ecx), "a"(eax), "d"(edx));
+    result = eax | (unsigned long)edx << 0x20;
+    return result;
 }
+
+STATIC INLINE uint64_t msr_rdpmc(unsigned int ecx) {
+    unsigned int edx = 0, eax = 0;
+   __asm__ __volatile__("rdpmc" : "=a" (eax), "=d" (edx) : "c" (ecx));
+
+   return (eax | ((uint64_t)edx << 32));
+}
+
 
 static void msr_ops(struct MsrList *oplist)
 {
@@ -1751,6 +1786,9 @@ static void msr_ops(struct MsrList *oplist)
 	case MSR_READ:
             msrops->value = read_msr(msrops->ecx);
             break;
+	case MSR_RDPMC: 
+	    msrops->value = msr_rdpmc(msrops->ecx);
+	    break;
         default:
             printk(KERN_WARNING "LIKI: Unknown MSR operater.\n");
             return;
@@ -1758,6 +1796,128 @@ static void msr_ops(struct MsrList *oplist)
     }
     label_end:
     return;
+}
+
+static void enable_intel_msr(void *data)
+{
+	int cpuid;
+	cpuid = raw_smp_processor_id();
+
+	msr_ops(msr_init);
+	msr_cpu_list[cpuid].enabled = 1;
+	msr_cpu_list[cpuid].init_smi_cnt = read_msr(MSR_SMI_CNT);
+}
+
+static void enable_amd_msr(void *data)
+{
+	uint64_t saved_perf_ctl, ret;
+	int cpuid;
+	cpuid = raw_smp_processor_id();
+
+	saved_perf_ctl = (uint64_t)-1;
+	saved_perf_ctl = read_msr(AMD_MSR_PERF_CTL);
+	if (saved_perf_ctl == -1) {
+		if (cpuid==0) printk(KERN_WARNING "Failed to read AMD_MSR_PERF_CTL\n");
+		return;
+	} else {
+#ifdef __LIKI_DEBUG
+		if (cpuid==0) printk(KERN_WARNING "AMD_MSR_PERF_CTL (0x%lx): 0x%lx\n", (unsigned long)AMD_MSR_PERF_CTL, (unsigned long)saved_perf_ctl);
+#endif
+	}
+
+	if (saved_perf_ctl & AMD_MSR_PERF_CTL_EN) {
+		if (cpuid==0) printk(KERN_WARNING "Disabling AMD_MSR_PERF_CTL\n");
+		ret = write_msr(AMD_MSR_PERF_CTL, saved_perf_ctl & ~((uint64_t)(AMD_MSR_PERF_CTL_EN|AMD_MSR_PERF_CTL_EVENT_MASK)), 0);
+		if (ret == -1) {
+			if (cpuid==0) printk(KERN_WARNING "Failed to update AMD_MSR_PERF_CTL\n");
+			return;
+		}
+
+		ret = read_msr (AMD_MSR_PERF_CTL);
+		if (ret != -1) {
+			if (cpuid==0) printk(KERN_WARNING "AMD_MSR_PERF_CTL: 0x%lx\n", (unsigned long)ret);
+		}
+	}
+
+	if (msr_rdpmc(AMD_MSR_PERF_IDX) != 0) {
+#ifdef __LIKI_DEBUG
+		if (cpuid==0) printk(KERN_WARNING "Resetting AMD_MSR_PERF_CTR\n");
+#endif
+		ret = write_msr (AMD_MSR_PERF_CTR, 0, 0);
+		if (ret == -1) {
+			if (cpuid==0) printk(KERN_WARNING "Failed to update MSR_PERF_CTR\n");
+			return;
+		}
+
+		if (msr_rdpmc(AMD_MSR_PERF_IDX) != 0) {
+			if (cpuid==0) printk(KERN_WARNING "Failed to reset MSR_PERF_CTR\n");
+			return;
+		}
+	}
+
+#ifdef __LIKI_DEBUG
+	if (cpuid==0) printk(KERN_WARNING "Enabling Event 0x%x\n", AMD_PMC_LSSMIRX);
+#endif
+	ret = write_msr (AMD_MSR_PERF_CTL, AMD_MSR_PERF_CTL_EN|AMD_MSR_PERT_CTL_OS_USER_MODE|AMD_PMC_LSSMIRX, 0);
+	if (ret == -1) {
+		if (cpuid==0) printk(KERN_WARNING "Failed to update AMD_MSR_PERF_CTL\n");
+		return;
+	}
+
+	ret = read_msr(AMD_MSR_PERF_CTL);
+#ifdef __LIKI_DEBUG
+	if (ret != -1) {
+		if (cpuid==0) printk(KERN_WARNING "AMD_MSR_PERF_CTL: 0x%lx\n", (unsigned long)ret);
+	}
+
+	if (cpuid==0) printk(KERN_WARNING "calling msr_ops");
+#endif
+
+	msr_ops(msr_init);
+	msr_cpu_list[cpuid].enabled = 1;
+	msr_cpu_list[cpuid].init_smi_cnt = msr_rdpmc(AMD_MSR_PERF_IDX);
+}
+
+static void disable_intel_msr(void *data)
+{
+	int cpuid;
+	cpuid = raw_smp_processor_id();
+
+	if (msr_cpu_list[cpuid].enabled) {
+		msr_cpu_list[cpuid].enabled = 0;
+		msr_ops(msr_stop);
+	}
+}
+
+static void disable_amd_msr(void *data)
+{
+	uint64_t perf_ctl, ret;
+	int cpuid;
+	cpuid = raw_smp_processor_id();
+
+	if (msr_cpu_list[cpuid].enabled) {
+		msr_cpu_list[cpuid].enabled = 0;
+		msr_ops(msr_stop);
+
+		perf_ctl = read_msr (AMD_MSR_PERF_CTL);
+   		if (perf_ctl != -1) {
+#ifdef __LIKI_DEBUG
+         		if (cpuid==0)  printk(KERN_WARNING "AMD_MSR_PERF_CTL: 0x%lx\n", (unsigned long)perf_ctl);
+#endif
+      			if ((perf_ctl & AMD_MSR_PERF_CTL_EVENT_MASK) != AMD_PMC_LSSMIRX) {
+         			if (cpuid==0) printk(KERN_WARNING "MAJOR ERROR! PMC counter event tracking changed to 0x%lx\n", (unsigned long)(perf_ctl & AMD_MSR_PERF_CTL_EVENT_MASK));
+      			}
+		}
+
+		ret = write_msr (AMD_MSR_PERF_CTL, perf_ctl & ~((uint64_t)(AMD_MSR_PERF_CTL_EN|AMD_MSR_PERF_CTL_EVENT_MASK)), 0);
+#ifdef __LIKI_DEBUG
+   		if (ret == -1) {
+      			if (cpuid==0) printk(KERN_WARNING "Failed to update AMD_MSR_PERF_CTL\n");
+   		} else {
+         		if (cpuid==0)  printk(KERN_WARNING "AMD_MSR_PERF_CTL: 0x%lx\n", (unsigned long)ret);
+		}
+#endif
+	}
 }
 
 /* its OK for startup_msr() to fail.  If it does, we will
@@ -1768,7 +1928,7 @@ startup_msr(void)
 {
 	msr_cpu_list = NULL;
 
-	if (boot_cpu_data.x86_vendor != X86_VENDOR_INTEL) {
+	if ((boot_cpu_data.x86_vendor != X86_VENDOR_INTEL) && (boot_cpu_data.x86_vendor != X86_VENDOR_AMD)) {
 		printk(KERN_WARNING "LiKI: MSR Features disabled, Vendor ID is %d. \n",boot_cpu_data.x86_vendor);
 		return(ENOTSUPP);
 	}
@@ -1781,7 +1941,8 @@ startup_msr(void)
 
 	/* only allow Advanced CPU statistics on known CPUs */
 	/* see intel-family.h in kernel source.   See include/asm/intel-family.h */
-	switch (boot_cpu_data.x86_model) {
+	if (boot_cpu_data.x86_vendor == X86_VENDOR_INTEL) {
+	    switch (boot_cpu_data.x86_model) {
 		case 26: 	/* INTEL_FAM6_NEHALEM_EP - 45nm Nahalem-EP */
 		case 30:	/* INTEL_FAM6_NEHALEM - 45nm Nahalem */
 		case 46: 	/* INTEL_FAM6_NAHALEM_EX - 45nm Nahalem-EP */
@@ -1823,41 +1984,48 @@ startup_msr(void)
 		case 142:	/* KabyLake-U/Y - needs testing!!! */
 		case 158:	/* KabyLake-H/S - needs testing!!! */
 		default:
-			printk(KERN_WARNING "LiKI: MSR Features disabled, x86_model is %d. \n",boot_cpu_data.x86_model);
+			printk(KERN_WARNING "LiKI: MSR Features disabled, Intel x86_model is %d. \n",boot_cpu_data.x86_model);
 			return(ENOTSUPP);
-	}
+	    }
 
-        msr_cpu_list= kzalloc(ALIGN((sizeof(struct msr_cpu)*nr_cpu_ids), cache_line_size()),
+            msr_cpu_list= kzalloc(ALIGN((sizeof(struct msr_cpu)*nr_cpu_ids), cache_line_size()),
                         GFP_KERNEL);
 
-        if (!msr_cpu_list) {
+            if (!msr_cpu_list) {
                 printk(KERN_WARNING "LiKI: Could not allocate space for MSR CPU list - skipping\n");
 		return(ENOMEM);
+            }
+
+	    msr_init = intel_msr_init;
+	    msr_stop = intel_msr_stop;
+	    enable_msr = enable_intel_msr;
+	    disable_msr = disable_intel_msr;
+	} else if (boot_cpu_data.x86_vendor == X86_VENDOR_AMD) {
+	    switch (boot_cpu_data.x86) {
+		case 23: 
+		case 25: 
+		case 26: 
+			break;
+		default:
+       	                 printk(KERN_WARNING "LiKI: MSR Features disabled, AMD family is %d. \n",boot_cpu_data.x86_model);
+              		 return(ENOTSUPP);
+	    }
+
+            msr_cpu_list= kzalloc(ALIGN((sizeof(struct msr_cpu)*nr_cpu_ids), cache_line_size()),
+                        GFP_KERNEL);
+
+            if (!msr_cpu_list) {
+                printk(KERN_WARNING "LiKI: Could not allocate space for MSR CPU list - skipping\n");
+		return(ENOMEM);
+            }
+
+	    msr_init = amd_msr_init;
+	    msr_stop = amd_msr_stop;
+	    enable_msr = enable_amd_msr;
+	    disable_msr = disable_amd_msr;
         }
         return 0;
 }
-
-static void enable_msr(void *data)
-{
-	int cpuid;
-	cpuid = raw_smp_processor_id();
-
-	msr_ops(msr_init);
-	msr_cpu_list[cpuid].enabled = 1;
-	msr_cpu_list[cpuid].init_smi_cnt = read_msr(MSR_SMI_CNT);
-}
-
-static void disable_msr(void *data)
-{
-	int cpuid;
-	cpuid = raw_smp_processor_id();
-
-	if (msr_cpu_list[cpuid].enabled) {
-		msr_cpu_list[cpuid].enabled = 0;
-		msr_ops(msr_stop);
-	}
-}
-
 
 STATIC void
 shutdown_msr(void)
@@ -2433,7 +2601,7 @@ sched_switch_trace(RXUNUSED struct rq *rq, struct task_struct *p, struct task_st
 	else
 		stksz = 0;
 
-        if (enabled_features & MSR_FEATURE) {
+	if (enabled_features & MSR_FEATURE) {
                 sz = TRACE_ROUNDUP((sizeof(sched_switch_t) + stksz + MSRSZ));
         } else {
                 sz = TRACE_ROUNDUP((sizeof(sched_switch_t) + stksz));
@@ -2553,7 +2721,7 @@ sched_switch_trace(RXUNUSED struct rq *rq, struct task_struct *p, struct task_st
 	t->next_policy = n->policy;
 
 #ifdef CONFIG_X86_64
-	if (enabled_features & MSR_FEATURE) {
+	if ((boot_cpu_data.x86_vendor == X86_VENDOR_INTEL) && (enabled_features & MSR_FEATURE)) {
 		msr_idx = t->stack_depth;
 		t->ips[msr_idx++] = read_msr(MSR_PMC0);
 		t->ips[msr_idx++] = read_msr(MSR_PMC1);
@@ -2562,7 +2730,17 @@ sched_switch_trace(RXUNUSED struct rq *rq, struct task_struct *p, struct task_st
 		t->ips[msr_idx++] = read_msr(MSR_FIXED_CLKFREQ);
 		t->ips[msr_idx++] = read_msr(MSR_ACTUAL_CLKFREQ);
 		t->ips[msr_idx++] = read_msr(MSR_SMI_CNT) - msr_cpu_list[mycpu].init_smi_cnt;
+	} else if ((boot_cpu_data.x86_vendor == X86_VENDOR_AMD) && (enabled_features & MSR_FEATURE)) {
+		msr_idx = t->stack_depth;
+		t->ips[msr_idx++] = 0;
+		t->ips[msr_idx++] = 0;
+		t->ips[msr_idx++] = 0; 
+		t->ips[msr_idx++] = 0;
+		t->ips[msr_idx++] = read_msr(MSR_FIXED_CLKFREQ);
+		t->ips[msr_idx++] = read_msr(MSR_ACTUAL_CLKFREQ);
+		t->ips[msr_idx++] = msr_rdpmc(AMD_MSR_PERF_IDX) - msr_cpu_list[mycpu].init_smi_cnt;
 	}
+
 #endif	// CONFIG_X86_64
 
 	trace_commit(t);
@@ -4277,7 +4455,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 #else
 		if (sock->ops->getname(sock, (struct sockaddr *)&local, &loclen, 0)) {
 #endif
-			fput_light(sock->file, fput_needed);
+			fput_compat(sock->file, fput_needed);
 			goto scexit_skip_vldata;
 		}
 
@@ -4293,7 +4471,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 #else
 			if (sock->ops->getname(sock, (struct sockaddr *)&remote, &remlen, 1)) {
 #endif
-				fput_light(sock->file, fput_needed);
+				fput_compat(sock->file, fput_needed);
 				goto scexit_skip_vldata;
 			}
 
@@ -4312,7 +4490,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 				memset((void *)&remote, 0, sizeof(struct sockaddr_storage));
 		}
 
-		fput_light(sock->file, fput_needed);
+		fput_compat(sock->file, fput_needed);
 
 		if (remlen <= 0 || loclen <= 0)
 			goto scexit_skip_vldata;
@@ -4392,7 +4570,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 #else
 			if (sock->ops->getname(sock, (struct sockaddr *)&remote, &remlen, 1)) {
 #endif
-				fput_light(sock->file, fput_needed);
+				fput_compat(sock->file, fput_needed);
 				goto scexit_skip_vldata;
 			}
 
@@ -4401,11 +4579,11 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 #else
 			if (sock->ops->getname(sock, (struct sockaddr *)&local, &loclen, 0)) {
 #endif
-				fput_light(sock->file, fput_needed);
+				fput_compat(sock->file, fput_needed);
 				goto scexit_skip_vldata;
 			}
 
-			fput_light(sock->file, fput_needed);
+			fput_compat(sock->file, fput_needed);
 	
 			if (loclen <= 0 || remlen <= 0) {
 				goto scexit_skip_vldata;
@@ -4530,7 +4708,7 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 #else
 		if (sock->ops->getname(sock, (struct sockaddr *)&remote, &remlen, 1)) {
 #endif
-			fput_light(sock->file, fput_needed);
+			fput_compat(sock->file, fput_needed);
 			goto scexit_skip_vldata;
 		}
 
@@ -4539,11 +4717,11 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 #else
 			if (sock->ops->getname(sock, (struct sockaddr *)&local, &loclen, 0)) {
 #endif
-			fput_light(sock->file, fput_needed);
+			fput_compat(sock->file, fput_needed);
 			goto scexit_skip_vldata;
 		}
 
-		fput_light(sock->file, fput_needed);
+		fput_compat(sock->file, fput_needed);
 
 		if (loclen <= 0 || remlen <= 0)
 			loclen = remlen = 0;
@@ -4608,7 +4786,7 @@ mmsgexit_skip_addresses:
 #else
 		if (sock->ops->getname(sock, (struct sockaddr *)&remote, &remlen, 1)) {
 #endif
-			fput_light(sock->file, fput_needed);
+			fput_compat(sock->file, fput_needed);
 			goto scexit_skip_vldata;
 		}
 
@@ -4617,11 +4795,11 @@ mmsgexit_skip_addresses:
 #else
 		if (sock->ops->getname(sock, (struct sockaddr *)&local, &loclen, 0)) {
 #endif
-			fput_light(sock->file, fput_needed);
+			fput_compat(sock->file, fput_needed);
 			goto scexit_skip_vldata;
 		}
 
-		fput_light(sock->file, fput_needed);
+		fput_compat(sock->file, fput_needed);
 
 		if (loclen <= 0 || remlen <= 0)
 			goto scexit_skip_vldata;
@@ -4796,7 +4974,6 @@ hardclock_trace(struct pt_regs *regs)
 	mycpu = raw_smp_processor_id();
 	tb = &tbufs[mycpu];
 
-#ifdef HARDCLOCK_INTERVAL
 	/* Throttle the rate of hardclock records to less than the resolution
 	 * of the profile tick. It would be nice to do this by creating a
 	 * unique timer (i.e. not use the profile timer), but since we want 
@@ -4805,13 +4982,12 @@ hardclock_trace(struct pt_regs *regs)
 	 */
 	time = liki_global_clock(tb, UNORDERED);
 
-	if (time < (tb->last_hardclock + (HARDCLOCK_INTERVAL * 1000000))) {
+	if (time < (tb->last_hardclock + (1000000000 / hc_per_sec  ) - 10000)) {
 		raw_local_irq_restore(flags);
 		return;
 	}
 
 	tb->last_hardclock = time;
-#endif
 
 	if (unlikely((t = (hardclock_t *)trace_alloc(sz, TRUE)) == NULL)) {
 		raw_local_irq_restore(flags);
@@ -6612,6 +6788,40 @@ STATIC const struct file_operations liki_et_fops = {
 	.owner = THIS_MODULE,
 };
 
+STATIC ssize_t 
+liki_set_hcps(struct file *file, const char __user *ubuf,
+                             size_t count, loff_t *off)
+{
+	unsigned long		new_hcps;
+
+	if (count != sizeof(unsigned long))
+		return(-EINVAL);
+
+	if (copy_from_user(&new_hcps, ubuf, sizeof(unsigned long)))
+		return(-EFAULT);
+
+	/* Need to ensure we don't have two folks fiddling with enabled
+	 * traces at the same time, or someone in shutdown while we're
+	 * fiddling with enabled traces etc.
+	 *
+	 */
+
+	if (new_hcps == 0) new_hcps=DEFAULT_HARDCLOCK_PER_SECOND;
+	if (new_hcps > MAX_HARDCLOCK_PER_SECOND) new_hcps=MAX_HARDCLOCK_PER_SECOND;
+	mutex_lock(&state_mutex);
+	hc_per_sec = new_hcps;
+	mutex_unlock(&state_mutex);
+
+	printk(KERN_WARNING "LiKI: CPU Profiling set to %p per second.\n", (void *)hc_per_sec);
+
+	return (sizeof(unsigned long));
+}
+
+STATIC const struct file_operations liki_hcps_fops = {
+	.open = liki_dummy_open,
+	.write = liki_set_hcps,
+	.owner = THIS_MODULE,
+};
 
 STATIC int
 task_tracing_op(unsigned long id, int op)
@@ -6838,6 +7048,13 @@ create_debugfs_files(void)
 		goto create_debugfs_files_failed;
 	}
 
+	/* Create a file that can be used by userspace tools to control the number of 
+	 * Hardclock Profile events per second 
+	 */
+ 	if (debugfs_create_file(HC_PER_SEC_FILE, 0600, debugdir, 0, &liki_hcps_fops) == NULL) {
+		printk(KERN_WARNING "LiKI: failed to create hc_per_sec  file\n");
+		goto create_debugfs_files_failed;
+	}
 
 	/* Create a file that can be used by userspace tools to control 
 	 * the set of running traces.
@@ -6963,7 +7180,7 @@ liki_initialize(void)
 	int	i;
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,9,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,15,0)
 	printk(KERN_INFO "LiKI: unsupported kernel version\n");
 	return(-EINVAL);
 #else

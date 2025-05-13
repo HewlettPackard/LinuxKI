@@ -44,7 +44,7 @@ typedef signed long int64;
 #define NSECS(value) ((value))
 #define KI_MAXTRACECALLS 3000
 #define LIKI_MAXTRACECALLS 64 
-#define KI_MAXSYSCALLS	 500
+#define KI_MAXSYSCALLS	 600
 
 #define MIN(X,Y) ((X) < (Y) ?  (X) : (Y))
 #define MAX(X,Y) ((X) > (Y) ?  (X) : (Y))

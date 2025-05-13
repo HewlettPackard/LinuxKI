@@ -60,7 +60,7 @@ else ifneq (,$(wildcard /etc/rocky-release))
    hostversion:=$(shell grep -oE '[0-9]+\.[0-9]+' /etc/rocky-release)
 else ifneq (,$(wildcard /etc/centos-release))
    hostdistro:=centos
-   hostversion:=$(shell grep -oE '[0-9]+\.[0-9]+' /etc/centos-release)
+   hostversion:=$(shell grep -oE '[0-9]+(\.[0-9]+)?' /etc/centos-release)
 else ifneq (,$(wildcard /etc/redhat-release))
    hostdistro:=rhel
    hostversion:=$(shell grep -oE '[0-9]+\.[0-9]+' /etc/redhat-release)
@@ -193,7 +193,7 @@ else ifeq ($(hostdistro),centos) #  Centos
       else
         EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL86 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
       endif
-   else ifneq (,$(findstring 9.,$(hostversion)))
+   else ifneq (,$(findstring 9,$(hostversion)))
         #RHEL 9.0
         EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL9 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
    endif

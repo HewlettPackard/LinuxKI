@@ -46,6 +46,7 @@ int			liki_sf = -1;
 int			liki_isf32 = -1;
 int			liki_isf64 = -1;
 int			liki_trf = -1;
+int			liki_hcpsf = -1;
 static unsigned long	end_of_sample_period = 0;
 static unsigned long	new_sample_period = 0;
 
@@ -178,6 +179,13 @@ liki_init(char *user_debug_dir)
 	/* Open the traced resources file */
 	sprintf(name, "%s/%s/%s", liki_debug_mountpoint, DEBUGFS_DIR_NAME, TRACED_RESOURCES_FILE);
 	if ((liki_trf = open(name, O_RDWR)) < 0) {
+		fprintf (stderr, "Cannot open %s\n", name); 
+		return -ENOENT;
+	}
+
+	/* Open the hc_per_sec file */
+	sprintf(name, "%s/%s/%s", liki_debug_mountpoint, DEBUGFS_DIR_NAME, HC_PER_SEC_FILE);
+	if ((liki_hcpsf = open(name, O_RDWR)) < 0) {
 		fprintf (stderr, "Cannot open %s\n", name); 
 		return -ENOENT;
 	}
@@ -544,6 +552,16 @@ liki_reenable_global_tracing()
 	rop.op = REENABLE_GLOBAL;
 
 	return(write(liki_trf, &rop, sizeof(resource_op_t)));
+}
+
+int 
+liki_write_hcps(unsigned long hc_per_sec)
+{
+
+	if (liki_hcpsf == -1)
+		return -EINVAL;
+
+	return (write(liki_hcpsf, &hc_per_sec, sizeof(unsigned long)));
 }
 
 int
@@ -1557,6 +1575,7 @@ liki_close_live_stream()
 	close(liki_tef);
 	close(liki_isf32);
 	close(liki_isf64);
+	close(liki_hcpsf);
 } 
 
 

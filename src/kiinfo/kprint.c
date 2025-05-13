@@ -193,7 +193,8 @@ kp_sys_summary ()
 	if (globals->product)  { BOLD("Product         : %s", globals->product); NL; }
 	if (globals->model)    { BOLD("Model           : %s", globals->model); NL; }
 	if (globals->hostname) { BOLD("Hostname        : %s", globals->hostname); NL; }
-	if (globals->os_vers)  { BOLD("OS version      : %s", globals->os_vers); NL; }
+	if (globals->os_name)  { BOLD("OS Name         : %s", globals->os_name); NL; }
+	if (globals->os_vers)  { BOLD("OS Version      : %s", globals->os_vers); NL; }
 
 	if (globals->VM_guest) { BOLD("Virtual Machine Guest"); NL; }
 
@@ -1121,6 +1122,11 @@ kp_hc_stktraces()			/* Section 1.4.4 */
 
         if ((*print_pc_args.warnflagp) & WARNF_MIGRATE_PAGES) {
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_MIGRATE_PAGES, _LNK_1_4_4);
+                kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); NL;
+        }
+
+        if ((*print_pc_args.warnflagp) & WARNF_SYSTEMD_USER) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SYSTEMD_USER, _LNK_1_4_4);
                 kp_warning(globals->warnings, warn_indx, _LNK_1_4_4); NL;
         }
 }

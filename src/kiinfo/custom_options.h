@@ -41,6 +41,7 @@ int   vdepth = (uint32)0x1;
 int   vint =   (uint32)100;
 int   hthr =   (uint32)0;
 int   kilive = 0;
+int   hc_per_sec = (uint32) 100;
 char *edusfname=NULL;
 char *jstackfname=NULL;
 
@@ -189,6 +190,8 @@ Likidump(init_t *init, arg_t *arg)
                         sysignore = prop->p_value.s;
                 } else if (strcmp("msr", prop->p_name) == 0) {
                         SET(MSR_FLAG);
+                } else if (strcmp("freq", prop->p_name) == 0) {
+        		hc_per_sec = (uint32)prop->p_value.i;
 		} else if (strcmp("help", prop->p_name) == 0) {
 			option_usage(init, NULL, "likidump");
 		}
@@ -456,6 +459,8 @@ Kipid(init_t *init, arg_t *arg)
 			SET(PIDTREE_FLAG);
 		} else if (strcmp("nofutex", prop->p_name) == 0) {
 			CLEAR_STAT(FUTEX_STATS);
+                } else if (strcmp("freq", prop->p_name) == 0) {
+        		hc_per_sec = (uint32)prop->p_value.i;
                 } else if (strcmp("mangle", prop->p_name) == 0) {
                         SET(MANGLE_FLAG);
 		} else if (strcmp("vis", prop->p_name) == 0) {
@@ -529,6 +534,8 @@ Kidock(init_t *init, arg_t *arg)
         		npid = (uint32)prop->p_value.i;
 		} else if (strcmp("docktree", prop->p_name) == 0) {
 			SET(DOCKTREE_FLAG);
+                } else if (strcmp("freq", prop->p_name) == 0) {
+        		hc_per_sec = (uint32)prop->p_value.i;
                 } else {
 			pw_option_usage(init, NULL, "kidock");
 		}
@@ -563,6 +570,8 @@ Kilive(init_t *init, arg_t *arg)
 			CLEAR_STAT(FUTEX_STATS);
                 } else if (strcmp("mangle", prop->p_name) == 0) {
                         SET(MANGLE_FLAG);
+                } else if (strcmp("freq", prop->p_name) == 0) {
+        		hc_per_sec = (uint32)prop->p_value.i;
 		} else if (strcmp("step", prop->p_name) == 0) {
 			double float_time;
 			if ((float_time = strtod(prop->p_value.s, NULL)) > 0.0) {
@@ -627,6 +636,8 @@ Kitrace(init_t *init, arg_t *arg)
 			SET(NOMARKER_FLAG);
                 } else if (strcmp("mangle", prop->p_name) == 0) {
                         SET(MANGLE_FLAG);
+                } else if (strcmp("freq", prop->p_name) == 0) {
+        		hc_per_sec = (uint32)prop->p_value.i;
 		} else if (strcmp("abstime", prop->p_name) == 0) {
 			SET(ABSTIME_FLAG);
 		} else if (strcmp("fmttime", prop->p_name) == 0) {
@@ -697,6 +708,8 @@ Kiprof(init_t *init, arg_t *arg)
                 } else if (strcmp("npid", prop->p_name) == 0) {
         		npid = (uint32)prop->p_value.i;
 			npid ? SET(PERPID_STATS) : CLEAR(PERPID_STATS);
+                } else if (strcmp("freq", prop->p_name) == 0) {
+        		hc_per_sec = (uint32)prop->p_value.i;
                 } else if (strcmp("nsym", prop->p_name) == 0) {
         		nsym = (uint32)prop->p_value.i;
 		} else if (strcmp("objfile", prop->p_name) == 0) {
@@ -1039,6 +1052,8 @@ Kiall(init_t *init, arg_t *arg)
 			CLEAR_STAT(FUTEX_STATS);
 		} else if (strcmp("mangle", prop->p_name) == 0) {
 			SET(MANGLE_FLAG);
+                } else if (strcmp("freq", prop->p_name) == 0) {
+        		hc_per_sec = (uint32)prop->p_value.i;
                 } else if (strcmp("vis", prop->p_name) == 0) {
                         SET(VIS_FLAG);
 		} else if (strcmp("vpct", prop->p_name) == 0) {
@@ -1198,6 +1213,7 @@ flag_t likid_flags[] = {
   { "dev",		"dev",     FA_ALL, FT_REG,  "i" },
   { "cpu",		"cpu",     FA_ALL, FT_REG,  "i" },
   { "msr",		NULL,      FA_ALL, FT_OPT, NULL },
+  { "freq",             "hc_per_sec", FA_ALL, FT_REG, "i"},
   { "nop",		NULL,      FA_ALL, FT_OPT | FT_HIDDEN, NULL },    /* ignore this option */
   { "dur",              "duration", FA_ALL, FT_REG, "i"},
   { "events",		"default | all | tool | event", FA_ALL, FT_REG, "s"},
@@ -1226,7 +1242,7 @@ flag_t kparse_flags[] = {
   { "jstack",      "filename", FA_ALL, FT_REG, "s"},
   { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "mangle",   "mangle", FA_ALL, FT_OPT, NULL},
+  { "mangle",   NULL, FA_ALL, FT_OPT, NULL},
   { "vis",         NULL,   FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "events",	"default | all | tool | event", FA_ALL, FT_REG, "s"},
   { "subsys", 	"subsys", FA_ALL, FT_REG, "s"},
@@ -1246,7 +1262,8 @@ flag_t pid_flags[] = {
   { "pidtree",     NULL,    FA_ALL, FT_OPT, NULL},
   { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "mangle",   "mangle", FA_ALL, FT_OPT, NULL},
+  { "mangle",   NULL, FA_ALL, FT_OPT, NULL},
+  { "freq",        "hc_per_sec", FA_ALL, FT_REG, "i"},
   { "vis",         NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL},
   { "vpct",        "vpct",  FA_ALL, FT_REG | FT_HIDDEN, "i" },
   { "vdepth",      "vdepth",  FA_ALL, FT_REG | FT_HIDDEN, "i" },
@@ -1264,7 +1281,7 @@ flag_t pid_flags[] = {
   { "objfile",     "filename",    FA_ALL, FT_REG, "s" },
   { "events",		"default | all | tool | event", FA_ALL, FT_REG, "s"},
   { "subsys", 		"subsys", FA_ALL, FT_REG, "s"},
-  { "report",	   "[-]asxhfopnm\n\t\t\t\t- - Omit Reports\n\t\t\t\ta - Scheduler Activity Report\n\t\t\t\ts - System Call Report\n\t\t\t\tx - Futex Report\n\t\t\t\th - CPU Activity Report\n\t\t\t\tf - File Activity Report\n\t\t\t\to - Network/Socket Activity Report\n\t\t\t\tp - Physical Volume Report\n\t\t\t\tm - Memory Report", FA_ALL, FT_REG, "s"},
+  { "report",	   "[-]asxhfopnm\n\t\t\t\t- - Omit Reports\n\t\t\t\ta - Scheduler Activity Report\n\t\t\t\ts - System Call Report\n\t\t\t\tx - Futex Report\n\t\t\t\th - CPU Activity Report\n\t\t\t\tf - File Activity Report\n\t\t\t\to - Network/Socket Activity Report\n\t\t\t\tp - Physical Volume Report\n\t\t\t\tm - Memory Report\n ", FA_ALL, FT_REG, "s"}, 
 /*
   { "rqdetail",    "usecs",    FA_ALL, FT_OPT, "i" },
 */
@@ -1278,6 +1295,7 @@ flag_t dock_flags[] = {
   { "npid",   "npid",    FA_ALL, FT_REG, "i" },
   { "docktree",     NULL,    FA_ALL, FT_OPT, NULL},
   { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
+  { "freq",        "hc_per_sec", FA_ALL, FT_REG, "i"},
   { 0,0,0,0,0 }
 };
 
@@ -1288,8 +1306,9 @@ flag_t live_flags[] = {
   { "msr",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "mangle",   "mangle", FA_ALL, FT_OPT, NULL},
-  { "step",	   "<time_in_secs>",  FA_ALL, FT_OPT, "s" },
+  { "mangle",   NULL, FA_ALL, FT_OPT, NULL},
+  { "freq",        "hc_per_sec", FA_ALL, FT_REG, "i"},
+  { "step",	   "time_in_secs",  FA_ALL, FT_OPT, "s" },
   { 0,0,0,0,0 }
 };
 
@@ -1327,6 +1346,7 @@ flag_t prof_flags[] = {
   { "objfile",     "filename",    FA_ALL, FT_REG, "s" },
   { "edus",        "filename", FA_ALL, FT_REG, "s"},
   { "jstack",      "filename", FA_ALL, FT_REG, "s"},
+  { "freq",        "hc_per_sec", FA_ALL, FT_REG, "i"},
   { "kitrace", 	   NULL,    FA_ALL, FT_OPT, NULL},
   { "abstime", NULL, FA_ALL, FT_OPT, NULL },
   { "fmttime", NULL, FA_ALL, FT_OPT, NULL },
@@ -1408,7 +1428,8 @@ flag_t trace_flags[] = {
   { "nomapper", NULL, FA_ALL, FT_OPT, NULL },
   { "nomarker", NULL, FA_ALL, FT_OPT, NULL },
   { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "mangle",   "mangle", FA_ALL, FT_OPT, NULL},
+  { "mangle",   NULL, FA_ALL, FT_OPT, NULL},
+  { "freq",        "hc_per_sec", FA_ALL, FT_REG, "i"},
   { "abstime", NULL, FA_ALL, FT_OPT, NULL },
   { "fmttime", NULL, FA_ALL, FT_OPT, NULL },
   { "epochtime", NULL, FA_ALL, FT_OPT, NULL },
@@ -1454,7 +1475,8 @@ flag_t clparse_flags[] = {
   { "vis",         NULL,   FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "mangle",   "mangle", FA_ALL, FT_OPT, NULL},
+  { "mangle",   NULL, FA_ALL, FT_OPT, NULL},
+  { "freq",        "hc_per_sec", FA_ALL, FT_REG, "i"},
   { "help",        NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
 };
@@ -1463,6 +1485,7 @@ flag_t kiall_flags[] = {
   { "oracle",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "mangle",  	   NULL,    FA_ALL, FT_OPT, NULL},
+  { "freq",        "hc_per_sec", FA_ALL, FT_REG, "i"},
   { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "vis",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "vpct",        "vpct",    FA_ALL, FT_OPT | FT_HIDDEN, "i"},

@@ -1759,6 +1759,9 @@ print_syscall_retval(pid_info_t *pidp, int syscallno, uint64 retval)
 	short idx;
         if ((syscallno < 0) || IS_ERR_VALUE(retval)) {               
         	printf ("%cret=%lld", fsep, retval);   
+		if (abs(retval) < NERRNO) {
+			printf ("/%s", errnostr[abs(retval)]);
+		}
 		return 0;
 	}
 

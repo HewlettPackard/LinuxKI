@@ -1,0 +1,812 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:"Segoe UI";
+	panose-1:2 11 5 2 4 2 4 2 2 3;}
+@font-face
+	{font-family:Consolas;
+	panose-1:2 11 6 9 2 2 4 3 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+a:link, span.MsoHyperlink
+	{color:#0563C1;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:#954F72;
+	text-decoration:underline;}
+code
+	{font-family:"Courier New";}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:107%;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:.5in .5in .5in .5in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US link="#0563C1" vlink="#954F72">
+
+<div class=WordSection1>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;vertical-align:
+top'><b><i><span style='font-size:12.0pt;font-family:"Arial",sans-serif;
+color:black'>​LinuxKI Warning</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Suspect SOS_BLOCKALLOCPARTIALLIST spinlock contention</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>05/06/2025        </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-family:"Arial",sans-serif;
+color:black'>Problem Description</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>Customer recently purchased a
+new HPE Compute Scale-up Server 3200 with 4 Intel® Platinum 8468H processors.  
+They migrated their Windows 2019 MS SQL Server environment from a physical Dell
+R740 server with 2 Intel® Gold 5220R processors (48 cores) to a 128-core VM
+running on the CSUS 3200.     The workload performs worse on the CSUS 3200 and
+the CPU usage is often reaching 100% busy.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span lang=EN-GB style='font-family:"Arial",sans-serif;
+color:black;background:white'>Investigation</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span class=MsoHyperlink><span lang=EN-GB
+style='font-size:10.0pt;font-family:"Arial",sans-serif;background:white'><a
+href="https://github.com/HewlettPackard/LinuxKI/wiki">WinKI</a></span></span><span
+lang=EN-GB style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black;
+background:white'> data (LinuxKI for Windows) was collected for analysis when
+the CPU usage was high.   The SQL Server threads were spending a lot of time in
+Spinlock code when allocating memory block.   The following data from kipid
+output for one of the SQL Server threads:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>TID
+25232&nbsp; sqlservr.exe&nbsp; (UPDATE)</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp; PID
+22268&nbsp; sqlservr.exe</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+********* SCHEDULER ACTIVITY REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+RunTime&nbsp;&nbsp;&nbsp; : 19.707783&nbsp; SysTime&nbsp;&nbsp; :&nbsp;
+0.036242&nbsp;&nbsp; UserTime&nbsp;&nbsp; : 19.669407</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+SleepTime&nbsp; :&nbsp; 0.590948&nbsp; Sleep Cnt
+:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 492&nbsp;&nbsp; Wakeup Cnt
+:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+RunQTime&nbsp;&nbsp; :&nbsp; 0.013289&nbsp; Switch
+Cnt:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 514&nbsp;&nbsp; PreemptCnt
+:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 22</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+HardIRQ&nbsp;&nbsp;&nbsp; :&nbsp; 0.000000&nbsp; HardIRQ-S :&nbsp;
+0.000000&nbsp;&nbsp;&nbsp; HardIRQ-U :&nbsp; 0.000000</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+SoftIRQ&nbsp;&nbsp;&nbsp; :&nbsp; 0.002133&nbsp; SoftIRQ-S :&nbsp;
+0.000000&nbsp;&nbsp;&nbsp; SoftIRQ-U :&nbsp; 0.002133</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+Last CPU&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 86&nbsp; CPU
+Migrs :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 52&nbsp;&nbsp; NODE Migrs
+:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+busy&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp; 97.03%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+sys&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.18%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+user&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp; 96.84%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+irq&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.01%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+runQ&nbsp;&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.07%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+sleep&nbsp;&nbsp; :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2.91%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+******** CPU ACTIVITY REPORT ********</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+The percentages below reflect the percentage</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+of the Thread's total RunTime spent in either</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+User code or System code</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+RunTime:&nbsp; 19.7078</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Count&nbsp;&nbsp;&nbsp; USER&nbsp;&nbsp;&nbsp;&nbsp; SYS&nbsp;&nbsp;&nbsp; INTR</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;20499&nbsp;&nbsp; 20438&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+61&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+99.70%&nbsp;&nbsp; 0.30%&nbsp;&nbsp; 0.00%</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+HARDCLOCK entries</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Count&nbsp;&nbsp;&nbsp;&nbsp; Pct&nbsp; State&nbsp; Function</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span style='background:yellow'>16851&nbsp; 82.20%&nbsp; USER&nbsp;&nbsp;
+Spinlock&lt;49,1,268435714&gt;::SpinToAcquireOptimistic [sqldk.dll]</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+330&nbsp;&nbsp; 1.61%&nbsp; USER&nbsp;&nbsp; ExpInterlockedPopEntrySListEnd
+[ntdll.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+201&nbsp;&nbsp; 0.98%&nbsp; USER&nbsp;&nbsp;
+DescriptorAllocator&lt;SOS_ParentBlockDescriptor,0&gt;::PageDesc::Pop
+[sqldk.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+159&nbsp;&nbsp; 0.78%&nbsp; USER&nbsp;&nbsp; SOS_MemoryWorkSpace::DeCommitBlock
+[sqldk.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;109&nbsp;&nbsp; 0.53%&nbsp;
+USER&nbsp;&nbsp; CFixedInfo::InitSize [sqldk.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+90&nbsp;&nbsp; 0.44%&nbsp; USER&nbsp;&nbsp; ExpInterlockedPopEntrySListFault
+[ntdll.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+89&nbsp;&nbsp; 0.43%&nbsp; USER&nbsp;&nbsp; UNKNOWN [vcruntime140.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+70&nbsp;&nbsp; 0.34%&nbsp; USER&nbsp;&nbsp; ExpInterlockedPopEntrySListResume
+[ntdll.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+68&nbsp;&nbsp; 0.33%&nbsp; USER&nbsp;&nbsp; RtlpInterlockedPushEntrySList [ntdll.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+58&nbsp;&nbsp; 0.28%&nbsp; USER&nbsp;&nbsp;
+SOS_MemoryBlockAllocator::IsCachedBlocksAvailable [sqldk.dll]</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Count&nbsp;&nbsp;&nbsp;&nbsp; Pct&nbsp; HARDCLOCK Stack trace</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+============================================================</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+458&nbsp;&nbsp; 2.23%&nbsp; <span style='background:yellow'>Spinlock&lt;49,1,268435714&gt;::SpinToAcquireOptimistic</span>&nbsp;
+<span style='background:yellow'>TMemoryBlockAllocator&lt;0,8192,524288,8,1,0&gt;::Init</span>&nbsp;
+CFixedInfo::InitSize&nbsp; <span style='background:yellow'>SOS_MemoryBlockAllocator::AllocateBlock</span>&nbsp;
+SOS_MemoryWorkSpace::AllocatePage&nbsp; MemoryNode::AllocatePagesInternal&nbsp;
+MemoryClerkInternal::AllocatePagesWithFailureMode&nbsp;
+MemoryClerkInternal::AllocatePages&nbsp; SOS_OS::GetCurrentNtToken&nbsp;
+CMemObj::Alloc&nbsp; operator&nbsp; CMemo::PgexprIncludeRoot&nbsp;
+CMemo::DecCounters&nbsp; OptimizerUtil::AddScalarOnlyChildrenToMemo&nbsp;
+CLogOp_Project::PcnstrDeriveSpecial&nbsp; CNormalizeExpr::CollapseRTConstants</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+456&nbsp;&nbsp; 2.22%&nbsp; <span style='background:yellow'>Spinlock&lt;49,1,268435714&gt;::SpinToAcquireOptimistic&nbsp;
+TMemoryBlockAllocator&lt;0,8192,524288,8,1,0&gt;::Init&nbsp;
+CFixedInfo::InitSize&nbsp; SOS_MemoryBlockAllocator::AllocateBlock</span>&nbsp;
+SOS_MemoryWorkSpace::AllocatePage&nbsp; MemoryNode::AllocatePagesInternal&nbsp;
+MemoryClerkInternal::AllocatePagesWithFailureMode&nbsp;
+MemoryClerkInternal::AllocatePages&nbsp; SOS_OS::GetCurrentNtToken&nbsp;
+CMemObj::Alloc&nbsp; operator&nbsp; CMemo::CreateGroup&nbsp;
+CMemo::CreateGroup&nbsp; CMemo::DecCounters&nbsp; OptimizerUtil::AddScalarOnlyChildrenToMemo&nbsp;
+CLogOp_Project::PcnstrDeriveSpecial</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+452&nbsp;&nbsp; 2.20%&nbsp; <span style='background:yellow'>Spinlock&lt;49,1,268435714&gt;::SpinToAcquireOptimistic&nbsp;
+Spinlock&lt;49,1,268435714&gt;::SpinToAcquireOptimistic&nbsp;
+CFixedInfo::InitSize&nbsp; SOS_MemoryBlockAllocator::AllocateBlock</span>&nbsp;
+SOS_MemoryWorkSpace::AllocatePage&nbsp; MemoryNode::AllocatePagesInternal&nbsp;
+MemoryClerkInternal::AllocatePagesWithFailureMode&nbsp;
+MemoryClerkInternal::AllocatePages&nbsp; SOS_OS::GetCurrentNtToken&nbsp;
+CMemObj::Alloc&nbsp; operator&nbsp; CMemo::CreateGroup&nbsp;
+CMemo::CreateGroup&nbsp; CMemo::DecCounters&nbsp; OptimizerUtil::AddScalarOnlyChildrenToMemo&nbsp;
+CLogOp_Project::PcnstrDeriveSpecial</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>...</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='color:#1F497D'>Meanwhile, the SQL Server
+spinlock contention report shows the SOS_BLOCKALLOCPARTIALLIST spinlock as the top
+spinlock with contention:</span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=0
+ style='width:412.0pt;margin-left:-.05pt;border-collapse:collapse'>
+ <tr style='height:.2in'>
+  <td width=261 nowrap valign=bottom style='width:196.0pt;border:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>name</span></p>
+  </td>
+  <td width=84 nowrap valign=bottom style='width:59.0pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>collisions</span></p>
+  </td>
+  <td width=152 nowrap valign=bottom style='width:114.0pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>spins</span></p>
+  </td>
+  <td width=66 nowrap valign=bottom style='width:43.0pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>backoffs</span></p>
+  </td>
+ </tr>
+ <tr style='height:.2in'>
+  <td width=261 nowrap valign=bottom style='width:196.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>SOS_BLOCKALLOCPARTIALLIST</span></p>
+  </td>
+  <td width=84 nowrap valign=bottom style='width:59.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>2690503915</span></p>
+  </td>
+  <td width=152 nowrap valign=bottom style='width:114.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>1237401467478</span></p>
+  </td>
+  <td width=66 nowrap valign=bottom style='width:43.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>210649</span></p>
+  </td>
+ </tr>
+ <tr style='height:.2in'>
+  <td width=261 nowrap valign=bottom style='width:196.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>SOS_ACTIVEDESCRIPTOR</span></p>
+  </td>
+  <td width=84 nowrap valign=bottom style='width:59.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>15265354</span></p>
+  </td>
+  <td width=152 nowrap valign=bottom style='width:114.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>846057835</span></p>
+  </td>
+  <td width=66 nowrap valign=bottom style='width:43.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>1255</span></p>
+  </td>
+ </tr>
+ <tr style='height:.2in'>
+  <td width=261 nowrap valign=bottom style='width:196.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>LOCK_HASH</span></p>
+  </td>
+  <td width=84 nowrap valign=bottom style='width:59.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>12103477</span></p>
+  </td>
+  <td width=152 nowrap valign=bottom style='width:114.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>3914255243</span></p>
+  </td>
+  <td width=66 nowrap valign=bottom style='width:43.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>5342504</span></p>
+  </td>
+ </tr>
+ <tr style='height:.2in'>
+  <td width=261 nowrap valign=bottom style='width:196.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>SQL_MGR</span></p>
+  </td>
+  <td width=84 nowrap valign=bottom style='width:59.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>4181585</span></p>
+  </td>
+  <td width=152 nowrap valign=bottom style='width:114.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>316197305</span></p>
+  </td>
+  <td width=66 nowrap valign=bottom style='width:43.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>356887</span></p>
+  </td>
+ </tr>
+ <tr style='height:.2in'>
+  <td width=261 nowrap valign=bottom style='width:196.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>LOCK_RW_CMED_HASH_SET</span></p>
+  </td>
+  <td width=84 nowrap valign=bottom style='width:59.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>2584700</span></p>
+  </td>
+  <td width=152 nowrap valign=bottom style='width:114.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>2721612</span></p>
+  </td>
+  <td width=66 nowrap valign=bottom style='width:43.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>0</span></p>
+  </td>
+ </tr>
+ <tr style='height:.2in'>
+  <td width=261 nowrap valign=bottom style='width:196.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>SOS_CACHESTORE_CLOCK</span></p>
+  </td>
+  <td width=84 nowrap valign=bottom style='width:59.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>1777459</span></p>
+  </td>
+  <td width=152 nowrap valign=bottom style='width:114.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>48196285</span></p>
+  </td>
+  <td width=66 nowrap valign=bottom style='width:43.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>1158</span></p>
+  </td>
+ </tr>
+ <tr style='height:.2in'>
+  <td width=261 nowrap valign=bottom style='width:196.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>SOS_TLIST</span></p>
+  </td>
+  <td width=84 nowrap valign=bottom style='width:59.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>1771401</span></p>
+  </td>
+  <td width=152 nowrap valign=bottom style='width:114.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>12648910</span></p>
+  </td>
+  <td width=66 nowrap valign=bottom style='width:43.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>5</span></p>
+  </td>
+ </tr>
+ <tr style='height:.2in'>
+  <td width=261 nowrap valign=bottom style='width:196.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>SOS_SUSPEND_QUEUE</span></p>
+  </td>
+  <td width=84 nowrap valign=bottom style='width:59.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>1412705</span></p>
+  </td>
+  <td width=152 nowrap valign=bottom style='width:114.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>52272646</span></p>
+  </td>
+  <td width=66 nowrap valign=bottom style='width:43.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>28</span></p>
+  </td>
+ </tr>
+ <tr style='height:.2in'>
+  <td width=261 nowrap valign=bottom style='width:196.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>X_PACKET_LIST</span></p>
+  </td>
+  <td width=84 nowrap valign=bottom style='width:59.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>1213936</span></p>
+  </td>
+  <td width=152 nowrap valign=bottom style='width:114.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>15446440</span></p>
+  </td>
+  <td width=66 nowrap valign=bottom style='width:43.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>6</span></p>
+  </td>
+ </tr>
+ <tr style='height:.2in'>
+  <td width=261 nowrap valign=bottom style='width:196.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>COMPPLAN_SKELETON</span></p>
+  </td>
+  <td width=84 nowrap valign=bottom style='width:59.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>953293</span></p>
+  </td>
+  <td width=152 nowrap valign=bottom style='width:114.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>77433307</span></p>
+  </td>
+  <td width=66 nowrap valign=bottom style='width:43.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>94264</span></p>
+  </td>
+ </tr>
+ <tr style='height:.2in'>
+  <td width=261 nowrap valign=bottom style='width:196.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>SOS_OBJECT_STORE</span></p>
+  </td>
+  <td width=84 nowrap valign=bottom style='width:59.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>669942</span></p>
+  </td>
+  <td width=152 nowrap valign=bottom style='width:114.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>9101450</span></p>
+  </td>
+  <td width=66 nowrap valign=bottom style='width:43.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>26</span></p>
+  </td>
+ </tr>
+ <tr style='height:.2in'>
+  <td width=261 nowrap valign=bottom style='width:196.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>SOS_TASK</span></p>
+  </td>
+  <td width=84 nowrap valign=bottom style='width:59.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>425186</span></p>
+  </td>
+  <td width=152 nowrap valign=bottom style='width:114.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>5320401</span></p>
+  </td>
+  <td width=66 nowrap valign=bottom style='width:43.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>11</span></p>
+  </td>
+ </tr>
+ <tr style='height:.2in'>
+  <td width=261 nowrap valign=bottom style='width:196.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>XDESMGR</span></p>
+  </td>
+  <td width=84 nowrap valign=bottom style='width:59.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>418007</span></p>
+  </td>
+  <td width=152 nowrap valign=bottom style='width:114.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>27506347</span></p>
+  </td>
+  <td width=66 nowrap valign=bottom style='width:43.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>12371</span></p>
+  </td>
+ </tr>
+ <tr style='height:.2in'>
+  <td width=261 nowrap valign=bottom style='width:196.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+  style='color:black'>SOS_CACHESTORE</span></p>
+  </td>
+  <td width=84 nowrap valign=bottom style='width:59.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>373268</span></p>
+  </td>
+  <td width=152 nowrap valign=bottom style='width:114.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>39760716</span></p>
+  </td>
+  <td width=66 nowrap valign=bottom style='width:43.0pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:.2in'>
+  <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right'><span style='color:black'>74546</span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal><span style='color:#1F497D'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span lang=EN-GB style='font-family:"Arial",sans-serif;
+color:black;background:white'>Resolution</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>This problem is documented in <a
+href="https://github.com/MicrosoftDocs/SupportArticles-docs/blob/main/support/sql/releases/sqlserver-2019/cumulativeupdate21.md#2410400">bug
+2410400</a>:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'> </span><code><span
+style='font-size:10.0pt;font-family:Consolas;color:#1F2328'>SOS_BLOCKALLOCPARTIALLIST</span></code><span
+style='font-family:"Segoe UI",sans-serif;color:#1F2328;background:#F6F8FA'><span
+style='font-variant-ligatures: normal;font-variant-caps: normal;orphans: 2;
+text-align:start;widows: 2;-webkit-text-stroke-width: 0px;text-decoration-thickness: initial;
+text-decoration-style: initial;text-decoration-color: initial;float:none;
+word-spacing:0px'>&nbsp;spinlock contention and elevated CPU utilization occur
+on large-memory machines.</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Segoe UI",sans-serif;
+color:#1F2328;background:#F6F8FA'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='color:#1F497D'>After applying SQL Server 2019
+Cumulative Update 21, the spinlock contention no longer existed performance
+exceeded the Dell server by 30%.</span></p>
+
+</div>
+
+</body>
+
+</html>

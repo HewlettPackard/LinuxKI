@@ -83,7 +83,9 @@ char *oracle_wait_event[ORA_NEVENTS] = {
     "buffer busy wait",
     "gc current block",
     "gc current multi block request",
-    "latch: cache_buffers chains"
+    "latch: cache_buffers chains",
+    "latch free: sequence cache",
+    "latch: undo global data"
 };
 
 int oracle_pid_stats(void *arg1, void *arg2)
@@ -115,7 +117,7 @@ get_oracle_wait_event(void *arg, unsigned long *stktrc, unsigned int depth)
 	int i;
 	int is_user = ORA_NONE;
 	char *sym;
-	char skt_read=FALSE, ntwk_read=FALSE, ntwk_poll=FALSE, shrd_exam=FALSE, nanoslp=FALSE;
+	char skt_read=FALSE, ntwk_read=FALSE, ntwk_poll=FALSE, shrd_exam=FALSE, nanoslp=FALSE, latch_free=FALSE;
 	char shared_latch=FALSE;
 
         if (depth == 0) return ORA_NONE;
@@ -141,6 +143,8 @@ get_oracle_wait_event(void *arg, unsigned long *stktrc, unsigned int depth)
 					nanoslp = TRUE;
 				} else if (strncmp(sym, "epoll_wait", 9) == 0) {
 					ntwk_poll = TRUE;
+				} else if (strncmp(sym, "kslgetl", 7) == 0) {
+					latch_free = TRUE;
 				} else if (strncmp(sym, "ksl_get_shared_latch", 20) == 0) {
 					shared_latch = TRUE;
 				} else if (strncmp(sym, "ksfdread", 8) == 0) {
@@ -168,6 +172,10 @@ get_oracle_wait_event(void *arg, unsigned long *stktrc, unsigned int depth)
 					if (skt_read) return ORA_NET_FROM_CLIENT;
 				} else if (strncmp(sym, "kkscsCheckCursor", 16) == 0) {
 					if (shrd_exam) return ORA_CURSOR_PIN_S;
+				} else if (strncmp(sym, "kdn", 3) == 0) {
+					if (latch_free) return ORA_LATCH_SEQ;
+				} else if (strncmp(sym, "ktuisonline1", 12) == 0) {
+					if (latch_free) return ORA_LATCH_UNDO;
 				}
 			}
                 } else {

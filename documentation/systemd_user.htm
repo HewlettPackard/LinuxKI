@@ -1,0 +1,608 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+a:link, span.MsoHyperlink
+	{color:#0563C1;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:#954F72;
+	text-decoration:underline;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:107%;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:.5in .5in .5in .5in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US link="#0563C1" vlink="#954F72">
+
+<div class=WordSection1>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;vertical-align:
+top'><b><i><span style='font-size:12.0pt;font-family:"Arial",sans-serif;
+color:black'>​LinuxKI Warning</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>High CPU utilization caused by systemd --user</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>02/28/2025</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-family:"Arial",sans-serif;
+color:black'>Problem Description</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>Customer migrated their Oracle
+DB environment from HP-UX to a Superdome Flex 280 2-socket server running RHEL
+8.10.   After the migration, the customer observed severe performance
+degradation and the SDF 280 CPU utilization was near 100%.    </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>Due to the high CPU usage, the
+HPE team installed 2 more processor sockets into the SDF280, but the CPU
+utilization was still very high.  </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span lang=EN-GB style='font-family:"Arial",sans-serif;
+color:black;background:white'>Investigation</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span class=MsoHyperlink><span lang=EN-GB
+style='font-size:10.0pt;font-family:"Arial",sans-serif;background:white'><a
+href="https://github.com/HewlettPackard/LinuxKI/wiki">LinuxKI</a></span></span><span
+lang=EN-GB style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black;
+background:white'> data was collected for analysis near the end of the business
+day while the CPU usage was only around 40%, however the System CPU utilization
+accounted for ~24% itself.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>The Kparse report showed very
+high spinlock contention from the mnt_list_next() and m_stop() functions.   These
+functions are used read the mount table entries from the /proc filesystem.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#FFD1A4'>
+ <tr>
+  <td style='padding:1.5pt 2.25pt 1.5pt 2.25pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span style='font-size:10.0pt;
+  font-family:"Courier New"'>1.4.4 Report of non-idle kernel stack traces at
+  each clock tick</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><u><span style='font-size:10.0pt;font-family:"Courier New";
+  color:blue'>[Prev Subsection][Next Subsection]---[Prev Section][Next
+  Section][Table of Contents]</span></u></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><b><span style='font-size:10.0pt;font-family:"Courier New";color:black'>  
+Count     Pct  Stack trace</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:10.0pt;font-family:"Courier New";color:black'>  
+19438  16.76%  native_queued_spin_lock_slowpath  _raw_spin_</span><span
+style='font-size:10.0pt;font-family:"Courier New"'>lock  <span
+style='background:yellow'>mnt_list_next</span>.isra.28  seq_read  vfs_read 
+ksys_read  do_syscall_64  entry_SYSCALL_64_after_hwframe</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:10.0pt;font-family:"Courier New"'>     708  
+0.61%  native_queued_spin_lock_slowpath  _raw_spin_lock  <span
+style='background:yellow'>m_stop</span>  seq_read  vfs_read  ksys_read 
+do_syscall_64  entry_SYSCALL_64_after_hwframe</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:10.0pt;font-family:"Courier New"'>     303  
+0.26%  vsnprintf  seq_vprintf  seq_printf  show_mountinfo  seq_read  vfs_read 
+ksys_read  do_syscall_64  entry_SYSCALL_64_after_hwframe</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:10.0pt;font-family:"Courier New"'>     263  
+0.23%  _raw_spin_lock  <span style='background:yellow'>mnt_list_next</span>.isra.28 
+seq_read  vfs_read  ksys_read  do_syscall_64  entry_SYSCALL_64_after_hwframe</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:10.0pt;font-family:"Courier New";color:black'>    
+178   0.15%  do_syscall_64  entry_SYSCALL_64_after_hwframe</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>Further investigation showed
+&gt;1000 </span><span lang=EN-GB style='font-size:10.0pt;font-family:"Courier New";
+color:black;background:white'>systemd --user</span><span lang=EN-GB
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black;background:
+white'> processes on the system accessing the </span><span lang=EN-GB
+style='font-size:10.0pt;font-family:"Courier New";color:black;background:white'>/proc/self/mountinfo</span><span
+lang=EN-GB style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black;
+background:white'> file.  Below is trace data from one of the </span><span
+lang=EN-GB style='font-size:10.0pt;font-family:"Courier New";color:black;
+background:white'>systemd --user</span><span lang=EN-GB style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black;background:white'> processes.  Note
+the read() system call times are high for an in-memory filesystem, and there
+are many reads of the mountinfo file.  </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    3.221274 cpu=24 pid=392229
+tgid=392229 openat [257] entry dirfd=-100 *pathname=0x7f2d666450aa
+flags=RDONLY|CLOEXEC mode=00 filename: /proc/self/mountinfo</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    3.225608 cpu=24 pid=392229
+tgid=392229 openat [257] ret=21 syscallbeg=    0.004334 dirfd=-100
+*pathname=0x7f2d666450aa flags=RDONLY|CLOEXEC mode=00</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    3.225608 cpu=24 pid=392229
+tgid=392229 lseek [8] entry fd=21 offset=0x0 whence=SEEK_CUR</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    3.225609 cpu=24 pid=392229
+tgid=392229 lseek [8] ret=0x0 syscallbeg=    0.000000 fd=21 offset=0x0
+whence=SEEK_CUR</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    3.225619 cpu=24 pid=392229
+tgid=392229 read [0] entry fd=21 *buf=0x56488c941dc0 count=16384</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    3.226808 cpu=24 pid=392229
+tgid=392229 read [0] ret=0xff6 syscallbeg=    <span style='background:yellow'>0.001189</span>
+fd=21 *buf=0x56488c941dc0 count=16384</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    3.226809 cpu=24 pid=392229
+tgid=392229 poll [7] entry *fds=0x7fff9ab7e7f0 nfds=1 timeout=0 pollfd[0]={21
+0x2 0x0}</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    3.226810 cpu=24 pid=392229
+tgid=392229 poll [7] ret=0x0 syscallbeg=    0.000001 *fds=0x7fff9ab7e7f0 nfds=1
+timeout=0 pollfd[0]={21 0x2 0x0}</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    3.226810 cpu=24 pid=392229
+tgid=392229 read [0] entry fd=21 *buf=0x56488c942db6 count=12298</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    3.227543 cpu=24 pid=392229
+tgid=392229 read [0] ret=0xf7c syscallbeg=    <span style='background:yellow'>0.000732</span>
+fd=21 *buf=0x56488c942db6 count=12298</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>...</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>Meanwhile, </span><span
+lang=EN-GB style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:white'>mounts.&lt;timestamp&gt;</span><span lang=EN-GB
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black;background:
+white'> file collected by the LinuxKI runki script showed over 1000 tmpfs
+filesystems, one for each user logged on. </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>tmpfs on /run/user/905 type tmpfs
+(rw,nosuid,nodev,relatime,seclabel,size=158322208k,mode=700,uid=905,gid=801)</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>tmpfs on /run/user/7434599 type
+tmpfs
+(rw,nosuid,nodev,relatime,seclabel,size=158322208k,mode=700,uid=7434599,gid=350)</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>tmpfs on /run/user/2018 type tmpfs
+(rw,nosuid,nodev,relatime,seclabel,size=158322208k,mode=700,uid=2018,gid=350)</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>tmpfs on /run/user/2221 type tmpfs
+(rw,nosuid,nodev,relatime,seclabel,size=158322208k,mode=700,uid=2221,gid=350)</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>tmpfs on /run/user/119639 type
+tmpfs (rw,nosuid,nodev,relatime,seclabel,size=158322208k,mode=700,uid=119639,gid=350)</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>...</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>During the busy part of the
+day, this server can have over 2000 users logged in.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span lang=EN-GB style='font-family:"Arial",sans-serif;
+color:black;background:white'>systemd --user </span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>For each user logged into the
+system, a </span><span lang=EN-GB style='font-size:10.0pt;font-family:"Courier New";
+color:black;background:white'>systemd --user</span><span lang=EN-GB
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black;background:
+white'> process is spawned and the </span><span lang=EN-GB style='font-size:
+10.0pt;font-family:"Courier New";color:black;background:white'>/run/user/&lt;UID&gt;</span><span
+lang=EN-GB style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black;
+background:white'> tmpfs filesystem is mounted.   So a new entry is added to
+the </span><span lang=EN-GB style='font-size:10.0pt;font-family:"Courier New";
+color:black;background:white'>mountinfo</span><span lang=EN-GB
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black;background:
+white'> file during the user’s first login, and cleaned-up after the user’s
+last logoff.   With heavy login/logoff activity, this file is modified very
+frequently.   The </span><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>systemd-user-runtime-dir</span><span
+lang=EN-GB style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black;
+background:white'> process is responsible for calling mount or umount of the users
+tmpfs during the login/logoff.    During the mount/umount, ALL of the remaining
+systemd --user processes are woken up so they can re-read the mountinfo file.  
+For example:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    0.689792 cpu=23 pid=393545
+tgid=393545 umount2 [166] entry *target=0x7fff2ee29100 flags=0x2</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    0.689810 cpu=23 pid=393545
+tgid=393545 sched_wakeup target_pid=10197 prio=120 target_cpu=18 success=1</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    0.689814 cpu=23 pid=393545
+tgid=393545 sched_wakeup target_pid=392229 prio=120 target_cpu=25 success=1</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    0.689818 cpu=23 pid=393545
+tgid=393545 sched_wakeup target_pid=391966 prio=120 target_cpu=26 success=1</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    0.689820 cpu=23 pid=393545
+tgid=393545 sched_wakeup target_pid=391676 prio=120 target_cpu=28 success=1</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    0.689824 cpu=23 pid=393545
+tgid=393545 sched_wakeup target_pid=391336 prio=120 target_cpu=48 success=1</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>    0.689828 cpu=23 pid=393545
+tgid=393545 sched_wakeup target_pid=390951 prio=120 target_cpu=15 success=1</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Courier New";color:black;background:white'>...</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:8.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-GB style='font-size:10.0pt;line-height:107%;
+font-family:"Arial",sans-serif;background:white'>The mass wakeups of all the </span><span
+lang=EN-GB style='font-size:10.0pt;line-height:107%;font-family:"Courier New";
+background:white'>systemd --user</span><span lang=EN-GB style='font-size:10.0pt;
+line-height:107%;font-family:"Arial",sans-serif;background:white'> processes
+causes the spinlock contention as each of these processes will need to read the
+mountinfo file, which requires the spinlock as the file is read.  This type of
+behavior is called a “thundering herd”. </span></p>
+
+<p class=MsoNormal><span lang=EN-GB style='font-size:10.0pt;line-height:107%;
+font-family:"Arial",sans-serif;background:white'>Note that the Kparse
+Thundering Herd Detection section will show these mass wakeups from the </span><span
+lang=EN-GB style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>systemd-user-runtime-dir</span><span
+lang=EN-GB style='font-size:10.0pt;line-height:107%;font-family:"Arial",sans-serif;
+background:white'> processes</span><span lang=EN-GB style='background:white'>.   
+</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;background:#8CFF8C'>
+ <tr>
+  <td style='padding:1.5pt 2.25pt 1.5pt 2.25pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span style='font-size:10.0pt;
+  font-family:"Courier New"'>1.5 Thundering Herd Detection</span></b></p>
+  <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><u><span style='font-size:10.0pt;font-family:"Courier New";
+  color:blue'><a
+  href="http://gse-rose-st068.us.hpecorp.net/work/mcr/ferguson/a08810/0212_1654/kp.0212_1654.html#subsection1.4"><span
+  style='color:blue'>[Prev Subsection]</span></a><a
+  href="http://gse-rose-st068.us.hpecorp.net/work/mcr/ferguson/a08810/0212_1654/kp.0212_1654.html#subsection1.6"><span
+  style='color:blue'>[Next Subsection]</span></a><a
+  href="http://gse-rose-st068.us.hpecorp.net/work/mcr/ferguson/a08810/0212_1654/kp.0212_1654.html#Section1"><span
+  style='color:blue'>---[Prev Section]</span></a><a
+  href="http://gse-rose-st068.us.hpecorp.net/work/mcr/ferguson/a08810/0212_1654/kp.0212_1654.html#Section2"><span
+  style='color:blue'>[Next Section]</span></a><a
+  href="http://gse-rose-st068.us.hpecorp.net/work/mcr/ferguson/a08810/0212_1654/kp.0212_1654.html#TOC"><span
+  style='color:blue'>[Table of Contents]</span></a></span></u></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><b><span style='font-size:10.0pt;font-family:"Courier New";color:black'>PID      
+Wakeups MaxWakeups    Count     TimeStamp  cmd</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:10.0pt;font-family:"Courier New";color:blue'><a
+href="http://gse-rose-st068.us.hpecorp.net/work/mcr/ferguson/a08810/0212_1654/PIDS/393545"
+target="kipid file"><span style='color:blue'>393545</span></a></span></u><span
+style='font-size:10.0pt;font-family:"Courier New";color:black'>      
+1267       1258        1      0.694290 
+/usr/lib/systemd/systemd-user-runtime-dir</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:10.0pt;font-family:"Courier New";color:blue'><a
+href="http://gse-rose-st068.us.hpecorp.net/work/mcr/ferguson/a08810/0212_1654/PIDS/393747"
+target="kipid file"><span style='color:blue'>393747</span></a></span></u><span
+style='font-size:10.0pt;font-family:"Courier New";color:black'>      
+1268       1257        1      3.225537 
+/usr/lib/systemd/systemd-user-runtime-dir</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:10.0pt;font-family:"Courier New";color:blue'><a
+href="http://gse-rose-st068.us.hpecorp.net/work/mcr/ferguson/a08810/0212_1654/PIDS/393867"
+target="kipid file"><span style='color:blue'>393867</span></a></span></u><span
+style='font-size:10.0pt;font-family:"Courier New";color:black'>      
+1268       1256        1      6.165620 
+/usr/lib/systemd/systemd-user-runtime-dir</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:10.0pt;font-family:"Courier New";color:blue'><a
+href="http://gse-rose-st068.us.hpecorp.net/work/mcr/ferguson/a08810/0212_1654/PIDS/394036"
+target="kipid file"><span style='color:blue'>394036</span></a></span></u><span
+style='font-size:10.0pt;font-family:"Courier New";color:black'>      
+1266       1255        1     10.086015 
+/usr/lib/systemd/systemd-user-runtime-dir</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:10.0pt;font-family:"Courier New";color:blue'><a
+href="http://gse-rose-st068.us.hpecorp.net/work/mcr/ferguson/a08810/0212_1654/PIDS/394288"
+target="kipid file"><span style='color:blue'>394288</span></a></span></u><span
+style='font-size:10.0pt;font-family:"Courier New";color:black'>      
+1267       1254        1     14.729325 
+/usr/lib/systemd/systemd-user-runtime-dir</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:10.0pt;font-family:"Courier New";color:blue'><a
+href="http://gse-rose-st068.us.hpecorp.net/work/mcr/ferguson/a08810/0212_1654/PIDS/394634"
+target="kipid file"><span style='color:blue'>394634</span></a></span></u><span
+style='font-size:10.0pt;font-family:"Courier New";color:black'>      
+1257       1251        1     19.888534 
+/usr/lib/systemd/systemd-user-runtime-dir</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:10.0pt;font-family:"Courier New";color:blue'><a
+href="http://gse-rose-st068.us.hpecorp.net/work/mcr/ferguson/a08810/0212_1654/PIDS/394524"
+target="kipid file"><span style='color:blue'>394524</span></a></span></u><span
+style='font-size:10.0pt;font-family:"Courier New";color:black'>        514        505       
+1     17.755736  /usr/lib/systemd/systemd-user-runtime-dir</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><u><span style='font-size:10.0pt;font-family:"Courier New";color:blue'><a
+href="http://gse-rose-st068.us.hpecorp.net/work/mcr/ferguson/a08810/0212_1654/PIDS/394530"
+target="kipid file"><span style='color:blue'>394530</span></a></span></u><span
+style='font-size:10.0pt;font-family:"Courier New";color:black'>       
+424        411        1     18.603044 
+/usr/lib/systemd/systemd-user-runtime-dir</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span lang=EN-GB style='font-family:"Arial",sans-serif;
+color:black;background:white'>Resolution</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>The </span><span lang=EN-GB
+style='font-size:10.0pt;font-family:"Courier New";color:black;background:white'>systemd
+--user</span><span lang=EN-GB style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black;background:white'> processes can be disabled as long as the
+customer is not using the Linux Desktop GUI using the following command:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:9.0pt;font-family:
+"Courier New";color:black;background:white'># systemctl mask user@.service</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:9.0pt;font-family:
+"Courier New";color:black;background:white'>Created symlink
+/etc/systemd/system/user@.service → /dev/null.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>For more information, please
+see the following RedHat article:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span class=MsoHyperlink><span lang=EN-GB
+style='font-size:10.0pt;font-family:"Arial",sans-serif;background:white'><a
+href="https://access.redhat.com/solutions/5211801">https://access.redhat.com/solutions/5211801</a></span></span><span
+lang=EN-GB style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black;
+background:white'> </span></p>
+
+</div>
+
+</body>
+
+</html>

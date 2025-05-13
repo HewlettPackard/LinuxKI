@@ -1082,7 +1082,6 @@ pid_report(void *arg1, void *v)
 
 	tab=tab4;
 	if (sched_flag) sched_report(pidp, pidfile, pid_jsonfile, pid_wtree_jsonfile);
-	if (pidp->ora_wait_hash) ora_wait_report(pidp, pidfile);
 	if (hc_flag) cpu_report(pidp, pidfile);
 	if (hc_flag) pid_spin_report(pidp, pidfile);
 	if (scall_flag) pid_syscall_report(pidp, pidfile);

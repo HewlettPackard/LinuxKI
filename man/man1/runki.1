@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad
-.TH runki 1 ”7.10 - October 11, 2024" version "7.10"
+.TH runki 1 "7.11 - May 06, 2025" version "7.11"
 .SH NAME
 runki  -  LinuxKI trace dump collection script
 
@@ -25,8 +25,8 @@ Script to collect a LinuxKI trace dump using the LiKI kernel tracking module (de
  -J <path>       Location of Java jstack command
  -n <interface>  Gather tcpdump trace data
  -v              Skip vxfs, misc disc data collection
- -d <secs>       Duration of KI data collection. Defaults to 20 secs if not specified.
- -d 0            Initially continuous logging.  Collect LinuxKI dump with kiinfo -likiend
+ -d <secs>       Duration of KI data collection. Defaults to 20 secs if not specified. 
+ -d 0            Initiate continuous logging.  Collect LinuxKI dump with kiinfo -likiend
  -t <secs>       Maximum time for data collection tools to run. Defaults to 120 secs if not specified
  -p              Skip Per-PID data (lsof, stacks, numa_maps, maps)
  -f              Use ftrace tracing instead of LiKI DLKM tracing to dump trace data
@@ -38,6 +38,7 @@ Script to collect a LinuxKI trace dump using the LiKI kernel tracking module (de
  -e <event>      Identify events to dump. Possible values are: default | all | <event>
  -s <subsys>     Identify subsys to dump. For example: irq, scsi, block, etc.
  -I <sysignore>  File to specify ignored system call (liki only)
+ -F <hc_per_sec> Number of CPU Profile events per second (default: 100)
  -T <timestamp>  Should be of the form MMDD_HHMM
  -V "<varargs>"  Specify multiple filters and flags to pass to kiinfo -likidump
  -c "comment"    echo comment into comment.$tag file
@@ -59,13 +60,13 @@ If there is sufficient available memory on the system, you should collect the da
 The runki script will do all the work.   It will make sure the debug filesystem is mounted, insert the LiKI DLKM if needed, enable the trace points and dump the trace data to disk.   It will also collect supplemental information which can be used to interpret the trace data and help troubleshoot performance problems.    The result will be a single compress tar file of the format ki_all.<hostname>.<timestamp>.tgz, where the timestamp will be of the format MMDD_HHMM.   The amount of trace data depends on the number of CPU and the rate at which the trace events occur.   The data should be collected in a filesystem with plenty of disk space (200 MB - 5 GB) which is mounted for cached I/O.    Note that root privilege will be needed to execute the runki script.   Below is an example using the LiKI tracing:
 
 .B    $ /opt/linuxki/runki
-    === runki for Linux version 7.6 
+    === runki for Linux version 7.11 
     === Installing LinuxKI trace points ===
     === Starting: LinuxKI liKI trace dump for 20 seconds ===
     ===
     Command line: /opt/linuxki/kiinfo -likidump dur=20,events=default,subsys=default,pid=0,tgid=0,cpu=-1,dev=-1,debug_dir=/sys/kernel/debug,sysignore= -ts 0209_1243
  
-    kiinfo (7.6)
+    kiinfo (7.11)
 
     kiinfo: spooling trace data to disk...
     kiinfo: Tracing complete

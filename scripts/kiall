@@ -603,7 +603,7 @@ fi
 
 if [ $cflag -eq 1 -a $fflag -eq 1 ] ; then
     echo "ERROR: Cannot use both -c and -f options"
-    exit 10 
+    exit 11 
 fi
 
 if [ $rflag -eq 1 ] ; then

@@ -69,6 +69,8 @@ int pc_do_numa_page = -1;
 int pc_pagevec_lru_move_fn = -1;
 int pc_release_pages = -1;
 int pc_alloc_pages_nodemask = -1;
+int pc_mnt_list_next = -1;
+int pc_seq_read = -1;
 
 
 void
@@ -1732,7 +1734,8 @@ parse_kallsyms()
                 else if (strcmp(globals->symtable[i].nameptr, "pagevec_lru_move_fn") == 0) pc_pagevec_lru_move_fn = i;
                 else if (strcmp(globals->symtable[i].nameptr, "release_pages") == 0) pc_release_pages = i;
                 else if (strcmp(globals->symtable[i].nameptr, "__alloc_pages_nodemask") == 0) pc_alloc_pages_nodemask = i;
-
+                else if (strcmp(globals->symtable[i].nameptr, "seq_read") == 0) pc_seq_read = i;
+                else if (strncmp(globals->symtable[i].nameptr, "mnt_list_next", 13) == 0) pc_mnt_list_next = i;
 	}
 
 	globals->nsyms = nsyms;
@@ -2590,8 +2593,9 @@ parse_SQLThreadList()
 
 		if (strncmp(util_str, "PID,INSTANCE", 12) == 0) continue;
 
-		endptr = strstr(util_str,"  ");
-		endptr[0] = ',';
+		util_str[strlen(util_str)] = ',';
+                if (endptr = strstr(util_str,"  ")) endptr[0] = ',';
+
 		pidstr = strtok2(util_str,",");   pid=atoi(pidstr);
 		instance = strtok2(NULL,",");
 		tidstr = strtok2(NULL,",");	 tid = atoi(tidstr);
@@ -2664,6 +2668,13 @@ parse_systeminfo()
 			while (end && (*end != 0xa) && (*end != 0xd)) end++;
 			*end=0;
 			add_command(&globals->hostname, pos);
+		} else if (strncmp(input_str, "OS Name:", 8) == 0) {
+			pos=&input_str[11];
+			while (isspace(*pos)) pos++;
+			end = pos;
+			while (end && (*end != 0xa) && (*end != 0xd)) end++;
+			*end=0;
+			add_command(&globals->os_name, pos);
 		} else if (strncmp(input_str, "OS Version:", 11) == 0) {
 			pos=&input_str[11];
 			while (isspace(*pos)) pos++;

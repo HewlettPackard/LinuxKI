@@ -35,6 +35,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "info.h"
 
 extern int liki_enable_msr_data();
+extern int liki_write_hcps(unsigned long);
 extern int likiend_init();
 
 struct	trace_stream {
@@ -271,6 +272,11 @@ likidump()
 
 	/* filter out ignored system calls */
 	if (sysignore) ignore_syscalls(sysignore);
+
+	/* set CPU Profiling Frequency (events per sec) */
+	if (hc_per_sec && (hc_per_sec != 100)) { 
+		liki_write_hcps((unsigned long)hc_per_sec);
+	}
 
 	/* Open all the ring buffer files and the associated disk files, and
 	 * create a thread per file pair to stream the buffers to disk

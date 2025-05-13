@@ -1835,7 +1835,7 @@ live_print_msr_stats(sched_stats_t *statp, char iscpu)
 	unsigned long *msrptr;
 
 	msrptr = &statp->msr_total[0];
-	if (msrptr[RET_INSTR] == 0) return; 
+	if ((msrptr[RET_INSTR] == 0) && (msrptr[REF_CLK_FREQ] == 0))  return; 
 
 	lineno++;
 	mvprintw (lineno++, col, "   LLC_ref   LLC_hits  LLC_hit%%     Instrs     Cycles      CPI   Avg_MHz  SMI_cnt");

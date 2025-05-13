@@ -429,6 +429,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define REQ_META                (1 << 20)
 #define REQ_FLUSH               (1 << 26)
 
+#define NERRNO		134
 #define REQ_NRBIT	32  /* should be 35, but need to expand the cmd_flags */
 #define GFP_NRBIT	32  
 #define IRQ_NRBIT	16
@@ -988,7 +989,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 /* macros for managing the Notes and Warnings messages and links.  */
 /* update with warnmsg[] definitions in globals.c */
-#define MAXWARNMSG		36
+#define MAXWARNMSG		38
 #define MAXNOTEMSG		0
 #define MAXNOTEWARN		MAXWARNMSG+MAXNOTEMSG
 #define WARN_CPU_BOTTLENECK		0		
@@ -1027,6 +1028,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARN_RUNQ_DELAYS		33
 #define WARN_LARGE_NUMA_NODE		34
 #define WARN_CLOCKSOURCE		35
+#define WARN_SYSTEMD_USER		36
+#define WARN_MEMBLOCK_ALLOC		37
 #define NOTE_NUM1		MAXWARNMSG+0
 
 /* warn flags passed to "foreach" functions for detection */
@@ -1054,6 +1057,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARNF_MEM_IMBALANCE		0x200000ull
 #define WARNF_NODE_LOWMEM		0x400000ull
 #define WARNF_RUNQ_DELAYS		0x800000ull
+#define WARNF_SYSTEMD_USER		0x1000000ull
 
 /* warn flags specific to hardclocks warnflag */ 
 #define WARNF_SEMLOCK			0x1ull
@@ -1068,6 +1072,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 /* warn flags specific to Windows */
 #define WARNF_TCPTIMEOUTS		0x01ull 
 #define WARNF_SQL_STATS			0x02ull 
+#define WARNF_MEMBLOCK_ALLOC		0x04ull
 
 
 typedef struct var_arg_struct {
@@ -2288,6 +2293,7 @@ typedef struct server_info {
 	char *subdir;
 	char *hostname;
 	char *os_vers;
+	char *os_name;
 	char *model;
 	char *product;
 	pid_info_t **pid_hash;		/* perpid information */
@@ -2606,6 +2612,7 @@ extern char *drm_ioctl[];
 extern char *dm_ioctl[];
 extern char *kvm_ioctl[];
 extern char *sg_ioctl[];
+extern char *errnostr[];
 
 extern void hex_dump(void *, int);
 extern int incr_trc_stats(void *, void *);

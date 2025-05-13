@@ -52,4 +52,6 @@ extern char *oracle_wait_event[];
 #define ORA_GC_CUR_READ			11
 #define ORA_GC_CUR_MB_READ		12
 #define ORA_LATCH_CACHE_BUF		13
-#define ORA_NEVENTS			14	
+#define ORA_LATCH_SEQ			14
+#define ORA_LATCH_UNDO			15
+#define ORA_NEVENTS			16	

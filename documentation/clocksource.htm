@@ -1,0 +1,588 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+a:link, span.MsoHyperlink
+	{color:#0563C1;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:#954F72;
+	text-decoration:underline;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:107%;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:.5in .5in .5in .5in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US link="#0563C1" vlink="#954F72">
+
+<div class=WordSection1>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;vertical-align:
+top'><b><i><span style='font-size:12.0pt;font-family:"Arial",sans-serif;
+color:black'>​LinuxKI Warning</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Performance degradation due incorrect clocksource</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>02/28/2025</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+11.25pt;vertical-align:top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>Problem Description</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>Customer was running sysbench
+memory tests on a DL360 Gen10 server and a DL380 Gen10 servers using the same
+Intel Xeon Gold 6252 processors.   The memory throughput on the DL380 server
+was 6534 MB/sec, but the DL360 server could only achieve 134MB/sec, about 48x
+slower than the DL380 server.   </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>The sysbench command used by
+the customer is listed below:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Courier New"'>$ sysbench --memory-block-size=1k --memory-total-size=10G
+--memory-access-mode=seq run</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span lang=EN-GB style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black;background:white'>Investigation</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span lang=EN-GB style='font-family:"Arial",sans-serif;
+color:black;background:white'>&nbsp;</span></b></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif'>There are 3 main issues here.&nbsp;&nbsp;&nbsp; The first
+is the way the sysbench memory benchmark works and how it’s being run in the
+customer’s environment.&nbsp;&nbsp;&nbsp; The 2nd issue is due to the clock_gettime()
+overhead between the each memory-block-size write.&nbsp;&nbsp;&nbsp; The 3rd
+issue has to do with the clocksource setting, which is the real cause of the
+performance issue.</span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif'>The details are provided here to show a good case study on
+troubleshooting what appeared to be a memory issue, but ended up being a
+clocksource issue.   </span></p>
+
+<p class=MsoNormal><b><i>sysbench memory benchmark</i></b></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif'>The way sysbench is being run today, it is not really a
+memory benchmark, but more of a processor cache benchmark.&nbsp;&nbsp; That is
+because the memory-block-size is only 1KB.&nbsp;&nbsp; So the benchmark is
+writing to the same 1K over and over again.&nbsp;&nbsp;&nbsp; Looking at the
+sysbench source code, here is the main loop:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>int
+event_seq_write(sb_event_t *req, int thread_id)</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>{</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;
+(void) req; /* unused */</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;
+(void) thread_id; /* unused */</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>&nbsp; for
+(size_t *buf = tls_buf, *end = buf + memory_block_size / SIZEOF_SIZE_T;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+buf &lt; end; buf++)</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>&nbsp; {</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp;
+SIZE_T_STORE(buf, end - buf);</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>&nbsp; }</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;
+return 0;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>}</span></p>
+
+<p class=MsoNormal style='margin-top:12.0pt'><span style='font-size:10.0pt;
+line-height:107%;font-family:"Arial",sans-serif'>The for loop above will
+iterate over the 1K memory block 8-bytes (64-bits) at a
+time.&nbsp;&nbsp;&nbsp;&nbsp; It writes a pointer value (end-buf) to the
+address of buf.&nbsp;&nbsp; So the entire loop will iterate 256 times doing a
+single 8-byte write at a time.&nbsp; &nbsp;Since the memory-block-size is so
+small, the writes will be done to the same 1K over and over again until 10GB of
+data is written.&nbsp;&nbsp;&nbsp; </span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif'>A better memory benchmark would be to use a larger
+memory-block-size, especially a size larger than the LLC cache
+size.&nbsp;&nbsp;&nbsp; Consider using 128 MB memory-block-size or
+larger.&nbsp;&nbsp; </span></p>
+
+<p class=MsoNormal><b><i><span style='font-size:10.0pt;line-height:107%;
+font-family:"Arial",sans-serif'>sysbench memory overhead</span></i></b></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif'>Note that the event_seq_write() function above has to be
+called many times.&nbsp;&nbsp; After each call, sysbench will call clock_gettime()
+to get a timestamp.&nbsp;&nbsp; This overhead is magnified by the fact that the
+memory-block-size is so small, so clock_gettime() has to be called hundreds of
+thousands of times.&nbsp;&nbsp;&nbsp; </span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif'>Increasing the memory-block-size will improve the overall
+throughput, plus it will be more of a memory test rather than just a processor
+cache read test.   In fact, the customer increased the memory-block-size to
+128MB, and the results were now the same on the DL380 and the DL360 <b><i>clocksource
+value</i></b></span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif'>@ 7400 MB/sec.</span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif'>The customer collected perf data for both the DL380 and 360
+servers when the sysbench memory test was run.   For the faster DL380, the top
+functions executed are:</span></p>
+
+<p class=MsoListParagraphCxSpFirst><span style='font-size:9.0pt;line-height:
+107%;font-family:"Courier New"'>Samples: 159&nbsp; of event 'cycles', Event
+count (approx.): 6078062403</span></p>
+
+<p class=MsoListParagraphCxSpMiddle><span style='font-size:9.0pt;line-height:
+107%;font-family:"Courier New"'>Overhead&nbsp; Command&nbsp;&nbsp; Shared
+Object&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Symbol</span></p>
+
+<p class=MsoListParagraphCxSpMiddle><span style='font-size:9.0pt;line-height:
+107%;font-family:"Courier New"'>&nbsp; <span style='background:yellow'>16.94%&nbsp;
+sysbench&nbsp;
+[vdso]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[.] 0x00000000000006f5</span></span></p>
+
+<p class=MsoListParagraphCxSpMiddle><span style='font-size:9.0pt;line-height:
+107%;font-family:"Courier New"'>&nbsp; 10.42%&nbsp; sysbench&nbsp;
+sysbench&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [.]
+sb_histogram_update</span></p>
+
+<p class=MsoListParagraphCxSpMiddle><span style='font-size:9.0pt;line-height:
+107%;font-family:"Courier New"'>&nbsp;&nbsp; 6.74%&nbsp; sysbench&nbsp;
+sysbench&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [.]
+sb_event_stop</span></p>
+
+<p class=MsoListParagraphCxSpMiddle><span style='font-size:9.0pt;line-height:
+107%;font-family:"Courier New"'>&nbsp;&nbsp; 4.90%&nbsp; sysbench&nbsp;
+[kernel.kallsyms]&nbsp; [k] clear_page_erms</span></p>
+
+<p class=MsoListParagraphCxSpLast><span style='font-size:9.0pt;line-height:
+107%;font-family:"Courier New"'>&nbsp;&nbsp; 4.29%&nbsp; sysbench&nbsp;
+sysbench&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [.]
+0x00000000000195ba</span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif'>However, the profile on the slower DL360 showed the
+following functions:</span></p>
+
+<p class=MsoListParagraphCxSpFirst><span style='font-size:9.0pt;line-height:
+107%;font-family:"Courier New"'>Samples: 989&nbsp; of event 'cycles', Event
+count (approx.): 37274861306</span></p>
+
+<p class=MsoListParagraphCxSpMiddle><span style='font-size:9.0pt;line-height:
+107%;font-family:"Courier New"'>Overhead&nbsp; Command&nbsp;&nbsp; Shared
+Object&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Symbol</span></p>
+
+<p class=MsoListParagraphCxSpMiddle><span style='font-size:9.0pt;line-height:
+107%;font-family:"Courier New"'>&nbsp; <span style='background:yellow'>90.30%&nbsp;
+sysbench&nbsp; [kernel.kallsyms]&nbsp;&nbsp;&nbsp;&nbsp; [k] read_hpet.part.0</span></span></p>
+
+<p class=MsoListParagraphCxSpMiddle><span style='font-size:9.0pt;line-height:
+107%;font-family:"Courier New"'>&nbsp;&nbsp; 1.00%&nbsp; sysbench&nbsp;
+ld-linux-x86-64.so.2&nbsp; [.] intel_check_word.constprop.0</span></p>
+
+<p class=MsoListParagraphCxSpMiddle><span style='font-size:9.0pt;line-height:
+107%;font-family:"Courier New"'>&nbsp;&nbsp; 0.70%&nbsp; sysbench&nbsp;
+[kernel.kallsyms]&nbsp;&nbsp;&nbsp;&nbsp; [k] syscall_return_via_sysret</span></p>
+
+<p class=MsoListParagraphCxSpMiddle><span style='font-size:9.0pt;line-height:
+107%;font-family:"Courier New"'>&nbsp;&nbsp; 0.60%&nbsp; sysbench&nbsp;
+[kernel.kallsyms]&nbsp;&nbsp;&nbsp;&nbsp; [k] copy_user_generic_unrolled</span></p>
+
+<p class=MsoListParagraphCxSpLast><span style='font-size:9.0pt;line-height:
+107%;font-family:"Courier New"'>&nbsp;&nbsp; 0.50%&nbsp; sysbench&nbsp;
+sysbench&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[.] sb_histogram_update</span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif'>A VDSO is a Virtual Shared Direct Object (vdso).  To
+provide a faster clock mechanism, some functions such as clock_gettime() and
+gettimeofday() can be loaded into a vdso and executed in user
+space.&nbsp;&nbsp; This prevents the expensive system call
+overhead.&nbsp;&nbsp; The vdso is like a special dynamic library loaded at
+runtime on behave of the libc library.&nbsp;&nbsp;&nbsp;&nbsp; In short, it’s a
+performance speedup for clock_gettime().&nbsp;&nbsp;&nbsp; And since clock_gettime()
+is called so often, it has a big impact on sysbench if the vdso is not
+used.&nbsp;&nbsp; </span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif'>However, clock_gettime() can only use the vdso in some
+cases, and in some cases it has to fallback to the slower system call
+mechanism.&nbsp;&nbsp; &nbsp;&nbsp;Historically, the vdso code would check to
+see if the clock_gettime() was called with clk_id value of CLOCK_REALTIME,
+CLOCK_MONOTONIC, CLOCK_REALTIME_COARSE, and CLOCK_MONOTONIC_SOURCE.&nbsp;&nbsp;&nbsp;
+Other arguments would fall back to the system call.&nbsp;&nbsp;
+&nbsp;&nbsp;Sysbench uses CLOCK_MONOTONIC, so it should use the vdso.</span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif'>Note that the perf profile for the DL360 is not using the
+vdso, but instead using the slower system call behavior.  There are a couple of
+other cases where the vdso would fall back to the more expensive system call.</span></p>
+
+<p class=MsoListParagraph style='margin-top:0in;margin-right:0in;margin-bottom:
+0in;margin-left:38.3pt;margin-bottom:.0001pt;text-indent:-.25in;line-height:
+normal'><span style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>vdso=0 is set on the boot command line.&nbsp;&nbsp;&nbsp; This is
+unusual, but you can check by doing “grep vdso /proc/cmdline”.&nbsp;&nbsp; </p>
+
+<p class=MsoListParagraph style='margin-top:0in;margin-right:0in;margin-bottom:
+0in;margin-left:38.3pt;margin-bottom:.0001pt;text-indent:-.25in;line-height:
+normal'><span style='font-family:Symbol;color:#1F497D'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>The clocksource is set to hpet instead of tsc.&nbsp;&nbsp; Based
+on DL360 profile, the top function indicates that the hpet clocksource is being
+used.</p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='color:#1F497D'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>Troubleshooting
+the clocksource</span></b></p>
+
+<p class=MsoNormal style='margin-top:12.0pt'><span style='font-size:10.0pt;
+line-height:107%;font-family:"Arial",sans-serif'>The default clocksource for
+Linux is TSC (Time Stamp Counter).   However, there are multiple reasons why
+the clocksource may have been switched to HPET (High Precision Event Time).   
+To troubleshoot, the console logs will be extremely helpful, as can be seen
+with the example below from the customer’s server:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>#  dmesg |
+grep clocksource</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>[&nbsp;&nbsp;&nbsp;
+0.026044] clocksource: refined-jiffies: mask: 0xffffffff max_cycles:
+0xffffffff, max_idle_ns: 1910969940391419 ns</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>[&nbsp;&nbsp;
+38.467855] clocksource: hpet: mask: 0xffffffff max_cycles: 0xffffffff,
+max_idle_ns: 79635855245 ns</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>[&nbsp;&nbsp;
+41.201379] clocksource: tsc-early: mask: 0xffffffffffffffff max_cycles:
+0x1e4530a99b6, max_idle_ns: 440795257976 ns</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>[&nbsp;&nbsp;
+42.901537] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff,
+max_idle_ns: 1911260446275000 ns</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>[&nbsp;&nbsp;
+44.758200] clocksource: Switched to clocksource tsc-early</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>[&nbsp;&nbsp;
+44.833935] clocksource: timekeeping watchdog on CPU6: Marking clocksource
+'tsc-early' as unstable because the skew is too large:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>[&nbsp;&nbsp;
+44.834925] clocksource:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'hpet' wd_nsec: 31341083803 wd_now: 4b85a2d7 wd_last: 1eb0305b mask: ffffffff</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>[&nbsp;&nbsp;
+44.834925]
+clocksource:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'tsc-early' cs_nsec: 31267624914 cs_now: 6a1f0050c8 cs_last: 5ad53d75de mask:
+ffffffffffffffff</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>[&nbsp;&nbsp;
+44.834925]
+clocksource:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+'tsc-early' is current clocksource.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>[&nbsp;&nbsp;
+44.834925] <span style='background:yellow'>tsc: Marking TSC unstable due to
+clocksource watchdog</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>[&nbsp;&nbsp;
+45.555632] <span style='background:yellow'>clocksource: Switched to clocksource
+hpet</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:9.0pt;line-height:107%;font-family:"Courier New"'>[&nbsp;&nbsp;
+46.695710] clocksource: acpi_pm: mask: 0xffffff max_cycles: 0xffffff,
+max_idle_ns: 2085701024 ns</span></p>
+
+<p class=MsoNormal style='margin-top:12.0pt'><span style='font-size:10.0pt;
+line-height:107%;font-family:"Arial",sans-serif'>During boot up, the
+clocksource may change, but should eventually settle to the TSC clock source.  
+In the above messages, the TSC clock source was marked as “unstable” by the
+clocksource watchdog, and the clock source was switched to the more expensive
+hpet.    This was confirmed by checking the clocksource as follows:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>$ cat
+/sys/devices/system/clocksource/clocksource0/current_clocksource</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>hpet</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-size:10.0pt;line-height:107%;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-size:10.0pt;line-height:107%;font-family:
+"Arial",sans-serif'>Note that an incorrect clocksource setting has been
+observed at other sites as well.   For example, at another customer site, a
+Redis process (redis-server) was impacted as it was making ~77000 calls to
+gettimeofday() per second due to the clocksource setting.   Any process that
+makes a lot of calls to clock_gettime() or gettimeofday() can be impacted the
+clocksource setting.  </span></p>
+
+<p class=MsoNormal><b><span style='font-size:10.0pt;line-height:107%;
+font-family:"Arial",sans-serif'>Solutions and Workarounds</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>The
+unstable clocksource can be caused by a number of issues, including kernel
+defects.   Any process/thread that makes a lot of calls to clock_gettime() or
+gettimeofday() can be impacted if the TSC clocksource is disabled and the HPET
+clock source is used.  </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>One
+workaround to resolve the issue is to add the following to the kernel boot
+parameters to force the clocksource to TSC:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.25in;margin-bottom:.0001pt;line-height:normal;background:white'><span
+lang=EN-GB style='font-size:9.0pt;font-family:"Courier New";color:black;
+background:white'>clocksource=tsc tsc=reliable</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:0in;margin-bottom:0in;
+margin-left:.25in;margin-bottom:.0001pt;line-height:normal;background:white'><b><span
+lang=EN-GB style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black;
+background:white'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>Once this was done at the
+customer site, even with the small memory-block-size, the throughput for the
+DL360 increased from 48 MB/sec to 6545 MB/sec, essentially matching the DL380
+performance.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>Various bugs in the past have
+caused clocksource issues, including the following one:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span class=MsoHyperlink><span lang=EN-GB
+style='font-size:10.0pt;font-family:"Arial",sans-serif;background:white'><a
+href="https://access.redhat.com/solutions/6985574">Why error &quot;tsc: Marking
+TSC unstable due to check_tsc_sync_source failed&quot; is being reported on
+RHEL running on HP?</a></span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>The customer upgraded from
+RHEL 9.0 to RHEL 9.2 and the clocksource issues was resolved.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>Be aware that there can be
+multiple causes of clocksource issues.   Such as the following issue fixed in
+ROM of the DL325/DL345 Gen11:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span class=MsoHyperlink><span lang=EN-GB
+style='font-size:10.0pt;font-family:"Arial",sans-serif;background:white'><a
+href="https://support.hpe.com/connect/s/softwaredetails?language=en_US&amp;collectionId=MTX-531a59d20c964f07&amp;tab=releaseNotes&amp;softwareId=MTX_9ca50b89ea894420ae6af32269">System
+ROM Flash Binary - HPE ProLiant DL325/DL345 Gen11 (A56)</a></span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>Note that LinuxKI version 7.9
+will now detect an incorrect clock source setting at the beginning of the
+Kparse report file:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><span style='font-size:10.0pt;font-family:"Courier New";color:black'>clocksource:
+hpet</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal'><a name=warncheck0></a><span style='font-size:10.0pt;font-family:"Courier New";
+color:#CC0000'>Warning: System is using clocksource other than tsc </span><u><span
+style='font-size:10.0pt;font-family:"Courier New";color:blue'>[INFO][Next]</span></u></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><span lang=EN-GB style='font-size:10.0pt;font-family:
+"Arial",sans-serif;color:black;background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+normal;background:white'><b><span lang=EN-GB style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black;background:white'>&nbsp;</span></b></p>
+
+</div>
+
+</body>
+
+</html>

@@ -91,7 +91,7 @@ update_swoff_msr_stats(sched_switch_t *rec_ptr, sched_stats_t *statp)
 
 	/* if this is for a CPU, don't erase the SMI_Count */
 	if (msrptr = get_msr_ptr(rec_ptr)) {
-		if (last_msrptr[RET_INSTR]) {
+		if (last_msrptr[RET_INSTR] || last_msrptr[ACT_CLK_FREQ]) {
 			for (i=0; i < MSR_NREGS; i++) {
 				total_msrptr[i] += msrptr[i] - last_msrptr[i];
 			}
@@ -128,13 +128,9 @@ update_cpu_msr_stats(sched_switch_t *rec_ptr, sched_stats_t *statp)
 	int i;
 
 	if (msrptr = get_msr_ptr(rec_ptr)) {
-		if (last_msrptr[RET_INSTR] == 0) {
-			/* for SMIs, the total is actually the initial */
-                        total_msrptr[SMI_CNT] = msrptr[SMI_CNT];
-		} else {
-			for (i=0; i < MSR_NREGS-1; i++) {
-				total_msrptr[i]+= msrptr[i] - last_msrptr[i];
-			}
+		total_msrptr[SMI_CNT] = msrptr[SMI_CNT];
+		for (i=0; i < MSR_NREGS-1; i++) {
+			total_msrptr[i] += msrptr[i] - last_msrptr[i];
 		}
 
 		for (i=0; i < MSR_NREGS; i++) {

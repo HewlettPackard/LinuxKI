@@ -60,6 +60,8 @@ extern int pc_migrate_pages;
 extern int pc_pagevec_lru_move_fn;
 extern int pc_release_pages;
 extern int pc_alloc_pages_nodemask;
+extern int pc_mnt_list_next;
+extern int pc_seq_read;
 
 int prof_dummy_func(void *, void *);
 int prof_ftrace_print_func(void *, void *);
@@ -368,6 +370,49 @@ int print_pid_spinlock_summary(void *arg1, void *arg2)
 	print_spin_stats(&spinlockp->stats, pidp->cmd, NULL);
 }
 
+int
+hc_check_memblock_alloc(void *p1, void *p2)
+{
+	stktrc_info_t *stktrcp = (stktrc_info_t *)p1;
+	print_pc_args_t *print_pc_args = (print_pc_args_t *)p2;
+	pid_info_t *pidp;
+	vtxt_preg_t *pregp;
+        float avg, wpct;
+	uint64 key, symaddr;
+	char *sym;
+	uint64 offset;
+        int i;
+	bool is_spinlock = FALSE;
+
+	if (!IS_WINKI) return 0;
+	if (stktrcp->cnt == 0) return 0;
+
+        for (i=0;(i<stktrcp->stklen) || (i < 10); i++) {
+		sym = NULL;
+                key = stktrcp->stklle.key[i];
+
+		pidp = stktrcp->pidp;
+		pregp = get_win_pregp(key, pidp);
+		if (pregp) {
+			sym = win_symlookup(pregp, key, &symaddr);
+		} 
+
+		if (sym && print_pc_args->warnflagp) {
+			if (strstr(dmangle(sym), "Spinlock")) {
+				is_spinlock = TRUE;
+				continue;
+			}
+
+			if (is_spinlock && strstr(dmangle(sym), "SOS_MemoryBlockAllocator::AllocateBlock")) {
+				(*print_pc_args->warnflagp) |= WARNF_MEMBLOCK_ALLOC;
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
 
 int
 hc_print_pc2(void *arg1, void *arg2)
@@ -438,6 +483,12 @@ hc_print_pc2(void *arg1, void *arg2)
 			((key == pc_pagevec_lru_move_fn) || (key == pc_alloc_pages_nodemask) || (key == pc_release_pages))) {
 			*print_pc_args->warnflagp |= WARNF_LARGE_NUMA_NODE;
 			RED_FONT;
+		}  else if ((((pcinfop->count*100.0) / hcinfop->total) > 2.0) &&
+				(strstr(dmangle(sym), "Spinlock") )) {
+			foreach_hash_entry((void **)hcinfop->hc_stktrc_hash, STKTRC_HSIZE, hc_check_memblock_alloc, stktrc_sort_by_cnt, 10, (void *)print_pc_args);
+			if (*print_pc_args->warnflagp & WARNF_MEMBLOCK_ALLOC) {
+				RED_FONT;
+			}
 		}
 	}
 		
@@ -544,6 +595,7 @@ hc_print_stktrc(void *p1, void *p2)
 	int kvm_pagefault_warn_cnt = 0;
 	int cpufreq_warn_cnt = 0;
         int migrate_pages_warn_cnt = 0;
+	int systemd_user_warn_cnt = 0;
 
 	if (stktrcp->cnt == 0) return 0;
 
@@ -587,6 +639,7 @@ hc_print_stktrc(void *p1, void *p2)
 					else if (key == pc_pcc_cpufreq_target) cpufreq_warn_cnt=2;
 					else if (key == pc_kvm_mmu_page_fault) kvm_pagefault_warn_cnt=2;
 					else if ((key == pc_do_numa_page) || (key == pc_migrate_pages)) migrate_pages_warn_cnt++;
+					else if ((key == pc_seq_read) || (key == pc_mnt_list_next)) systemd_user_warn_cnt++;
 				}
 
 				if (hugetlb_fault_warn_cnt >= 2) {
@@ -613,6 +666,10 @@ hc_print_stktrc(void *p1, void *p2)
                                         RED_FONT;
                                         migrate_pages_warn_cnt = 0;
                                         *print_pc_args->warnflagp |= WARNF_MIGRATE_PAGES;
+                                } else if (systemd_user_warn_cnt >= 2) {
+                                        RED_FONT;
+                                        systemd_user_warn_cnt = 0;
+                                        *print_pc_args->warnflagp |= WARNF_SYSTEMD_USER;
 
 				}
 			}
@@ -741,7 +798,7 @@ int print_pid_symbols(void *arg1, void *arg2)
 	int warn_indx;
 
         if (hcinfop==NULL) return 0;
-        if (hcinfop->cpustate[HC_SYS] == 0)   return 0;
+        /* if (hcinfop->cpustate[HC_SYS] == 0)   return 0; */
 
 	print_pc_args.warnflagp = NULL;
 
@@ -802,6 +859,10 @@ int print_pid_symbols(void *arg1, void *arg2)
 		kp_warning(globals->warnings, warn_indx, _LNK_1_4_5); NL;
 	}
 
+	if (print_pc_args.warnflagp && ((*print_pc_args.warnflagp) & WARNF_MEMBLOCK_ALLOC)) {
+		warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_MEMBLOCK_ALLOC, _LNK_1_4_5);
+		kp_warning(globals->warnings, warn_indx, _LNK_1_4_5); NL;
+	}
 
 	return 0;
 }

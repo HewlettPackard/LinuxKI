@@ -48,6 +48,7 @@
 #define TRACE_ENABLE_FILE	"enabled_traces"
 #define	TRACED_RESOURCES_FILE	"traced_resources"
 #define	SYNC_FILE		"sync"
+#define HC_PER_SEC_FILE		"hc_per_sec"
 #define DEFAULT_DATAFILE_NAME   "ki.bin"
 #define FP_FILE_SUFFIX		"fp"
 
@@ -790,12 +791,34 @@ int 		liki_next_live_chunk(char *);
 #define MSR_ACTUAL_CLKFREQ      0xe8
 #define MSR_SMI_CNT             0x34
 
+#if 0
+/* Trying to read register 0xe9 on AMD will result in a crash */
+#define MSR_INSTR_RET_AMD	0xe9
+#endif
+
+
+#define BIT22   (1<<22)
+#define BIT17   (1<<17)
+#define BIT16   (1<<16)
+
+#define AMD_MSR_PERF_IDX        5
+
+#define AMD_MSR_PERF_CTL        (0xC0010200|(AMD_MSR_PERF_IDX * 0x2))
+#   define AMD_MSR_PERF_CTL_EN  BIT22
+#   define AMD_MSR_PERT_CTL_OS_USER_MODE (BIT16|BIT17)
+#   define AMD_MSR_PERF_CTL_EVENT_MASK 0xFF
+#define AMD_MSR_PERF_CTR        (0xC0010201|(AMD_MSR_PERF_IDX * 0x2))
+
+#define AMD_PMC_LSSMIRX 0x2B
+
+
 enum MsrOperation {
     MSR_NOP   = 0,
     MSR_READ  = 1,
     MSR_WRITE = 2,
     MSR_STOP  = 3,
-    MSR_RDTSC = 4
+    MSR_RDTSC = 4,
+    MSR_RDPMC = 5
 };
 
 struct MsrList {

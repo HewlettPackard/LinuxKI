@@ -558,6 +558,7 @@ extern int vdepth;
 extern int vint;
 extern int hthr;
 extern int top;
+extern int hc_per_sec;
 
 extern char passsword_flag;
 extern char *trace_tag;

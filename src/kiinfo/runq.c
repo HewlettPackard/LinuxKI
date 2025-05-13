@@ -2530,7 +2530,7 @@ msr_report(pid_info_t *pidp, FILE *pidfile)
 	if (schedp == NULL) return;
 	msrptr = &schedp->sched_stats.msr_total[0];
 
-	if (msrptr[0] == 0) return;
+	if ((msrptr[RET_INSTR] == 0) && (msrptr[REF_CLK_FREQ] == 0))  return;
 
 	PNL;
 	pid_printf (pidfile, "    ******** CPU MSR REPORT *******"); PNL;
@@ -2752,6 +2752,8 @@ sched_report(void *arg1, FILE *pidfile, FILE *pid_jsonfile, FILE *pid_wtree_json
 				sched_print_setrq_stktrc, setrq_sort_by_sleep_time, npid, &vararg);
 		}
         }
+
+	if (pidp->ora_wait_hash) ora_wait_report(pidp, pidfile);
 
         if (pidp->slp_hash) {
         	pid_printf (pidfile, "\n%s******** SLEEP REPORT ********\n\n", tab);

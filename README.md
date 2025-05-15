@@ -78,7 +78,7 @@ Pre-packaged RPM and DEB files are available on the [Releases Page](https://gith
 
 ### Prerequisites
 
-There are no mandatory pre-requisites.   LinuxKI should install and run on most Linux systems from 2.6.32 through 6.8.13
+There are no mandatory pre-requisites.   LinuxKI should install and run on most Linux systems from 2.6.32 through 6.14.
 
 However, if you would like to use the LiKI tracing mechanism (preferred method), you will need the following installed to compile the LiKI module from source code:
 

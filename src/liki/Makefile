@@ -240,6 +240,9 @@ else ifeq ($(hostdistro),debian) # Debian, same as SLES
 else ifeq ($(hostdistro),fedora)
    #FEDORA 
    EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DHARDCLOCK_STACK_SKIP=6 -DOTHER_STACK_SKIP=2
+   ifneq (,$(findstring 43,$(hostversion)))
+      ccflags-y := $(EXTRA_CFLAGS)
+   endif
 else ifeq ($(hostdistro),ubuntu)
     ifeq ($(hostarch),aarch64)  # ARM
        	hcskip:=12

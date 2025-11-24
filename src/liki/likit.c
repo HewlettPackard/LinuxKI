@@ -2087,7 +2087,11 @@ shutdown_timer_lists(void)
 
 	/* Be sure all timers are deleted */
 	for (cpu=0; cpu<nr_cpu_ids; cpu++) {
+#if LINUX_VERSION_CODE > KERNEL_VERSION(6,14,0)
+		timer_delete(&timer_lists[cpu]);
+#else 
 		del_timer(&timer_lists[cpu]);
+#endif
 	}
 
 	/* Now free the timer_lists array */

@@ -1583,7 +1583,7 @@ if [ $do_local -eq 0 ] ; then
         elif [ -f tcpdump.$tag* ] ; then
 	   tar -cSf - *.$tag tcpdump.$tag* | pigz -c - > ki_all.$HOSTNAME.$tag.tgz
         else
-           tar -cSf *.$tag | pigz -c - > ki_all.$HOSTNAME.$tag.tgz
+           tar -cSf - *.$tag | pigz -c - > ki_all.$HOSTNAME.$tag.tgz
         fi
     else
         # tar will gzip output via 'z' option

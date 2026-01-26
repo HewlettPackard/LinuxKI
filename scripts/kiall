@@ -63,7 +63,7 @@ shopt -s extglob
 # 
 # USAGE: 
 #
-#   kiall [-l] [-m] [-r] [-f] [-c] [-x] [-M] [-B] [-V] [-P num_threads] [-t timestamp]
+#   kiall [-l] [-m] [-r] [-f] [-c] [-x] [-Z] [-M] [-B] [-V] [-P num_threads] [-t timestamp]
 #   
 # OPTIONS:
 #  
@@ -84,6 +84,8 @@ shopt -s extglob
 #   -l        lite collection 
 #
 #   -x        Generate the kparse report as a .txt file instead of an .html file
+#
+#   -Z        Use parallel gzip/gunzip to speed up gzip/gunzip phases
 #
 #   -M        Leave C++ function names mangled
 #
@@ -119,10 +121,16 @@ hthr=""
 lite=0
 dotxt=0
 dovis=0
+dopigz=0
+dounpigz=0
+# defining GZIP/GUNZIP variables to minimize code changes to support
+# parallel gzip/gunzip with still decent code readability
+GZIP=gzip
+GUNZIP=gunzip
 
 help()
 {
-    printf "Usage: %s: [-l] [-m] [-r] [-f] [-c] [-x] [-M] [-B] [-t timestamp]\n" "$0"
+    printf "Usage: %s: [-l] [-m] [-r] [-f] [-c] [-x] [-Z] [-M] [-B] [-t timestamp]\n" "$0"
 	printf "       -h               Help\n"
 	printf "       -l               Lite version - bypasses some options\n" 
 	printf "       -m               Do not process collectl or MWA data\n"
@@ -130,6 +138,7 @@ help()
 	printf "       -f               Find KI files in pwd and any directories below\n"
 	printf "       -c               Cluster-wide processing\n"
 	printf "       -x               Generate Kparse text format instead of html format\n"
+	printf "       -Z               Use parallel gzip/gunzip to speed up gzip/gunzip phase\n"
 	printf "       -M               Leave C++ function names mangled\n"
 	printf "       -B               Do not report Disk Block Frequency stats in Kparse output\n"
 	printf "       -t <timestamp>   Only process KI bundle with matching timestamp\n"
@@ -154,8 +163,8 @@ extract_ki_files()
 # First, unzip regular files; not tar archives 
     for file in `ls *$tag*gz 2>/dev/null | grep -E -v "\.tar|\.tgz"`
     do
-        echo gunzip $file
-        gunzip $file
+        echo ${GUNZIP} $file
+        ${GUNZIP} $file
     done
 
 # Check to see if ki.bin or etl files exist.   If so, then we can return 
@@ -171,23 +180,32 @@ extract_ki_files()
 
 # if there are no ki.bin files, then try to extract from ki_all tar files 
     if [ -f ki_all.$NODENAME.$tag.tar ] ; then
-	gzip ki_all.$NODENAME.$tag.tar
+	${GZIP} ki_all.$NODENAME.$tag.tar
     fi 
     if [ -f ki_all.$NODENAME.$tag.tar.gz ] ; then
 	mv ki_all.$NODENAME.$tag.tar.gz ki_all.$NODENAME.$tag.tgz
     fi 
     if [ -f ki_all.$tag.tar ] ; then
-	gzip ki_all.$tag.tar
+	${GZIP} ki_all.$tag.tar
     fi 
     if [ -f ki_all.$tag.tar.gz ] ; then
 	mv ki_all.$tag.tar.gz ki_all.$NODENAME.$tag.tgz
     fi 
 
-    if [ -f ki_all.$NODENAME.$tag.tgz ] ; then
-	tar xf ki_all.$NODENAME.$tag.tgz
-    elif [ -f ki_all.$tag.tgz ] ; then
-	tar xf ki_all.$tag.tgz
+    if [ $dounpigz -eq 1 ] ; then
+        if [ -f ki_all.$NODENAME.$tag.tgz ] ; then
+	    cat ki_all.$NODENAME.$tag.tgz | unpigz -c - | tar -xf -
+        elif [ -f ki_all.$tag.tgz ] ; then
+	    cat ki_all.$tag.tgz | unpigz -c - | tar -xf -
+        fi
+    else
+        if [ -f ki_all.$NODENAME.$tag.tgz ] ; then
+	    tar xf ki_all.$NODENAME.$tag.tgz
+        elif [ -f ki_all.$tag.tgz ] ; then
+	    tar xf ki_all.$tag.tgz
+        fi
     fi
+
 
 # Check for Windows ZIP file 
     if [ -f ki_all.$NODENAME.$tag.zip ] ; then
@@ -244,7 +262,7 @@ process_mw()
     fi
 
     if [ -f MWA.tar.$tag ] ; then
-	gzip MWA.tar.$tag
+	${GZIP} MWA.tar.$tag
 	mv MWA.tar.$tag.gz MWA.$tag.tgz
     fi
 
@@ -557,6 +575,10 @@ while [ "`echo $1 | cut -c1`" = "-" ] ; do
 		-V)	dovis=1
 			shift 1
 			;;
+		-Z)	dopigz=1
+			dounpigz=1
+			shift 1
+			;;
 		-M)	mangle=",mangle"
 			shift 1
 			;;
@@ -604,6 +626,28 @@ fi
 if [ $cflag -eq 1 -a $fflag -eq 1 ] ; then
     echo "ERROR: Cannot use both -c and -f options"
     exit 11 
+fi
+
+if [ $dounpigz -eq 1 ] ; then
+    which unpigz >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo "!!! parallel gunzip was requested (-Z) but the executable (unpigz) is not available"
+        echo "!!! falling back onto regular gunzip"
+        dounpigz=0
+    else
+        GUNZIP=unpigz
+    fi
+fi
+
+if [ $dopigz -eq 1 ] ; then
+    which pigz >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo "!!! parallel gzip was requested (-Z) but the executable (pigz) is not available"
+        echo "!!! falling back onto regular gzip"
+        dopigz=0
+    else
+        GZIP=pigz
+    fi
 fi
 
 if [ $rflag -eq 1 ] ; then

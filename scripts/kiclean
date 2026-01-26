@@ -33,7 +33,7 @@
 # 
 # USAGE:
 # 
-#   kiclean [-r] [-f] [-p] [-v]
+#   kiclean [-r] [-f] [-p] [-v] [-Z]
 #
 # OPTIONS:  
 # 
@@ -48,6 +48,8 @@
 #
 #   -v       Remove the Visualization subdirs & related .sh .php .csv files
 #  
+#   -Z       Use parallel gzip/gunzip to speed up gzip/gunzip phases
+#
 # NOTE:
 #
 #   Update the DIR environment variable below to reflect the directory where the KI tools
@@ -60,12 +62,19 @@ force=0
 rflag=0
 pflag=0
 vflag=0
+dopigz=0
+dounpigz=0
+# defining GZIP/GUNZIP variables to minimize code changes to support
+# parallel gzip/gunzip with still decent code readability
+GZIP=gzip
+GUNZIP=gunzip
 
 help()
 {
-    printf "Usage: %s: [-r] [-f] [-p]\n" "$0"
+    printf "Usage: %s: [-r] [-f] [-p] [-Z]\n" "$0"
         printf "            -h               Help\n"
         printf "            -r               Recursively traverse subdirs looking for KI data to archive\n"
+        printf "            -Z               Use parallel gzip/gunzip to speed up gzip/gunzip phase\n"
 	printf "	    -p		     Remove PIDS and CIDS subdirectories\n"
         printf "            -f               Force remove misc/tmp files\n"
 }
@@ -91,7 +100,7 @@ clean_pwd()
 
 	if [ -z $NODENAME ]; then
 # 	    if there is no NODENAME, then pull it from the hostname file
-	    gunzip hostname.$tag >/dev/null 2>&1
+	    ${GUNZIP} hostname.$tag >/dev/null 2>&1
             if [ -f hostname.$tag ] ; then
                 NODENAME=`cat hostname.$tag | sed "s/\./ /g" | awk '{print $1}'`
             fi
@@ -106,16 +115,16 @@ clean_pwd()
 #	We will check the Windows KI zip file first
 	if [ ! -f ki_all.$NODENAME.$tag.zip ]; then
 	    if [ -f ki_all.$NODENAME.$tag.tar ] ; then
-               gzip ki_all.$NODENAME.$tag.tar
+               ${GZIP} ki_all.$NODENAME.$tag.tar
   	    fi
 	    if [ -f ki_all.$NODENAME.$tag.tar.gz ] ; then
 		mv ki_all.$NODENAME.$tag.tar.gz ki_all.$NODENAME.$tag.tgz
 	    fi
 	    if [ -f ki_all.$tag.tar ] ; then 
-		gzip ki_all.$tag.tar
+		${GZIP} ki_all.$tag.tar
 	    fi
 	    if [ -f ki_all.$NODENAME.$tag.tar ] ; then
-                gzip ki_all.$NODENAME.$tag.tar
+                ${GZIP} ki_all.$NODENAME.$tag.tar
             fi
             if [ -f ki_all.$NODENAME.$tag.tar.gz ] ; then
                 mv ki_all.$NODENAME.$tag.tar.gz ki_all.$NODENAME.$tag.tgz
@@ -124,8 +133,12 @@ clean_pwd()
 	    if [ ! -f ki_all.$NODENAME.$tag.tgz ] ; then
 #	        if there is no ki_all.*.tgz file, then lets archive what we have
 #    	        First, unzip regular files
-                gunzip *.gz
-	        tar -czvf ki_all.$NODENAME.$tag.tgz *.$tag	
+                ${GUNZIP} *.gz
+                if [ $dopigz -eq 1 ] ; then
+	            tar -cvf - *.$tag | pigz -c - > ki_all.$NODENAME.$tag.tgz
+                else
+	            tar -czvf ki_all.$NODENAME.$tag.tgz *.$tag
+                fi
 	    fi
 
 	    if [ ! -f ki_all.$NODENAME.$tag.tgz ] ; then
@@ -188,7 +201,7 @@ recursive_clean()
 	done
 }
 
-while getopts hfpvr optname 
+while getopts hfpvrZ optname 
 do
 	case $optname in
 		h)	help
@@ -197,10 +210,34 @@ do
 		r)	rflag=1;;
 		p)	pflag=1;;
 		v)	vflag=1;;
+		Z)	dopigz=1
+			dounpigz=1;;
 		?)	help
 			exit 2;;
 	esac
 done
+
+if [ $dounpigz -eq 1 ] ; then
+    which unpigz >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo "!!! parallel gunzip was requested (-Z) but the executable (unpigz) is not available"
+        echo "!!! falling back onto regular gunzip"
+        dounpigz=0
+    else
+        GUNZIP=unpigz
+    fi
+fi
+
+if [ $dopigz -eq 1 ] ; then
+    which pigz >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo "!!! parallel gzip was requested (-Z) but the executable (pigz) is not available"
+        echo "!!! falling back onto regular gzip"
+        dopigz=0
+    else
+        GZIP=pigz
+    fi
+fi
 
 if [ $rflag -eq 1 ] ; then
 	recursive_clean

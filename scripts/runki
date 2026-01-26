@@ -41,6 +41,7 @@ declare -a cpu_cstate
 
 duration=20
 do_local=0
+do_pgzip=0
 do_collectl=0
 do_userspace=0
 do_sar=0
@@ -59,9 +60,10 @@ MSRARG="nop"
 
 help()
 {
-	printf "Usage: %s: [-h] [-L] [-M] [-U] [-X] [-a] [-j] [-J path] [-f | -p] [-n interface] [-v] [-d duration] [-t maxrun] [-P pid] [-G tgid] [-C cpu] [-D dev] [-e event] [-s subsys] [-I sysignore] [-T timestamp] [-c \"comment\"]\n" "$0"
+	printf "Usage: %s: [-h] [-L] [-Z] [-M] [-U] [-X] [-a] [-j] [-J path] [-f | -p] [-n interface] [-v] [-d duration] [-t maxrun] [-P pid] [-G tgid] [-C cpu] [-D dev] [-e event] [-s subsys] [-I sysignore] [-T timestamp] [-c \"comment\"]\n" "$0"
 	printf "                -h              Help\n"
         printf "                -L              Gather minimal data for local analysis...no gzip/tar\n"
+        printf "                -Z              Use parallel gzip to speed up gzip/tar phase (NOT recommended on production systems)\n"
 	printf "                -M              Include Collectl/MeasureWare data collection\n"
         printf "                -U              Include userspace profile (perf) data collection\n"
         printf "                -X              Include sar data collection\n"
@@ -678,7 +680,11 @@ getcollectldata()
 	   echo "=== Copying Collectl logs ... " | tee -a ki.err.$tag
 	   cd /var/log/collectl
            cp -p /etc/collectl.conf collectl.conf.$tag
-   	   tar -czf $KIDIR/collectl.$tag.tgz collectl.conf.$tag `find . -mtime -1|grep raw`
+           if [ $do_pgzip -eq 1 ] ; then
+               tar -cf - collectl.conf.$tag `find . -mtime -1|grep raw` | pigz -c - > $KIDIR/collectl.$tag.tgz
+           else
+               tar -czf $KIDIR/collectl.$tag.tgz collectl.conf.$tag `find . -mtime -1|grep raw`
+           fi
            rm -f collectl.conf.$tag
 	   cd $KIDIR
 	fi
@@ -687,7 +693,11 @@ getcollectldata()
 	       echo "=== Copying MeasureWare logs ... " | tee -a ki.err.$tag
 	       cd /var/opt/perf/datafiles
                cp ../parm parm.$tag
-   	       tar -czf $KIDIR/MW.$tag.tgz parm.$tag log*
+               if [ $do_pgzip -eq 1 ] ; then
+                   tar -cf - parm.$tag log* | pigz -c - > $KIDIR/MW.$tag.tgz
+               else
+                   tar -czf $KIDIR/MW.$tag.tgz parm.$tag log*
+               fi
                rm -f parm.$tag
 	       cd $KIDIR
 	   fi
@@ -1071,6 +1081,7 @@ while true
 do
     case "$1" in
             -L)     do_local=1;;
+	    -Z)     do_pgzip=1;;
 	    -M)     do_collectl=1;;
             -m)     do_collectl=0;;
 	    -U)     do_userspace=1;;
@@ -1104,11 +1115,12 @@ do
 done
 
 ARGS=$cmdargs
-while getopts :d:t:hLMUXmuxpfajJ:n:e:s:V:T:P:G:C:D:I:F:Rc:v optname $ARGS
+while getopts :d:t:hLZMUXmuxpfajJ:n:e:s:V:T:P:G:C:D:I:F:Rc:v optname $ARGS
 do
     case $optname in
             h)     help;exit 2;;
             L)     do_local=1;;
+            Z)     do_pgzip=1;;
 	    M)     do_collectl=1;;
             m)     do_collectl=0;;
 	    U)     do_userspace=1;;
@@ -1149,6 +1161,15 @@ fi
 if [ $do_local -eq 1 ]; then
 	do_vxfs=0
 	do_collectl=0
+fi
+
+if [ $do_pgzip -eq 1 ]; then
+	which pigz >/dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		echo "!!! parallel gzip was requested (-Z) but the executable (pigz) is not available"
+		echo "!!! falling back onto regular gzip"
+		do_pgzip=0
+	fi
 fi
 
 echo "=== $version" | tee -a ki.err.$tag
@@ -1550,18 +1571,35 @@ fi
 if [ $do_local -eq 0 ] ; then
 
     echo "=== Tarring up the results ... " | tee -a ki.err.$tag
-    # tar will gzip output via 'z' option
-    if [ -f collectl.$tag* ] && [ -f MW.$tag* ] ; then
-       tar -czSf ki_all.$HOSTNAME.$tag.tgz *.$tag collectl.$tag* MW.$tag*
-    elif [ -f collectl.$tag* ] ; then
-       tar -czSf ki_all.$HOSTNAME.$tag.tgz *.$tag collectl.$tag*
-    elif [ -f MW.$tag* ] ; then
-       tar -czSf ki_all.$HOSTNAME.$tag.tgz *.$tag MW.$tag*
-    elif [ -f tcpdump.$tag* ] ; then
-	tar -czSf ki_all.$HOSTNAME.$tag.tgz *.$tag tcpdump.$tag*
+
+    if [ $do_pgzip -eq 1 ] ; then
+        # tar will parallel gzip output via 'pigz' tool
+        if [ -f collectl.$tag* ] && [ -f MW.$tag* ] ; then
+           tar -cSf - *.$tag collectl.$tag* MW.$tag* | pigz -c - > ki_all.$HOSTNAME.$tag.tgz
+        elif [ -f collectl.$tag* ] ; then
+           tar -cSf - *.$tag collectl.$tag* | pigz -c - > ki_all.$HOSTNAME.$tag.tgz
+        elif [ -f MW.$tag* ] ; then
+           tar -cSf - *.$tag MW.$tag* | pigz -c - > ki_all.$HOSTNAME.$tag.tgz
+        elif [ -f tcpdump.$tag* ] ; then
+	   tar -cSf - *.$tag tcpdump.$tag* | pigz -c - > ki_all.$HOSTNAME.$tag.tgz
+        else
+           tar -cSf - *.$tag | pigz -c - > ki_all.$HOSTNAME.$tag.tgz
+        fi
     else
-       tar -czSf ki_all.$HOSTNAME.$tag.tgz *.$tag
+        # tar will gzip output via 'z' option
+        if [ -f collectl.$tag* ] && [ -f MW.$tag* ] ; then
+           tar -czSf ki_all.$HOSTNAME.$tag.tgz *.$tag collectl.$tag* MW.$tag*
+        elif [ -f collectl.$tag* ] ; then
+           tar -czSf ki_all.$HOSTNAME.$tag.tgz *.$tag collectl.$tag*
+        elif [ -f MW.$tag* ] ; then
+           tar -czSf ki_all.$HOSTNAME.$tag.tgz *.$tag MW.$tag*
+        elif [ -f tcpdump.$tag* ] ; then
+	    tar -czSf ki_all.$HOSTNAME.$tag.tgz *.$tag tcpdump.$tag*
+        else
+           tar -czSf ki_all.$HOSTNAME.$tag.tgz *.$tag
+        fi
     fi
+
     # remove the individual files
     rm -rf objdump.$tag 2>/dev/null
     rm -f *.$tag

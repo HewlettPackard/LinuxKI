@@ -1,0 +1,132 @@
+.\" Process this file with
+.\" groff -man -Tascii kiinfo.1
+.\"
+.ad l
+.TH kiinfo-kikvm 1 "8.0 - February 12, 2026" version "8.0"
+.SH NAME
+kiinfo  -  LinuxKI data collection and analysis engine
+
+.SH SYNOPSIS
+.B kiinfo \-kikvm [FLAGS] [OPTIONS]
+
+.SH DESCRIPTION
+
+\fBkiinfo -kikvm\fR generates the Docker Activity Report.  The report will provide a summary of CPU and IO statistics for the KVM guests, and then for each VM, the top tasks using User CPU, System CPU, waiting for CPU, and performing Disk IO are shown.   
+
+.SH OPTIONS
+
+See kiinfo(1).
+
+.SH FLAGS
+.B help
+.RS
+Provide help information for kikvm flags
+.RE
+
+.B npid=<npid>
+.RS
+Limit per-kvm guest details to list npids for each KVM guest
+.RE
+
+.B kvmtree
+.RS
+Create VIDS subdirectory with a file for each KVM guest VM.  Used with kiinfo -kparse kptree.
+.RE
+
+.B freq=<hc_per_sec>
+.RS
+CPU profile (hardclock) frequency (default 100 times per second)
+.RE
+
+.SH EXAMPLES
+
+1) Create a KVM Activity Report and reporting the top 10 PIDs for each KVM guest: 
+
+.B $ kiinfo -kikvm npid=10 -ts 1115_1758
+
+.SH SAMPLE OUTPUT
+
+Command line: /opt/linuxki/kiinfo -kikvm npid=10 -ts 0616_1754
+
+kiinfo (7.12e)
+
+Linux kvmhost-sdf 3.10.0-957.el7.x86_64 #1 SMP Thu Oct 4 20:48:51 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
+
+KVM VMs detected: 5
+    TGID   nlwp  VM Name
+   30352     63  appnode1  -smp 16,sockets=16,cores=1,threads=1
+    1660     39  appnode2  -smp 16,sockets=16,cores=1,threads=1
+    1861     30  appnode3  -smp 16,sockets=16,cores=1,threads=1
+    2250     19  appnode5  -smp 16,sockets=16,cores=1,threads=1
+    2055     19  appnode4  -smp 16,sockets=16,cores=1,threads=1
+
+KVM CPU Statistics
+
+    TGID         busy          sys         user         runq  hardirq_sys hardirq_user  softirq_sys softirq_user  VM Name
+   30352    39.063654    38.453639     0.531849     1.567494     0.001724     0.000162     0.073915     0.002364  appnode1
+    1660    18.013675    17.814507     0.148813     0.724941     0.000610     0.000028     0.048991     0.000725  appnode2
+    1861     6.606958     6.515817     0.070487     0.619500     0.000217     0.000019     0.020076     0.000342  appnode3
+    2250     6.559207     6.478571     0.066656     0.595202     0.000227     0.000008     0.013353     0.000393  appnode5
+    2055     5.949749     5.865251     0.071585     0.512259     0.000423     0.000011     0.012126     0.000353  appnode4
+
+KVM IO Statistics
+
+          ---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------
+    TGID     IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv  KVM Name
+   30352       72       4      55    0.15     0.002     0.405      64       1      12    0.17     0.002     0.378       8       3     414    0.00     0.002     0.630  appnode1
+    1660        6       1     101    0.00     0.002     0.552       1       0       6    0.00     0.002     0.346       4       0     127    0.00     0.002     0.609  appnode2
+    1861        1       0       6    0.00     0.002     0.374       1       0       6    0.00     0.002     0.374       0       0       0    0.00     0.000     0.000  appnode3
+    2055        0       0       0    0.00     0.000     0.000       0       0       0    0.00     0.000     0.000       0       0       0    0.00     0.000     0.000  appnode4
+    2250        0       0       0    0.00     0.000     0.000       0       0       0    0.00     0.000     0.000       0       0       0    0.00     0.000     0.000  appnode5
+
+---------------------------------------------------
+TGID:    30352  VM name: appnode1  -smp 16,sockets=16,cores=1,threads=1
+
+    TGID         busy          sys         user          irq         runq     IOPS     MB/s   NetOPS  NetMB/s  VM Name
+   30352    39.063654    38.453639     0.531849     0.078166     1.567494     72.1      3.9      0.0      0.0  appnode1
+
+Top Tasks sorted by RunTime
+PID           RunTime      SysTime     UserTime     RunqTime    SleepTime  Command
+30383        3.040554     2.847847     0.184721     0.169899    16.784789  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30385        2.949353     2.940412     0.005166     0.080131    16.964841  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30389        2.669150     2.661607     0.003717     0.089642    17.237902  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30384        2.654392     2.644639     0.005082     0.088597    17.256790  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30388        2.554620     2.541722     0.004642     0.093701    17.348424  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30394        2.479887     2.472336     0.003922     0.088262    17.431571  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30390        2.435281     2.427242     0.004442     0.076370    17.482782  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30397        2.358499     2.350486     0.003316     0.082475    17.496532  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30386        2.353185     2.344734     0.004855     0.069413    17.570017  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30391        2.311573     2.304172     0.004178     0.085440    17.597522  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+
+Top Tasks sorted by RunQTime
+PID           RunTime      SysTime     UserTime     RunqTime    SleepTime  Command
+30383        3.040554     2.847847     0.184721     0.169899    16.784789  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30352        1.211492     0.938796     0.265393     0.147204    18.636621  /usr/libexec/qemu-kvm  /appnode1/
+30388        2.554620     2.541722     0.004642     0.093701    17.348424  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30389        2.669150     2.661607     0.003717     0.089642    17.237902  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30384        2.654392     2.644639     0.005082     0.088597    17.256790  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30394        2.479887     2.472336     0.003922     0.088262    17.431571  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30391        2.311573     2.304172     0.004178     0.085440    17.597522  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30397        2.358499     2.350486     0.003316     0.082475    17.496532  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30392        1.967694     1.961868     0.002737     0.082066    17.947299  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+30385        2.949353     2.940412     0.005166     0.080131    16.964841  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+
+Top Tasks sorted by physical IO
+     Cnt      r/s      w/s    KB/sec    Avserv      PID  Process
+---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------
+   IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    PID    Process
+      2       0     129    0.11     0.002     0.490       1       0       7    0.14     0.002     0.360       0       0     571    0.00     0.001     0.965    32064  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+      2       0      54    0.25     0.001     0.352       2       0      11    0.29     0.001     0.337       0       0     318    0.00     0.002     0.447     5137  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+      2       0      76    0.23     0.002     0.400       1       0      21    0.28     0.002     0.387       0       0     343    0.00     0.001     0.464    30810  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+      2       0      29    0.20     0.001     0.360       2       0       8    0.21     0.001     0.356       0       0     380    0.00     0.002     0.421     7618  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+      2       0      48    0.18     0.001     0.379       2       0       9    0.19     0.001     0.364       0       0     448    0.00     0.002     0.534     5134  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+      2       0      24    0.09     0.002     0.396       2       0      24    0.09     0.002     0.396       0       0       0    0.00     0.000     0.000    30781  /usr/libexec/qemu-kvm (qemu-kvm)  /appnode1/
+...
+
+.SH AUTHOR
+Mark C. Ray <mark.ray@hpe.com>
+
+.SH SEE ALSO
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kidock(1) kiinfo-kifutex(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1) kivis-build(1) kivis-start(1) kivis-stop(1)
+
+https://github.com/HewlettPackard/LinuxKI/wiki

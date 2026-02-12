@@ -69,6 +69,7 @@ extern void   socket_init_func(void *);
 extern void   file_init_func(void *);
 extern void   futex_init_func(void *);
 extern void   docker_init_func(void *);
+extern void   kvm_init_func(void *);
 extern void   clparse_init_func(void *);
 extern void   kiall_init_func(void *);
 extern int    add_filter_item(void *, uint64);
@@ -545,6 +546,36 @@ Kidock(init_t *init, arg_t *arg)
 	filter_func_arg = &trace_filter;
 }
 
+static void
+Kikvm(init_t *init, arg_t *arg)
+{
+	prop_t *prop;
+	int pid_cnt=0;
+	int ret;
+
+	tools_cnt++;
+	SET(SCHED_FLAG | SCALL_FLAG | FILE_FLAG | SOCK_FLAG | SORT_FLAG | DSK_FLAG | 
+	    FUTEX_FLAG | HC_FLAG | MEMORY_FLAG | CACHE_FLAG | SYSARGS_FLAG | SYSENTER_FLAG );
+	SET_STAT(PERPID_STATS | SLEEP_STATS | STKTRC_STATS | COOP_STATS | SCALL_STATS | PERDSK_STATS | PERFD_STATS | FUTEX_STATS );
+	tool_init_func = kvm_init_func;
+	npid=10;
+
+	if (arg) {
+            for (prop = arg->a_props; prop; prop = prop->p_nextp) {
+                if (strcmp("npid", prop->p_name) == 0) {
+        		npid = (uint32)prop->p_value.i;
+		} else if (strcmp("kvmtree", prop->p_name) == 0) {
+			SET(KVMTREE_FLAG);
+                } else if (strcmp("freq", prop->p_name) == 0) {
+        		hc_per_sec = (uint32)prop->p_value.i;
+                } else {
+			pw_option_usage(init, NULL, "kikvm");
+		}
+	    }
+	}
+
+	filter_func_arg = &trace_filter;
+}
 
 static void
 Kilive(init_t *init, arg_t *arg)
@@ -1242,7 +1273,7 @@ flag_t kparse_flags[] = {
   { "jstack",      "filename", FA_ALL, FT_REG, "s"},
   { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "mangle",   NULL, FA_ALL, FT_OPT, NULL},
+  { "mangle",   NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL},
   { "vis",         NULL,   FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "events",	"default | all | tool | event", FA_ALL, FT_REG, "s"},
   { "subsys", 	"subsys", FA_ALL, FT_REG, "s"},
@@ -1262,7 +1293,7 @@ flag_t pid_flags[] = {
   { "pidtree",     NULL,    FA_ALL, FT_OPT, NULL},
   { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "mangle",   NULL, FA_ALL, FT_OPT, NULL},
+  { "mangle",   NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL},
   { "freq",        "hc_per_sec", FA_ALL, FT_REG, "i"},
   { "vis",         NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL},
   { "vpct",        "vpct",  FA_ALL, FT_REG | FT_HIDDEN, "i" },
@@ -1299,6 +1330,15 @@ flag_t dock_flags[] = {
   { 0,0,0,0,0 }
 };
 
+flag_t kvm_flags[] = {
+  { "help",        NULL,    FA_ALL, FT_OPT, NULL},
+  { "npid",   "npid",    FA_ALL, FT_REG, "i" },
+  { "kvmtree",     NULL,    FA_ALL, FT_OPT, NULL},
+  { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
+  { "freq",        "hc_per_sec", FA_ALL, FT_REG, "i"},
+  { 0,0,0,0,0 }
+};
+
 flag_t live_flags[] = {
   { "help",         NULL,   FA_ALL, FT_OPT, NULL },
   { "sysignore",   "filename", FA_ALL, FT_REG, "s" },
@@ -1306,7 +1346,7 @@ flag_t live_flags[] = {
   { "msr",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "mangle",   NULL, FA_ALL, FT_OPT, NULL},
+  { "mangle",   NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL},
   { "freq",        "hc_per_sec", FA_ALL, FT_REG, "i"},
   { "step",	   "time_in_secs",  FA_ALL, FT_OPT, "s" },
   { 0,0,0,0,0 }
@@ -1428,7 +1468,7 @@ flag_t trace_flags[] = {
   { "nomapper", NULL, FA_ALL, FT_OPT, NULL },
   { "nomarker", NULL, FA_ALL, FT_OPT, NULL },
   { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "mangle",   NULL, FA_ALL, FT_OPT, NULL},
+  { "mangle",   NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL},
   { "freq",        "hc_per_sec", FA_ALL, FT_REG, "i"},
   { "abstime", NULL, FA_ALL, FT_OPT, NULL },
   { "fmttime", NULL, FA_ALL, FT_OPT, NULL },
@@ -1475,7 +1515,7 @@ flag_t clparse_flags[] = {
   { "vis",         NULL,   FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
   { "nomerge", NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "mangle",   NULL, FA_ALL, FT_OPT, NULL},
+  { "mangle",   NULL, FA_ALL, FT_OPT | FT_HIDDEN, NULL},
   { "freq",        "hc_per_sec", FA_ALL, FT_REG, "i"},
   { "help",        NULL,   FA_ALL, FT_OPT, NULL },
   { 0,0,0,0,0 }
@@ -1484,7 +1524,7 @@ flag_t clparse_flags[] = {
 flag_t kiall_flags[] = {
   { "oracle",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "nofutex",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
-  { "mangle",  	   NULL,    FA_ALL, FT_OPT, NULL},
+  { "mangle",  	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL},
   { "freq",        "hc_per_sec", FA_ALL, FT_REG, "i"},
   { "csv",	   NULL,    FA_ALL, FT_OPT, NULL },
   { "vis",	   NULL,    FA_ALL, FT_OPT | FT_HIDDEN, NULL },
@@ -1522,6 +1562,7 @@ option_t otab[] =
   { "kiprof",    NULL,  NULL,    prof_flags , OT_CONF,   0, NULL, Kiprof    },
   { "kiwait",    NULL,  NULL,    wait_flags , OT_CONF,   0, NULL, Kiwait    },
   { "kidock",     NULL,  NULL,    dock_flags , OT_CONF,    0, NULL, Kidock     },
+  { "kikvm",     NULL,  NULL,    kvm_flags , OT_CONF,    0, NULL, Kikvm      },
   { "kiall",     NULL,  NULL,    kiall_flags, OT_CONF, 0, NULL, Kiall },
   { "kilive",     "live",  NULL,    live_flags , OT_CONF,    0, NULL, Kilive     },
   { "clparse",    "cl",  NULL,    clparse_flags, OT_CONF,    0, NULL, Clparse    }, 

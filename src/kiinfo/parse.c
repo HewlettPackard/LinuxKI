@@ -1042,13 +1042,47 @@ add_oracle_sid(pid_info_t *pidp)
                 sid_name, (char *)oracle_proc[oraproc_idx], (char *)oracle_procname[oraproc_idx]);
 }
 
-
-int 
-print_pidp_addr(void *arg1, void *arg2) 
+int add_kvm_process(pid_info_t *pidp, int nlwp, char *cmd, char *lineptr) 
 {
-	pid_info_t *pidp = arg1;
+	char *nameptr,*tmpptr;
+	char kvm_name[120], smp_arg[240];
+	vm_info_t *vminfop;
+	vmpid_info_t *vmpidp;
 
-	printf ("pidp 0x%llx %d %s \n", pidp, pidp->PID, pidp->cmd);
+	kvm_name[0] = smp_arg[0] = 0;
+	vminfop = GET_VMINFOP(&globals->vm_hash, pidp->tgid);
+	pidp->vminfop = vminfop;
+	if (pidp->tgid == pidp->PID) {
+		globals->nvms++;
+		if ((nameptr = strstr(lineptr, "-name ")) != NULL) {
+			sscanf (&nameptr[6], "%s,", kvm_name);
+			if (tmpptr = strchr(kvm_name, ',')) tmpptr[0] = 0;
+		}
+
+		if ((nameptr = strstr(lineptr, "-smp ")) != NULL) {
+			sscanf (&nameptr[5], "%s,", smp_arg);
+		}
+
+		vminfop->nlwp = nlwp;
+
+		add_command(&vminfop->cmd, cmd);
+		add_command(&vminfop->vm_name, kvm_name);
+		add_command(&vminfop->smp_arg, smp_arg);
+		add_string(&vminfop->vm_detail, lineptr);
+
+		vmpidp = GET_VMPIDP(&vminfop->vmpid_hash, pidp->PID);
+		vmpidp->vminfop = vminfop;
+		vmpidp->pidp = pidp;
+
+		/* printf ("KVM VM detected - PID %d %s ", pidp->PID, vminfop->cmd);
+		printf ("%s", vminfop->vm_name);
+		printf (" nlwp=%d", vminfop->nlwp);
+		printf ("\n"); */
+	} else {
+		vmpidp = GET_VMPIDP(&vminfop->vmpid_hash, pidp->PID);
+		vmpidp->vminfop = vminfop;
+		vmpidp->pidp = pidp;
+	}	
 }
 
 /* parse_pself */
@@ -1079,13 +1113,11 @@ parse_pself()
 
 	/* skip the first line */
 	n = 0;
-	lineptr = malloc(4096);
+	lineptr = malloc(8192);
 	if (lineptr == NULL) {
 		fprintf (stderr, "parse_pself() - unable to malloc buffer - skipping...\n");
 		return;
 	}
-	MALLOC_LOG(lineptr, 4096);
-	retval = getline(&lineptr, &n, f);
 
 	while (1) {
 		retval = getline(&lineptr, &n, f);
@@ -1106,6 +1138,10 @@ parse_pself()
 		if (tgid != pid) {
 			tgidp = GET_PIDP(&globals->pid_hash, tgid);
 			pidp->elf = tgidp->elf;
+		}
+
+		if (strstr(cmd, "/usr/bin/kvm") || strstr(cmd, "/usr/libexec/qemu-kvm")) {
+			add_kvm_process(pidp, nlwp, cmd, lineptr);
 		}
 
 		if (oracle) 
@@ -2156,10 +2192,6 @@ parse_pods()
 	return;
 }
 
-
-
-
-
 void
 print_docker_ps()
 {
@@ -2368,7 +2400,7 @@ parse_scavuln(char print_flag)
 	char *rtnptr;
 	char varname[30];
 
-	globals->scavuln = SCA_UNKNOWN;
+	globals->scavuln = SCA_VULNERABLE;
 	if (is_alive) {
 		return;
 	} else {
@@ -2384,14 +2416,16 @@ parse_scavuln(char print_flag)
 		return;
 	}
 
-	globals->scavuln = SCA_VULNERABLE;
 	rtnptr = fgets((char *)&input_str, 127, f);
 	if (rtnptr == NULL ) {
 		if (print_flag) printf ("Kernel does not support Security Mitigations\n");
 	} else {
 	    	while (rtnptr != NULL) {
 			if (strstr(input_str, "Mitigat")) {
-				globals->scavuln = SCA_MITIGATED;
+				globals->scavuln |= SCA_MITIGATED;
+				if (strstr(input_str, "spec_rstack_overflow") && strstr(input_str, "Safe RET")) {
+					globals->scavuln |= SRSO_MITIGATED;
+				}
 				RED_FONT;
 			}
 

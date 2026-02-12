@@ -52,6 +52,7 @@ shopt -s extglob
 # version 7.7   07/28/2023   change egrep to grep -E                
 # version 7.8   11/09/2023   Add -f to the "rm" commands to prevent being prompted in script.
 # version 7.9   04/19/2024   Added ntstatus processing for WinKI
+# version 8.0   02/12/2026   Add parallel zip/unzip (-Z)         
 # 
 # DESCRIPTION:
 #  
@@ -139,7 +140,6 @@ help()
 	printf "       -c               Cluster-wide processing\n"
 	printf "       -x               Generate Kparse text format instead of html format\n"
 	printf "       -Z               Use parallel gzip/gunzip to speed up gzip/gunzip phase\n"
-	printf "       -M               Leave C++ function names mangled\n"
 	printf "       -B               Do not report Disk Block Frequency stats in Kparse output\n"
 	printf "       -t <timestamp>   Only process KI bundle with matching timestamp\n"
 }

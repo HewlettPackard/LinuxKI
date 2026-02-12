@@ -157,6 +157,18 @@ Confused about platform!
 						 */
 #define MAX_HARDCLOCK_PER_SECOND	10000	/* every 100 usec max */
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,17,0)) || (defined RHEL91)
+/* 5.17 kernel change the struct page to struct folio.   This affected the hidden page_cache tracepoints
+ * such as mm_page_alloc_trace/mm_pae_free_trace and page_cache_insert_trace/page_cache_evict_trace.
+ * These macros are used access the fields in the struct folio.   
+ */
+#define PAGE  struct folio 
+#define PAGE_TO_PFN folio_pfn
+#else
+#define PAGE  struct page
+#define PAGE_TO_PFN page_to_pfn
+#endif
+
 
 /* Global data declarations
  *
@@ -665,9 +677,14 @@ liki_fetch_kern_caller_regs(struct pt_regs *regs)
 #endif
        	regs->cs = __KERNEL_CS; 
        	regs->flags = 0;
-	asm volatile(_ASM_MOV "%%" _ASM_SP ", %0\n"
-			: "=m" ((regs)->sp)
-			:: "memory" );
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
+        regs->sp = (unsigned long)__builtin_frame_address(0);
+#else
+        asm volatile(_ASM_MOV "%%" _ASM_SP ", %0\n"
+                        : "=m" ((regs)->sp)
+                        :: "memory" );
+#endif
 }
 
 /* here we hide the complexity of to copy from user space.  There
@@ -2087,7 +2104,11 @@ shutdown_timer_lists(void)
 
 	/* Be sure all timers are deleted */
 	for (cpu=0; cpu<nr_cpu_ids; cpu++) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,15,0)
+		timer_delete(&timer_lists[cpu]);
+#else
 		del_timer(&timer_lists[cpu]);
+#endif
 	}
 
 	/* Now free the timer_lists array */
@@ -2912,7 +2933,7 @@ sched_migrate_task_trace(RXUNUSED struct task_struct *p, unsigned int new_cpu)
 	return;
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,16,0) || (defined RHEL9) || (defined SLES15SP5)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,16,0) || (defined RHEL9) || (defined RHEL91) || (defined SLES15SP5)
 #define GENDISK q->disk
 #else
 #define GENDISK r->rq_disk
@@ -3291,7 +3312,7 @@ mm_filemap_fault_trace(RXUNUSED struct mm_struct *vm_mm, unsigned long virtual_a
 #endif
 
 STATIC void
-mm_page_alloc_trace(RXUNUSED struct page *page, unsigned int order, unsigned int gfp_flags, unsigned int migratetype )
+mm_page_alloc_trace(RXUNUSED PAGE *page, unsigned int order, unsigned int gfp_flags, unsigned int migratetype )
 {
 	mm_page_alloc_t	*t;
 	unsigned int			sz, stksz;
@@ -3335,7 +3356,7 @@ mm_page_alloc_trace(RXUNUSED struct page *page, unsigned int order, unsigned int
 
 	POPULATE_COMMON_FIELDS(t, TT_MM_PAGE_ALLOC, sz, ORDERED);
 
-	t->page = page ? page_to_pfn(page) : 0;
+	t->page = page ? PAGE_TO_PFN(page) : 0;
 	t->order = order;
 	t->flags = (unsigned int)gfp_flags;
 	t->migratetype = migratetype;
@@ -3355,7 +3376,7 @@ mm_page_alloc_trace(RXUNUSED struct page *page, unsigned int order, unsigned int
 }
 
 STATIC void
-mm_page_free_trace(RXUNUSED struct page *page, unsigned int order )
+mm_page_free_trace(RXUNUSED PAGE *page, unsigned int order )
 {
 	mm_page_free_t	*t;
 	unsigned int			sz, stksz;
@@ -3398,7 +3419,7 @@ mm_page_free_trace(RXUNUSED struct page *page, unsigned int order )
 
 	POPULATE_COMMON_FIELDS(t, TT_MM_PAGE_FREE, sz, ORDERED);
 
-	t->page = page ? page_to_pfn(page) : 0;
+	t->page = page ? PAGE_TO_PFN(page) : 0;
 	t->order = order;
 
 	/* Copy in stack trace if we got one */
@@ -3417,7 +3438,7 @@ mm_page_free_trace(RXUNUSED struct page *page, unsigned int order )
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
 STATIC void
-page_cache_insert_trace(RXUNUSED struct page *page)
+page_cache_insert_trace(RXUNUSED PAGE *page)
 {
 	cache_insert_t		*t;
 	TRACE_COMMON_DECLS;
@@ -3471,7 +3492,7 @@ page_cache_insert_trace(RXUNUSED struct page *page)
 
 /* the cache_evict jprobe is obsolete */
 STATIC void
-page_cache_evict_trace(RXUNUSED struct page *page)
+page_cache_evict_trace(RXUNUSED PAGE *page)
 {
 	cache_evict_t			*t;
 	unsigned int			sz, stksz;
@@ -7108,7 +7129,7 @@ liki_initialize(void)
 	int	i;
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,15,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,18,0)
 	printk(KERN_INFO "LiKI: unsupported kernel version\n");
 	return(-EINVAL);
 #else

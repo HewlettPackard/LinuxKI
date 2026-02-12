@@ -377,7 +377,7 @@ print_iostats_totals(void *arg1, void *arg2, void *arg3)
         	avserv = iostatsp->cum_ioserv/MAX(iostatsp->compl_cnt,1) / 1000000.0;
 		avinflt = (iostatsp->cum_async_inflight + iostatsp->cum_sync_inflight) / (MAX(iostatsp->issue_cnt,1) * 1.0);
 
-		dock_printf ("%7.0f %7.0f %7d %7.2f %9.3f ",
+		aux_printf ("%7.0f %7.0f %7d %7.2f %9.3f ",
                         iostatsp->compl_cnt/serverp->total_secs,
                         (iostatsp->sect_xfrd/2048)/serverp->total_secs,
                         (iostatsp->sect_xfrd/2)/MAX(iostatsp->compl_cnt,1),
@@ -389,7 +389,7 @@ print_iostats_totals(void *arg1, void *arg2, void *arg3)
 			(*warnflagp) |= WARNF_AVSERV;
 		}	
 
-                dock_printf ("%9.3f ", avserv);
+                aux_printf ("%9.3f ", avserv);
 		BLACK_FONT;
 
                 i--;
@@ -442,40 +442,38 @@ print_pid_iosum(void *arg1, void *arg2)
 {
 	pid_info_t *pidp = (pid_info_t *)arg1;
 	iostats_t *rstatp, *wstatp, *tstatp;
-	docker_info_t *dockerp;
 	pid_info_t *tgidp;
 	
 	if (pidp == NULL) return 0;
 	
 	tstatp = &pidp->iostats[IO_TOTAL];
-	/* if (tstatp->compl_cnt == 0) return 0; */
+	/* this was commented out and I don't remember why, so I uncommented out on 12/2/2025 */
+	if (tstatp->compl_cnt == 0) return 0; 
 
 	SPAN_GREY;
 	print_iostats_totals (globals, &pidp->iostats[0], NULL);
 
-	if (dockfile) {
-		dock_printf ("%8d", pidp->PID);
+	if (dockfile || kvmfile) {
+		aux_printf ("%8d", pidp->PID);
 	} else {
 		PID_URL_FIELD8_R(pidp->PID);
 	}
 
-	dockerp = pidp->dockerp;
 	if (pidp->cmd) {
-		dock_printf ("  %s", pidp->cmd);
+		aux_printf ("  %s", pidp->cmd);
 	} else if (pidp->tgid) { 
 		/* try to show TGID command */
 		tgidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
 		if (tgidp->cmd) {
-			dock_printf ("  %s", tgidp->cmd);
+			aux_printf ("  %s", tgidp->cmd);
 		}
 	}
-	if (pidp->hcmd) dock_printf ("  {%s}", pidp->hcmd);
-	if (pidp->thread_cmd) dock_printf (" (%s)", pidp->thread_cmd);
-	if (dockerp && (dockfile == NULL)) {
-		printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", dockerp->ID);
-	}
+	if (pidp->hcmd) aux_printf ("  {%s}", pidp->hcmd);
+	if (pidp->thread_cmd) aux_printf (" (%s)", pidp->thread_cmd);
+	if (pidp->dockerp) aux_printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
+	if (pidp->vminfop) aux_printf ("  /%s/", ((vm_info_t *)(pidp->vminfop))->vm_name);
 
-	dock_printf ("\n");
+	aux_printf ("\n");
 			
 	_SPAN;	
 

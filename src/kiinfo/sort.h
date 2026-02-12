@@ -52,6 +52,15 @@ extern int dkpid_sort_by_runqtime(const void *, const void *);
 extern int dkpid_sort_by_rss(const void *, const void *);
 extern int dkpid_sort_by_iocnt(const void *, const void *);
 
+extern int vm_sort_by_runtime(const void *, const void *);
+extern int vm_sort_by_iocnt(const void *, const void *);
+
+extern int vmpid_sort_by_runtime(const void *, const void *);
+extern int vmpid_sort_by_systime(const void *, const void *);
+extern int vmpid_sort_by_runqtime(const void *, const void *);
+extern int vmpid_sort_by_rss(const void *, const void *);
+extern int vmpid_sort_by_iocnt(const void *, const void *);
+
 extern int pid_sort_by_trace_recs(const void *, const void *);
 extern int pid_sort_by_iocnt(const void *, const void *);
 extern int pid_sort_by_miocnt(const void *, const void *);

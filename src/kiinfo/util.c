@@ -1435,7 +1435,7 @@ pid_printf(FILE *pidfile, const char *format, ...)
 }
 
 int
-dock_printf(const char *format, ...)
+aux_printf(const char *format, ...)
 {
 	va_list ap;
 
@@ -1444,6 +1444,10 @@ dock_printf(const char *format, ...)
 	if (dockfile)  {
 		va_start(ap, format);
 		vfprintf(dockfile, format, ap);
+	} 
+	if (kvmfile) {
+		va_start(ap, format);
+		vfprintf(kvmfile, format, ap);
 	}
 	
 	return 0;

@@ -277,14 +277,11 @@ cl_perserver_info (void *arg1, void *arg2)
 
 	if (debug) printf ("cl_perserver_info\n");
 
-	switch (serverp->scavuln) {
-		case SCA_MITIGATED:  scavuln = 'Y'; break; 
-		case SCA_VULNERABLE:  scavuln = 'N'; break; 
-		default:  scavuln = '?'; 
+	if (serverp->scavuln) {
+		scavuln = 'Y';
+	} else {
+		scavuln = 'N';
 	}
-
-	if (serverp->scavuln == SCA_UNKNOWN) scavuln = '?';
-	
 
 	SERVER_URL_FIELD16(serverp);
 	printf (" %-30s %5d %4s %5d   %8dM   %6c   %7.2f   %s",
@@ -545,6 +542,10 @@ cl_global_cpu_by_runtime()				/* Section 1.2.1 */
 	}
 	if (warnflag & WARNF_STEALTIME) {
 		warn_indx = add_warning((void **)&cl_warnings, &next_warning, WARN_STEALTIME, _LNK_1_1);
+                cl_warning(cl_warnings, warn_indx, _LNK_1_1); T("\n");
+	}
+	if (warnflag & WARNF_SMIS) {
+		warn_indx = add_warning((void **)&cl_warnings, &next_warning, WARN_SMIS, _LNK_1_1);
                 cl_warning(cl_warnings, warn_indx, _LNK_1_1); T("\n");
 	}
 }

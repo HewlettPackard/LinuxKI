@@ -560,12 +560,14 @@ print_block_rq_insert_rec(void *a, char *scsi_cmd_addr)
 		fsep, ioflags(rec_ptr->cmd_flags), 
 		fsep, rec_ptr->sector,
 		fsep, rec_ptr->nr_sectors * 512);
-
+#if 0
+	/* in_flight counters are no longer maintained by Linux */
 	if (IS_LIKI_V2_PLUS) {
 		printf ("%casync=%d%csync=%d", 
 			fsep, rec_ptr->async_in_flight, 
 			fsep, rec_ptr->sync_in_flight);
 	}
+#endif
 	/* printf ("%cflags: 0x%016llx", fsep, rec_ptr->cmd_flags);  */
 	printf ("\n");
 	return 0;
@@ -586,11 +588,14 @@ print_block_rq_issue_rec(void *a, char *scsi_cmd_addr)
 		fsep, rec_ptr->sector,
 		fsep, rec_ptr->nr_sectors * 512);
 
+#if 0
+	/* in_flight counters are no longer maintained by Linux */
 	if (IS_LIKI_V2_PLUS) {
 		printf ("%casync=%d%csync=%d", 
 			fsep, rec_ptr->async_in_flight,
 			fsep, rec_ptr->sync_in_flight);
 	}
+#endif
 
 	/* printf ("%cflags: 0x%016llx", fsep, rec_ptr->cmd_flags); */
 	printf ("\n");
@@ -614,11 +619,14 @@ print_block_rq_complete_rec(void *a, int issue_pid, int insert_pid, uint64 qtm, 
 		fsep, rec_ptr->sector,
 		fsep, rec_ptr->nr_sectors * 512);
 
+#if 0
+	/* in_flight counters are no longer maintained by Linux */
 	if (IS_LIKI_V2_PLUS) {
 		printf ("%casync=%d%csync=%d", 
 			fsep, rec_ptr->async_in_flight,
 			fsep, rec_ptr->sync_in_flight);
 	}
+#endif
 
 	printf ("%cqpid=%d%cspid=%d%cqtm= %9.06f%csvtm= %9.06f", 
 		fsep, insert_pid, 

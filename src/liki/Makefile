@@ -126,16 +126,30 @@ ifeq ($(hostdistro),rhel) # Red Hat Enterprise Linux (RHEL)
       endif
    else ifneq (,$(findstring 9.,$(hostversion)))
         #RHEL 9.0
+      ifneq (,$(findstring 5.14.0-70.,$(hostkernel)))
         EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL9 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 5.14.0-162.,$(hostkernel)))
+        #RHEL 9.1 
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL91 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
+      else
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL91 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
+      endif
    else ifneq (,$(findstring 10.,$(hostversion)))
         #RHEL 10.0
-        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL9 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
    else ifneq (,$(findstring 9,$(hostversion)))
+      ifneq (,$(findstring 5.14.0-70.,$(hostkernel)))
         #RHEL 9.0
         EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL9 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
+      else ifneq (,$(findstring 5.14.0-162.,$(hostkernel)))
+        #RHEL 9.1 
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL91 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
+      else
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL9 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
+      endif
    else ifneq (,$(findstring 10,$(hostversion)))
         #RHEL 10.0
-        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DRHEL9 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
+        EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DHARDCLOCK_STACK_SKIP=$(hcskip) -DOTHER_STACK_SKIP=2
    endif
 else ifeq ($(hostdistro),ol) # Oracle Linux (OL)
    ifeq (,$(findstring uek,$(hostkernel)))
@@ -240,6 +254,9 @@ else ifeq ($(hostdistro),debian) # Debian, same as SLES
 else ifeq ($(hostdistro),fedora)
    #FEDORA 
    EXTRA_CFLAGS=-g -O3 -Wall -Warray-bounds=0 -DHARDCLOCK_STACK_SKIP=6 -DOTHER_STACK_SKIP=2
+#   ifneq (,$findstring 43,$(hostversion)))
+#	ccflags-y := $(EXTRA_CFLAGS)
+#   endif
 else ifeq ($(hostdistro),ubuntu)
     ifeq ($(hostarch),aarch64)  # ARM
        	hcskip:=12
@@ -262,6 +279,7 @@ else
 endif
 
 $(info EXTRA_CFLAGS=${EXTRA_CFLAGS})
+ccflags-y := $(EXTRA_CFLAGS)
 ifeq ($(KERNELRELEASE),)  
 
 KERNELDIR ?= /lib/modules/$(shell uname -r)/build 

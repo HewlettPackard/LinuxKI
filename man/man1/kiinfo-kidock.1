@@ -2,7 +2,7 @@
 .\" groff -man -Tascii kiinfo.1
 .\"
 .ad l
-.TH kiinfo-kidock 1 "7.12 - November 14, 2025" version "7.12"
+.TH kiinfo-kidock 1 "8.0 - February 12, 2026" version "8.0"
 .SH NAME
 kiinfo  -  LinuxKI data collection and analysis engine
 
@@ -26,6 +26,11 @@ Provide help information for kidock flags
 .B npid=<npid>
 .RS
 Limit per-docker container details to list npids for each docker container
+.RE
+
+.B docktree
+.RS
+Create CIDS subdirectory with a file for each container.  Used with kiinfo -kparse kptree.
 .RE
 
 .B freq=<hc_per_sec>
@@ -114,6 +119,6 @@ CPU profile (hardclock) frequency (default 100 times per second)
 Mark C. Ray <mark.ray@hpe.com>
 
 .SH SEE ALSO
-LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1) kivis-build(1) kivis-start(1) kivis-stop(1)
+LinuxKI(1) kiinfo(1) kiinfo-dump(1) kiinfo-likidump(1) kiinfo-likimerge(1) kiinfo-live(1) kiinfo-kparse(1) kiinfo-kitrace(1) kiinfo-kipid(1) kiinfo-kiprof(1) kiinfo-kidsk(1) kiinfo-kirunq(1) kiinfo-kiwait(1) kiinfo-kifile(1) kiinfo-kisock(1) kiinfo-kifutex(1) kiinfo-kikvm(1) kiinfo-kiall(1) kiinfo-clparse(1) runki(1) kiall(1) kiclean(1) kivis-build(1) kivis-start(1) kivis-stop(1)
 
 https://github.com/HewlettPackard/LinuxKI/wiki

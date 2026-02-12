@@ -1,0 +1,777 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:Aptos;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+a:link, span.MsoHyperlink
+	{color:#0563C1;
+	text-decoration:underline;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	font-size:12.0pt;
+	font-family:"Times New Roman",serif;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:107%;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:.5in .5in .5in .5in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US link="#0563C1" vlink="#954F72" style='word-wrap:break-word'>
+
+<div class=WordSection1>
+
+<p class=MsoNormal style='margin-bottom:0in;vertical-align:top'><b><i><span
+style='font-size:12.0pt;font-family:"Arial",sans-serif;color:black'>LinuxKI
+Warning</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><b><span style='font-family:"Arial",sans-serif;color:black'>Speculative
+Return Stack Overflow (SRSO) mitigation may negatively impact performance</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Date: 12/17/2025</span></p>
+
+<p class=MsoNormal style='line-height:normal;vertical-align:top'><b><span
+style='font-family:"Arial",sans-serif;color:black'>Problem</span></b></p>
+
+<p class=MsoNormal style='line-height:normal;vertical-align:top'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>In August
+of 2023, AMD documented a new speculative side channel attack vulnerability that
+impacted AMD EPYC 1<sup>st</sup>-4<sup>th</sup> Generation processors.   The
+security vulnerability, also known as Speculative Return Stack Overflow (SRSO)
+is documented in CVE-2023-20569 and in </span><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif'><a
+href="https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7005.html">AMD
+Security Bulletin AMD-SB-7005</a></span><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;color:black'>.     AMD introduced a
+microcode/firmware to mitigate the attack, which was incorporated into HPE
+firmware in 2023.    Meanwhile, OS mitigations were also released to address
+some remaining vulnerabilities that are not covered in the microcode.   </span></p>
+
+<p class=MsoNormal style='line-height:normal;vertical-align:top'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>The purpose
+of this article is to show how the OS mitigation, enabled by default, can
+negatively impact performance using a recent customer case study.   </span></p>
+
+<p class=MsoNormal style='line-height:normal;vertical-align:top'><b><span
+style='font-family:"Arial",sans-serif;color:black'>Problem description</span></b></p>
+
+<p class=MsoNormal style='line-height:11.25pt;vertical-align:top'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Customer
+was running MongoDB on a VMWare 23 vCPU VM running on a Dell PowerEdge R740xd using
+the 2x Intel® Xeon® Gold 6248R (2-sockets 3.0 GHz) processors using 4
+direct-attached NVMe drives configured in a MD RAID10 volume.   When the VM was
+migrated to an HPE ProLiant DL385 Gen11 server using the 2x AMD EPYC 9554 (64-core,
+3.1 GHz) with 4x direct-attached NVMe drives in a MD RAID10 volume, the DL385
+server underperformed the older Dell server. </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Suspecting
+a potential I/O issue, the customer use fio to benchmark the I/O performance.  
+ To remove the virtualization layer from the equation and “prove” the
+performance was with the DL385 I/O, the customer an fio on the Dell VM and HPE
+VM as well a bare-metal DL385 and compared the results.   The following fio
+command was used in the results:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-family:"Courier New";color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>$ fio
+-direct=1 -iodepth=128 -rw=randrw -ioengine=libaio -bs=4k -size=50G -numjobs=4
+-runtime=60 -group_reporting -filename=/datos/fio_test -name=randrw_test</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-family:"Aptos",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>The
+results of the test are as follows:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-family:"Aptos",sans-serif;color:black'>&nbsp;</span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0
+ style='border-collapse:collapse'>
+ <tr style='height:14.6pt'>
+  <td width=131 valign=top style='width:98.6pt;border:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:14.6pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='font-size:10.0pt;font-family:"Arial",sans-serif'>DELL VM (Intel)</span></p>
+  </td>
+  <td width=120 valign=top style='width:1.25in;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt;height:14.6pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='font-size:10.0pt;font-family:"Arial",sans-serif'>HPE VM (AMD)</span></p>
+  </td>
+  <td width=120 valign=top style='width:1.25in;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt;height:14.6pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='font-size:10.0pt;font-family:"Arial",sans-serif'>HPE BM (AMD)</span></p>
+  </td>
+ </tr>
+ <tr style='height:16.6pt'>
+  <td width=131 valign=top style='width:98.6pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:16.6pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='font-size:10.0pt;font-family:"Arial",sans-serif'>530K</span></p>
+  </td>
+  <td width=120 valign=top style='width:1.25in;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.6pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='font-size:10.0pt;font-family:"Arial",sans-serif'>294K</span></p>
+  </td>
+  <td width=120 valign=top style='width:1.25in;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.6pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='font-size:10.0pt;font-family:"Arial",sans-serif'>340K</span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><b><span style='font-family:"Aptos",sans-serif;color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><b><span style='font-family:"Arial",sans-serif;color:black'>Investigation</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><b><span style='font-family:"Arial",sans-serif;color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif'><a
+href="https://github.com/HewlettPackard/LinuxKI">LinuxKI</a></span><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'> was used
+to capture traces from the Dell VM and the HPE Bare-metal VM.    The analysis
+showed that the I/O was faster on the HPE server.  Meanwhile, each of the fio
+threads were CPU bound, not I/O bound.   Below is the kipid output for one of
+the four fio threads from the Dell VM.   The average I/O service time for the
+NVMe drives was 34 usecs.   Note that the ftrace tracing module was used on the
+Dell VM, the ftrace is sufficient for demonstrating the issue.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-family:"Aptos",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>PID 34287 fio</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>  PPID 34262  fio</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>RunTime    :  9.115779  SysTime   :  5.419579   UserTime   : 
+1.934425   StealTime  :  0.000000</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>SleepTime  :  0.000000  Sleep Cnt :         0   Wakeup Cnt :   
+506939</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>RunQTime   :  0.884079  Switch Cnt:    501174   PreemptCnt :   
+501174</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>Last CPU   :        21  CPU Migrs :       128   NODE Migrs
+:         0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>Policy     : SCHED_NORMAL</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>*** No Hardclock Traces with Ftrace ***</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>*** No Sleep Functions with Ftrace ***</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>              -------------------- Total I/O ------------------- 
+-------------------- Write I/O -------------------  -------------------- Read
+I/O --------------------</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>device          IO/s    MB/s  AvIOsz AvInFlt    Avwait    <span
+style='background:yellow'>Avserv</span>    IO/s    MB/s  AvIOsz AvInFlt   
+Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>All           175643     686       4    0.00     0.000     <span
+style='background:yellow'>0.034</span>  118045     461       4    0.00    
+0.000     0.010   57597     225       4    0.00     0.000     0.082</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>nvme0n1        45663     178       4    0.00     0.000     0.035  
+29474     115       4    0.00     0.000     0.010   16188      63       4   
+0.00     0.000     0.082</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>nvme2n1        45530     178       4    0.00     0.000     0.036  
+29555     115       4    0.00     0.000     0.011   15975      62       4   
+0.00     0.000     0.084</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>nvme3n1        42321     165       4    0.00     0.000     0.031  
+29553     115       4    0.00     0.000     0.009   12769      50       4   
+0.00     0.000     0.081</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>nvme1n1        42129     165       4    0.00     0.000     0.031  
+29463     115       4    0.00     0.000     0.010   12665      49       4   
+0.00     0.000     0.081</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>- Top System Calls -</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>System Call Name                 Count     Rate     ElpTime       
+Avg        Max    Errs    AvSz     KB/s</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>io_submit                      1188894 <span style='background:
+yellow'>118891.1</span>    6.345137   <span style='background:yellow'>0.000005</span>  
+0.002902       0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>   SLEEP                        273119  27312.3    0.486778  
+0.000002</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>   RUNQ                                            0.014746</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>   CPU                                             5.902344</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>io_getevents                   1190473 119049.0    0.677231  
+0.000001   0.001401       0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>   SLEEP                         22942   2294.2    0.038318  
+0.000002</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>   RUNQ                                            0.000246</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>   CPU                                             0.683728</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-family:"Aptos",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>On
+the HPE bare-metal server, the kipid for one of the fio threads shows the NVMe
+I/O is faster than the Dell server, but fio is also CPU bound.   While fio is
+CPU bound on both environments, note that the Dell VM calls io_submit at a
+higher rate than the HPE server and has a lower Average Elapsed time (5 usecs
+vs. 9 usecs).   All things equal, it simply looks like the io_submit() system
+call simply uses more CPU.   </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-family:"Aptos",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>PID 114060 fio</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>  PPID 114041  fio</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>RunTime    :  8.901798  SysTime   :  5.755597   UserTime   : 
+1.569299   StealTime  :  0.000000</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>SleepTime  :  0.000000  Sleep Cnt :         0   Wakeup Cnt :     
+3515</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>RunQTime   :  1.098291  Switch Cnt:    405310   PreemptCnt :   
+405310</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>Last CPU   :        18  CPU Migrs :       686   NODE Migrs
+:         0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>Policy     : SCHED_NORMAL     vss :     43922          rss
+:         0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>   LLC_ref   LLC_hits  LLC_hit%     Instrs     Cycles      CPI  
+Avg_MHz  SMI_cnt</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>        0k         0k     -nan%       0.0m       0.0m     -nan  
+3749.90        0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>- Top Hardclock Functions -</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>   Count     Pct  State  Function</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>      92  12.14%  SYS    __schedule</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>      47   6.20%  USER   UNKNOWN</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>      31   4.09%  SYS    do_syscall_64</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>      28   3.69%  SYS    __submit_bio</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>      26   3.43%  SYS    bio_associate_blkg</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>              -------------------- Total I/O ------------------- 
+-------------------- Write I/O -------------------  -------------------- Read
+I/O --------------------</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>device          IO/s    MB/s  AvIOsz AvInFlt    Avwait    <span
+style='background:yellow'>Avserv</span>    IO/s    MB/s  AvIOsz AvInFlt   
+Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>All           121622     475       4    0.00     0.000     <span
+style='background:yellow'>0.02</span>6   81074     317       4    0.00    
+0.000     0.007   40548     158       4    0.00     0.000     0.064</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>nvme2n1        32680     128       4    0.00     0.000     0.029  
+20288      79       4    0.00     0.000     0.008   12392      48       4   
+0.00     0.000     0.064</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>nvme0n1        32616     127       4    0.00     0.000     0.029  
+20250      79       4    0.00     0.000     0.008   12366      48       4   
+0.00     0.000     0.064</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>nvme3n1        28187     110       4    0.00     0.000     0.024  
+20288      79       4    0.00     0.000     0.008    7900      31       4   
+0.00     0.000     0.064</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>nvme1n1        28139     110       4    0.00     0.000     0.023  
+20250      79       4    0.00     0.000     0.007    7890      31       4   
+0.00     0.000     0.064</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>- Top System Calls -</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>System Call Name                 Count     Rate     ElpTime       
+Avg        Max    Errs    AvSz     KB/s</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>io_submit                       810857  <span style='background:
+yellow'>81084.9</span>    7.334464   <span style='background:yellow'>0.000009</span>  
+0.000159       0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>   RUNQ                                            0.686714</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>   CPU                                             6.647751</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>   AIO Reads                    405466  40546.2              
+0.000412   0.001048            4096 162184.9</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>   AIO Writes                   405360  40535.6            
+152.285214   0.000376            4096      0.0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>io_getevents                    810858  81085.0    0.511966  
+0.000001   0.000038       0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>   RUNQ                                            0.002804</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;background:
+#F2F2F2;vertical-align:top'><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'>   CPU                                             0.509162</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><b><span style='font-size:10.0pt;font-family:"Aptos",sans-serif;
+color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><b><span style='font-family:"Arial",sans-serif;color:black'>Getting to the
+root cause</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><b><span style='font-family:"Arial",sans-serif;color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Understanding
+that CPU performance is more critical to the performance than the physical I/O
+was very important.   Note that the kparse output does show the following
+warning on both the Dell VM and HPE bare-metal environments:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:9.0pt;font-family:"Courier New";color:#CC0000'>Warning:
+Security mitigations present </span><span style='font-size:9.0pt;font-family:
+"Courier New"'><a
+href="http://htmlpreview.github.io/?https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/sca_vuln.htm"
+target="_blank"><span style='color:blue'>[INFO]</span></a></span><u><span
+style='font-size:9.0pt;font-family:"Courier New";color:blue'>[Next]</span></u></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Security
+mitigations are not that unusual and have been known to cause performance
+issues as noted by the article in the INFO link from the warning:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif'><a
+href="https://htmlpreview.github.io/?https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/sca_vuln.htm">Side-Channel
+Attack (Spectrum/Meltdown) mitigation can negatively impact performance</a></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Comparing
+the mitigations between the Dell (Intel) server and the HPE (AMD) server showed
+one mitigation specific to the AMD Gen1, Gen2, Gen3, and Gen4 processors (EPYC
+9554 is a Gen4 processor):</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-family:"Aptos",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:9.0pt;font-family:"Courier New";color:#CC0000'>/sys/devices/system/cpu/vulnerabilities/spec_rstack_overflow
+Mitigation: Safe RET</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Courier New";color:#CC0000'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><b><span style='font-family:"Arial",sans-serif;color:black'>Solution</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><b><span style='font-family:"Arial",sans-serif;color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>To
+resolve the issue, the SRSO mitigation was disabled by adding the following
+boot command line option:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-size:9.0pt;font-family:"Courier New";color:black'>spec_rstack_overflow=off</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-size:10.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>After
+adding this option to the HPE bare-metal server and the HPE VM, the results
+were in line with expectations:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-family:"Aptos",sans-serif;color:black'>&nbsp;</span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0
+ style='border-collapse:collapse'>
+ <tr style='height:14.6pt'>
+  <td width=131 valign=top style='width:98.6pt;border:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:14.6pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='font-size:10.0pt;font-family:"Arial",sans-serif'>DELL VM (Intel)</span></p>
+  </td>
+  <td width=120 valign=top style='width:1.25in;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt;height:14.6pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='font-size:10.0pt;font-family:"Arial",sans-serif'>HPE VM (AMD)</span></p>
+  </td>
+  <td width=120 valign=top style='width:1.25in;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt;height:14.6pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='font-size:10.0pt;font-family:"Arial",sans-serif'>HPE BM (AMD)</span></p>
+  </td>
+ </tr>
+ <tr style='height:16.6pt'>
+  <td width=131 valign=top style='width:98.6pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:16.6pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='font-size:10.0pt;font-family:"Arial",sans-serif'>530K</span></p>
+  </td>
+  <td width=120 valign=top style='width:1.25in;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.6pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='font-size:10.0pt;font-family:"Arial",sans-serif'>478K</span></p>
+  </td>
+  <td width=120 valign=top style='width:1.25in;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.6pt'>
+  <p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+  style='font-size:10.0pt;font-family:"Arial",sans-serif'>565K</span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-family:"Aptos",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>Note
+the HPE VM results were slightly lower as the Dell VM with 23 vCPUs could
+easily fit on a single NUMA node (socket) on the DELL server while the HPE
+server with Memory Domains per Socket (NPS) set 4 would spread the VM across
+multiple NUMA nodes, potentially across sockets.   Plus, the Max CPU Frequency
+on the Intel server was also higher than the HPE server.    <a name="sca_vuln"></a></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span lang=EN-GB style='font-size:8.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span lang=EN-GB style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>While the OS mitigation can be disabled, it may leave the server
+open to the vulnerabilities that the OS code was designed to address.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span lang=EN-GB style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span lang=EN-GB style='font-size:10.0pt;font-family:"Arial",sans-serif;
+color:black'>5<sup>th</sup> Generation and later AMD EPYC processors are not
+impacted by the SRSO mitigation.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:11.25pt;vertical-align:
+top'><span lang=EN-GB style='font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><b><span style='font-family:"Arial",sans-serif;
+color:black'>Summary</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><b><span style='font-family:"Arial",sans-serif;
+color:black'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span style='font-size:10.0pt;
+line-height:107%;font-family:"Arial",sans-serif;color:black'>Be aware that the SRSO
+mitigation can impact performance. The impact could be minor or severe, and the
+problem could be disguised as something other than a CPU issue.      Note that
+LinuxKI will now display a Warning if the SRSO OS mitigation is present:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span style='font-family:"Aptos",sans-serif;
+color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:9.0pt;font-family:"Courier New";color:#CC0000'>Warning:
+Speculative Return Stack Overflow (SRSO) mitigation detected and may impact
+performance </span><span style='font-size:9.0pt;font-family:"Courier New"'><a
+href="http://htmlpreview.github.io/?https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/srso.htm"
+target="_blank"><span style='color:blue'>[INFO]</span></a></span><u><span
+style='font-size:9.0pt;font-family:"Courier New";color:blue'>[Next]</span></u></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Courier New";color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span style='font-size:10.0pt;
+line-height:107%;font-family:"Arial",sans-serif;color:black'>For additional
+information, please refer to the following documentation:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span style='font-size:10.0pt;
+line-height:107%;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoListParagraph style='text-indent:-.25in'><span style='font-size:
+10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'><a
+href="https://www.amd.com/en/resources/product-security/bulletin/amd-sb-7005.html">Return
+Address Security Bulletin</a></span><span style='font-size:10.0pt;font-family:
+"Arial",sans-serif'> (AMD)</span></p>
+
+<p class=MsoListParagraph style='text-indent:-.25in'><span style='font-size:
+10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'><a
+href="https://docs.kernel.org/admin-guide/hw-vuln/srso.html">Speculative Return
+Stack Overflow (SRSO)</a></span></p>
+
+<p class=MsoListParagraph style='text-indent:-.25in'><span style='font-size:
+10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'><a
+href="https://access.redhat.com/security/cve/cve-2023-20569">CVE-2023-20569</a></span><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'> (RedHat)</span></p>
+
+<p class=MsoListParagraph style='text-indent:-.25in'><span style='font-size:
+10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'><a
+href="https://htmlpreview.github.io/?https://github.com/HewlettPackard/LinuxKI/blob/master/documentation/sca_vuln.htm">Side-Channel
+Attack (Spectre/Meltdown) mitigation can negatively impact performance</a><span
+style='color:black'> (LinuxKI)</span></span></p>
+
+<p class=MsoListParagraph style='text-indent:-.25in'><span style='font-size:
+10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'><a
+href="https://github.com/HewlettPackard/LinuxKI">The LinuxKI Toolset</a></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span style='font-size:10.0pt;
+line-height:107%;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+</div>
+
+</body>
+
+</html>

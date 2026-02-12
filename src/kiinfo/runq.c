@@ -587,6 +587,10 @@ print_global_cpu_stats(void *arg1, void *arg2)
 			(*warnflagp) |= WARNF_STEALTIME;
 			red_font = TRUE;
 		} 
+		if ((msr_flag) && (gstatp->msr_last[SMI_CNT])) {
+			(*warnflagp) |= WARNF_SMIS;
+			red_font = TRUE;
+		}
 		if (red_font) RED_FONT;
 	}
 
@@ -1322,6 +1326,7 @@ print_wakeup_pids(void *arg1, void *arg2)
 	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
         if (pidp->thread_cmd) printf ("  (%s)", pidp->thread_cmd);
 	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
+	if (pidp->vminfop) printf ("  /%s/", ((vm_info_t *)(pidp->vminfop))->vm_name);
         if (cluster_flag) { SPACE; SERVER_URL_FIELD_BRACKETS(globals) }
 	NL;
 
@@ -1385,6 +1390,7 @@ sched_print_setrq_pids(void *arg1, void *arg2)
 		if (pidp->hcmd) pid_printf (pidfile, "  {%s}", pidp->hcmd);
 		if (pidp->thread_cmd) pid_printf (pidfile, "  (%s)", pidp->thread_cmd);
 		if (pidp->dockerp) pid_printf (pidfile, HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
+		if (pidp->vminfop) pid_printf (pidfile, "  /%s/", ((vm_info_t *)(pidp->vminfop))->vm_name);
 	        coopinfop->waker_is_ICS = 0;
         }
         PNL;
@@ -1425,6 +1431,7 @@ sched_print_setrq_stktrc(void *arg1, void *arg2)
 		if (pidp->hcmd) pid_printf (pidfile, "  {%s}", pidp->hcmd);
 		if (pidp->thread_cmd) pid_printf (pidfile, "  (%s)", pidp->thread_cmd);
 		if (pidp->dockerp) pid_printf (pidfile, HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
+		if (pidp->vminfop) pid_printf (pidfile, "  /%s/", ((vm_info_t *)(pidp->vminfop))->vm_name);
         }
         PNL;
 
@@ -2324,6 +2331,10 @@ pid_json_print_summary(FILE *pid_jsonfile, pid_info_t *pidp, sched_stats_t *stat
 		sprintf (json_temp, HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
         	strcat(json_detail,json_temp);
 	}
+	if (pidp->vminfop) { 
+		sprintf (json_temp, " /%s/", ((vm_info_t *)(pidp->vminfop))->vm_name);
+        	strcat(json_detail,json_temp);
+	}
 
         sprintf (json_temp, "\\n");
         strcat(json_detail,json_temp);
@@ -2978,29 +2989,30 @@ print_pid_runtime_summary(void *arg1, void *arg2)
 	if ((schedp = pidp->schedp) == NULL) return 0;
 	statp = &schedp->sched_stats;
 
-	if (dockfile) {
-		dock_printf ("%-8d", pidp->PID);
+	if (dockfile || kvmfile) {
+		aux_printf ("%-8d", pidp->PID);
 	} else {
 		PID_URL_FIELD8(pidp->PID);
 	}
 
-        dock_printf (" %12.6f %12.6f %12.6f %12.6f %12.6f", 
+        aux_printf (" %12.6f %12.6f %12.6f %12.6f %12.6f", 
                 SECS(statp->T_run_time),
                 SECS(statp->T_sys_time),
                 SECS(statp->T_user_time),
                 SECS(statp->T_runq_time),
                 SECS(statp->T_sleep_time));
 
-	if (pidp->cmd) dock_printf ("  %s", (char *)pidp->cmd);
-	if (pidp->hcmd) dock_printf ("  {%s}", pidp->hcmd);
-	if (pidp->thread_cmd) dock_printf (" (%s)", pidp->thread_cmd);
+	if (pidp->cmd) aux_printf ("  %s", (char *)pidp->cmd);
+	if (pidp->hcmd) aux_printf ("  {%s}", pidp->hcmd);
+	if (pidp->thread_cmd) aux_printf (" (%s)", pidp->thread_cmd);
 	if (pidp->dockerp && (dockfile == NULL)) {
-		printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
+		aux_printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 	}
+	if (pidp->vminfop) aux_printf ("  /%s/", ((vm_info_t *)(pidp->vminfop))->vm_name);
 
         if (cluster_flag && dockfile == NULL) { SPACE; SERVER_URL_FIELD_BRACKETS(globals) }
 
-	DNL;
+	ANL;
 
         return 0;
 
@@ -3027,13 +3039,13 @@ print_pid_runqtime_summary(void *arg1, void *arg2)
 		(*warnflagp) |= WARNF_RUNQ_DELAYS;
 	}
 
-	if (dockfile) {
-		dock_printf ("%-8d", pidp->PID);
+	if (dockfile || kvmfile) {
+		aux_printf ("%-8d", pidp->PID);
 	} else {
 		PID_URL_FIELD8(pidp->PID);
 	}
 
-        dock_printf (" %12.6f %12.6f %12.6f %12.6f %12.6f %12.6f", 
+        aux_printf (" %12.6f %12.6f %12.6f %12.6f %12.6f %12.6f", 
                 SECS(statp->T_run_time),
                 SECS(statp->T_sys_time),
                 SECS(statp->T_user_time),
@@ -3041,12 +3053,13 @@ print_pid_runqtime_summary(void *arg1, void *arg2)
                 SECS(statp->T_sleep_time),
 		rqinfop ? SECS(rqinfop->max_time*1000.0) : 0.0);
 
-	if (pidp->cmd) dock_printf ("  %s", (char *)pidp->cmd);
-	if (pidp->hcmd) dock_printf ("  {%s}", pidp->hcmd);
-	if (pidp->thread_cmd) dock_printf (" (%s)", pidp->thread_cmd);
-	if (pidp->dockerp && (dockfile == NULL)) {
-		printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
+	if (pidp->cmd) aux_printf ("  %s", (char *)pidp->cmd);
+	if (pidp->hcmd) aux_printf ("  {%s}", pidp->hcmd);
+	if (pidp->thread_cmd) aux_printf (" (%s)", pidp->thread_cmd);
+	if (pidp->dockerp) {
+		aux_printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
 	}
+	if (pidp->vminfop) aux_printf ("  /%s/", ((vm_info_t *)(pidp->vminfop))->vm_name);
 
         if (cluster_flag && dockfile == NULL) { SPACE; SERVER_URL_FIELD_BRACKETS(globals) }
 
@@ -3054,7 +3067,7 @@ print_pid_runqtime_summary(void *arg1, void *arg2)
 		BLACK_FONT;
 	} 
 
-	DNL;
+	ANL;
 
         return 0;
 
@@ -3085,6 +3098,7 @@ print_pid_stealtime_summary(void *arg1, void *arg2)
 	if (pidp->hcmd) printf ("  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) printf (" (%s)", pidp->thread_cmd);
 	if (pidp->dockerp) printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", ((docker_info_t *)(pidp->dockerp))->ID);
+	if (pidp->vminfop) printf ("  /%s/", ((vm_info_t *)(pidp->vminfop))->vm_name);
         if (cluster_flag) { SPACE; SERVER_URL_FIELD_BRACKETS(globals) }
 
 	NL; 

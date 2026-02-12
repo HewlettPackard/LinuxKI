@@ -1,0 +1,1536 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Aptos;}
+@font-face
+	{font-family:"Segoe UI";
+	panose-1:2 11 5 2 4 2 4 2 2 3;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:115%;
+	font-size:12.0pt;
+	font-family:"Aptos",sans-serif;}
+a:link, span.MsoHyperlink
+	{color:#0563C1;
+	text-decoration:underline;}
+p
+	{margin-right:0in;
+	margin-left:0in;
+	font-size:12.0pt;
+	font-family:"Times New Roman",serif;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:115%;
+	font-size:12.0pt;
+	font-family:"Aptos",sans-serif;}
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	line-height:115%;
+	font-size:12.0pt;
+	font-family:"Aptos",sans-serif;}
+p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	line-height:115%;
+	font-size:12.0pt;
+	font-family:"Aptos",sans-serif;}
+p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:115%;
+	font-size:12.0pt;
+	font-family:"Aptos",sans-serif;}
+.MsoChpDefault
+	{font-size:12.0pt;
+	font-family:"Aptos",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:115%;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US link="#0563C1" vlink="#954F72" style='word-wrap:break-word'>
+
+<div class=WordSection1>
+
+<p class=MsoNormal style='margin-bottom:0in'><b><i><span style='font-family:
+"Arial",sans-serif'>LinuxKI Warning</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><b><i><span style='font-family:
+"Arial",sans-serif'>&nbsp;</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><b><span style='font-size:11.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>System Management Interrupts (SMI)</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span style='font-size:10.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>Date: 12/16/2025</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><b><span style='font-size:11.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>System management
+interrupts are high priority unmaskable hardware interruptions which cause the
+CPU to immediately suspend all other activities, including the operating
+system, and go into a special execution mode called system management mode
+(SMM). </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Typically, the
+operating system has absolutely no control over when SMIs will happen or how
+long the CPU will subsequently stay in system management mode. In fact, the
+operating system is not even aware of the transitions to and from SMM, which
+makes troubleshooting the source and duration of the SMIs very difficult.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>The concepts of SMI and
+SMM are specific to x86, but similar high privilege processor modes exist on
+other architectures. On ARM, for example, Secure Monitor Mode manages the
+switches between the Secure and Non-secure processor states.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:white'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:black'>The purpose
+of this article is to identify if SMIs are occurring, determine the impact of
+the SMIs, and identify methods to reduce the number of SMIs.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:white'><span
+style='font-size:11.0pt;font-family:"Arial",sans-serif;color:black'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+style='font-size:11.0pt;font-family:"Arial",sans-serif'>What is the impact of
+SMIs?</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+style='font-size:11.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>The firmware code
+(BIOS, UEFI) typically initiates the SMI. Once the SMI is generated, the state
+of the CPU is saved and the SMM code is executed on the SMM stack. Once the SMM
+code is complete, control is returned to the OS by restoring the state of the
+CPU. Thus, while a CPU is executing the SMM request, the OS is essentially
+&quot;hijacked&quot;. The OS is unaware that an SMI has occurred and how much
+time the SMI took to execute. </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>SMIs are typically
+infrequent, but could last hundreds of microseconds, depending on what the
+interrupt needs to do. For most environments, SMIs can easily be ignored as
+they have a negligible impact on the overall performance.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>However, the delays
+could impact sensitive low-latency applications, and the impact may vary
+depending on the frequency and duration of the SMIs. In a recent case, the SMIs
+were causing jitter on an audio streaming application. Identifying the cause
+and remediation steps were critical to the application’s success. Meanwhile, a
+high frequency market trading application is another example of a low latency
+application where microseconds make a difference between a successful trade and
+an unsuccessful trade!</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+style='font-size:11.0pt;font-family:"Arial",sans-serif'>Typical causes of SMIs</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+style='font-size:11.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>System Management Mode
+(SMM) is often used to control power management features and handling system
+events such as memory errors. An SMI is typically generated by firmware through
+features such as Integrated Lights-Out (iLO) by writing to the Advanced Power
+Management Control (APCM) register or other internal registers. Below is a list
+of some known causes of SMIs, but this list should not be considered as an exhaustive
+list.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpFirst style='margin-bottom:0in;text-indent:-.25in;
+line-height:normal'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>iLO,
+including Redfish APIs accessing iLO features. This can include external system
+monitoring tools like HPE OneView, HPE Compute Operations Manager (COM), and
+other 3<sup>rd</sup> party monitoring tools using Redfish API. Note that not
+every Redfish API access to iLO will cause an SMI. </span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;text-indent:-.25in;
+line-height:normal'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>iLO
+Remote Console, especially when connecting and disconnecting from the Remote
+Console.</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;text-indent:-.25in;
+line-height:normal'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>Advanced
+configuration and power management.</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;text-indent:-.25in;
+line-height:normal'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>Detection
+and reporting of memory errors.</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;text-indent:-.25in;
+line-height:normal'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>Operating
+system interacting with EFI.</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;text-indent:-.25in;
+line-height:normal'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>During
+bootup as the OS identifies and configures hardware resources. Once the system
+is booted, the SMIs should be rare or infrequent. </span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;line-height:normal'><b><span
+style='font-size:11.0pt;font-family:"Arial",sans-serif'>Detecting SMIs and
+their frequency</span></b></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;line-height:normal'><span
+style='font-size:11.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:#1F2328;
+background:white'>For Intel x86 CPUs, the MSR_SMI_COUNT (0x34) model specific
+register contains the number of SMIs that have occurred in a system since boot.
+Each CPU core has access to its own MSR_SMI_COUNT register.</span></p>
+
+<p class=MsoListParagraphCxSpLast style='margin:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:#1F2328;
+background:white'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><i><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:#1F2328;
+background:white'>rdmsr</span></i></b></p>
+
+<p class=MsoListParagraphCxSpFirst style='margin:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:#1F2328;
+background:white'>The rdmsr tool can be used to read the model specific
+register. Check with your Linux vendor for the appropriate package (such as
+msr-tools). Note that rdmsr needs root/superuser privilege. </span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:#1F2328;
+background:white'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:#1F2328;
+background:white'>The following rdmsr command will check CPU 0 to see how many
+SMIs have occurred since boot (value is in hexadecimal by default):</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:#1F2328;
+background:white'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Courier New"'>$ rdmsr -p 0 0x34</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Courier New"'>255c</span></p>
+
+<p class=MsoListParagraphCxSpLast style='margin:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>0x255c SMIs sound like
+a lot, but most of the SMIs occurred during bootup. If you want to monitor all
+CPU cores for SMIs over time, you can use the following command which will
+update the SMI counters every 2 seconds:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>$ watch -n 2
+'rdmsr --all 0x34 | column' </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>Every 2.0s: rdmsr
+--all  0x34 | column               rhel10: Fri Dec  5 05:06:05 2025</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>CPU 47: 2568  
+CPU 39: 2568   CPU 31: 2568   CPU 23: 255c   CPU 15: 255c   CPU 7: 255c</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>CPU 46: 2568  
+CPU 38: 2568   CPU 30: 2568   CPU 22: 255c   CPU 14: 255c   CPU 6: 255c</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>CPU 45: 2568  
+CPU 37: 2568   CPU 29: 2568   CPU 21: 255c   CPU 13: 255c   CPU 5: 255c</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>CPU 44: 2568  
+CPU 36: 2568   CPU 28: 2568   CPU 20: 255c   CPU 12: 255c   CPU 4: 255c</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>CPU 43: 2568  
+CPU 35: 2568   CPU 27: 2568   CPU 19: 255c   CPU 11: 255c   CPU 3: 255c</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>CPU 42: 2568  
+CPU 34: 2568   CPU 26: 2568   CPU 18: 255c   CPU 10: 255c   CPU 2: 255c</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>CPU 41: 2568  
+CPU 33: 2568   CPU 25: 2568   CPU 17: 255c   CPU 9: 255c    CPU 1: 255c</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>CPU 40: 2568  
+CPU 32: 2568   CPU 24: 2568   CPU 16: 255c   CPU 8: 255c    CPU 0: 255c</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><i><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>turbostat</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>One of the best ways to
+identify how often SMIs are occurring is by using the turbostat tool included
+in the kernel-tools package. Turbostat reads the MSR 0x34 register and
+determines the number of SMIs that have occurred since the last interval.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>You can use turbostat
+without any option, or you can monitor just the SMI count over a period.   For
+example:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:11.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>$ turbostat -i 5
+–show CPU,SMI</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>CPU     SMI    
+UMHz0.0 UMHz3.0 UMHz4.0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>-       0      
+1200    800     800</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>0       0      
+1200    800     800</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>1       0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>2       0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>3       0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>...</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><i><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>LinuxKI</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>The LinuxKI Toolset
+will report if an SMI has occurred, provided the SMI occurred during the traced
+period, which is 20 seconds by default. While LinuxKI tracing can be performed for
+longer than 20 seconds, it is not recommended unless the system is idle due to
+the amount of data that is logged. Due to the short duration of the trace, it
+is more difficult to capture an SMI unless the frequency and approximate time
+has already been determined. </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>To collect the SMI
+counts, you need to collect the data using the Advanced CPU Metrics option
+(-R):</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:9.0pt;font-family:"Courier New"'>$ runki -R</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>The kparse output and
+kirunq output will show the number of SMIs that have occurred during the trace.
+For example:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><a
+name="_Hlk216791813"><span style='font-size:9.0pt;font-family:"Courier New";
+color:black'> cpu node   Total Busy      sys      usr     idle ... LLC_hit%  
+CPI  Avg_MHz SMI_cnt</span></a></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>   0 [ 0] :     
+0.14%    0.12%    0.02%   99.42% ...   99.00%  3.49  2278.55       2</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>   1 [ 0] :     
+0.08%    0.07%    0.01%   99.56% ...   99.01%  3.34  2302.12       2</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>   2 [ 0] :     
+0.03%    0.03%    0.00%   99.56% ...   99.17%  3.89  2356.83       2</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>   3 [ 0] :     
+0.03%    0.01%    0.01%   99.63% ...   99.46%  3.82  2364.94       2</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>...</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>The ASCII trace data
+can be used to identify exactly when the SMIs occurred and the approximate
+duration of each SMI. This advanced analysis will be discussed at the end of
+this article.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><b><span style='font-size:11.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>Identifying how much CPU is
+used by the SMIs</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><b><span style='font-size:11.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Detecting how much CPU
+is being used by the SMI can be difficult. The tools mentioned above can detect
+if SMIs are occurring, and the frequency can be approximated when monitoring
+over time. The tools discussed in this section detect latency, not specifically
+SMIs. But SMIs usually cause latency over 100 microseconds. When used with
+tools such as rdmsr and smi_watch.sh, especially in a server configured for low
+latency, the tools described in this section can be used to identify the amount
+of CPU used by each SMI.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:8.0pt;font-family:"Arial",sans-serif;color:#1F2328;border:
+none windowtext 1.0pt;padding:0in'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:#1F2328;
+border:none windowtext 1.0pt;padding:0in'>These tools are often used on systems
+configured for low latency using the following whitepapers:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;color:#1F2328;
+border:none windowtext 1.0pt;padding:0in'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpFirst style='margin-bottom:0in;text-indent:-.25in;
+line-height:normal'><span style='font-size:10.0pt;font-family:Symbol;
+color:#1F2328;border:none windowtext 1.0pt;padding:0in'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a
+href="https://www.amd.com/content/dam/amd/en/documents/epyc-technical-docs/white-papers/58649_amd-epyc-tg-low-latency.pdf"><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;border:none windowtext 1.0pt;
+padding:0in'>Low Latency Tuning for AMD EPYC CPU-Powered Servers (July 2024)</span></a></p>
+
+<p class=MsoListParagraphCxSpLast style='margin-bottom:0in;text-indent:-.25in;
+line-height:normal'><span style='font-size:10.0pt;font-family:Symbol;
+color:#1F2328;border:none windowtext 1.0pt;padding:0in'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="https://www.hpe.com/psnow/doc/c01804533"><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;border:none windowtext 1.0pt;
+padding:0in'>Configuring and tuning HPE ProLiant Server for low-latency
+applications (Edition 12)</span></a></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><i><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><i><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>sysjitter</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Sysjitter is a popular
+opensource tool to measure CPU jitter delays. Note that the delays may or may
+not be caused by SMIs. It can be downloaded from the following URL:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><a
+href="https://github.com/Xilinx-CNS/cns-sysjitter"><span style='font-size:10.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>https://</span></a><a
+href="https://github.com/Xilinx-CNS/cns-sysjitter"><span style='font-size:10.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>github.com/Xilinx-CNS/cns-sysjitter</span></a><span
+style='font-size:10.0pt;line-height:115%;font-family:"Arial",sans-serif'>  </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span style='font-size:10.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Before running
+sysjitter, be sure to follow the appropriate Low Latency Whitepapers.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>The example below runs
+sysjitter on CPU cores 4-7 for 60 seconds and reports any jitter greater than 100000
+nanoseconds, or 100 microseconds (usec), as SMIs are typically greater than 100
+microseconds. </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>$ sysjitter
+--cores 4-7 --runtime 60 100000</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>core_i: 4 5 6 7</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>threshold(ns):
+100000 100000 100000 100000</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>cpu_mhz: 2398
+2398 2398 2398</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>runtime(ns):
+60050321894 60050322519 60050322263 60050325839</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>runtime(s):
+60.050 60.050 60.050 60.050</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>int_n: 6 6 7 7</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>int_n_per_sec:
+0.100 0.100 0.117 0.117</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>int_min(ns):
+932713 930167 192898 929625</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>int_median(ns):
+1035597 1035897 1024371 1035842</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>int_mean(ns):
+1063832 1062949 939676 1215494</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>int_90(ns):
+1277813 1276818 1278748 2127663</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>int_99(ns):
+1277813 1276818 1278748 2127663</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>int_999(ns):
+1277813 1276818 1278748 2127663</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>int_9999(ns):
+1277813 1276818 1278748 2127663</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>int_99999(ns):
+1277813 1276818 1278748 2127663</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>int_max(ns):
+1277813 1276818 1278748 2127663</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>int_total(ns):
+6382997 6377696 6577737 8508463</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>int_total(%):
+0.011 0.011 0.011 0.014</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>The int_n line shows
+that 6 delays of more than 100 usecs occurred on CPU 4 and 5, and 7 delays of
+more than 100 usecs occurred on CPU 6 and 7. The mean delay is &gt;1000 usecs
+(1 millisecond).</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Note that sysjitter
+does not report if SMIs have occurred, but you can use rdmsr before and after
+sysjitter to report how many SMIs have occurred.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>For more information on
+sysjitter, see the Low Latency whitepapers mentioned at the end of this
+article. </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><i><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>hwlatdetect</span></i></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>The hwlatdetect tool
+can be used to detect latencies and uses the built-in Linux hwlat tracer:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>$ cat
+/sys/kernel/debug/tracing/available_tracers</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black;background:yellow'>hwlat</span><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'> blk
+function_graph wakeup_dl wakeup_rt wakeup function nop</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>hwlatdetect loops in
+kernel space, so it is not impacted by the scheduler or other running threads.
+Hwlatdetect can be impacted by SMIs, HT Sibling threads, and Turbo-boost
+frequency jitter. In the example below, hwlatdetect is run on a CPU for 950000
+usecs in a 1000000 usec interval (1 second) and looks for delays greater than
+the latency threshold (10 usecs), then switches to the next CPU and repeats the
+test. It also reports the number of SMIs that occurred during the period. In
+this example, the detected latencies were between 241 and 274 usecs.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>$ sudo hwlatdetect</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>hwlatdetect:  test duration 120
+seconds</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>   detector: tracer</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>   parameters:</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>        Latency threshold: 10us</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>        Sample window:    
+1000000us</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>        Sample width:     
+950000us</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>     Non-sampling period:  50000us</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>        Output File:       None</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>Starting test</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>test finished</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>Max Latency: 274us</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>Samples recorded: 13</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>Samples exceeding threshold: 13</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black;background:yellow'>25 SMIs occured
+on cpu 0</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>...</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>SMIs during run: 800</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>ts: 1611344060.676987549,
+inner:274, outer:244</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>ts: 1611344070.686987756, inner:1,
+outer:271</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>ts: 1611344080.696987963,
+inner:274, outer:241</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>ts: 1611344090.706988170,
+inner:261, outer:1</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>ts: 1611344100.716988377, inner:0,
+outer:273</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>ts: 1611344101.717988398,
+inner:250, outer:0</span></p>
+
+<p style='margin:0in;background:#F2F2F2'><span lang=EN-GB style='font-size:
+9.0pt;font-family:"Courier New";color:black'>ts: 1611344111.727988605,
+inner:242, outer:0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>The hwlatdetect program
+can be installed with the rt-tests package. For more information, refer to the </span><a
+name="_Hlk216790822"></a><a
+href="https://docs.redhat.com/en/documentation/red_hat_enterprise_linux_for_real_time/8/html/optimizing_rhel_8_for_real_time_for_low_latency_operation/assembly_running-and-interpreting-hardware-and-firmware-latency-tests_optimizing-rhel8-for-real-time-for-low-latency-operation"><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Optimizing RHEL 8 for
+Real Time for low latency operations</span></a><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif'>.   </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>You can also use the
+hwlat ftrace tracer directly using the following command. Note that
+tracing_thresh is the delay microseconds (usecs) to report:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>$ echo hwlat &gt;
+/sys/kernel/debug/tracing/current_tracer</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>$ echo 100 &gt;
+/sys/kernel/debug/tracing/tracing_thresh</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>$ sleep 5</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>$</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>$ echo nop &gt;
+/sys/kernel/debug/tracing/current_tracer</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>cat
+/sys/kernel/debug/tracing/trace</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+style='font-size:11.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+style='font-size:11.0pt;font-family:"Arial",sans-serif'>Case Study #1: Multiple
+SMIs seen at different intervals on DL380 Gen12 server</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:11.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>The customer reported CPU
+jitter delays in their low latency environment in hundreds of microseconds. Using
+the smi-watch.sh script, the SMIs were identified to occur during the following
+intervals.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpFirst style='margin-bottom:0in;text-indent:-.25in;
+line-height:normal'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>Once
+every 10 minutes</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;text-indent:-.25in;
+line-height:normal'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>Once
+every 5 minutes</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;text-indent:-.25in;
+line-height:normal'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>Spurious
+SMIs at unpredictable intervals</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>After disconnecting the
+iLO Management lan, the SMIs which occurred every 5 minutes  disappeared. After
+updating to iLO 7 version v1.18 and updating the BIOS to v1.54, the SMIs on 5-minute
+intervals disappeared with the iLO Management lan connected.</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;line-height:normal'><span
+style='font-size:11.0pt'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Meanwhile, the customer
+found a Splunk forwarder calling df every 10 minutes. The df command with no
+options will display filesystem attributes such as free space for each
+filesystem on the server. Using strace to trace the df command, the following
+system call was observed:</span></p>
+
+<p class=MsoListParagraphCxSpLast style='margin:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F6F8FA'><span
+style='font-size:9.0pt;font-family:"Courier New";color:#1F2328;border:none windowtext 1.0pt;
+padding:0in'>statfs(&quot;/sys/firmware/efi/efivars&quot;,
+{f_type=EFIVARFS_MAGIC, f_bsize=1, f_blocks=507804, f_bfree=211500,
+f_bavail=206380, f_files=0, f_ffree=0, f_fsid={val=[0, 0]}, f_namelen=255,
+f_frsize=1, f_flags=ST_VALID|ST_NOSUID|ST_NODEV|ST_NOEXEC|ST_RELATIME}) = 0</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Calling statfs() on the
+/sys/firmware/efi/efivars triggers the SMI as the efivars driver will make a
+call to firmware to get the attributes of the pseudo-filesystem.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>To resolve the SMI
+every 10 minutes, the Splunk forwarder was modified to use df -x efivars to
+exclude the efivars filesystem type.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Finally, the customer
+found that OpsRamp was installed on the server as part of their standard
+build.   They removed OpsRamp and the spurious SMIs went away as well.   It’s
+possible that OpsRamp periodically calls df, but the actual trigger of the SMI
+is unknown.   </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Operating system-generated
+SMIs are unusual, but as seen in this case study, can certainly occur. For more
+information on troubleshooting operating system-generated SMIs, see the
+Advanced Troubleshooting section at the end of this article.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><b><span style='font-size:11.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>Case Study #2: Poor audio
+stream quality on a ProLiant DL20 Gen11 server</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span style='font-size:10.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span style='font-size:10.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>Customer reported poor audio
+streaming quality on their DL20 Gen11 server.    Using sysjitter, HPE was able
+to determine there were some high jitter latencies, and smi_watch.sh was used
+to determine that SMIs were occurring periodically.    Further research and
+analyzing the AHS logs revealed that the customer had a script that runs every
+30 seconds that queries the iLO via Redfish to execute the following:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span style='font-size:10.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;background:#F2F2F2'><span
+style='font-size:9.0pt;line-height:115%;font-family:"Courier New";color:black'>/redfish/v1/systems/1
+| jq .Oem.Hpe.AggregateHealthStatus &lt;== slow causes SMI jitter</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;background:#F2F2F2'><span
+style='font-size:9.0pt;line-height:115%;font-family:"Courier New";color:black'>/redfish/v1/chassis/1/thermal</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;background:#F2F2F2'><span
+style='font-size:9.0pt;line-height:115%;font-family:"Courier New";color:black'>/redfish/v1/chassis/1/power</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span style='font-size:10.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span style='font-size:10.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>When the  script was stopped,
+the SMIs went away.    Additional investigation showed that getting the Power
+and Thermal attributes did not increase the SMI count.  However, when querying
+the System attributes to get the AggregateHealthStatus, a cache is the iLO
+needs to periodically be refreshed, which causes the SMI, and on a DL20, these
+SMIs can take several to hundreds of milliseconds.   </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span style='font-size:10.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span style='font-size:10.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>To reduce the frequency of the
+SMIs, the script was modified to collect the System attributes much less
+frequently, improving the audio quality significantly.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><b><span style='font-size:11.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><b><span style='font-size:11.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>Troubleshooting SMIs </span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><b><span style='font-size:11.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>For the most part,
+there is no need to be concerned about the SMIs as they are a necessary part of
+the management of the system. However, in the case of latency-sensitive
+applications, where a customer needs near real-time behavior, the following
+troubleshooting is recommended:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpFirst style='margin-top:0in;margin-right:0in;
+margin-bottom:0in;margin-left:39.45pt;text-indent:-.25in;line-height:normal'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>The
+best suggestion is to follow the recommendations from the low-latency
+whitepapers.</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-top:0in;margin-right:0in;
+margin-bottom:0in;margin-left:39.45pt;text-indent:-.25in;line-height:normal'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>Be
+sure to upgrade the latest BIOS/UEFI firmware version and the latest iLO
+firmware version as some SMIs get addressed in the firmware. </span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-top:0in;margin-right:0in;
+margin-bottom:0in;margin-left:39.45pt;text-indent:-.25in;line-height:normal'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>Disconnect
+the iLO Management lan to determine if the SMIs are triggered by something
+outside the iLO. If the SMIs go away, check for iLO redfish scripts, remote
+console access, or whether HPE Oneview or HP COM is configured to retrieve
+configuration, power, or similar data.</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-top:0in;margin-right:0in;
+margin-bottom:0in;margin-left:39.45pt;text-indent:-.25in;line-height:normal'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>If
+SMIs are still observed after, collect the AHS logs for analysis by
+Support/ERT.</span></p>
+
+<p class=MsoListParagraphCxSpLast style='margin-top:0in;margin-right:0in;
+margin-bottom:0in;margin-left:39.45pt;text-indent:-.25in;line-height:normal'><span
+style='font-size:10.0pt;font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>SMIs
+can be generated by the OS. While it is unusual, it can happen as seen in the Case
+Study #1 above. Identifying OS-generated SMIs can be done using LinuxKI and
+ftrace function tracing as described below.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+style='font-family:"Arial",sans-serif'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><b><span
+style='font-family:"Arial",sans-serif'>Advanced troubleshooting for potential
+OS Generated SMIs</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>SMIs can be detected by
+the LinuxKI Toolset. LinuxKI will capture the SMI counter on every sched_switch
+event in the Advanced CPU metrics are enabled using the -R option with runki.
+For example:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:9.0pt;font-family:"Courier New"'>$ runki -e all -R</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>The -e all option will
+collect some additional trace events such as workqueue_queue_work and
+workqueue_execute_start events.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Note that LinuxKI only
+runs for 20 seconds by default. If you are using LinuxKI on an idle system to
+capture an SMI, you can run it longer by using the -d option. For example, the
+following command collects trace data for 60 seconds:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:11.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:9.0pt;font-family:"Courier New"'>$ runki -e all -R -d 60</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Note that LinuxKI will
+add jitter, but the goal is to track down the SMI. To be certain that one or
+more SMIs can be detected during the trace, you need to be able to predict when
+an SMI will occur using tools like latency or smi_watch.sh. By observing the
+pattern, you can usually predict when an SMI will occur. Then the runki script
+can be 5-10 seconds before the SMI is expected. </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>The
+kirunq.&lt;timestamp&gt;.txt will show the number of SMIs that occurred for
+each CPU during the trace period. Note the SMI_cnt column on the right (the IRQ
+columns were omitted for clarity):</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'> cpu node   Total
+Busy      sys      usr     idle ... LLC_hit%   CPI  Avg_MHz SMI_cnt</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>   0 [ 0] :     
+0.14%    0.12%    0.02%   99.42% ...   99.00%  3.49  2278.55       2</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>   1 [ 0] :     
+0.08%    0.07%    0.01%   99.56% ...   99.01%  3.34  2302.12       2</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>   2 [ 0] :     
+0.03%    0.03%    0.00%   99.56% ...   99.17%  3.89  2356.83       2</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>   3 [ 0] :     
+0.03%    0.01%    0.01%   99.63% ...   99.46%  3.82  2364.94       2</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>...</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>If SMIs have occurred,
+the KI ASCII file will need to be regenerated with the model specific register
+(MSR) data used for the Advanced CPU metrics:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:11.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:9.0pt;font-family:"Courier New"'>$ kiinfo -kitrace msr -ts
+&lt;timestamp&gt; &gt;ki.&lt;timestamp&gt;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Next, you can find the
+last sched_switch event with smicnt=0 and the first sched_switch event with
+smicnt=1:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>$ grep <a
+name="_Hlk216776484">&quot;smicnt=0&quot; ki.1112_2253 | tail -1</a></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    1.837295
+cpu=34 pid=83299 tgid=83299 sched_switch syscall=statfs prio=120 state=SSLEEP
+next_pid=0 next_prio=120 next_tgid=n/a policy=n/a vss=575 rss=205
+llcref=3183407 llcmiss=16258 instrs=19930651 cycles=72058638
+fixed_clkfreq=59317416 actual_clkfreq=57983534 <span style='background:yellow'>smicnt=0</span>
+wait_for_completion+0x8a __efi_queue_work+0xe8
+virt_efi_query_variable_info+0x9c efivarfs_statfs+0xe2 statfs_by_dentry+0x64
+user_statfs+0x6b __do_sys_statfs+0x32 do_syscall_64+0x7d
+entry_SYSCALL_64_after_hwframe+0x76 | 0x7f08590fb4ab 0x7f085902c30e</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>$ grep
+&quot;smicnt=1&quot; ki.1112_2253 | head -1</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    1.838154
+cpu=1 pid=72761 tgid=72761 sched_switch syscall=restart_sycsall prio=120
+state=SSLEEP next_pid=0 next_prio=120 next_tgid=n/a policy=n/a vss=0 rss=0
+llcref=2948069 llcmiss=40097 instrs=25026641 cycles=72567052
+fixed_clkfreq=69773064 actual_clkfreq=64866039 <span style='background:yellow'>smicnt=1</span>
+worker_thread+0x1a2 kthread+0xcf ret_from_fork+0x31 ret_from_fork_asm+0x1a</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>                 </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Based on the above, we
+can tell the SMI occurred between 1.837295 and 1.838154 (time relative to the
+start of the trace).</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Looking back at the
+last few trace events from CPU 32, you can see PID 83299 (df) was calling
+statfs() and queued up a work function efi_call_rts() and woke up PID 72761
+(kworker/u192:0). The sched_switch() stack trace shows it is trying to query
+the efi to get details.  After the sched switch, there is a delay of ~850 usecs
+before PID 72761 performs the wakeup.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    1.837233
+cpu=34 pid=83299 tgid=83299 statfs [137] entry *path=0x402010
+*buf=0x7ffe12ee2b70</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    1.837282
+cpu=34 pid=83299 tgid=83299 workqueue_queue_work func=efi_call_rts
+target_cpu=-1</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    1.837287
+cpu=34 pid=83299 tgid=83299 sched_wakeup target_pid=72761 prio=120 target_cpu=1
+success=1</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    1.837295
+cpu=34 pid=83299 tgid=83299 sched_switch syscall=statfs prio=120 state=SSLEEP
+next_pid=0 next_prio=120 next_tgid=n/a policy=n/a vss=575 rss=205
+llcref=3183407 llcmiss=16258 instrs=19930651 cycles=72058638
+fixed_clkfreq=59317416 actual_clkfreq=57983534 <span style='background:yellow'>smicnt=0</span>
+wait_for_completion+0x8a __efi_queue_work+0xe8
+virt_efi_query_variable_info+0x9c efivarfs_statfs+0xe2 statfs_by_dentry+0x64
+user_statfs+0x6b __do_sys_statfs+0x32 do_syscall_64+0x7d
+entry_SYSCALL_64_after_hwframe+0x76 | 0x7f08590fb4ab 0x7f085902c30e</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    1.838145
+cpu=1 pid=72761 tgid=72761 sched_wakeup target_pid=83299 prio=120 target_cpu=34
+success=1</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    1.838155
+cpu=34 pid=0 tgid=0 sched_switch syscall=idle prio=n/a state=n/a next_pid=83299
+next_prio=120 next_tgid=83299 policy=SCHED_NORMAL vss=0 rss=0 llcref=3184455
+llcmiss=16353 instrs=19936836 cycles=72096624 fixed_clkfreq=61132752
+actual_clkfreq=59784662 <span style='background:yellow'>smicnt=1</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    1.838165
+cpu=34 pid=83299 tgid=83299 statfs [137] ret=0x0 syscallbeg=    0.000932
+*path=0x402010 *buf=0x7ffe12ee2b70</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:11.0pt'>Next, looking at PID 72761 (kworker/u192:0), the
+workqueue function efi_call_rts() is started. You can see a delay of 851 usecs
+before it wakes up the df process above. This is where the SMI occurs.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    1.837287
+cpu=34 pid=83299 tgid=83299 sched_wakeup target_pid=72761 prio=120 target_cpu=1
+success=1</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    1.837291
+cpu=1 pid=0 tgid=0 sched_switch syscall=idle prio=n/a state=n/a next_pid=72761
+next_prio=120 next_tgid=72761 policy=SCHED_NORMAL vss=0 rss=0 llcref=2945475
+llcmiss=39723 instrs=25012226 cycles=72228673 fixed_clkfreq=67707288
+actual_clkfreq=62800263 <span style='background:yellow'>smicnt=0</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    <span
+style='background:yellow'>1.837294</span> cpu=1 pid=72761 tgid=72761 <span
+style='background:yellow'>workqueue_execute_start func=efi_call_rts</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    <span
+style='background:yellow'>1.838145</span> cpu=1 pid=72761 tgid=72761
+sched_wakeup target_pid=83299 prio=120 target_cpu=34 success=1</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>    1.838154
+cpu=1 pid=72761 tgid=72761 sched_switch syscall=restart_sycsall prio=120
+state=SSLEEP next_pid=0 next_prio=120 next_tgid=n/a policy=n/a vss=0 rss=0
+llcref=2948069 llcmiss=40097 instrs=25026641 cycles=72567052
+fixed_clkfreq=69773064 actual_clkfreq=64866039 <span style='background:yellow'>smicnt=1</span>
+worker_thread+0x1a2 kthread+0xcf ret_from_fork+0x31 ret_from_fork_asm+0x1a</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>This analysis is as far
+as we can go with LinuxKI. If the SMI was not caused by the OS, as shown in
+this case, then we will still see the SMI count increase in the trace, but the
+trace activity will not show anything interesting.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>To dig deeper into the
+kernel functions executed on behalf of efi_call_rts(), the ftrace kernel
+function tracer can be used. Since df on the /sys/firmware/efi/efivars file
+system was determined to have caused the SMI, the following script was used to
+collect the ftrace kernel function trace of the df command:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span style='font-size:10.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'># more
+functrace.sh</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>tag=`date
++%m%d_%H%M`</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>HOSTNAME=`hostname
+-s`</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>savedir=$PWD</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>savebufsz=`cat
+/sys/kernel/debug/tracing/buffer_size_kb`</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>cd
+/sys/kernel/debug/tracing</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>echo 0
+&gt;tracing_on</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>echo 0 &gt;trace</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>echo function
+&gt;current_tracer</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>echo 16384
+&gt;buffer_size_kb</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>echo 1
+&gt;tracing_on</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black;background:yellow'>df
+/sys/firmware/efi/efivars</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>echo 0
+&gt;tracing_on</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>cat trace
+&gt;$savedir/functrace.$HOSTNAME.$tag.txt</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>echo nop
+&gt;current_tracer</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>echo $savebufsz
+&gt;buffer_size_kb</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>cd $savedir</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:11.0pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Analyzing the functrace
+output file and searching for efi_call_rts() shows the kernel function called. Note
+that there was no activity logged on any CPU for 832 usecs after the call to
+switch_ldt(). </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:8.0pt;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'> 
+kworker/u192:2-72350   [006] ...1. 519845.576044: efi_call_rts
+&lt;-process_one_work</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'> 
+kworker/u192:2-72350   [006] ...1. 519845.576045: arch_efi_call_virt_setup
+&lt;-efi_call_rts</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'> 
+kworker/u192:2-72350   [006] ...1. 519845.576045: efi_sync_low_kernel_mappings
+&lt;-arch_efi_call_virt_setup</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'> 
+kworker/u192:2-72350   [006] ...1. 519845.576046: kernel_fpu_begin_mask
+&lt;-arch_efi_call_virt_setup</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'> 
+kworker/u192:2-72350   [006] ...3. 519845.576046: switch_mm &lt;-efi_call_rts</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'> 
+kworker/u192:2-72350   [006] d..3. 519845.576046: switch_mm_irqs_off
+&lt;-switch_mm</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'> 
+kworker/u192:2-72350   [006] d..3. <span style='background:yellow'>519845.576047</span>:
+<span style='background:yellow'>switch_ldt &lt;-switch_mm</span></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>         
+&lt;idle&gt;-0       [045] d..2. <span style='background:yellow'>519845.576879</span>:
+sched_idle_set_state &lt;-cpuidle_enter_state</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'> 
+kworker/u192:2-72350   [006] d..3. 519845.576880: __rcu_irq_enter_check_tick
+&lt;-irqentry_enter</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>         
+&lt;idle&gt;-0       [000] d..2. 519845.576880: sched_idle_set_state
+&lt;-cpuidle_enter_state</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'>         
+&lt;idle&gt;-0       [045] d..2. 519845.576880: __rcu_irq_enter_check_tick
+&lt;-ct_nmi_enter</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal;background:#F2F2F2'><span
+style='font-size:9.0pt;font-family:"Courier New";color:black'> 
+kworker/u192:2-72350   [006] d..3. 519845.576880: irq_enter_rcu
+&lt;-sysvec_apic_timer_interrupt</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Examining the source
+code reveals the following code path was taken:</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:9.0pt;font-family:"Courier New"'>efi_call_rts()</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:9.0pt;font-family:"Courier New"'>  efi_call_virt()</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:9.0pt;font-family:"Courier New"'>   arch_efi_call_virt_setup()</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:9.0pt;font-family:"Courier New"'>      efi_enter_mm</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:9.0pt;font-family:"Courier New"'>        switch_mm</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:9.0pt;font-family:"Courier New"'>          switch_ldt</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:9.0pt;font-family:"Courier New"'>            load_mm_ldt</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:11.0pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Exactly where the SMI
+is generated is not entirely clear. The source code for load_mm_ldt() does
+document that any change to the mm-&gt;context_ldt is followed by an IPI to all
+CPUs with the mm active. The switch_ldt() and underlying functions will trigger
+the switch to the SMM stack to execute the SMI code. </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><b><span style='font-size:11.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>References</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><b><span style='font-size:11.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='margin-bottom:0in'><span style='font-size:10.0pt;
+line-height:115%;font-family:"Arial",sans-serif'>Whitepapers:</span></p>
+
+<p class=MsoListParagraphCxSpFirst style='margin-bottom:0in;text-indent:-.25in;
+line-height:normal'><span style='font-size:10.0pt;font-family:Symbol;
+color:#1F2328;border:none windowtext 1.0pt;padding:0in'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a
+href="https://www.amd.com/content/dam/amd/en/documents/epyc-technical-docs/white-papers/58649_amd-epyc-tg-low-latency.pdf"><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;border:none windowtext 1.0pt;
+padding:0in'>Low Latency Tuning for AMD EPYC CPU-Powered Servers (July 2024)</span></a></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-bottom:0in;text-indent:-.25in;
+line-height:normal'><span style='font-size:10.0pt;font-family:Symbol;
+color:#1F2328;border:none windowtext 1.0pt;padding:0in'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="https://www.hpe.com/psnow/doc/c01804533"><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;border:none windowtext 1.0pt;
+padding:0in'>Configuring and tuning HPE ProLiant Server for low-latency
+applications (Edition 12)</span></a></p>
+
+<p class=MsoListParagraphCxSpLast style='margin-bottom:0in;text-indent:-.25in;
+line-height:normal'><span style='font-size:10.0pt;font-family:Symbol;
+color:#1F2328;border:none windowtext 1.0pt;padding:0in'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a
+href="https://docs.redhat.com/en/documentation/red_hat_enterprise_linux_for_real_time/8/html/optimizing_rhel_8_for_real_time_for_low_latency_operation/assembly_running-and-interpreting-hardware-and-firmware-latency-tests_optimizing-rhel8-for-real-time-for-low-latency-operation"><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Optimizing RHEL 8 for
+Real Time for low latency operations</span></a></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;line-height:normal'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>Tools</span></p>
+
+<p class=MsoListParagraphCxSpFirst style='margin-bottom:0in;text-indent:-.25in;
+line-height:normal'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="https://github.com/Xilinx-CNS/cns-sysjitter"><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>sysjitter</span></a></p>
+
+<p class=MsoListParagraphCxSpLast style='margin-bottom:0in;text-indent:-.25in;
+line-height:normal'><span style='font-size:10.0pt;font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><a href="https://github.com/HewlettPackard/LinuxKI/wiki"><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif'>LinuxKI</span></a></p>
+
+</div>
+
+</body>
+
+</html>

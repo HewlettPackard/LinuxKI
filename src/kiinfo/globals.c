@@ -6868,7 +6868,7 @@ warnmsg_t warnmsg[MAXNOTEWARN] = {
 	{ "Warning: High CPU time or Contention on /proc/stats due to high CPU and IRQ count", _HTTP_KSTAT_IRQS}, 
 	{ "Warning: Excessive poll() calls by Oracle", _HTTP_ORACLE_POLL},
 	{ "Warning: Excessive CPU time in pcc_cpufreq driver", _HTTP_PCC_CPUFREQ},
-	{ "Warning: Security mitigations present", _HTTP_SSA_VULN},
+	{ "Warning: Security mitigations present", _HTTP_SCA_MITIGATED},
 	{ "Warning: TCP Timeouts Detected", _HTTP_TCP_TIMEOUTS},
 	{ "Warning: Excessive page faults on KVM host, consider using Huge Pages", _HTTP_KVM_PAGEFAULT},
 	{ "Warning: Excessive CPU time in SQL stats code. Consider disabling stats", _HTTP_SQL_STATS},
@@ -6882,7 +6882,9 @@ warnmsg_t warnmsg[MAXNOTEWARN] = {
         { "Warning: Spinlock contention caused by systemd --user and high number of user logins/logoffs", _HTTP_SYSTEMD_USER},
 	{ "Warning: Suspect SOS_BLOCKALLOCPARTIALLIST spinlock contention", _HTTP_MEMBLOCK_ALLOC},
 	{ "Warning: Heavy spinlock contention using mq-deadine IO schedule with high IOPS", _HTTP_MQDEADLINE},
-	{ "Warning: KVM Halt Polling may increase CPU usage on KVM host", _HTTP_KVM_HALT_POLL}
+	{ "Warning: KVM Halt Polling may increase CPU usage on KVM host", _HTTP_KVM_HALT_POLL},
+	{ "Warning: System Management Interrupts (SMIs) detected", _HTTP_SMIS},
+	{ "Warning: Speculative Return Stack Overflow (SRSO) mitigation detected and may impact performance", _HTTP_SRSO}
 };
 
 

@@ -24,6 +24,8 @@
 # version 5.1  06/07/2017  Added Copyright notice       
 # version 5.2  06/20/2017  Moved Copyright notice after shell designation
 # version 7.0  03/12/2021  Added processing to clean Windows ETL trace directories
+# version 7.12 12/16/2025  Change egrep to grep -E; remove PIDS|CIDS/TIDS|VIDS subdirs if -p is used
+# version 8.0  02/12/2026  Add -Z option to use parallel zip                                         
 #
 # DESCRIPTION:
 # 
@@ -75,7 +77,7 @@ help()
         printf "            -h               Help\n"
         printf "            -r               Recursively traverse subdirs looking for KI data to archive\n"
         printf "            -Z               Use parallel gzip/gunzip to speed up gzip/gunzip phase\n"
-	printf "	    -p		     Remove PIDS and CIDS subdirectories\n"
+	printf "	    -p		     Remove PIDS/CIDS/TIDS/VIDS subdirectories\n"
         printf "            -f               Force remove misc/tmp files\n"
 }
 
@@ -163,6 +165,7 @@ clean_pwd()
 	    rm -rf PIDS >/dev/null 2>&1
 	    rm -rf CIDS >/dev/null 2>&1
 	    rm -rf TIDS >/dev/null 2>&1
+	    rm -rf VIDS >/dev/null 2>&1
 	fi
 	if [ $vflag -eq 1 ] ; then
 	    rm -rf VIS D3 >/dev/null 2>&1
@@ -171,7 +174,7 @@ clean_pwd()
 	    rm -f $(ls *.html | grep -v kp)
 	fi
 
-    	for file in `ls 2>/dev/null | egrep -v '\.txt|\.gz|\.tgz|\.zip|\.html|^doc|^4000|^CIDS|^PIDS|^TIDS|^VIS|^statsp|^MW|^misc|^comment|^SymbolCache|^tl_temp'`
+    	for file in `ls 2>/dev/null | grep -E -v '\.txt|\.gz|\.tgz|\.zip|\.html|^doc|^4000|^CIDS|^PIDS|^TIDS|^VIDS|^VIS|^statsp|^MW|^misc|^comment|^SymbolCache|^tl_temp'`
     	do
             if [ $file == !p4.* ] ; then
                 continue
@@ -189,7 +192,7 @@ clean_pwd()
 
 recursive_clean()
 {
-	for SUBDIR in `find . -type d | grep -v CIDS | grep -v PIDS | grep -v MW | grep -v VIS | grep -v "tl_temp" | grep -v "objdump"`
+	for SUBDIR in `find . -type d | grep -E -v "CIDS|PIDS|MW|TIDS|VIDS|VIS|tl_temp|objdump"`
 	do
 		cd $SUBDIR
     		ls ki.[0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9] >/dev/null 2>&1

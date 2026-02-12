@@ -166,6 +166,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define SYSCONFIG_FLAG		0x10000000000000ull
 #define LIKISTART_FLAG		0x20000000000000ull
 #define LIKIEND_FLAG		0x40000000000000ull
+#define KVMTREE_FLAG		0x80000000000000ull
 
 #define SET_STAT(flag) (kiinfo_stats |= flag)
 #define CLEAR_STAT(flag) (kiinfo_stats &= ~flag)
@@ -207,6 +208,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define kptree			(ISSET(KPTREE_FLAG))
 #define pidtree			(ISSET(PIDTREE_FLAG))
 #define docktree		(ISSET(DOCKTREE_FLAG))
+#define kvmtree			(ISSET(KVMTREE_FLAG))
 #define itime_flag		(ISSET(ITIME_FLAG))
 #define sysenter_flag		(ISSET(SYSENTER_FLAG))
 #define sysargs_flag		(ISSET(SYSARGS_FLAG))
@@ -330,9 +332,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define HC_INTR		3
 #define HC_STATES	4
 
-#define SCA_UNKNOWN	0
-#define SCA_MITIGATED	1
-#define SCA_VULNERABLE	2
+#define SCA_VULNERABLE	0x0
+#define SCA_MITIGATED	0x1
+#define SRSO_MITIGATED  0x2
 
 #define STACK_CONTEXT(pc)   ((pc == STACK_CONTEXT_USER) || (pc == STACK_CONTEXT_KERNEL))
 #define WINKERN_ADDR(pc)    ((pc & 0xfffff80000000000) == 0xfffff80000000000)
@@ -534,6 +536,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define GET_DOCKERP(hashp, key) (docker_info_t *)find_add_hash_entry((lle_t ***)hashp, DOCKER_HASHSZ, key, DOCKER_HASH(key), sizeof(docker_info_t))
 #define GET_DKPIDP(hashp, key)	(dkpid_info_t *)find_add_hash_entry((lle_t ***)hashp, PID_HASHSZ, key, PID_HASH(key), sizeof(dkpid_info_t))
 #define GET_PIDP(hashp, key)	(pid_info_t *)find_add_hash_entry((lle_t ***)hashp, PID_HASHSZ, key, PID_HASH(key), sizeof(pid_info_t))
+#define GET_VMINFOP(hashp, key)	(vm_info_t *)find_add_hash_entry((lle_t ***)hashp, PID_HASHSZ, key, PID_HASH(key), sizeof(vm_info_t))
+#define GET_VMPIDP(hashp, key)	(vmpid_info_t *)find_add_hash_entry((lle_t ***)hashp, PID_HASHSZ, key, PID_HASH(key), sizeof(vmpid_info_t))
 #define GET_CPUP(hashp, key)   (cpu_info_t *)find_add_hash_entry((lle_t ***)hashp, CPU_HASHSZ, key, CPU_HASH(key), sizeof(cpu_info_t))
 #define GET_PCPUP(hashp, key)   (pcpu_info_t *)find_add_hash_entry((lle_t ***)hashp, CPU_HASHSZ, key, CPU_HASH(key), sizeof(pcpu_info_t))
 #define GET_LDOMP(hashp, key)   (ldom_info_t *)find_add_hash_entry((lle_t ***)hashp, LDOM_HASHSZ, key, LDOM_HASH(key), sizeof(ldom_info_t))
@@ -610,6 +614,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define FIND_NTSTATUS(hash, key)  (ntstatus_info_t *)find_entry((lle_t **)hash, key, NTSTATUS_HASH(key))
 #define FIND_IOCTL(hash, key)  (ioctl_info_t *)find_entry((lle_t **)hash, key, IOCTL_HASH(key))
 #define FIND_PIDP(hash, key)  (pid_info_t *)find_entry((lle_t **)hash, key, PID_HASH(key))
+#define FIND_VMINFOP(hash, key)  (vm_info_t *)find_entry((lle_t **)hash, key, PID_HASH(key))
 #define FIND_CPUP(hash, key)  (cpu_info_t *)find_entry((lle_t **)hash, key, CPU_HASH(key))
 #define FIND_PCPUP(hash, key)  (pcpu_info_t *)find_entry((lle_t **)hash, key, CPU_HASH(key))
 #define FIND_LDOMP(hash, key)  (ldom_info_t *)find_entry((lle_t **)hash, key, LDOM_HASH(key))
@@ -723,7 +728,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #define FOBJ lle.key
 #define FOBJ_HSIZE 0x1000
-#define FOBJ_HASH(fobj) ((fobj << 10) & (FOBJ_HSIZE-1))
+#define FOBJ_HASH(fobj) ((fobj >> 8) & (FOBJ_HSIZE-1))
 
 #define CALLER_ADDR lle.key
 #define SPIN_HSIZE 0x100
@@ -989,7 +994,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 /* macros for managing the Notes and Warnings messages and links.  */
 /* update with warnmsg[] definitions in globals.c */
-#define MAXWARNMSG		40	
+#define MAXWARNMSG		42
 #define MAXNOTEMSG		0
 #define MAXNOTEWARN		MAXWARNMSG+MAXNOTEMSG
 #define WARN_CPU_BOTTLENECK		0		
@@ -1017,7 +1022,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARN_KSTAT_IRQS			22
 #define WARN_ORACLE_POLL		23
 #define WARN_PCC_CPUFREQ		24
-#define WARN_SCA_VULN			25
+#define WARN_SCA_MITIGATED		25
 #define WARN_TCP_TIMEOUTS		26
 #define WARN_KVM_PAGEFAULT		27
 #define WARN_SQL_STATS			28
@@ -1032,6 +1037,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARN_MEMBLOCK_ALLOC		37
 #define WARN_MQDEADLINE			38
 #define WARN_KVM_HALT_POLL		39
+#define WARN_SMIS			40
+#define WARN_SRSO_MITIGATED		41
 #define NOTE_NUM1		MAXWARNMSG+0
 
 /* warn flags passed to "foreach" functions for detection */
@@ -1060,6 +1067,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define WARNF_NODE_LOWMEM		0x400000ull
 #define WARNF_RUNQ_DELAYS		0x800000ull
 #define WARNF_SYSTEMD_USER		0x1000000ull
+#define WARNF_SMIS			0x2000000ull
 
 /* warn flags specific to hardclocks warnflag */ 
 #define WARNF_SEMLOCK			0x1ull
@@ -1458,6 +1466,7 @@ typedef struct pid_info {
 	char 		*thread_cmd;
 	char		*hcmd;		/* Hadoop proc name or SQL Instance name*/
 	void		*dockerp;	/* docker pointer */
+	void		*vminfop;	/* docker pointer */
 	void *schedp;			/* struct sched_info */
 	hc_info_t *hcinfop;		/* struct hc_info */
 	void *spinlockp;		/* struct spinlock_info_t  WINDOWS ONLY */
@@ -2283,6 +2292,27 @@ struct irq_info {
 	void 		**irq_entry_hash;  
 };
 
+typedef struct vm_info {
+	lle_t		lle;
+	char		*cmd;
+	char 		*vm_name;
+	char 		*smp_arg;
+	char		*vm_detail;
+	void 		**vmpid_hash;		/* perpid information */
+	sched_stats_t 	sched_stats;
+	struct iostats	iostats[3];     /* TOTAL=0/READ=1/WRITE=2 */
+	struct sd_stats	netstats;	
+	int		nlwp;
+} vm_info_t;
+
+/* hash of pids belonging to same docker container */
+typedef struct vmpid_info {
+	lle_t			lle;
+	pid_info_t		*pidp;
+	vm_info_t		*vminfop;
+} vmpid_info_t;
+
+
 typedef struct docker_info {
 	lle_t lle;
 	char *name;
@@ -2305,6 +2335,7 @@ typedef struct server_info {
 	pcpu_info_t **pcpu_hash;	/* per-pcpu information */
 	ldom_info_t **ldom_hash;	/* per-ldom information */
 	docker_info_t **docker_hash;    /* per-docker information */
+	vm_info_t **vm_hash;		/* struct vm_info */
 	hc_info_t *hcinfop;		/* struct hc_info */
 	sched_info_t *schedp;		/* struct sched_info */
 	power_info_t *powerp;		/* struct power_info */
@@ -2388,6 +2419,7 @@ typedef struct server_info {
 	int nodes_per_socket;
 	int ndevs;
 	int futex_cnt;
+	int nvms;			/* number of KVM VMs */
 	uint32 cache_insert_cnt;
 	uint32 cache_evict_cnt;
 	char HT_enabled;

@@ -114,8 +114,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define _LNK_9_1	"subsection9.1"
 #define _LNK_9_2	"subsection9.2"
 #define _LNK_9_3	"subsection9.3"
-#define _LNK_9_4	"subsection9.4"
 #define _LNK_10_0	"Section10"
+#define _LNK_10_1	"subsection10.1"
+#define _LNK_10_2	"subsection10.2"
+#define _LNK_10_3	"subsection10.3"
+#define _LNK_10_4	"subsection10.4"
+#define _LNK_11_0	"Section11"
 
 #define _HTTP_BARRIERS "BarrierWritesOracleASM.htm"
 #define _HTTP_SEMGET "SAPDB2semget.htm"
@@ -135,7 +139,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define _HTTP_KSTAT_IRQS "kstat_irqs.htm"
 #define _HTTP_ORACLE_POLL "oracle_polling.htm"
 #define _HTTP_PCC_CPUFREQ "pcc_cpufreq.htm"
-#define _HTTP_SSA_VULN "sca_vuln.htm"
+#define _HTTP_SCA_MITIGATED "sca_vuln.htm"
 #define _HTTP_TCP_TIMEOUTS "tcp_timeouts.htm"
 #define _HTTP_KVM_PAGEFAULT "kvm_pagefault.htm"
 #define _HTTP_SQL_STATS "sql_stats.htm"
@@ -148,6 +152,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define _HTTP_MEMBLOCK_ALLOC "memblock_alloc.htm"
 #define _HTTP_MQDEADLINE "mqdeadline.htm"
 #define _HTTP_KVM_HALT_POLL "kvm_halt_poll.htm"
+#define _HTTP_SMIS "SMI.htm"
+#define _HTTP_SRSO "srso.htm"
 #define _HTTP_4_5 "#subsection4.5"
 
 #define _MSG_LINK_INFO \

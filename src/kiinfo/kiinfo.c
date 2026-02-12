@@ -88,6 +88,7 @@ char ts_begin_marker[64];
 char ts_end_marker[64];
 
 FILE *dockfile = NULL;
+FILE *kvmfile = NULL;
 FILE *node_csvfile = NULL;
 FILE *pid_csvfile = NULL;
 FILE *dsk_csvfile = NULL;

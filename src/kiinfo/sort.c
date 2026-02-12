@@ -562,6 +562,157 @@ dkpid_sort_by_iocnt(const void *v1, const void *v2)
 }
 
 int
+vm_sort_by_runtime(const void *v1, const void *v2)
+{
+	const uint64 *p1=v1;
+	const uint64 *p2=v2;
+	vm_info_t *vmp1 = (vm_info_t *)*p1;
+	vm_info_t *vmp2 = (vm_info_t *)*p2;
+	int64 diff;
+
+        diff = vmp1->sched_stats.T_run_time - vmp2->sched_stats.T_run_time;
+
+        if (diff < 0) {
+                return 1;
+        } else if (diff > 0) {
+                return -1;
+        } else {
+                return 0;
+        }
+}
+
+int
+vm_sort_by_iocnt(const void *v1, const void *v2)
+{
+	const uint64 *p1=v1;
+	const uint64 *p2=v2;
+	vm_info_t *vmp1 = (vm_info_t *)*p1;
+	vm_info_t *vmp2 = (vm_info_t *)*p2;
+	int64 diff;
+
+	return (int)(vmp2->iostats[IOTOT].compl_cnt - vmp1->iostats[IOTOT].compl_cnt);
+}
+
+int
+vmpid_sort_by_runtime(const void *v1, const void *v2)
+{
+	const uint64 *p1=v1;
+	const uint64 *p2=v2;
+	vmpid_info_t *b1 = (vmpid_info_t *)*p1;
+	vmpid_info_t *b2 = (vmpid_info_t *)*p2;
+	pid_info_t *a1 = (pid_info_t *)b1->pidp;
+	pid_info_t *a2 = (pid_info_t *)b2->pidp;
+        sched_info_t *schedp1 = a1->schedp;
+        sched_info_t *schedp2 = a2->schedp;
+	int64 diff;
+
+	if (schedp1 == NULL && schedp2 == NULL) return 0;
+	if (schedp1 == NULL) return 1;
+	if (schedp2 == NULL) return -1;
+        diff = schedp1->sched_stats.T_run_time - schedp2->sched_stats.T_run_time;
+
+        if (diff < 0) {
+                return 1;
+        } else if (diff > 0) {
+                return -1;
+        } else {
+                return 0;
+        }
+}
+
+int
+vmpid_sort_by_runqtime(const void *v1, const void *v2)
+{
+	const uint64 *p1=v1;
+	const uint64 *p2=v2;
+	vmpid_info_t *b1 = (vmpid_info_t *)*p1;
+	vmpid_info_t *b2 = (vmpid_info_t *)*p2;
+	pid_info_t *a1 = (pid_info_t *)b1->pidp;
+	pid_info_t *a2 = (pid_info_t *)b2->pidp;
+        sched_info_t *schedp1 = a1->schedp;
+        sched_info_t *schedp2 = a2->schedp;
+	int64 diff;
+
+	if (schedp1 == NULL && schedp2 == NULL) return 0;
+	if (schedp1 == NULL) return 1;
+	if (schedp2 == NULL) return -1;
+        diff = schedp1->sched_stats.T_runq_time - schedp2->sched_stats.T_runq_time;
+
+        if (diff < 0) {
+                return 1;
+        } else if (diff > 0) {
+                return -1;
+        } else {
+                return 0;
+        }
+}
+
+int
+vmpid_sort_by_systime(const void *v1, const void *v2)
+{
+	const uint64 *p1=v1;
+	const uint64 *p2=v2;
+	vmpid_info_t *b1 = (vmpid_info_t *)*p1;
+	vmpid_info_t *b2 = (vmpid_info_t *)*p2;
+	pid_info_t *a1 = (pid_info_t *)b1->pidp;
+	pid_info_t *a2 = (pid_info_t *)b2->pidp;
+        sched_info_t *schedp1 = a1->schedp;
+        sched_info_t *schedp2 = a2->schedp;
+	int64 diff;
+
+	if (schedp1 == NULL && schedp2 == NULL) return 0;
+	if (schedp1 == NULL) return 1;
+	if (schedp2 == NULL) return -1;
+        diff = schedp1->sched_stats.T_sys_time - schedp2->sched_stats.T_sys_time;
+
+        if (diff < 0) {
+                return 1;
+        } else if (diff > 0) {
+                return -1;
+        } else {
+                return 0;
+        }
+}
+
+int
+vmpid_sort_by_rss(const void *v1, void *v2)
+{
+	const uint64 *p1=v1;
+	const uint64 *p2=v2;
+	vmpid_info_t *b1 = (vmpid_info_t *)*p1;
+	vmpid_info_t *b2 = (vmpid_info_t *)*p2;
+	pid_info_t *a1 = (pid_info_t *)b1->pidp;
+	pid_info_t *a2 = (pid_info_t *)b2->pidp;
+        int64 num1, num2;
+        int64 diff;
+        num1 = a1->rss;
+        num2 = a2->rss;
+        diff = num1 - num2;
+
+        if (diff < 0) {
+                return 1;
+        } else if (diff > 0) {
+                return -1;
+        } else {
+                return 0;
+        }
+}
+
+int
+vmpid_sort_by_iocnt(const void *v1, const void *v2)
+{
+	const uint64 *p1=v1;
+	const uint64 *p2=v2;
+	vmpid_info_t *b1 = (vmpid_info_t *)*p1;
+	vmpid_info_t *b2 = (vmpid_info_t *)*p2;
+	pid_info_t *a1 = (pid_info_t *)b1->pidp;
+	pid_info_t *a2 = (pid_info_t *)b2->pidp;
+	int64 diff;
+
+	return (int)(a2->iostats[IOTOT].compl_cnt - a1->iostats[IOTOT].compl_cnt);
+}
+
+int
 fc_sort_by_path(const void *v1, const void *v2)
 {
 	const uint64 *p1=v1;

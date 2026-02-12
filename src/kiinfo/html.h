@@ -39,10 +39,8 @@ extern int font_color;
 #define UL  if (HTML) printf ("<ul>")
 #define LI  if (HTML) printf ("<li>")
 #define NL  printf("\n")
-#define DNL dock_printf("\n");
+#define ANL aux_printf("\n");
 #define PNL pid_printf(pidfile, "\n");
-/* #define DNL if (dockfile) fprintf (dockfile, "\n"); NL; */
-/* #define PNL if (pidfile) fprintf (pidfile, "\n"); NL; */
 
 #define NLt if (!HTML) printf ("\n");
 
@@ -128,8 +126,8 @@ extern int font_color;
 
 #define PID_URL_FIELD8(pid) 										\
 	char pidlink[80];										\
-	if (dockfile) {											\
-		dock_printf("%-8d", (int)pid); 								\
+	if (dockfile || kvmfile) {											\
+		aux_printf("%-8d", (int)pid); 								\
 	} else if (kptree && HTML && vis) { 								\
 		sprintf (pidlink, "%d</A>", (int)pid); 							\
 		printf("<A Href=\"VIS/%d/pid_detail.html\" TARGET=\"kipid vis file\">%-12s", (int)pid, (char *)pidlink);	\
@@ -189,6 +187,12 @@ extern int font_color;
 		printf("%012llx", id);									\
 	}
 
+#define KVM_URL_FIELD(id)										\
+	if (kptree && HTML) {										\
+                printf("<A Href=\"VIDS/%d\" TARGET=\"kvm file\">%8d</A>", id, id);		\
+	} else {											\
+		printf("%8d", id);									\
+	}
 
 #define SERVER_URL_FIELD(serverp)									\
 	if (cltree && HTML) {										\

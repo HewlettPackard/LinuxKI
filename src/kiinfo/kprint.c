@@ -217,8 +217,12 @@ kp_sys_summary ()
 		BOLD("Security Mitigations:"); NL;
 		parse_scavuln(1);
 
-		if (globals->scavuln == SCA_MITIGATED) {
-                	warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SCA_VULN, _LNK_0_2_0);
+		if (globals->scavuln & SCA_MITIGATED) {
+                	warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SCA_MITIGATED, _LNK_0_2_0);
+                	kp_warning(globals->warnings, warn_indx, _LNK_0_2_0); T("\n");
+        	}
+		if (globals->scavuln & SRSO_MITIGATED) {
+                	warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SRSO_MITIGATED, _LNK_0_2_0);
                 	kp_warning(globals->warnings, warn_indx, _LNK_0_2_0); T("\n");
         	}
 	}
@@ -399,19 +403,28 @@ void kp_toc()
                 LI; ARF(_LNK_8_3, _MSG_8_3); NLt;
 	      _UL;
 	    }
+
+	  if (globals->vm_hash) {
+  	      LI; ARF(_LNK_9_0, _MSG_9_0); NLt;
+	      UL;	
+                LI; ARF(_LNK_9_1, _MSG_9_1); NLt;
+                LI; ARF(_LNK_9_2, _MSG_9_2); NLt;
+                LI; ARF(_LNK_9_3, _MSG_9_3); NLt;
+	      _UL;
+	    }
 	  }
 
-  	  LI; ARF(_LNK_9_0, _MSG_9_0); NLt;
+  	  LI; ARF(_LNK_10_0, _MSG_10_0); NLt;
 	  if (HTML) {
 	    UL;	
-              LI; ARF(_LNK_9_1, _MSG_9_1); NLt;
-              LI; ARF(_LNK_9_2, _MSG_9_2); NLt;
-              LI; ARF(_LNK_9_3, _MSG_9_3); NLt;
-              if (vis) { LI; ARF(_LNK_9_4, _MSG_9_4); NLt; }
+              LI; ARF(_LNK_10_1, _MSG_10_1); NLt;
+              LI; ARF(_LNK_10_2, _MSG_10_2); NLt;
+              LI; ARF(_LNK_10_3, _MSG_10_3); NLt;
+              if (vis) { LI; ARF(_LNK_10_4, _MSG_10_4); NLt; }
 	    _UL;
 	  }
 
-          LI; ARF(_LNK_10_0, _MSG_10_0); NLt;
+          LI; ARF(_LNK_11_0, _MSG_11_0); NLt;
 	_UL;
 }
 
@@ -460,6 +473,10 @@ kp_global_cpu()				/* Section 1.1 */
 	print_global_cpu_stats(globals, &warnflag);
         if (warnflag & WARNF_CPU_BOTTLENECK) {
                 warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_CPU_BOTTLENECK, _LNK_1_1);
+                kp_warning(globals->warnings, warn_indx, _LNK_1_1); NL;
+        }
+	if (warnflag & WARNF_SMIS) {
+                warn_indx = add_warning((void **)&globals->warnings, &globals->next_warning, WARN_SMIS, _LNK_1_1);
                 kp_warning(globals->warnings, warn_indx, _LNK_1_1); NL;
         }
 
@@ -2975,8 +2992,10 @@ kp_oracle()				/* Section 7.0 */
         ARFx(_LNK_6_0,"[Prev Section]");
 	if (globals->docker_hash) {
         	ARFx(_LNK_8_0,"[Next Section]");
-	} else {
+	} else if (globals->vm_hash) {
         	ARFx(_LNK_9_0,"[Next Section]");
+	} else {
+        	ARFx(_LNK_10_0,"[Next Section]");
 	}
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
@@ -3060,8 +3079,10 @@ kp_oracle_sids()			/* Section 7.1 */
         ARFx(_LNK_7_0,"---[Prev Section]"); 
 	if (globals->docker_hash) {
         	ARFx(_LNK_8_0,"[Next Section]");
-	} else {
+	} else if (globals->vm_hash) {
         	ARFx(_LNK_9_0,"[Next Section]");
+	} else {
+        	ARFx(_LNK_10_0,"[Next Section]");
 	}
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
@@ -3085,8 +3106,10 @@ kp_lgwr_analysis()			/* Section 7.2 */
         ARFx(_LNK_7_0,"---[Prev Section]"); 
 	if (globals->docker_hash) {
         	ARFx(_LNK_8_0,"[Next Section]");
-	} else {
+	} else if (globals->vm_hash) {
         	ARFx(_LNK_9_0,"[Next Section]");
+	} else {
+        	ARFx(_LNK_10_0,"[Next Section]");
 	}
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
@@ -3110,8 +3133,10 @@ kp_arch_analysis()			/* Section 7.3 */
         ARFx(_LNK_7_0,"---[Prev Section]"); 
 	if (globals->docker_hash) {
         	ARFx(_LNK_8_0,"[Next Section]");
-	} else {
+	} else if (globals->vm_hash) {
         	ARFx(_LNK_9_0,"[Next Section]");
+	} else {
+        	ARFx(_LNK_10_0,"[Next Section]");
 	}
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
@@ -3135,8 +3160,10 @@ kp_dbw_analysis()			/* Section 7.4 */
         ARFx(_LNK_7_0,"---[Prev Section]"); 
 	if (globals->docker_hash) {
         	ARFx(_LNK_8_0,"[Next Section]");
-	} else {
+	} else if (globals->vm_hash) {
         	ARFx(_LNK_9_0,"[Next Section]");
+	} else {
+        	ARFx(_LNK_10_0,"[Next Section]");
 	}
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
@@ -3160,8 +3187,10 @@ kp_pquery_analysis()			/* Section 7.5 */
         ARFx(_LNK_7_0,"---[Prev Section]"); 
 	if (globals->docker_hash) {
         	ARFx(_LNK_8_0,"[Next Section]");
-	} else {
+	} else if (globals->vm_hash) {
         	ARFx(_LNK_9_0,"[Next Section]");
+	} else {
+        	ARFx(_LNK_10_0,"[Next Section]");
 	}
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
@@ -3185,8 +3214,10 @@ kp_shared_server_analysis()		/* Section 7.6 */
         ARFx(_LNK_7_0,"---[Prev Section]"); 
 	if (globals->docker_hash) {
         	ARFx(_LNK_8_0,"[Next Section]");
-	} else {
+	} else if (globals->vm_hash) {
         	ARFx(_LNK_9_0,"[Next Section]");
+	} else {
+        	ARFx(_LNK_10_0,"[Next Section]");
 	}
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
@@ -3210,8 +3241,10 @@ kp_ioslave_analysis()			/* Section 7.7 */
         ARFx(_LNK_7_0,"---[Prev Section]"); 
 	if (globals->docker_hash) {
         	ARFx(_LNK_8_0,"[Next Section]");
-	} else {
+	} else if (globals->vm_hash) {
         	ARFx(_LNK_9_0,"[Next Section]");
+	} else {
+        	ARFx(_LNK_10_0,"[Next Section]");
 	}
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
@@ -3231,13 +3264,17 @@ kp_dockers()			/* Section 8.0 */
 	
 	if (next_sid > 1)  {
         	ARFx(_LNK_7_0,"[Prev Section]"); 
-	} else if (IS_LIKI_V2_PLUS)  { 
+	} else if (!IS_WINKI)  { 
         	ARFx(_LNK_6_0,"[Prev Section]");
 	} else { 
         	ARFx(_LNK_5_0,"[Prev Section]");
 	}
 
-        ARFx(_LNK_9_0,"[Next Section]");
+	if (globals->vm_hash) {
+        	ARFx(_LNK_9_0,"[Next Section]"); 
+	} else {
+        	ARFx(_LNK_10_0,"[Next Section]");
+	}
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 }
@@ -3250,14 +3287,12 @@ kp_docker_ps()				/* Section 8.1 */
         HEAD3(_MSG_8_1);
         FONT_SIZE(-1);
         ARFx(_LNK_8_2,"[Next Subsection]"); 
-	if (next_sid > 1)  {
-        	ARFx(_LNK_7_0,"---[Prev Section]"); 
-	} else if (IS_LIKI_V2_PLUS)  { 
-        	ARFx(_LNK_6_0,"---[Prev Section]");
-	} else { 
-        	ARFx(_LNK_5_0,"---[Prev Section]");
+        ARFx(_LNK_8_0,"---[Prev Section]"); 
+	if (globals->vm_hash) {
+        	ARFx(_LNK_9_0,"[Next Section]"); 
+	} else {
+        	ARFx(_LNK_10_0,"[Next Section]"); 
 	}
-        ARFx(_LNK_9_0,"[Next Section]"); 
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
 
@@ -3267,21 +3302,20 @@ kp_docker_ps()				/* Section 8.1 */
 	
 
 void
-kp_docker_cpu()				/* Section 8.1 */
+kp_docker_cpu()				/* Section 8.2 */
 {
         GREEN_TABLE;
         ANM(_LNK_8_2);
         HEAD3(_MSG_8_2);
         FONT_SIZE(-1);
-        ARFx(_LNK_8_2,"[Next Subsection]"); 
-	if (next_sid > 1)  {
-        	ARFx(_LNK_7_0,"---[Prev Section]"); 
-	} else if (IS_LIKI_V2_PLUS)  { 
-        	ARFx(_LNK_6_0,"---[Prev Section]");
-	} else { 
-        	ARFx(_LNK_5_0,"---[Prev Section]");
+        ARFx(_LNK_8_1,"[Prev Subsection]"); 
+        ARFx(_LNK_8_3,"[Next Subsection]"); 
+        ARFx(_LNK_8_0,"---[Prev Section]"); 
+	if (globals->vm_hash) {
+        	ARFx(_LNK_9_0,"[Next Section]"); 
+	} else {
+        	ARFx(_LNK_10_0,"[Next Section]"); 
 	}
-        ARFx(_LNK_9_0,"[Next Section]"); 
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
 
@@ -3297,16 +3331,12 @@ kp_docker_io()				/* Section 8.3 */
         HEAD3(_MSG_8_3);
         FONT_SIZE(-1);
         ARFx(_LNK_8_2,"[Prev Subsection]"); 
-	if (globals->docker_hash) {
-        	ARFx(_LNK_8_0,"---[Prev Section]"); 
-	} else if (next_sid > 1)  {
-        	ARFx(_LNK_7_0,"---[Prev Section]"); 
-	} else if (IS_LIKI_V2_PLUS)  { 
-        	ARFx(_LNK_6_0,"---[Prev Section]");
-	} else { 
-        	ARFx(_LNK_5_0,"---[Prev Section]");
+        ARFx(_LNK_8_0,"---[Prev Section]"); 
+	if (globals->vm_hash) {
+        	ARFx(_LNK_9_0,"[Next Section]"); 
+	} else {
+        	ARFx(_LNK_10_0,"[Next Section]"); 
 	}
-        ARFx(_LNK_9_0,"[Next Section]"); 
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
 
@@ -3314,23 +3344,20 @@ kp_docker_io()				/* Section 8.3 */
 }
 
 void
-kp_file_links()			/* Section 9.0 */
+kp_vms()			/* Section 9.0 */
 {
-        int i, msg_idx;
-        warn_t *warnp;
-
 	HR;
         BLUE_TABLE;
         ANM(_LNK_9_0);
         HEAD2(_MSG_9_0);
         FONT_SIZE(-1);
-	
-	if (globals->docker_hash) {
+
+	if (globals->docker_hash) {	
         	ARFx(_LNK_8_0,"[Prev Section]"); 
 	} else if (next_sid > 1)  {
         	ARFx(_LNK_7_0,"[Prev Section]"); 
 	} else if (!IS_WINKI)  { 
-        	ARFx(_LNK_6_0,"[Prev Section]");
+        	ARFx(_LNK_6_0,"---[Prev Section]");
 	} else { 
         	ARFx(_LNK_5_0,"[Prev Section]");
 	}
@@ -3341,14 +3368,102 @@ kp_file_links()			/* Section 9.0 */
 }
 
 void
-kp_txt_links()				/* Section 9.1 */
+kp_vm_ps()				/* Section 9.1 */
 {
         GREEN_TABLE;
         ANM(_LNK_9_1);
         HEAD3(_MSG_9_1);
         FONT_SIZE(-1);
         ARFx(_LNK_9_2,"[Next Subsection]"); 
-	if (globals->docker_hash) {
+        ARFx(_LNK_9_0,"---[Prev Section]"); 
+        ARFx(_LNK_10_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+
+	vm_print_info_report();
+}
+	
+
+void
+kp_vm_cpu()				/* Section 9.2 */
+{
+        GREEN_TABLE;
+        ANM(_LNK_9_2);
+        HEAD3(_MSG_9_2);
+        FONT_SIZE(-1);
+        ARFx(_LNK_9_1,"[Prev Subsection]"); 
+        ARFx(_LNK_9_3,"[Next Subsection]"); 
+        ARFx(_LNK_9_0,"---[Prev Section]"); 
+        ARFx(_LNK_10_0,"[Next Section]"); 
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+
+	BOLD ("    TGID         busy          sys         user         runq");
+	if (globals->schedp->sched_stats.T_irq_time)
+		BOLD ("  hardirq_sys hardirq_user  softirq_sys softirq_user");
+	BOLD ("  VM Name\n");
+	foreach_hash_entry((void **)globals->vm_hash, PID_HASHSZ, print_vm_totals, vm_sort_by_runtime, 20, NULL);
+}
+
+void
+kp_vm_io()				/* Section 9.3 */
+{
+        GREEN_TABLE;
+        ANM(_LNK_9_3);
+        HEAD3(_MSG_9_3);
+        FONT_SIZE(-1);
+        ARFx(_LNK_9_2,"[Prev Subsection]"); 
+        ARFx(_LNK_9_0,"---[Prev Section]"); 
+	ARFx(_LNK_10_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]"); 
+        _TABLE;
+
+	/* vm_print_io_report(); */
+	BOLD("          ---------------------  Total  --------------------- ----------------------  Write  -------------------- ----------------------  Read  ---------------------\n");
+	BOLD("    TGID     IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv    IO/s    MB/s  AvIOsz AvInFlt    Avwait    Avserv  KVM Name\n");
+	foreach_hash_entry((void **)globals->vm_hash, PID_HASHSZ, print_vm_iototals, vm_sort_by_iocnt, 20, NULL);
+}
+
+void
+kp_file_links()			/* Section 10.0 */
+{
+        int i, msg_idx;
+        warn_t *warnp;
+
+	HR;
+        BLUE_TABLE;
+        ANM(_LNK_10_0);
+        HEAD2(_MSG_10_0);
+        FONT_SIZE(-1);
+	
+	if (globals->vm_hash) {
+        	ARFx(_LNK_9_0,"[Prev Section]"); 
+	} else if (globals->docker_hash) {
+        	ARFx(_LNK_8_0,"[Prev Section]"); 
+	} else if (next_sid > 1)  {
+        	ARFx(_LNK_7_0,"[Prev Section]"); 
+	} else if (!IS_WINKI)  { 
+        	ARFx(_LNK_6_0,"[Prev Section]");
+	} else { 
+        	ARFx(_LNK_5_0,"[Prev Section]");
+	}
+
+        ARFx(_LNK_11_0,"[Next Section]");
+        ARFx(_LNK_TOC,"[Table of Contents]");
+        _TABLE;
+}
+
+void
+kp_txt_links()				/* Section 10.1 */
+{
+        GREEN_TABLE;
+        ANM(_LNK_10_1);
+        HEAD3(_MSG_10_1);
+        FONT_SIZE(-1);
+        ARFx(_LNK_10_2,"[Next Subsection]"); 
+	if (globals->vm_hash) {
+        	ARFx(_LNK_9_0,"---[Prev Section]"); 
+	} else if (globals->docker_hash) {
         	ARFx(_LNK_8_0,"---[Prev Section]"); 
 	} else if (next_sid > 1)  {
         	ARFx(_LNK_7_0,"---[Prev Section]"); 
@@ -3371,15 +3486,17 @@ kp_txt_links()				/* Section 9.1 */
 }
 
 void
-kp_csv_links()				/* Section 9.2 */
+kp_csv_links()				/* Section 10.2 */
 {
         GREEN_TABLE;
-        ANM(_LNK_9_2);
-        HEAD3(_MSG_9_2);
+        ANM(_LNK_10_2);
+        HEAD3(_MSG_10_2);
         FONT_SIZE(-1);
-        ARFx(_LNK_9_1,"[Prev Subsection]"); 
-        ARFx(_LNK_9_3,"[Next Subsection]"); 
-	if (globals->docker_hash) {
+        ARFx(_LNK_10_1,"[Prev Subsection]"); 
+        ARFx(_LNK_10_3,"[Next Subsection]"); 
+	if (globals->vm_hash) {
+        	ARFx(_LNK_9_0,"---[Prev Section]"); 
+	} else if (globals->docker_hash) {
         	ARFx(_LNK_8_0,"---[Prev Section]"); 
 	} else if (next_sid > 1)  {
         	ARFx(_LNK_7_0,"---[Prev Section]"); 
@@ -3400,15 +3517,17 @@ kp_csv_links()				/* Section 9.2 */
 }
 
 void
-kp_misc_links()				/* Section 9.3 */
+kp_misc_links()				/* Section 10.3 */
 {
         GREEN_TABLE;
-        ANM(_LNK_9_3);
-        HEAD3(_MSG_9_3);
+        ANM(_LNK_10_3);
+        HEAD3(_MSG_10_3);
         FONT_SIZE(-1);
-        ARFx(_LNK_9_2,"[Prev Subsection]");  
-        if (vis) { ARFx(_LNK_9_4,"[Next Subsection]");  }
-	if (globals->docker_hash) {
+        ARFx(_LNK_10_2,"[Prev Subsection]");  
+        ARFx(_LNK_10_4,"[Next Subsection]");
+	if (globals->vm_hash) {
+        	ARFx(_LNK_9_0,"---[Prev Section]"); 
+	} else if (globals->docker_hash) {
         	ARFx(_LNK_8_0,"---[Prev Section]"); 
 	} else if (next_sid > 1)  {
         	ARFx(_LNK_7_0,"---[Prev Section]"); 
@@ -3473,14 +3592,16 @@ kp_misc_links()				/* Section 9.3 */
 }
 
 void
-kp_vis_links()				/* Section 9.4 */
+kp_vis_links()				/* Section 10.4 */
 {
         GREEN_TABLE;
-        ANM(_LNK_9_4);
-        HEAD3(_MSG_9_4);
+        ANM(_LNK_10_4);
+        HEAD3(_MSG_10_4);
         FONT_SIZE(-1);
-        ARFx(_LNK_9_3,"[Prev Subsection]"); 
-	if (globals->docker_hash) {
+        ARFx(_LNK_10_3,"[Prev Subsection]"); 
+	if (globals->vm_hash) {
+        	ARFx(_LNK_9_0,"---[Prev Section]"); 
+	} else if (globals->docker_hash) {
         	ARFx(_LNK_8_0,"---[Prev Section]"); 
 	} else if (next_sid > 1)  {
         	ARFx(_LNK_7_0,"---[Prev Section]"); 
@@ -3489,7 +3610,7 @@ kp_vis_links()				/* Section 9.4 */
 	} else { 
         	ARFx(_LNK_5_0,"---[Prev Section]");
 	}
-        ARFx(_LNK_10_0,"[Next Section]"); 
+        ARFx(_LNK_11_0,"[Next Section]"); 
         ARFx(_LNK_TOC,"[Table of Contents]"); 
         _TABLE;
 	VISFILE_FIELD("timeline", "Server Activity Timeline");
@@ -3505,19 +3626,19 @@ kp_vis_links()				/* Section 9.4 */
 }
 
 void
-kp_warnings_report()			/* Section 9.0 */
+kp_warnings_report()			/* Section 11.0 */
 {
         int i, msg_idx;
         warn_t *warnp;
 
 	HR;
         BLUE_TABLE;
-        ANM(_LNK_10_0);
+        ANM(_LNK_11_0);
         ANM(SPF(line,"%s%d", _LNK_WARN, globals->next_warning));
-        HEAD2(_MSG_10_0);
+        HEAD2(_MSG_11_0);
         FONT_SIZE(-1);
 	
-        ARFx(_LNK_9_0,"[Prev Section]"); 
+        ARFx(_LNK_10_0,"[Prev Section]"); 
         ARFx(_LNK_TOC,"[Table of Contents]");
         _TABLE;
 

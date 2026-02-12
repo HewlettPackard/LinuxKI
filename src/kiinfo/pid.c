@@ -826,18 +826,18 @@ print_pid_memory(void *arg1, void *arg2)
         sched_info_t *schedp;
         uint64 *warnflagp = (uint64 *)arg2;
 
-        dock_printf ("%8d %8d %8d %s",
+        aux_printf ("%8d %8d %8d %s",
                 pidp->vss,
                 pidp->rss,
 		pidp->PID,
 		pidp->cmd);
-        if (pidp->hcmd) dock_printf ("  {%s}", pidp->hcmd);
-        if (pidp->thread_cmd) dock_printf (" (%s)", pidp->thread_cmd);
+        if (pidp->hcmd) aux_printf ("  {%s}", pidp->hcmd);
+        if (pidp->thread_cmd) aux_printf (" (%s)", pidp->thread_cmd);
 	if (dockerp && (dockfile == NULL)) {
         	printf (HTML ? " &lt;%012llx&gt;" : " <%012llx>", dockerp->ID);
 	}
 
-        dock_printf ("\n");
+        aux_printf ("\n");
 
         return 0;
 }
@@ -933,6 +933,7 @@ int
 pid_report(void *arg1, void *v)
 {
 	pid_info_t *pidp = (pid_info_t *)arg1;
+	vm_info_t *vminfop;
 	filter_t *f = (filter_t *)v;
 	char pid_fname[20];
 	char vis_dir[20];
@@ -953,6 +954,7 @@ pid_report(void *arg1, void *v)
 	FILE *pidfile;
 
 	dockerp = pidp->dockerp;
+	vminfop = pidp->vminfop;
 
 	/* we can remove the check for IS_WINKI when we do the trc stats */
 	if (!IS_WINKI && pidp->num_tr_recs == 0) return 0;
@@ -1043,6 +1045,7 @@ pid_report(void *arg1, void *v)
 	pid_printf (pidfile, "\n%s %d  %s", tlabel, (int)pidp->PID, (char *)pidp->cmd);
 	if (pidp->hcmd) pid_printf (pidfile, "  {%s}", pidp->hcmd);
 	if (pidp->thread_cmd) pid_printf (pidfile, "  (%s)", pidp->thread_cmd);
+	if (vminfop) pid_printf (pidfile, "  <%s>", vminfop->vm_name);
 
 	pid_printf (pidfile, "\n");
 	
@@ -1055,10 +1058,11 @@ pid_report(void *arg1, void *v)
 	}
 	if (pidp->tgid && (pidp->tgid != pidp->PID)) {
 		tgidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
-		dockerp = tgidp->dockerp;
+		if (tgidp->dockerp) dockerp = tgidp->dockerp;
 		pid_printf (pidfile, "  %s %d  %s", plabel, tgidp->PID, (char *)tgidp->cmd);
 		if (tgidp->hcmd) pid_printf (pidfile, "  {%s}", tgidp->hcmd);
 		if (tgidp->thread_cmd) pid_printf (pidfile, "  (%s)", tgidp->thread_cmd);
+		if (vminfop) pid_printf (pidfile, "  <%s>", vminfop->vm_name);
 		pid_printf (pidfile, "\n");
 	}
 	if (pidp->nlwp > 1) {

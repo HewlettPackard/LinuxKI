@@ -185,6 +185,19 @@ extern int	docker_print_io_report();
 extern int	docker_print_cpu_report();
 extern int    print_docker_summary(void *, void *);
 
+extern void   kvm_init_func(void *);
+extern int    kvm_report_func(void *);
+extern int    kvm_print_report(void *);
+extern int	calc_vm_pid_totals(void *, void *);
+extern uint64 find_vm_by_name(char *);
+extern int    vm_print_info_report();
+extern int    vm_print_io_report();
+extern int    vm_print_cpu_report();
+extern int    print_vm_info(void *, void *);
+extern int    print_vm_summary(void *, void *);
+extern int    print_vm_totals(void *, void *);
+extern int    print_vm_iototals(void *, void *);
+
 extern void   pid_init_func(void *);
 extern void *pid_filter_func(void *, void *);
 extern int    pid_process_func(void *, void *);
@@ -428,7 +441,7 @@ extern int add_filter_item_str(void *, char *);
 extern void ki_syscall_traces_on();
 
 extern int	pid_printf(FILE *, const char *, ...); 
-extern int	dock_printf(const char *, ...); 
+extern int	aux_printf(const char *, ...); 
 extern int	csv_printf(FILE *, const char *, ...); 
 extern int	json_printf(FILE *, const char *, ...);
 extern void     wtree_build(pid_info_t *, FILE *);
@@ -549,6 +562,7 @@ extern FILE *cluster_network_csvfile;
 extern FILE *server_vis_csvfile;
 extern FILE *cluster_vis_csvfile;
 extern FILE *dockfile;
+extern FILE *kvmfile;
 extern FILE *node_csvfile;
 extern FILE *sysconfig_file;
 

@@ -400,6 +400,10 @@ kparse_print_report(void *v)
         	dockerp->name = "system";
 	}
 
+	if (globals->vm_hash) {
+		foreach_hash_entry((void **)globals->pid_hash, PID_HASHSZ, calc_vm_pid_totals, NULL, 0, NULL);
+	}
+
         parse_cstates();
         if (globals->HT_enabled) calc_global_HT_stats(globals, NULL);
 
@@ -538,14 +542,21 @@ kparse_print_report(void *v)
 		kp_docker_io();				/* Section 8.3 */
 	}
 
-	if (HTML) {
-		kp_file_links();	    		/* Section 9.0 */
-		kp_txt_links();				/* Section 9.1 */
-		kp_csv_links();				/* Section 9.2 */
-		kp_misc_links();			/* Section 9.3 */
-		if (vis) kp_vis_links();		/* Section 9.4 */
+	if (globals->vm_hash) {
+		kp_vms();				/* Section 9.0 */
+		kp_vm_ps();				/* Section 9.1 */
+		kp_vm_cpu();				/* Section 9.2 */
+		kp_vm_io();				/* Section 9.3 */
 	}
-	kp_warnings_report();    			/* Section 10.0 */
+
+	if (HTML) {
+		kp_file_links();	    		/* Section 10.0 */
+		kp_txt_links();				/* Section 10.1 */
+		kp_csv_links();				/* Section 10.2 */
+		kp_misc_links();			/* Section 10.3 */
+		if (vis) kp_vis_links();		/* Section 10.4 */
+	}
+	kp_warnings_report();    			/* Section 11.0 */
 	globals->next_warning=0;
 	return 0;
 }

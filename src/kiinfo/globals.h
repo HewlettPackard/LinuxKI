@@ -624,7 +624,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #define FIND_IOREQP(hash, key)  (io_req_t *)find_entry((lle_t **)hash, key, IOQ_HASH(key))
 #define FIND_CTX(hashp, key) (ctx_info_t *)find_entry((lle_t **)hashp, key, CTX_HASH(key))
 #define FIND_IOCB(hashp, key) (iocb_info_t *)find_entry((lle_t **)hashp, key, IOCB_HASH(key))
-#define FIND_FDINFOP(hash, key)  (fd_info_t *)find_entry(lle_t **)hash, key, FD_HASH(key))
+#define FIND_FDINFOP(hash, key)  (fd_info_t *)find_entry((lle_t **)hash, key, FD_HASH(key))
 #define FIND_FDATAP(hash, dev, node)  (fdata_info_t *)find_entry((lle_t **)hash, FDATA_KEY(dev,node), FDATA_HASH(dev, node))
 #define FIND_SDATAP(hash, ip1, port1, ip2, port2)  (sdata_info_t *)find_entry2((lle2_t **)hash, SOCK_KEY(ip1, port1), SOCK_KEY(ip2, port2), SDATA_HASH(ip1, port1, ip2, port2))
 #define FIND_IRQENTRYP(hash, key) (irq_entry_t *)find_entry((lle_t **)hash, key, IRQ_HASH(key))
@@ -2008,7 +2008,7 @@ typedef struct fd_info {
 	uint64		dev;
 	struct sockaddr_in6	*lsock;
 	struct sockaddr_in6	*rsock;
-	uint32		node;
+	uint64		node;
 	int		ftype;
 	int 		rndio_flag;
 	int		multiple_fnames;

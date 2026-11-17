@@ -657,7 +657,7 @@ print_stktrc_info_live(void *arg1, void *arg2)
                         sprintf (symname, "unknown");
                 } else if (stktrcp->pidp) {
                         pidp = stktrcp->pidp;
-                        if (pidp->PID != pidp->tgid) {
+                        if (timestamp && pidp->tgid && (pidp->PID != pidp->tgid)) {
                                 pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
                         }
 
@@ -742,7 +742,7 @@ print_hc_stktrc_live(void *arg1, void *arg2)
                         sprintf (symname, "unknown");
                 } else if (stktrcp->pidp) {
                         pidp = stktrcp->pidp;
-                        if (pidp->PID != pidp->tgid) {
+                        if (timestamp && pidp->tgid && (pidp->PID != pidp->tgid)) {
                                 pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
                         }
 

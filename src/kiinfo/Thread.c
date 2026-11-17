@@ -375,7 +375,7 @@ print_thread_cswitch_func (trace_info_t *trcinfop, pid_info_t *pidp, pid_info_t 
 	PRINT_COMMON_FIELDS_C011(p, p->OldThreadId , pidp->tgid);
 
         printf (" target_tid=%d target_pid=%d", p->NewThreadId, tpidp->tgid);
-        printf (" oldpri=%d newpri=%d", p->NewThreadPriority, p->OldThreadPriority);
+        printf (" oldpri=%d newpri=%d", p->OldThreadPriority, p->NewThreadPriority);
         printf (" prev_cstate=%d wait_reason=%s",
                 p->PreviousCstate,
                 win_thread_wait_reason[p->OldThreadWaitReason]);

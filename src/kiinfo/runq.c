@@ -1724,7 +1724,7 @@ print_stktrc_info(void *arg1, void *arg2)
 				pid_printf (pidfile, "  unknown");
 	        	} else if (stktrcp->pidp) {
                         	pidp = stktrcp->pidp;
-                        	if (pidp->PID != pidp->tgid) {
+				if (timestamp && pidp->tgid && (pidp->PID != pidp->tgid)) {
                                 	pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
                         	}
 

@@ -114,6 +114,17 @@ Confused about platform!
 #endif
 #include "liki.h"
 
+/*
+ * strncpy() was removed from the kernel string API in 7.x.  Use
+ * strscpy_pad(), which zero-pads like strncpy() but always NUL-terminates.
+ */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(7,0,0)
+#include <linux/string.h>
+#define LIKI_STRNCPY(dst, src, n)	strscpy_pad((dst), (src), (n))
+#else
+#define LIKI_STRNCPY(dst, src, n)	strncpy((dst), (src), (n))
+#endif
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,5,0)
 #define KTIME_GET       ktime_get_real_ts64
 #else
@@ -313,9 +324,15 @@ STATIC char		ignored_syscalls32[NR_syscalls];
 
 /* Function pointers for unexported functions */
 
+/* Setting SOCK_ARGS will get Local/Remote IP addresses with the system
+ * call exits.   However, this can cause issues as the getnae() function
+ * can potentially sleep on the socket lock, which is not desirable */
+#define SOCK_ARGS	0
+#if SOCK_ARGS
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5,2,0)
 static struct socket *(*sockfd_lookup_light_fp)(int, int *, int *);
 #endif
+#endif /* SOCK_ARGS */
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
 struct stack_trace {
@@ -2006,6 +2023,7 @@ startup_msr(void)
 
 		case 0xad:	/* GraniteRapids X */
 		case 0xae:	/* GraniteRapids D */
+		case 0xaf:	/* SierraForest X */
 
 			break;
 		case 87:	/* Knights Landing - needs testing!!! */
@@ -2105,7 +2123,13 @@ shutdown_timer_lists(void)
 	/* Be sure all timers are deleted */
 	for (cpu=0; cpu<nr_cpu_ids; cpu++) {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6,15,0)
-		timer_delete(&timer_lists[cpu]);
+		/* hardclock_timer() re-arms itself unless shutdown_pending is set
+		 * (it is set by now), so wait for a handler running on another
+		 * CPU to finish before timer_lists is freed.  Timers of CPUs that
+		 * were offline at startup were never initialized.
+		 */
+		if (timer_lists[cpu].function)
+			timer_delete_sync(&timer_lists[cpu]);
 #else
 		del_timer(&timer_lists[cpu]);
 #endif
@@ -2677,7 +2701,7 @@ sched_switch_trace(RXUNUSED struct rq *rq, struct task_struct *p, struct task_st
 
 	/* Outgoing thread data first */
 
-	strncpy(t->prev_comm, current->comm, TASK_COMM_LEN);
+	LIKI_STRNCPY(t->prev_comm, current->comm, TASK_COMM_LEN);
 	regs = task_pt_regs(current);
 
 	/* set syscallno to -1 if regs is NULL */
@@ -4181,10 +4205,12 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 	long			args_tmp[N_SYSCALL_ARGS];
 	void 			*vldtmp;
 	int			sz;
+#if SOCK_ARGS
 	struct sockaddr_storage	remote;
 	struct sockaddr_storage	local;
 	struct socket		*sock;
 	int			loclen = 0, remlen = 0;
+#endif
 	TRACE_COMMON_DECLS;
 
 	if (unlikely(tracing_state == TRACING_DISABLED))
@@ -4446,6 +4472,9 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
  	}
 #endif	//__NR_ppoll
 
+#if SOCK_ARGS
+	/* this is not compiled by default.   Note that Soft lockup can occur
+	 * as vfs_fsstat() and getname() could potential sleep */
 
 	/* For the networking syscalls we capture the local and remote socket 
 	 * addresses so we can reliably piece together connections across a cluster.
@@ -4621,9 +4650,6 @@ syscall_exit_trace(RXUNUSED struct pt_regs *regs, long ret)
 			}
 
 		} else {
-			/* if target if NFS file, we have issues which can cause softlockups,
-			   so we cannot call vfs_fstat(), so just exit
-			*/
 			goto scexit_skip_vldata;
 		}
 
@@ -4836,7 +4862,7 @@ mmsgexit_skip_addresses:
 		break;
 
 		}
-
+#endif  /* SOCK_ARGS */
 	case __NR_io_getevents:
 		{
 
@@ -5329,7 +5355,7 @@ irq_handler_entry_trace(RXUNUSED int irq, struct irqaction *action)
 	t->irq = irq;
 
 	if (action->name != NULL)
-		strncpy(t->name, action->name, IRQ_NAME_LEN);
+		LIKI_STRNCPY(t->name, action->name, IRQ_NAME_LEN);
 
 	trace_commit(t);
 
@@ -5554,7 +5580,7 @@ softirq_raise_trace(RXUNUSED struct softirq_action *h, struct softirq_action *ve
 #endif
 
 	if (t->vec >= 0 && t->vec < NR_SOFTIRQS)
-		strncpy(t->name, softirq_names[t->vec], IRQ_NAME_LEN);
+		LIKI_STRNCPY(t->name, softirq_names[t->vec], IRQ_NAME_LEN);
 
 	trace_commit(t);
 
@@ -7073,6 +7099,14 @@ shutdown(void)
 	change_installed_traces(TT_BITMASK_NO_TRACES);
 	synchronize_sched();
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,15,0)
+	/* Faultable tracepoints (e.g. sys_enter/sys_exit) are not covered by
+	 * synchronize_rcu().  Wait until no task is still inside a LiKI probe
+	 * before the buffers and the module text go away.
+	 */
+	tracepoint_synchronize_unregister();
+#endif
+
 	if (timer_lists)
 		shutdown_timer_lists();
 
@@ -7129,7 +7163,10 @@ liki_initialize(void)
 	int	i;
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,18,0)
+/* Tracepoint prototypes and kernel interfaces used here were reviewed
+ * and tested up to kernel 7.3.  Refuse to load on anything newer.
+ */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(7,4,0)
 	printk(KERN_INFO "LiKI: unsupported kernel version\n");
 	return(-EINVAL);
 #else
@@ -7155,6 +7192,7 @@ liki_initialize(void)
 	 * un-exported functions and call them anyway.
 	 */
 
+#if SOCK_ARGS
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
 	/* Nothing to do here as we will use sockfd_lookup() */
 #elif defined CONFIG_PPC64
@@ -7170,6 +7208,7 @@ liki_initialize(void)
 		return(-EINVAL);
 	}
 #endif
+#endif  /* SOCK_ARGS */
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
 	/* Nothing to do here as we will use stack_trace_save() */

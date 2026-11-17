@@ -929,7 +929,8 @@ ki_open(void *arg1, void *arg2, uint64 scalltime)
 		incr_syscall_stats(&syscallp->stats, rec_ptr->ret, scalltime, ks_action->logio);
 
 		/* if multi-threaded, we need to change the master threads filename */
-		if (pidp->tgid && (pidp->PID != pidp->tgid)) pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
+		if (timestamp && pidp->tgid && (pidp->PID != pidp->tgid)) 
+			pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
 
 		if ((fdinfop->fnamep == NULL) && (pidp->last_open_fname)) {
 			fdinfop->fnamep = pidp->last_open_fname;
@@ -1753,6 +1754,75 @@ print_varargs_exit(syscall_exit_t *rec_ptr)
 	}
 }
 
+static inline int 
+print_fdinfo_exit(pid_info_t *pidp, syscall_exit_t *rec_ptr)
+{
+	pid_info_t *tgidp;
+	struct sockaddr_in6 *lsock, *rsock;
+	int fd;
+	unsigned int device, ftype;
+	uint64 node;
+	int syscallno = rec_ptr->syscallno;
+	fd_info_t *fdinfop, *tfdinfop;
+
+	switch (globals->syscall_index_64[syscallno]) {
+		case __NUM_recvmmsg :
+		case __NUM_sendmmsg :	
+		case __NUM_recvfrom:
+		case __NUM_sendto:
+		case __NUM_recvmsg:
+		case __NUM_sendmsg:
+		case __NUM_read:
+		case __NUM_readv:
+		case __NUM_pread64:
+		case __NUM_write :
+		case __NUM_writev :
+		case __NUM_pwrite64:
+			/* fd/sockfd is first argument to above system calls */
+              		fd = pidp->last_syscall_args[0];
+			fdinfop = FIND_FDINFOP(pidp->fdhash, fd);
+			if ((pidp->tgid != pidp->PID) && (fdinfop == NULL)) {
+				/* inherit fdinfop from primary thread */
+				tgidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
+				tfdinfop = (fd_info_t *)FIND_FDINFOP(tgidp->fdhash, fd);
+                        	if (tfdinfop) fdinfop = tfdinfop;
+			}
+
+			if (fdinfop) {
+				if (ftype >= F_TYPES) break;
+				device = fdinfop->dev;
+				node = fdinfop->node;
+				ftype = fdinfop->ftype;
+				lsock = fdinfop->lsock;
+				rsock = fdinfop->rsock;
+
+				printf ("%ctype=%s", fsep, ftype_name_index[ftype]);
+
+				if ((ftype == F_IPv6) || (ftype == F_IPv6)) {
+					printf ("%cfamily=INET", fsep);
+					if (lsock) { 
+						printf ("%cL=", fsep);
+						print_ip_port_v6(lsock, 0, NULL);
+					}
+
+					if (rsock) { 
+						printf ("%cR=", fsep);
+						print_ip_port_v6(rsock, 0, NULL);
+					}
+				} else {
+					printf ("%cdev=0x%08llx", fsep, device);
+					if (ftype != F_BLK ) {
+						printf ("%cino=%lu", fsep, node);
+					}
+				}
+
+			}
+			break;
+		default:
+			break;
+	}
+}
+
 static inline int
 print_syscall_retval(pid_info_t *pidp, int syscallno, uint64 retval)
 {
@@ -1865,7 +1935,9 @@ print_sys_exit_rec(void *a, void *p)
                         /* Need to code for poll() and other arguments, only works for 64 bit processes */
 			pidp->elf = ELF64;
                         print_varargs_exit(rec_ptr);
-                }
+                } else {
+			print_fdinfo_exit(pidp, rec_ptr);
+		}
         } else {
                 /* we have a different syscall on enter than exit.  Assume we missed the enter */
                 printf ("%c", fsep);

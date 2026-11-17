@@ -1140,7 +1140,7 @@ parse_pself()
 			pidp->elf = tgidp->elf;
 		}
 
-		if (strstr(cmd, "/usr/bin/kvm") || strstr(cmd, "/usr/libexec/qemu-kvm")) {
+		if (strstr(cmd, "/usr/bin/kvm") || strstr(cmd, "/usr/libexec/qemu-kvm") || strstr(cmd, "/usr/bin/qemu")) {
 			add_kvm_process(pidp, nlwp, cmd, lineptr);
 		}
 
@@ -1881,7 +1881,7 @@ load_perpid_mapfile(void *arg1, void *arg2)
 	uint64 len = 0;
 
 	/* if mulithreaded, then we must use the tgid pid */
-        if (pidp->tgid && (pidp->PID != pidp->tgid)) {
+        if (timestamp && pidp->tgid && (pidp->PID != pidp->tgid)) {
                 pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
         }
 
@@ -2423,7 +2423,7 @@ parse_scavuln(char print_flag)
 	    	while (rtnptr != NULL) {
 			if (strstr(input_str, "Mitigat")) {
 				globals->scavuln |= SCA_MITIGATED;
-				if (strstr(input_str, "spec_rstack_overflow") && strstr(input_str, "Safe RET")) {
+				if (strstr(input_str, "spec_rstack_overflow") && strstr(input_str, "afe RET")) {
 					globals->scavuln |= SRSO_MITIGATED;
 				}
 				RED_FONT;

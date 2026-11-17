@@ -95,7 +95,8 @@ collect_pc_info(hardclock_t *rec_ptr, hc_info_t *hcinfop, pid_info_t *pidp)
 			}
 		} else if (pidp) {
 			/* if multi-threaded, use TGID */
-			if (pidp->PID != pidp->tgid) pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
+			if (timestamp && pidp->tgid && (pidp->PID != pidp->tgid)) 
+				pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
 
 			if (pregp = find_vtext_preg(pidp->vtxt_pregp, pc)) {
 				if (symlookup(pregp, pc, &offset)) {

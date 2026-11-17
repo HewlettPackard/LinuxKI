@@ -23,7 +23,7 @@ set tmo=20
 if [%1] NEQ [] set tmo=%1
 if [%tmo%] EQU [0] set tmo=20
 
-for /F %%A in ('wmic os get LocalDateTime ^| find "."') do set tag1=%%A
+for /F %%A in ('powershell -NoProfile -Command "[DateTime]::Now.ToString('yyyyMMddHHmmss',[Globalization.CultureInfo]::InvariantCulture)"') do set tag1=%%A
 set tag=%tag1:~4,4%_%tag1:~8,4%
 
 @echo ** runki for Windows $Date: 2021/11/09 $Revision: 7.6 ** >ki.err.%tag%
@@ -40,8 +40,10 @@ xperf -d ki.%tag%.etl
 @echo xperf collection complete.  Collecting system information...
 @echo xperf collection complete.  Collecting system information... >>ki.err.%tag%
 systeminfo >systeminfo.%tag%
-wmic cpu list brief >cpulist.%tag%
-wmic cpu get SocketDesignation, NumberOfCores, NumberOfLogicalProcessors /Format:List >corelist.%tag%
+REM # wmic is not available on Windows Server 2025, use PowerShell CIM instead.
+REM # cpulist must be ASCII; corelist must be UTF-16LE with BOM, as Key=Value lines with SocketDesignation last.
+powershell -NoProfile -Command "Get-CimInstance Win32_Processor | Select-Object Caption,DeviceID,Manufacturer,MaxClockSpeed,Name,SocketDesignation | Format-Table -AutoSize | Out-String -Width 4096 | Out-File -Encoding ascii cpulist.%tag%"
+powershell -NoProfile -Command "Get-CimInstance Win32_Processor | ForEach-Object { 'NumberOfCores='+$_.NumberOfCores; 'NumberOfLogicalProcessors='+$_.NumberOfLogicalProcessors; 'SocketDesignation='+$_.SocketDesignation; '' } | Out-File -Encoding Unicode corelist.%tag%"
 
 if exist "./GetSQLServerInfo.ps1" ( 
 	@echo Collecting SQL Instance information.   Please wait 1-2 minutes per SQL Instance ....

@@ -1691,7 +1691,7 @@ get_user_sym(uint64 ip, void *arg)
 		}
 	} else {
 		/* if mulithreaded, then we must use the tgid pid */
-		if (pidp->tgid && (pidp->PID != pidp->tgid)) {
+		if (timestamp && pidp->tgid && (pidp->PID != pidp->tgid)) {
 			pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
 		}
 
@@ -1739,7 +1739,7 @@ print_user_sym(unsigned long ip, uint64 pid, char print_objfile)
 		pidp = GET_PIDP(&globals->pid_hash, pid);
 
 		/* if mulithreaded, then we must use the tgid pid */
-		if (pidp->tgid && (pidp->PID != pidp->tgid)) {
+		if (timestamp && pidp->tgid && (pidp->PID != pidp->tgid)) {
 			pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
 		}
 
@@ -1990,7 +1990,8 @@ uint64 convert_pc_to_key(uint64 mode, void *arg2, uint64 pc)
                         }
                 } else if (pidp) {
                         /* if multi-threaded, use TGID */
-                        if (pidp->PID != pidp->tgid) pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
+			if (timestamp && pidp->tgid && (pidp->PID != pidp->tgid)) 
+                        	pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
 
                         if (pregp = find_vtext_preg(pidp->vtxt_pregp, pc)) {
                                 if (symlookup(pregp, pc, &offset)) {

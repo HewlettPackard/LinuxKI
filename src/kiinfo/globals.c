@@ -101,7 +101,7 @@ char *ftype_name_index[F_TYPES] = {
 	"IPv4",
 	"IPv6",
 	"netlink",
-	"0000"
+	"a_inode"
 };
 
 /* for 2.x kernels */

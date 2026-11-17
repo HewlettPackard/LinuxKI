@@ -3542,8 +3542,8 @@ kp_misc_links()				/* Section 10.3 */
 	BOLD("General"); NL;
 	if (IS_WINKI) {
 		FILE_FIELD("systeminfo", "systeminfo");
-		FILE_FIELD("cpulist", "wmic cpu list brief");
-		FILE_FIELD("corelist", "wmic cpu get SocketDesignation, NumberOfCores, NumberOfLogicalProcessors");
+		FILE_FIELD("cpulist", "Win32_Processor (cpu list)");
+		FILE_FIELD("corelist", "Win32_Processor (SocketDesignation, NumberOfCores, NumberOfLogicalProcessors)");
 		FILE_FIELD("tasklist", "tasklist");
 
 	} else {

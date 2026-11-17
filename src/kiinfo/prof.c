@@ -694,7 +694,7 @@ hc_print_stktrc(void *p1, void *p2)
 			BLACK_FONT;
 		} else if (stktrcp->pidp) {
 			pidp = stktrcp->pidp;
-			if (pidp->PID != pidp->tgid) {
+			if (timestamp && pidp->tgid && (pidp->PID != pidp->tgid)) {
 				pidp = GET_PIDP(&globals->pid_hash, pidp->tgid);
 			}
 
